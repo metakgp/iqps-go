@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    {% include 'navbar.html' %}
+    <div class="form-group">
+        <div id="info-box">
+            <h4>Thank you for considering to put a request</h4>
+            <span>Make sure to search properly before putting a request.</span><br>
+            <span>You can trying searching through <a href="/data/all">here</a> for completeness.</span><br>
+            <span>Look <a href="#result-box">down</a> to see if your request is already on the list.</span>
+            <span>Go ahead if you are really sure.</span>
+        </div>
+        <form method="POST" class="actual-form">
+            {% csrf_token %}
+            {{ form }}
+            <button class="submit-btn">Submit</button>
+        </form>
+    </div>
+    
+    <div id="result-box">
+        <h3>Pending Requests</h3>
+        {% for req in reqs %}
+            <div class="result">
+                <span class="result-keywords">Unique-Id: {{ req.id }}</span><br>
+                <span class="result-subject">{{ req.subject }}</span>
+                <span class="result-type">{{ req.paper_type }} - {{ req.year }}</span>
+            </div>
+        {% endfor %}
+    </div>
+    <link rel="stylesheet" href="{% static 'assets/main.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/formpage.css' %}">
+<!--<style>
+.form-group{
+    transform: translateY(-20vh);
+}
+.actual-form{
+    display: flex;
+    overflow-x: auto;
+    flex-direction: row!important;
+    height: 30px;
+    width: 180%;
+    margin-top: 10px;
+    transform: translateX(-25%);
+}
+
+#result-box{
+    transform: translateY(-40vh)!important;
+}
+</style>-->
+
+    {% include 'msgparser.html' %}
+{% endblock %}

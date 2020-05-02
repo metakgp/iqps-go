@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+    <style type="text/css">
+	select {
+	    width: 200px;
+	}
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/css/select2.min.css" type="text/css" media="screen" rel="stylesheet">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/js/select2.min.js"></script>
+    <script type="text/javascript" src="/static/django_select2/django_select2.js"></script>
+    <link rel="stylesheet" href="{% static 'assets/formpage.css' %}">
+
+{% endblock %}
+
+{% block content %}
+    {% include 'navbar.html' %}
+    
+    <div class="form-group"> 
+    {% if user.is_staff %}
+	<div>
+	    <h2>Bulk Upload</h2>
+	    <!-- Old MFQP data.json -->
+	    <form method="POST" enctype="multipart/form-data">
+		{% csrf_token %}
+		{{ bulk_form }}
+		<button type="submit" class="submit-btn">Upload</button>
+	    </form>
+	</div>
+    {% endif %}
+
+    <div>
+	<h2>Upload new paper</h2>
+	<!-- Crowdsourcing -->
+	<form method="POST" enctype="multipart/form-data">
+	    {% csrf_token %}
+	    {{ crowd_form }}
+	    <button type="submit" class="submit-btn">Upload</button>
+	</form>
+    </div>
+<style>
+.form-group{
+    flex-direction: row!important;
+    column-gap: 30px;
+    transform: translateY(20vh);
+}
+</style>
+    </div>
+    {% include 'msgparser.html' %}
+{% endblock %}

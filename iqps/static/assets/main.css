@@ -1,0 +1,100 @@
+body{
+    font-family: Roboto;
+}
+
+#search-box{
+    transition: all 0.5s;
+    transform: translateY(30vh);
+}
+
+#search-box:focus{
+    transform: translateY(20vh);
+}
+
+#history-box{
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    margin: auto;
+    background-color: lightgray;
+    position: relative;
+    top: 25vh;
+
+    padding: 10px;
+}
+
+#filter-box{
+    width: 80%;
+    margin: auto;
+    display: flex;
+    padding: 10px;
+    /*column-gap: 3px;*/
+    overflow-x: auto;
+    color: red;
+    font-family: monospace;
+}
+
+#filter-box > input{
+    margin-left: 5px;
+    margin-right: 5px;
+}
+#searchbar{
+    height: 40px;
+    width: 80%;
+    margin: auto;
+    border-width: 5px;
+    border-style: solid;
+    border-color: gray;
+    font-size: 35px;
+    padding: 8px;
+    overflow: hidden;
+    outline: 0;
+}
+#searchbar:focus{
+    border-color: blue;
+}
+
+.gray-text{
+    color: lightgray;
+}
+#placeholder{
+    display: inline;
+}
+.result:nth-child(odd){
+    background-color: lightgray;
+}
+.result-group{
+    width: 80%;
+    margin-top: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    top: 15vh;
+    padding-bottom: 30px;
+
+}
+.result{
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    margin: 4px;
+}
+.result-name{
+    font-size: 1.5em;
+    color: navy;
+    font-weight: bold;
+}
+.result-type, .result-dep{
+    font-family: Monospace;
+    color: red;
+}
+#filter-box input, #id_department{
+    width: 150px;
+}
+
+.result-keywords{
+    font-family: monospace;
+    color: navy;
+}
+
+

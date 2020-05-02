@@ -1,0 +1,54 @@
+version: '3'
+
+networks:
+  main-network:
+  nginx-network:
+
+services:
+  nginx:
+    container_name: 'iqps-nginx'
+    build: ./nginx
+    volumes:
+      - /local-data/qps:/var/www/static/
+    networks:
+      main-network:
+      nginx-network:
+    depends_on:
+      - web
+  db:
+    build: ./mariadb-udf-docker
+    restart: always
+    networks:
+      main-network:
+    environment:
+       MYSQL_DATABASE: 'iqps'
+       MYSQL_USER: 'iqps_admin'
+       MYSQL_PASSWORD: '1234'
+       MYSQL_ROOT_PASSWORD: '1234'
+       MYSQL_ROOT_HOST: '%'
+    volumes:
+      - /local-data/database:/var/lib/mysql
+  web:
+    build: .
+    command: gunicorn iqps.wsgi -w 4 -b 0.0.0.0:8000 --access-logfile /var/log/iqps/gunicorn.log
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/iqps/
+      - /local-data/qps:/var/www/static/
+      - /local-data/logs:/var/log/iqps/
+    networks:
+      main-network:
+    depends_on:
+      - db
+  backup:
+    build: ./backup
+    environment:
+       MYSQL_PASSWORD: '1234'
+       DROPBOX_ACCESS_TOKEN: 'DROPBOX_TOKEN'
+    networks:
+      main-network:
+    depends_on:
+      - db    
+    

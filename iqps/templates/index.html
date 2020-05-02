@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    {% include 'navbar.html' %}
+    <div id="search-box">
+        <p id="searchbar" contenteditable="true" active="true"><span class="gray-text" id="placeholder">Your pursuit for a good CG begins here</span></p>
+        <div id="filter-box">
+            {{ filter_form }}
+        </div>
+    </div>
+    <div class="result-group" id="result-box"></div>
+    <div class="history-group" id="history-box"></div>
+    <link rel="stylesheet" href="{% static 'assets/main.css' %}">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/css/select2.min.css" type="text/css" media="screen" rel="stylesheet">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/js/select2.min.js"></script>
+    <script type="text/javascript" src="/static/django_select2/django_select2.js"></script>
+
+    <script src="{% static 'assets/search.js' %}"></script>
+
+{% endblock %}

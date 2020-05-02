@@ -1,0 +1,80 @@
+html, body{
+    height: 100%;
+    background-color: rgb(245, 245, 245);
+}
+
+.form-group{
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    height: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: center;
+}
+
+.form-group form{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    
+    background-color: white;
+    
+    border-color: black;
+    border-width: 2px;
+    border-style: solid;
+
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    
+}
+
+.submit-btn{
+    margin-top: 5px;
+    margin-top: 5px;
+    background-color: rgb(16, 165, 224);
+    color: rgb(210, 224, 16);
+    font-weight: bold;
+    display: block;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    width: max-content;
+    margin-left: auto;
+    margin-right: auto;
+    border-width: 1px;
+    border-color: rgb(36, 7, 250);
+    outline: 0;
+}
+
+label, small, .errorlist{
+    font-family: Monospace;
+    color: red;
+    padding-top: 5px;
+    padding-bottom: 5px;
+
+    list-style-type: none;
+}
+
+.errorlist li:before{
+    content: "❌    ";
+}
+
+input{
+    border-radius: 0%;
+    border-width: 1px;
+    border-style: solid;
+    border-color: black;
+    padding-bottom: 5px;
+}
+
+.helptext{
+    display: none;
+}
+
+
+.captcha{
+    width: max-content;
+    margin: auto;
+}

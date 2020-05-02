@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'assets/formpage.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="form-group">
+	<h2>Register in iQPS</h2>
+
+	<form method="POST">
+	    {% csrf_token %}
+	    {{ form }}
+	    <button type="submit" class="submit-btn">Register</button>
+	    <small>Already have an account? <a href="/accounts/login/">Login</a>
+	</form>
+    </div>
+{% endblock %}

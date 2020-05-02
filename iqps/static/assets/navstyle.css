@@ -1,0 +1,39 @@
+.nav-bar{
+display: flex;
+justify-content: space-between;
+width: 100%;
+background-color: black;
+color: white;
+position: fixed;
+top: 0px;
+left: 0px;
+padding-left: 10px;
+padding-right: 10px;
+max-height: 15vh;
+
+z-index: 999;
+}
+.nav-menu{
+display: flex;
+flex-direction: row-reverse;
+padding-right: 20px;
+list-style-type: none;
+}
+.nav-item{
+display: block;
+padding: 5px 5px 5px 5px;
+color: white;
+text-decoration: none;
+transition: background-color 1s;
+margin-top: 0px;
+margin-bottom: 0px;
+}
+.nav-item:hover{
+background-color: rgb(105, 97, 96);
+}
+
+.nav-item a{
+color: white;
+text-decoration: none;
+}
+
