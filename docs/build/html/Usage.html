@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Usage &#8212; IQPS 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Admin Roles" href="AdminRoles.html" />
+    <link rel="prev" title="Installation" href="Installation.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<p>The main user interfaces are described as follows:</p>
+<div class="section" id="searching-for-a-question-paper">
+<h2>1. Searching for a Question Paper<a class="headerlink" href="#searching-for-a-question-paper" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="_images/search.png"><img alt="_images/search.png" src="_images/search.png" style="width: 400px;" /></a>
+<p>Searching is done through AJAX. It uses debounced calls to our API.
+Several filters can be added as shown in the image.</p>
+<p>Besides, user can search for papers which are tagged with specific keywords.
+Those keywords are defined by the uploader while uploading the papers
+or added by the admin.</p>
+<p>5 most recent search histories are also shown. These are stored in browser local storage.</p>
+</div>
+<div class="section" id="uploading-a-paper">
+<h2>2. Uploading a paper<a class="headerlink" href="#uploading-a-paper" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="_images/upload.png"><img alt="_images/upload.png" src="_images/upload.png" style="width: 400px;" /></a>
+<p>Uploading a paper is done one at a time for a normal user by the interface as shown above.
+Keywords to be considered while adding papers:</p>
+<ul class="simple">
+<li><p>Difficulty: Hard/Easy</p></li>
+<li><p>Concepts covered</p></li>
+<li><p>Paper setter etc.</p></li>
+</ul>
+<p>The uploaded papers are sent to Google Drive.</p>
+<p>However, occassionally admin needs to scrape paper links from the Library Site and add them in a bulk.
+For that, specifically for admin, a bulk upload interface is present.</p>
+<a class="reference internal image-reference" href="_images/upload_elevated.png"><img alt="_images/upload_elevated.png" src="_images/upload_elevated.png" style="width: 400px;" /></a>
+</div>
+<div class="section" id="requesting-a-paper">
+<h2>3. Requesting a paper<a class="headerlink" href="#requesting-a-paper" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="_images/request.png"><img alt="_images/request.png" src="_images/request.png" style="width: 400px;" /></a>
+<p>Here users can request papers if not found.</p>
+</div>
+<div class="section" id="login-and-registration">
+<h2>4. Login and Registration<a class="headerlink" href="#login-and-registration" title="Permalink to this headline">¶</a></h2>
+<p>Users are NOT enforced to create an account to perform the above tasks.
+This is done to cut the overhead time, thereby improving User Experience.
+However, they can still create an account to let us know who are the curators of the page.</p>
+<p>The login system thereby serves as an entrypoint for the admin to log in.</p>
+<a class="reference internal image-reference" href="_images/login.png"><img alt="_images/login.png" src="_images/login.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="_images/register.png"><img alt="_images/register.png" src="_images/register.png" style="width: 400px;" /></a>
+</div>
+<div class="section" id="search-api">
+<h2>5. Search API<a class="headerlink" href="#search-api" title="Permalink to this headline">¶</a></h2>
+<p>Besides these graphical interfaces, we also provide a JSON API to ease integration with other apps.</p>
+<p>The default route for it is: <code class="docutils literal notranslate"><span class="pre">/search/api</span></code>.</p>
+<p>Supports <code class="docutils literal notranslate"><span class="pre">GET</span></code> requests with the following parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">q</span></code>: The search query (on subject name)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">year</span></code>: Year filter</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dep</span></code>: Department filter</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">typ</span></code>: Paper type filter</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code>: Comma separated list of keywords to search for.</p></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">IQPS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#searching-for-a-question-paper">1. Searching for a Question Paper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#uploading-a-paper">2. Uploading a paper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#requesting-a-paper">3. Requesting a paper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#login-and-registration">4. Login and Registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#search-api">5. Search API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="AdminRoles.html">Admin Roles</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Installation.html" title="previous chapter">Installation</a></li>
+      <li>Next: <a href="AdminRoles.html" title="next chapter">Admin Roles</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Shubham Mishra.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/Usage.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
