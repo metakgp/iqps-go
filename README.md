@@ -17,22 +17,21 @@
 <br />
 <!-- UPDATE -->
 <div align="center">
-  <a href="https://github.com/metakgp/PROJECT_NAME">
+  <a href="https://github.com/metakgp/iqps">
     <img width="140" alt="image" src="https://user-images.githubusercontent.com/86282911/206632284-cb260f57-c612-4ab5-b92b-2172c341ab23.png">
   </a>
 
-  <h3 align="center">PROJECT_NAME</h3>
+  <h3 align="center">Intelligent Question Paper Search</h3>
 
   <p align="center">
   <!-- UPDATE -->
-    <i>Project one liner slogan goes here</i>
+    <i>An automated platform for searching and uploading semester question papers.</i>
     <br />
     <a href="https://github.com/metakgp/PROJECT_NAME/issues">Report Bug</a>
     ·
     <a href="https://github.com/metakgp/PROJECT_NAME/issues">Request Feature</a>
   </p>
 </div>
-
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -50,13 +49,14 @@
 
 </details>
 
-
 <!-- ABOUT THE PROJECT -->
+
 ## About The Project
+
 <!-- UPDATE -->
 <div align="center">
   <a href="https://github.com/metakgp/PROJECT_NAME">
-    <img width="80%" alt="image" src="https://user-images.githubusercontent.com/86282911/206632547-a3b34b47-e7ae-4186-a1e6-ecda7ddb38e6.png">
+    <img width="80%" alt="image" src="docs/source/_static/search.png">
   </a>
 </div>
 
@@ -67,12 +67,14 @@ _Detailed explaination of the project goes here_
 <div id="supports"></div>
 
 ### Supports:
+
 <!-- UPDATE -->
+
 1. Shells
-    * `bash`
-    * `zsh`
+   - `bash`
+   - `zsh`
 2. OS(s)
-    * any `*nix`[`GNU+Linux` and `Unix`]
+   - any `*nix`[`GNU+Linux` and `Unix`]
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -81,9 +83,12 @@ _Detailed explaination of the project goes here_
 To set up a local instance of the application, follow the steps below.
 
 ### Prerequisites
+
 The following dependencies are required to be installed for the project to function properly:
+
 <!-- UPDATE -->
-* npm
+
+- npm
   ```sh
   npm install npm@latest -g
   ```
@@ -93,7 +98,9 @@ The following dependencies are required to be installed for the project to funct
 ### Installation
 
 _Now that the environment has been set up and configured to properly compile and run the project, the next step is to install and configure the project locally on your system._
+
 <!-- UPDATE -->
+
 1. Clone the repository
    ```sh
    git clone https://github.com/metakgp/PROJECT_NAME.git
@@ -110,10 +117,12 @@ _Now that the environment has been set up and configured to properly compile and
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
 <!-- USAGE EXAMPLES -->
+
 ## Usage
+
 <!-- UPDATE -->
+
 Use this space to show useful examples of how this project can be used. Additional screenshots, code examples and demos work well in this space.
 
 <div align="center">
@@ -127,6 +136,7 @@ Use this space to show useful examples of how this project can be used. Addition
 ## Maintainer(s)
 
 <!-- UPDATE -->
+
 - [NAME](https://github.com/GITHUB_USERNAME)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -159,10 +169,10 @@ Use this space to show useful examples of how this project can be used. Addition
 
 ## Additional documentation
 
-  - [License](/LICENSE)
-  - [Code of Conduct](/.github/CODE_OF_CONDUCT.md)
-  - [Security Policy](/.github/SECURITY.md)
-  - [Contribution Guidelines](/.github/CONTRIBUTING.md)
+- [License](/LICENSE)
+- [Code of Conduct](/.github/CODE_OF_CONDUCT.md)
+- [Security Policy](/.github/SECURITY.md)
+- [Contribution Guidelines](/.github/CONTRIBUTING.md)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
