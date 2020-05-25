@@ -32,7 +32,8 @@ DEBUG = True if os.environ.get("MODE", "dev") == "dev" else False
 ALLOWED_HOSTS = [
         "localhost",
         "127.0.0.1",
-        os.environ.get("HOSTNAME", ".ngrok.io")
+        "0.0.0.0",
+        os.environ.get("CNAME", ".ngrok.io")
     ]
 
 
@@ -93,6 +94,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'iqps',
+        'HOST': os.environ['DB_HOSTNAME'],
         'USER': os.environ['DB_USERNAME'],
         'PASSWORD': os.environ['DB_PASSWORD']
     }

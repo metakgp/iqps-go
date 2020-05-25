@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  db:
+    image: mariadb:latest
+    restart: always
+    ports:
+      - '3306:3306'
+    environment:
+       MYSQL_DATABASE: 'iqps'
+       MYSQL_USER: 'iqps_admin'
+       MYSQL_PASSWORD: 'DB_PWD'
+       MYSQL_ROOT_PASSWORD: 'DB_ROOT_PWD'
+       MYSQL_ROOT_HOST: '%'
+    volumes:
+      - local_db_data_path:/var/lib/mysql
+  web:
+    build: .
+    command: gunicorn iqps.wsgi -w 4 -b 0.0.0.0:8000 --access-logfile /var/log/iqps/gunicorn.log
+    restart: always
+    volumes:
+      - .:/iqps/
+      - local_static_root_path:/var/www/static/
+      - local_log_path:/var/log/iqps/
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
