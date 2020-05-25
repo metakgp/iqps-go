@@ -1,94 +1,76 @@
 Installation
 ############
 
-Pre-requisites for installation:
+Installation can be easily done using Docker.
 
-    1. Python >= 3.7 with pip and virtualenv installed
-    #. MySQL
-    #. Linux based OS prefered.
+Source Installation is a lengthy process, the notes for the same are `here <SourceInstall.html>`_.
+
+To install with Docker, first install git, Docker-CE and docker-compose (Install scripts work only on Unix based systems)
+
+Follow the steps given in the official website of Docker. This varies from OS to OS.
+
+Although, it is advisable not to use the default docker versions available in your OS's repos,
+unless the Docker docs tell you to do so.
+
+Once everything is installed, follow the following steps:
 
 Steps
 =====
 
-1. Clone the repository to your machine.
+1. Clone the repository:
 
-#. In the MySQL console, run the following commands as the root user:
+   .. code-block:: bash
 
-.. code-block:: bash
-    
-    mysql> CREATE USER 'iqps_admin'@'%' IDENTIFIED BY 'pwd';
-    mysql> GRANT ALL PRIVILEGES ON iqps.* TO 'iqps_admin'@'%';
-    mysql> CREATE DATABASE iqps;   
-
-
-Replace ``iqps_admin`` and ``pwd`` with whatever database username and password you want to give.
-
-#. In the repo directory, execute:
-
-.. code-block:: bash
-    
-    $ python3 -m virtualenv venv
-    $ source venv/bin/activate
-    $ pip install -r requirements.txt
-
+    git clone https://github.com/grapheo12/iqps.git
+    cd iqps
 
 #. Go to https://developers.google.com/drive/api/v3/quickstart/python. Click on ``Enable Drive API`` then click ``Create`` in the modal.
    It will generate a ``credentials.json`` file. Move it to ``iqps/conf`` folder inside the repo.
 
-#. Now open a python shell (remember to be in the same virtual environment as above) in the `iqps` directory inside the repo and run:
-   
-.. code-block:: python
-
-    >>> from upload.google_connect import connect
-    >>> connect()
-
-
-An authentication window will open in browser, accept all risks and allow everything.
-
 #. Now in Google Drive top-level directory, open a new folder called (for example) ``iqps_static``. This is where the uploaded question papers go.
 
-#. Copy ``app.env.template`` to ``app.env`` in ``iqps/conf``.
+#. Run the install script for the first time:
 
-#. Fill out the ``app.env``. The field names are intuitive. Set ``MODE=dev`` for Development, ``MODE=prod`` for Production.
-   Create 2 new directories with paths say ``path1/`` and ``path2/``. And set ``STATIC_ROOT=path1/`` and ``LOG_PATH=path2/iqps.log``.
-   These are where your static files and logs will go respectively in production, should you decide to serve the static files independently.
-   Set ``HOSTNAME=localhost`` or our IP address. Set ``SECRET_KEY`` to some random long string.
+   .. code-block:: bash
 
-#. Now to migrate all the database tables, go to the ``iqps/`` directory inside the repo. Then run:
+    ./install.sh
 
-.. code-block:: bash
+This will ask for app permissions. Sign in with the account you used in step-3. Accept all risks.
 
-    $ python manage.py migrate --skip-checks
+#. You can move the project folder to the intended app server now, or (for development) you can keep it in the local machine.
+   Run the install script **FOR THE SECOND TIME**. Provide the details as asked.
 
+#. Wait till the logs look like following:
 
-#. Let's create the admin for the website now. Run:
+   .. code-block:: bash
 
-.. code-block:: bash
-    
-    $ python manage.py createsuperuser
+    db_1   | 2020-05-25 16:37:33 0 [Note] mysqld: ready for connections.
+    db_1   | Version: '10.4.12-MariaDB-1:10.4.12+maria~bionic'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  mariadb.org binary distribution
 
+Then kill the process by hitting ``CTRL+C``.
 
-The website is now ready. You can launch it via:
+#. Run the initialization script. It will ask for creation of super-user account:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-    $ python manage.py runserver
+    ./init.sh
 
+#. Run (and daemonize) the app by executing:
 
+   .. code-block:: bash
 
-Moving to production
-====================
+    docker-compose up -d
 
-To use this setup to production, in ``app.env`` set ``MODE=prod``.
-Then copy all your local files to the production server.
-Set up the ``STATIC_ROOT`` and ``LOG_PATH`` directories there.
-Then run:
+#. You can also stop the service by running:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-    $ python manage.py collectstatic
+    docker-compose down
 
+The next step is to configure a Server eg, Apache or Nginx to act as a Reverse-Proxy and serve the static files.
 
-Setup a server like Apache or Nginx to serve the webapp.
-Add configuration there to serve the static files under ``webapp_root_url/static`` URL.
+However, if you want to bring up a development system, setting up a server is unnecessary.
+To do that, while the server is down, change ``MODE=prod`` to ``MODE=dev`` in ``iqps/conf/app.env``.
+Also, in ``docker-compose.yml`` change the line ``command: gunicorn iqps.wsgi -w 4 -b 0.0.0.0:8000 --access-logfile /var/log/iqps/gunicorn.log``
+to ``command: python manage.py runserver 0.0.0.0:8000``.
 

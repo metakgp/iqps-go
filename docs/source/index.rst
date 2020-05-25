@@ -11,6 +11,7 @@ Welcome to IQPS's documentation!
    :caption: Contents:
     
    Installation
+   SourceInstall
    Usage
    AdminRoles
    DevDoc

@@ -14,6 +14,7 @@
     <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Source Installation" href="SourceInstall.html" />
     <link rel="prev" title="Welcome to IQPS’s documentation!" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -33,78 +34,65 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>Pre-requisites for installation:</p>
-<blockquote>
-<div><ol class="arabic simple">
-<li><p>Python &gt;= 3.7 with pip and virtualenv installed</p></li>
-<li><p>MySQL</p></li>
-<li><p>Linux based OS prefered.</p></li>
-</ol>
-</div></blockquote>
+<p>Installation can be easily done using Docker.</p>
+<p>Source Installation is a lengthy process, the notes for the same are <a class="reference external" href="SourceInstall.html">here</a>.</p>
+<p>To install with Docker, first install git, Docker-CE and docker-compose (Install scripts work only on Unix based systems)</p>
+<p>Follow the steps given in the official website of Docker. This varies from OS to OS.</p>
+<p>Although, it is advisable not to use the default docker versions available in your OS’s repos,
+unless the Docker docs tell you to do so.</p>
+<p>Once everything is installed, follow the following steps:</p>
 <div class="section" id="steps">
 <h2>Steps<a class="headerlink" href="#steps" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li><p>Clone the repository to your machine.</p></li>
-<li><p>In the MySQL console, run the following commands as the root user:</p></li>
-</ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mysql&gt; CREATE USER <span class="s1">&#39;iqps_admin&#39;</span>@<span class="s1">&#39;%&#39;</span> IDENTIFIED BY <span class="s1">&#39;pwd&#39;</span><span class="p">;</span>
-mysql&gt; GRANT ALL PRIVILEGES ON iqps.* TO <span class="s1">&#39;iqps_admin&#39;</span>@<span class="s1">&#39;%&#39;</span><span class="p">;</span>
-mysql&gt; CREATE DATABASE iqps<span class="p">;</span>
+<ol class="arabic">
+<li><p>Clone the repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/grapheo12/iqps.git
+<span class="nb">cd</span> iqps
 </pre></div>
 </div>
-<p>Replace <code class="docutils literal notranslate"><span class="pre">iqps_admin</span></code> and <code class="docutils literal notranslate"><span class="pre">pwd</span></code> with whatever database username and password you want to give.</p>
-<ol class="arabic simple">
-<li><p>In the repo directory, execute:</p></li>
-</ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python3 -m virtualenv venv
-$ <span class="nb">source</span> venv/bin/activate
-$ pip install -r requirements.txt
-</pre></div>
-</div>
-<ol class="arabic simple">
+</li>
 <li><p>Go to <a class="reference external" href="https://developers.google.com/drive/api/v3/quickstart/python">https://developers.google.com/drive/api/v3/quickstart/python</a>. Click on <code class="docutils literal notranslate"><span class="pre">Enable</span> <span class="pre">Drive</span> <span class="pre">API</span></code> then click <code class="docutils literal notranslate"><span class="pre">Create</span></code> in the modal.
 It will generate a <code class="docutils literal notranslate"><span class="pre">credentials.json</span></code> file. Move it to <code class="docutils literal notranslate"><span class="pre">iqps/conf</span></code> folder inside the repo.</p></li>
-<li><p>Now open a python shell (remember to be in the same virtual environment as above) in the <cite>iqps</cite> directory inside the repo and run:</p></li>
-</ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">upload.google_connect</span> <span class="kn">import</span> <span class="n">connect</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">connect</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>An authentication window will open in browser, accept all risks and allow everything.</p>
-<ol class="arabic simple">
 <li><p>Now in Google Drive top-level directory, open a new folder called (for example) <code class="docutils literal notranslate"><span class="pre">iqps_static</span></code>. This is where the uploaded question papers go.</p></li>
-<li><p>Copy <code class="docutils literal notranslate"><span class="pre">app.env.template</span></code> to <code class="docutils literal notranslate"><span class="pre">app.env</span></code> in <code class="docutils literal notranslate"><span class="pre">iqps/conf</span></code>.</p></li>
-<li><p>Fill out the <code class="docutils literal notranslate"><span class="pre">app.env</span></code>. The field names are intuitive. Set <code class="docutils literal notranslate"><span class="pre">MODE=dev</span></code> for Development, <code class="docutils literal notranslate"><span class="pre">MODE=prod</span></code> for Production.
-Create 2 new directories with paths say <code class="docutils literal notranslate"><span class="pre">path1/</span></code> and <code class="docutils literal notranslate"><span class="pre">path2/</span></code>. And set <code class="docutils literal notranslate"><span class="pre">STATIC_ROOT=path1/</span></code> and <code class="docutils literal notranslate"><span class="pre">LOG_PATH=path2/iqps.log</span></code>.
-These are where your static files and logs will go respectively in production, should you decide to serve the static files independently.
-Set <code class="docutils literal notranslate"><span class="pre">HOSTNAME=localhost</span></code> or our IP address. Set <code class="docutils literal notranslate"><span class="pre">SECRET_KEY</span></code> to some random long string.</p></li>
-<li><p>Now to migrate all the database tables, go to the <code class="docutils literal notranslate"><span class="pre">iqps/</span></code> directory inside the repo. Then run:</p></li>
+<li><p>Run the install script for the first time:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./install.sh
+</pre></div>
+</div>
+</li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python manage.py migrate --skip-checks
+<p>This will ask for app permissions. Sign in with the account you used in step-3. Accept all risks.</p>
+<ol class="arabic">
+<li><p>You can move the project folder to the intended app server now, or (for development) you can keep it in the local machine.
+Run the install script <strong>FOR THE SECOND TIME</strong>. Provide the details as asked.</p></li>
+<li><p>Wait till the logs look like following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>db_1   <span class="p">|</span> <span class="m">2020</span>-05-25 <span class="m">16</span>:37:33 <span class="m">0</span> <span class="o">[</span>Note<span class="o">]</span> mysqld: ready <span class="k">for</span> connections.
+db_1   <span class="p">|</span> Version: <span class="s1">&#39;10.4.12-MariaDB-1:10.4.12+maria~bionic&#39;</span>  socket: <span class="s1">&#39;/var/run/mysqld/mysqld.sock&#39;</span>  port: <span class="m">3306</span>  mariadb.org binary distribution
 </pre></div>
 </div>
-<ol class="arabic simple">
-<li><p>Let’s create the admin for the website now. Run:</p></li>
+</li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python manage.py createsuperuser
+<p>Then kill the process by hitting <code class="docutils literal notranslate"><span class="pre">CTRL+C</span></code>.</p>
+<ol class="arabic">
+<li><p>Run the initialization script. It will ask for creation of super-user account:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./init.sh
 </pre></div>
 </div>
-<p>The website is now ready. You can launch it via:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python manage.py runserver
+</li>
+<li><p>Run (and daemonize) the app by executing:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose up -d
 </pre></div>
 </div>
-</div>
-<div class="section" id="moving-to-production">
-<h2>Moving to production<a class="headerlink" href="#moving-to-production" title="Permalink to this headline">¶</a></h2>
-<p>To use this setup to production, in <code class="docutils literal notranslate"><span class="pre">app.env</span></code> set <code class="docutils literal notranslate"><span class="pre">MODE=prod</span></code>.
-Then copy all your local files to the production server.
-Set up the <code class="docutils literal notranslate"><span class="pre">STATIC_ROOT</span></code> and <code class="docutils literal notranslate"><span class="pre">LOG_PATH</span></code> directories there.
-Then run:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python manage.py collectstatic
+</li>
+<li><p>You can also stop the service by running:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose down
 </pre></div>
 </div>
-<p>Setup a server like Apache or Nginx to serve the webapp.
-Add configuration there to serve the static files under <code class="docutils literal notranslate"><span class="pre">webapp_root_url/static</span></code> URL.</p>
+</li>
+</ol>
+<p>The next step is to configure a Server eg, Apache or Nginx to act as a Reverse-Proxy and serve the static files.</p>
+<p>However, if you want to bring up a development system, setting up a server is unnecessary.
+To do that, while the server is down, change <code class="docutils literal notranslate"><span class="pre">MODE=prod</span></code> to <code class="docutils literal notranslate"><span class="pre">MODE=dev</span></code> in <code class="docutils literal notranslate"><span class="pre">iqps/conf/app.env</span></code>.
+Also, in <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> change the line <code class="docutils literal notranslate"><span class="pre">command:</span> <span class="pre">gunicorn</span> <span class="pre">iqps.wsgi</span> <span class="pre">-w</span> <span class="pre">4</span> <span class="pre">-b</span> <span class="pre">0.0.0.0:8000</span> <span class="pre">--access-logfile</span> <span class="pre">/var/log/iqps/gunicorn.log</span></code>
+to <code class="docutils literal notranslate"><span class="pre">command:</span> <span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">runserver</span> <span class="pre">0.0.0.0:8000</span></code>.</p>
 </div>
 </div>
 
@@ -129,9 +117,12 @@ Add configuration there to serve the static files under <code class="docutils li
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#steps">Steps</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#moving-to-production">Moving to production</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="SourceInstall.html">Source Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AdminRoles.html">Admin Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DevDoc.html">Design and Architecture</a></li>
 </ul>
 
 <div class="relations">
@@ -139,6 +130,7 @@ Add configuration there to serve the static files under <code class="docutils li
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="index.html" title="previous chapter">Welcome to IQPS’s documentation!</a></li>
+      <li>Next: <a href="SourceInstall.html" title="next chapter">Source Installation</a></li>
   </ul></li>
 </ul>
 </div>
