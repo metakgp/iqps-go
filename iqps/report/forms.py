@@ -14,3 +14,7 @@ class ReportForm(forms.ModelForm):
         labels = {
             "reason": "Give a reason for Reporting this paper (max 1024 characters)"
         }
+
+        widgets = {
+            "reason": forms.Textarea
+        }
