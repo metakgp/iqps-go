@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'assets/formpage.css' %}">
+{% endblock %}
+
+{% block content %}
+    {% include 'navbar.html' %}
+    <div class="form-group">
+        <h2>Report Paper Link of {{ paper.subject }}</h2>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form }}
+            <button type="submit" class="submit-btn">Upload</button>
+        </form>
+    </div>
+    {% include 'msgparser.html' %}
+{% endblock %}

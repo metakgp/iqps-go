@@ -40,12 +40,12 @@ def _search(subject, year=0, department="", paper_type="", keywords=""):
     
     if keyword_filter == "":
         query =\
-        """SELECT p.subject, p.year, d.code, p.paper_type, p.link
+        """SELECT p.subject, p.year, d.code, p.paper_type, p.link, p.id
            FROM papers p JOIN departments d ON p.department_id = d.id
            WHERE SOUNDEX(SUBSTRING(p.subject, 1, LENGTH('{}'))) = SOUNDEX('{}') {} {} {} ORDER BY year DESC LIMIT 30;""".format(subject, subject, year_filter, dep_filter, type_filter)
     else:
         query =\
-        """SELECT p.subject, p.year, d.code, p.paper_type, p.link, GROUP_CONCAT(kt.text) AS keywords
+        """SELECT p.subject, p.year, d.code, p.paper_type, p.link, p.id, GROUP_CONCAT(kt.text) AS keywords
     FROM papers AS p JOIN departments AS d ON p.department_id = d.id
     LEFT OUTER JOIN (
         SELECT pk.paper_id, k.text FROM papers_keywords AS pk JOIN keywords AS k ON pk.keyword_id = k.id
