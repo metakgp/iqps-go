@@ -8,7 +8,7 @@
 	<div class="nav-menu-box">
 	    <ul class="nav-menu">
 		{% if not user.is_authenticated %}
-		    <li class="nav-item"><a href="/accounts/login/">Login</a></li>
+		    <li class="nav-item"><a href="/accounts/login/">Admin Login</a></li>
 		{% else %}
 		    <li class="nav-item"><a href="/accounts/logout/">Logout</a></li>
 		    <li class="nav-item">Hello, {{ user.username }}</li>
