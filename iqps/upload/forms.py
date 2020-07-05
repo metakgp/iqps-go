@@ -2,10 +2,20 @@ import logging
 from django import forms
 from django_select2.forms import ModelSelect2TagWidget, Select2Widget
 from captcha.fields import CaptchaField
+import datetime
 
 from data.models import Paper, Keyword
 
 LOG = logging.getLogger(__name__)
+
+
+def current_year():
+    return datetime.date.today().year
+
+
+def year_choices():
+    return [(r, r) for r in range(current_year(), 1950, -1)]
+
 
 class TextSearchFieldMixin:
     search_fields = ['text__icontains']
@@ -51,6 +61,8 @@ class BulkUploadForm(forms.Form):
 class UploadForm(forms.ModelForm):
     file = forms.FileField(widget=forms.ClearableFileInput,
                             label="Upload pdf")
+    year = forms.TypedChoiceField(coerce=int, choices=year_choices,
+                                  initial=current_year)
     captcha = CaptchaField()
     del_key = forms.IntegerField(label='Id (see Request Paper) resolved by this upload (Optional)', required=False)
     class Meta:
