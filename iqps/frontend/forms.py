@@ -1,11 +1,7 @@
 from django import forms
 from django_select2.forms import Select2MultipleWidget, Select2Widget
 from data.models import PAPER_TYPES, Department, Keyword
-import datetime
-
-
-def current_year():
-    return datetime.date.today().year
+from utils.timeutil import current_year
 
 
 def year_choices():

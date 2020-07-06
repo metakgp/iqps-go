@@ -2,15 +2,11 @@ import logging
 from django import forms
 from django_select2.forms import ModelSelect2TagWidget, Select2Widget
 from captcha.fields import CaptchaField
-import datetime
 
 from data.models import Paper, Keyword
+from utils.timeutil import current_year
 
 LOG = logging.getLogger(__name__)
-
-
-def current_year():
-    return datetime.date.today().year
 
 
 def year_choices():

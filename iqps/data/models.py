@@ -1,10 +1,6 @@
 from django.db import models
-import datetime
 from django.core.validators import MaxValueValidator, MinValueValidator
-
-
-def current_year():
-    return datetime.date.today().year
+from utils.timeutil import current_year
 
 
 def max_value_current_year(value):
