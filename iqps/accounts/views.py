@@ -1,11 +1,12 @@
 import logging
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth import authenticate, login, logout
 
 from .forms import UserLoginForm, UserRegisterForm
 
 app_name = "accounts"
 LOG = logging.getLogger(__name__)
+
 
 def loginView(request):
     next = request.GET.get('next')
@@ -22,17 +23,19 @@ def loginView(request):
         if next:
             return redirect(next)
         return redirect("/")
-    
+
     context = {
         "form": form
     }
-    
+
     return render(request, "login.html", context)
+
 
 def logoutView(request):
     next = request.GET.get('next')
     logout(request)
     return redirect(next or "/")
+
 
 def signupView(request):
     next = request.GET.get('next')
@@ -59,4 +62,3 @@ def signupView(request):
     }
 
     return render(request, "register.html", context)
-

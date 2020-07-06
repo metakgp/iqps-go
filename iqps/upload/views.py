@@ -2,11 +2,11 @@ import json
 import logging
 import uuid
 import os
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+# from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from data.models import Paper, Keyword, Department
+from data.models import Paper, Department
 from request.models import PaperRequest
 from iqps.settings import STATICFILES_DIRS, GDRIVE_DIRNAME
 from .forms import BulkUploadForm, UploadForm
@@ -15,7 +15,8 @@ from .google_connect import upload_file, get_or_create_folder
 GDRIVE_DIR_ID = None
 LOG = logging.getLogger(__name__)
 
-#@login_required
+
+# @login_required
 def index(request):
     global GDRIVE_DIR_ID
 
@@ -24,7 +25,7 @@ def index(request):
     if request.method == "POST":
         try:
             assert request.FILES.get('file', None) is not None
-            #UploadForm is submitted
+            # UploadForm is submitted
             upl = UploadForm(request.POST, request.FILES)
             if upl.is_valid():
                 path = STATICFILES_DIRS[0]
@@ -35,10 +36,11 @@ def index(request):
                     for chunk in file.chunks():
                         dest.write(chunk)
                 if not GDRIVE_DIR_ID:
-                    GDRIVE_DIR_ID = get_or_create_folder(GDRIVE_DIRNAME, public=True)
+                    GDRIVE_DIR_ID = get_or_create_folder(GDRIVE_DIRNAME,
+                                                         public=True)
                 paper = upl.save(commit=False)
                 paper.link = upload_file(path, "{}.pdf".format(uid),
-                                        folderId=GDRIVE_DIR_ID)
+                                         folderId=GDRIVE_DIR_ID)
                 keys_tmp = upl.cleaned_data.get("keywords")
 
                 paper.save()
@@ -62,7 +64,7 @@ def index(request):
 
         except AssertionError:
             if request.user.is_staff:
-                #BulkUploadForm has been submitted
+                # BulkUploadForm has been submitted
                 bulk = BulkUploadForm(request.POST, request.FILES)
                 processed = 0
                 saved = 0
@@ -74,30 +76,30 @@ def index(request):
                         if dep_code == "":
                             dep_code = "Other"
 
-                        dep, _ = Department.objects.get_or_create(code=dep_code)
+                        dep, _ = Department.objects\
+                            .get_or_create(code=dep_code)
 
-                        p = Paper(\
-                        department=dep,
-                        year=paper.get("Year", None),
-                        subject=paper.get("Paper", None),
-                        link=paper.get("Link", None),
-                        paper_type=paper.get("Semester", None)
-                        )
+                        p = Paper(
+                                  department=dep,
+                                  year=paper.get("Year", None),
+                                  subject=paper.get("Paper", None),
+                                  link=paper.get("Link", None),
+                                  paper_type=paper.get("Semester", None)
+                                 )
                         try:
                             p.save()
                             saved += 1
                         except Exception as e:
                             LOG.warning(e)
 
-                        LOG.info("%d entries processed, %d entries saved" % (processed, saved))
-                    messages.success(request, "Bulk upload successful: {} entries saved".format(saved))
-
-
+                        LOG.info("%d entries processed, %d entries saved"
+                                 % (processed, saved))
+                    messages.success(request,
+                                     "Bulk upload successful:\
+                                     {} entries saved"
+                                     .format(saved))
 
     return render(request, "upload.html", {
-                                        "bulk_form": bulk,
-                                        "crowd_form": upl
-                                        })
-
-
-
+                                            "bulk_form": bulk,
+                                            "crowd_form": upl
+                                          })

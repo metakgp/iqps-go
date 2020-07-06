@@ -13,13 +13,14 @@ SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly',
           'https://www.googleapis.com/auth/drive.file',
           'https://www.googleapis.com/auth/drive.appdata']
 
+
 def connect():
     creds = None
 
     if os.path.exists(os.path.join('conf', 'token.pickle')):
         with open(os.path.join('conf', 'token.pickle'), 'rb') as token:
             creds = pickle.load(token)
-    
+
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -34,6 +35,7 @@ def connect():
     service = build('drive', 'v3', credentials=creds)
     return service
 
+
 def upload_file(local_path, remote_name, folderId=None, service=None):
     if service is None:
         service = connect()
@@ -44,32 +46,37 @@ def upload_file(local_path, remote_name, folderId=None, service=None):
 
     media = MediaFileUpload(local_path)
     file = service.files().create(body=file_metadata,
-                                    media_body=media,
-                                    fields='webContentLink').execute()
+                                  media_body=media,
+                                  fields='webContentLink').execute()
     return file.get('webContentLink', None)
-     
+
+
 def get_or_create_folder(remote_name, public=False, service=None):
     if service is None:
         service = connect()
     folder_id = None
-    query = "name='{}' and mimeType='application/vnd.google-apps.folder'".format(remote_name)
+    query = "name='{}' and mimeType='application/vnd.google-apps.folder'"\
+            .format(remote_name)
 
     try:
         response = service.files().list(q=query,
-                                       spaces='drive',
-                                       fields='nextPageToken, files(id, name)',
-                                       pageToken=None).execute()
+                                        spaces='drive',
+                                        fields='nextPageToken, \
+                                        files(id, name)',
+                                        pageToken=None).execute()
         assert response.get('files', []) != []
         for folder in response.get('files'):
             folder_id = folder.get('id')
             break
-    except Exception as e:
+    except Exception:
         file_metadata = {
             'name': remote_name,
             'mimeType': 'application/vnd.google-apps.folder'
         }
 
-        folder = service.files().create(body=file_metadata, fields='id').execute()
+        folder = service.files()\
+            .create(body=file_metadata, fields='id')\
+            .execute()
         folder_id = folder.get('id')
 
         if public:
@@ -84,5 +91,3 @@ def get_or_create_folder(remote_name, public=False, service=None):
                 fields='id').execute()
     finally:
         return folder_id
-        
-     

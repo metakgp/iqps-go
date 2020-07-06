@@ -3,6 +3,7 @@ from django.contrib import messages
 from .forms import ReportForm
 from data.models import Paper
 
+
 def reportPaper(request, paperId):
     paper = get_object_or_404(Paper, pk=paperId)
     form = None
@@ -18,7 +19,7 @@ def reportPaper(request, paperId):
             "form": ReportForm(),
             "paper": paper
         })
-    except:
+    except Exception:
         if form is None:
             form = ReportForm()
         return render(request, "reportform.html", {

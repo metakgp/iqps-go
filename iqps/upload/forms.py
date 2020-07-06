@@ -16,6 +16,7 @@ def year_choices():
 class TextSearchFieldMixin:
     search_fields = ['text__icontains']
 
+
 class KeywordSelect2TagWidget(TextSearchFieldMixin, ModelSelect2TagWidget):
     model = Keyword
 
@@ -24,14 +25,15 @@ class KeywordSelect2TagWidget(TextSearchFieldMixin, ModelSelect2TagWidget):
         self.get_queryset().create(text=value)
 
     def value_from_datadict(self, data, files, name):
-        values = ModelSelect2TagWidget.value_from_datadict(self, data, files, name)
+        values = ModelSelect2TagWidget.value_from_datadict(self, data,
+                                                           files, name)
         pks = []
         for val in values:
             key_id = None
             try:
                 key_id = int(val)
                 word = Keyword.objects.get(id=key_id)
-            except:
+            except Exception:
                 word = Keyword.objects.get_or_create(text=val)
                 key_id = word[0].pk
             finally:
@@ -41,7 +43,7 @@ class KeywordSelect2TagWidget(TextSearchFieldMixin, ModelSelect2TagWidget):
 
 class BulkUploadForm(forms.Form):
     bulk_file = forms.FileField(widget=forms.ClearableFileInput,
-                            label="Upload json file (within 30MB)")
+                                label="Upload json file (within 30MB)")
 
     def clean(self, *args, **kwargs):
         try:
@@ -49,18 +51,22 @@ class BulkUploadForm(forms.Form):
             assert f is not None
             assert "json" in f.content_type
             assert f.size <= 30 * 1024 * 1024
-        except:
+        except Exception:
             raise forms.ValidationError("Invalid file")
         finally:
             super(BulkUploadForm, self).clean(*args, **kwargs)
 
+
 class UploadForm(forms.ModelForm):
     file = forms.FileField(widget=forms.ClearableFileInput,
-                            label="Upload pdf")
+                           label="Upload pdf")
     year = forms.TypedChoiceField(coerce=int, choices=year_choices,
                                   initial=current_year)
     captcha = CaptchaField()
-    del_key = forms.IntegerField(label='Id (see Request Paper) resolved by this upload (Optional)', required=False)
+    del_key = forms.IntegerField(label='Id (see Request Paper) resolved \
+                                 by this upload (Optional)',
+                                 required=False)
+
     class Meta:
         model = Paper
         fields = [
@@ -77,18 +83,16 @@ class UploadForm(forms.ModelForm):
             'department': Select2Widget
             }
         labels = {
-            'department': 'Department (Prefer 2 letter codes. Select Others if not found)'
+            'department': 'Department (Prefer 2 letter codes. \
+                          Select Others if not found)'
             }
-
 
     def clean(self, *args, **kwargs):
         try:
             f = self.files.get("file")
             assert f is not None
             assert "pdf" in f.content_type
-        except:
+        except Exception:
             raise forms.ValidationError("Invalid File")
         finally:
             super(UploadForm, self).clean(*args, **kwargs)
-
-

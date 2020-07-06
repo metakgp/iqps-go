@@ -1,6 +1,7 @@
 from django.db import models
 from data.models import PAPER_TYPES
 
+
 class PaperRequest(models.Model):
     subject = models.CharField(max_length=2048)
     paper_type = models.CharField(max_length=2, choices=PAPER_TYPES)

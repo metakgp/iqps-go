@@ -8,6 +8,7 @@ from .models import PaperRequest
 
 LOG = logging.getLogger(__name__)
 
+
 def paperRequest(request):
     if request.method == "POST":
         req = RequestForm(request.POST)
@@ -20,5 +21,8 @@ def paperRequest(request):
 
     reqs = PaperRequest.objects.all().order_by('-pk')
     reqarr = [dict(x) for x in reqs]
-    return render(request, "requestpage.html", {'form': RequestForm(), 'reqs': reqarr})
-
+    ctx = {
+            'form': RequestForm(),
+            'reqs': reqarr
+          }
+    return render(request, "requestpage.html", ctx)

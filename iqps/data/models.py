@@ -6,6 +6,7 @@ from utils.timeutil import current_year
 def max_value_current_year(value):
     return MaxValueValidator(current_year())(value)
 
+
 PAPER_TYPES = [
     ('MA', "Mid-Autumn"),
     ('EA', "End-Autumn"),
@@ -13,6 +14,7 @@ PAPER_TYPES = [
     ('ES', "End-Spring"),
     ('CT', "Class-test")
 ]
+
 
 class Keyword(models.Model):
     text = models.CharField(max_length=50)
@@ -23,6 +25,7 @@ class Keyword(models.Model):
     def __str__(self):
         return str(self.text)
 
+
 class Department(models.Model):
     code = models.CharField(max_length=200, unique=True)
 
@@ -31,6 +34,7 @@ class Department(models.Model):
 
     def __str__(self):
         return str(self.code)
+
 
 class Paper(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
@@ -41,7 +45,8 @@ class Paper(models.Model):
                                            max_value_current_year])
     added_on = models.DateTimeField(auto_now_add=True)
 
-    keywords = models.ManyToManyField(Keyword, blank=True, related_name="papers")
+    keywords = models.ManyToManyField(Keyword, blank=True,
+                                      related_name="papers")
 
     class Meta:
         db_table = 'papers'
@@ -52,9 +57,9 @@ class Paper(models.Model):
     def serialize_to_json(self):
         keyword_strs = [str(keyword) for keyword in self.keywords.all()]
         return {
-        'department': self.department.code,
-        'link': self.link,
-        'paper_type': self.paper_type,
-        'year': self.year,
-        'keywords': keyword_strs
+            'department': self.department.code,
+            'link': self.link,
+            'paper_type': self.paper_type,
+            'year': self.year,
+            'keywords': keyword_strs
         }
