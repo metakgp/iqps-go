@@ -1,0 +1,5 @@
+[pycodestyle]
+count = True
+ignore = D100, D103, W504, W503
+max-line-length = 120
+exclude=migrations*, docs*
