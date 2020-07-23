@@ -2,21 +2,21 @@
 {% load static %}
 
     <div class="nav-bar">
-	<div class="nav-head">
-        <h3 class="nav-item" style="transform: translateY(10px);"><a href="/">MFQP</a></h3>
-	</div>
-	<div class="nav-menu-box">
-	    <ul class="nav-menu">
-		{% if not user.is_authenticated %}
-		    <li class="nav-item"><a href="/accounts/login/">Admin Login</a></li>
-		{% else %}
-		    <li class="nav-item"><a href="/accounts/logout/">Logout</a></li>
-		    <li class="nav-item">Hello, {{ user.username }}</li>
-		{% endif %}
-		    <li class="nav-item"><a href="/upload/">Upload Paper</a></li>
-            <li class="nav-item"><a href="/request/">Request Paper</a></li>
-	    </ul>
-	</div>
+		<div class="nav-head">
+			<h3 class="nav-item"><a href="/">MFQP</a></h3>
+		</div>
+		<div class="nav-menu-box">
+			<ul class="nav-menu">
+			{% if not user.is_authenticated %}
+				<li class="nav-item"><a href="/accounts/login/">Admin Login</a></li>
+			{% else %}
+				<li class="nav-item"><a href="/accounts/logout/">Logout</a></li>
+				<li class="nav-item">Hello, {{ user.username }}</li>
+			{% endif %}
+				<li class="nav-item"><a href="/upload/">Upload Paper</a></li>
+				<li class="nav-item"><a href="/request/">Request Paper</a></li>
+			</ul>
+		</div>
     </div>
     <link rel="stylesheet" href="{% static 'assets/navstyle.css' %}">
 {% endblock %}

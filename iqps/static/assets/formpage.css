@@ -1,6 +1,9 @@
+@import url(//fonts.googleapis.com/css?family=Inter);
+
 html, body{
     height: 100%;
     background-color: rgb(245, 245, 245);
+    font-family: 'Inter';
 }
 
 .form-group{

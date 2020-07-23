@@ -60,7 +60,11 @@
   </a>
 </div>
 
-_Detailed explaination of the project goes here_
+Check out the docs for more info: [iqps-docs.netlify.app](https://iqps-docs.netlify.app/)
+
+Link to Installation Information: [https://iqps-docs.netlify.app/installation#steps](https://iqps-docs.netlify.app/installation#steps)
+
+Check the last paragraph of the above document for instructions to set up Development Environment.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

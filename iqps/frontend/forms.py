@@ -15,11 +15,13 @@ class FilterForm(forms.Form):
     KEYWORDS = map(lambda x: (x.text, x.text), Keyword.objects.all())
 
     year = forms.TypedChoiceField(coerce=int, choices=year_choices,
-                                  initial='', label="Year")
+                                  initial='', label="Year",
+                                  widget=Select2Widget)
     department = forms.ChoiceField(label="Department",
                                    choices=[('', '------')] + DEPARTMENT_TYPES,
                                    widget=Select2Widget)
     paper_type = forms.ChoiceField(choices=[('', '------')] + PAPER_TYPES,
-                                   label="Paper Type")
-    keywords = forms.ChoiceField(widget=Select2MultipleWidget,
-                                 choices=KEYWORDS)
+                                   label="Paper Type",
+                                   widget=Select2Widget)
+    # keywords = forms.ChoiceField(widget=Select2MultipleWidget,
+    #                              choices=KEYWORDS)
