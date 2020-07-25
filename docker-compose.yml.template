@@ -1,11 +1,15 @@
 version: '3'
 
+networks:
+  main-network:
+
+
 services:
   db:
     image: mariadb:latest
     restart: always
-    ports:
-      - '3306:3306'
+    networks:
+      main-network:
     environment:
        MYSQL_DATABASE: 'iqps'
        MYSQL_USER: 'iqps_admin'
@@ -22,7 +26,19 @@ services:
       - .:/iqps/
       - local_static_root_path:/var/www/static/
       - local_log_path:/var/log/iqps/
+    networks:
+      main-network:
     ports:
       - "8000:8000"
     depends_on:
       - db
+  backup:
+    build: ./backup
+    environment:
+       MYSQL_PASSWORD: 'DB_PWD'
+       DROPBOX_ACCESS_TOKEN: 'DROPBOX_TOKEN'
+    networks:
+      main-network:
+    depends_on:
+      - db    
+    

@@ -61,17 +61,17 @@ sed -i "s/hostcname/$APP_CNAME/" $CONF_PATH
 
 echo "Database will be connected as user: 'iqps_admin'"
 echo -n "Password for iqps_admin? : "
-read -s APP_DB_USER_PWD
+read APP_DB_USER_PWD
 echo -e
 
 sed -i "s/DB_PWD/$APP_DB_USER_PWD/" $CONF_PATH
-sed -i "s/DB_PWD/$APP_DB_USER_PWD/" docker-compose.yml
+sed -i "s/DB_PWD/$APP_DB_USER_PWD/g" docker-compose.yml
 
 echo -n "Database root user password? : "
-read -s APP_DB_PWD
+read APP_DB_PWD
 echo -e
 
-sed -i "s/DB_ROOT_PWD/$APP_DB_PWD/" docker-compose.yml
+sed -i "s/DB_ROOT_PWD/$APP_DB_PWD/g" docker-compose.yml
 
 echo -n "Google Drive Directory name for storing uploaded data? (Be sure to make the directory at a root level in the account of who authorized this app): "
 read APP_GDRIVE_DIR
@@ -95,6 +95,18 @@ read APP_DATA_DB_PATH
 
 mkdir -p $APP_DATA_DB_PATH
 sed -i "s+local_db_data_path+$APP_DATA_DB_PATH+" docker-compose.yml
+
+echo -n "Do you want Dropbox backup?(y|n)"
+read BACKUP_CONSENT
+
+if [ $BACKUP_CONSENT = "y" ]
+then
+    echo -n "Dropbox access token? "
+    read APP_DROPBOX_ACCESS_TOKEN
+    sed -i "s/DROPBOX_TOKEN/$APP_DROPBOX_ACCESS_TOKEN/" docker-compose.yml
+else
+    head -n -10 docker-compose.yml > docker-compose.yml
+fi
 
 echo "Attempting to start docker service.... (Requires sudo)"
 sudo systemctl restart docker
