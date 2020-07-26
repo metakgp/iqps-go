@@ -54,11 +54,6 @@ read APP_SECRET_KEY
 
 sed -i "s/secret_key/$APP_SECRET_KEY/" $CONF_PATH
 
-echo -n "DNS name of the app? (At least give the IP address if you don't have one yet): "
-read APP_CNAME
-
-sed -i "s/hostcname/$APP_CNAME/" $CONF_PATH
-
 echo "Database will be connected as user: 'iqps_admin'"
 echo -n "Password for iqps_admin? : "
 read APP_DB_USER_PWD
@@ -82,7 +77,7 @@ echo -n "Local path to store static files? (Give absolute path and make sure cur
 read APP_STATIC_ROOT
 
 mkdir -p $APP_STATIC_ROOT
-sed -i "s+local_static_root_path+$APP_STATIC_ROOT+" docker-compose.yml
+sed -i "s+local_static_root_path+$APP_STATIC_ROOT+g" docker-compose.yml
 
 echo -n "Local path to store logs? (Give absolute path and make sure current user has write access to it): "
 read APP_LOG_PATH
@@ -105,11 +100,11 @@ then
     read APP_DROPBOX_ACCESS_TOKEN
     sed -i "s/DROPBOX_TOKEN/$APP_DROPBOX_ACCESS_TOKEN/" docker-compose.yml
 else
-    head -n -10 docker-compose.yml > docker-compose.yml
+    echo "Please delete the last 10 lines (backup section) from docker-compose.yml"
 fi
 
-echo "Attempting to start docker service.... (Requires sudo)"
-sudo systemctl restart docker
+# echo "Attempting to start docker service.... (Requires sudo)"
+# sudo systemctl restart docker
 
 echo "Building Container"
 

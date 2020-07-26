@@ -5,6 +5,14 @@ networks:
 
 
 services:
+  nginx:
+    build: ./nginx
+    volumes:
+      - local_static_root_path:/var/www/static/
+    ports:
+      - "8001:8001"
+    networks:
+      main-network:
   db:
     image: mariadb:latest
     restart: always
