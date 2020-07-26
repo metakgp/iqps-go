@@ -82,9 +82,9 @@ function queryApiCaller(data) {
             buff = $("#id_paper_type").val();
             if (buff != "")
                 queryStr += ("&typ=" + buff);
-            buff = $("#id_keywords").val();
-            if (buff.length > 0)
-                queryStr += ("&keys=(\"" + buff.join("\", \"") + "\")");
+            // buff = $("#id_keywords").val();
+            // if (buff.length > 0)
+               // queryStr += ("&keys=(\"" + buff.join("\", \"") + "\")");
             resultBox.innerHTML = "";
             $.get("/search/api?q=" + queryStr, (data, stat) => {
                 if (isactive) {
