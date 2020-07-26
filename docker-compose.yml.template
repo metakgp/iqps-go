@@ -13,6 +13,8 @@ services:
       - "8001:8001"
     networks:
       main-network:
+    depends_on:
+      - web
   db:
     image: mariadb:latest
     restart: always
