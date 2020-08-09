@@ -42,7 +42,8 @@ def index(request):
                 paper.link = upload_file(path, "{}.pdf".format(uid),
                                          folderId=GDRIVE_DIR_ID)
                 keys_tmp = upl.cleaned_data.get("keywords")
-
+                if upl.cleaned_data.get('custom_subject', '') != '':
+                    paper.subject = upl.cleaned_data.get('custom_subject')
                 paper.save()
 
                 for key in keys_tmp:

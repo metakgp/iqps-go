@@ -8,17 +8,23 @@ def year_choices():
     base_choices = [(r, r) for r in range(current_year(), 1950, -1)]
     return [('', '')] + base_choices
 
+def dept_choices():
+    base_choices = list(map(lambda x: (x.code, x.code),
+                                Department.objects.all()))
+    return [('', '---------')] + base_choices
+
+def keyword_choices():
+    base_choices = list(map(lambda x: (x.text, x.text),
+                                Keyword.objects.all()))
+    return base_choices
+
 
 class FilterForm(forms.Form):
-    DEPARTMENT_TYPES = list(map(lambda x: (x.code, x.code),
-                                Department.objects.all()))
-    KEYWORDS = map(lambda x: (x.text, x.text), Keyword.objects.all())
-
     year = forms.TypedChoiceField(coerce=int, choices=year_choices,
                                   initial='', label="Year",
                                   widget=Select2Widget)
     department = forms.ChoiceField(label="Department",
-                                   choices=[('', '------')] + DEPARTMENT_TYPES,
+                                   choices=dept_choices,
                                    widget=Select2Widget)
     paper_type = forms.ChoiceField(choices=[('', '------')] + PAPER_TYPES,
                                    label="Paper Type",

@@ -40,7 +40,7 @@ class Paper(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     link = models.CharField(max_length=2048)
     subject = models.CharField(max_length=500)
-    paper_type = models.CharField(max_length=2, choices=PAPER_TYPES)
+    paper_type = models.CharField(max_length=30, choices=PAPER_TYPES)
     year = models.IntegerField(validators=[MinValueValidator(1951),
                                            max_value_current_year])
     added_on = models.DateTimeField(auto_now_add=True)

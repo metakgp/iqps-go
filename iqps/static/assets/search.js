@@ -21,7 +21,7 @@ $("#searchbar").focus(() => {
     try {
         $("#placeholder").remove();
     } catch (err) {
-        console.log("");
+        console.log(err);
     } finally {
         isactive = true;
         $("#search-box").css("transform", "translateY(20vh)");
@@ -114,7 +114,6 @@ function queryApiCaller(data) {
 
 const callback = function (mutationList, observer) {
     for (let mutation of mutationList) {
-        console.log(mutation);
         if ((mutation.type == "childList" || mutation.type == "characterData") &&
             (mutation.target.id == "searchbar" || mutation.target.parentNode.id == "searchbar")) {
             let data = mutation.target.innerText || mutation.target.data;
@@ -149,7 +148,8 @@ $("#id_year, #id_department, #id_paper_type, #id_keywords").on('input', () => {
 })
 
 function saveHistory(e) {
-    let data = `<a href="${e.target.href}">${e.target.parentNode.children[0].innerText}</a>`;
+    let data = `<a href="${e.target.href}">${e.target.parentNode.parentNode.children[0].innerText}</a>`;
     historyPush(data);
 }
+
 
