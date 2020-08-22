@@ -2,18 +2,18 @@ version: '3'
 
 networks:
   main-network:
-
+  nginx-network:
 
 services:
-  nginx:
-    build: ./nginx
-    volumes:
-      - local_static_root_path:/var/www/static/
-    ports:
-      - "8001:8001"
-    networks:
-      main-network:
-    depends_on:
+  nginx:	
+    container_name: 'iqps-nginx'
+    build: ./nginx	
+    volumes:	
+      - local_static_root_path:/var/www/static/	
+    networks:	
+      main-network:	
+      nginx-network:
+    depends_on:	
       - web
   db:
     image: mariadb:latest
