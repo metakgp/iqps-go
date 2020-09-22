@@ -24,7 +24,7 @@ Steps
     git clone https://github.com/grapheo12/iqps.git
     cd iqps
 
-#. Go to https://developers.google.com/drive/api/v3/quickstart/python. Click on ``Enable Drive API`` then click ``Create`` in the modal.
+#. Go to https://developers.google.com/drive/api/v3/quickstart/python. Click on ``Enable Drive API`` then click ``Create`` after selecting Desktop App in the modal.
    It will generate a ``credentials.json`` file. Move it to ``iqps/conf`` folder inside the repo.
 
 #. Now in Google Drive top-level directory, open a new folder called (for example) ``iqps_static``. This is where the uploaded question papers go.
