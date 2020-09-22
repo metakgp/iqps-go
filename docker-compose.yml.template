@@ -5,15 +5,15 @@ networks:
   nginx-network:
 
 services:
-  nginx:	
+  nginx:
     container_name: 'iqps-nginx'
-    build: ./nginx	
-    volumes:	
-      - local_static_root_path:/var/www/static/	
-    networks:	
-      main-network:	
+    build: ./nginx
+    volumes:
+      - local_static_root_path:/var/www/static/
+    networks:
+      main-network:
       nginx-network:
-    depends_on:	
+    depends_on:
       - web
   db:
     image: mariadb:latest
