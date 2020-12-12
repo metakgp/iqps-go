@@ -131,4 +131,7 @@ dmypy.json
 # filelock
 *.lock
 
+# object file
+*.o
+
 # End of https://www.gitignore.io/api/django
