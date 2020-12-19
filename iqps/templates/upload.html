@@ -11,8 +11,12 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/css/select2.min.css" type="text/css" media="screen" rel="stylesheet">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/js/select2.min.js"></script>
     <script type="text/javascript" src="/static/django_select2/django_select2.js"></script>
-    <link rel="stylesheet" href="{% static 'assets/formpage.css' %}">
-
+	<link rel="stylesheet" href="{% static 'assets/formpage.css' %}">
+	{% if login_req %}
+        {% if not user.is_authenticated %}
+                <meta http-equiv="refresh" content="0; url='/'" />
+        {% endif %}
+    {% endif %}
 {% endblock %}
 
 {% block content %}

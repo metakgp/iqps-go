@@ -102,5 +102,6 @@ def index(request):
 
     return render(request, "upload.html", {
                                             "bulk_form": bulk,
-                                            "crowd_form": upl
+                                            "crowd_form": upl,
+                                            "login_req": os.environ['LOGIN_REQUIRED']
                                           })

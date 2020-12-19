@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
 from .forms import ReportForm
 from data.models import Paper
-
+import os
 
 def reportPaper(request, paperId):
     paper = get_object_or_404(Paper, pk=paperId)
@@ -17,12 +17,14 @@ def reportPaper(request, paperId):
         messages.add_message(request, messages.INFO, "Report Successful!")
         return render(request, "reportform.html", {
             "form": ReportForm(),
-            "paper": paper
+            "paper": paper,
+            "login_req": os.environ['LOGIN_REQUIRED']
         })
     except Exception:
         if form is None:
             form = ReportForm()
         return render(request, "reportform.html", {
             "form": form,
-            "paper": paper
+            "paper": paper,
+            "login_req": os.environ['LOGIN_REQUIRED']
         })

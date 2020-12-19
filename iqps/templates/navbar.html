@@ -7,14 +7,25 @@
 		</div>
 		<div class="nav-menu-box">
 			<ul class="nav-menu">
-			{% if not user.is_authenticated %}
-				<li class="nav-item"><a href="/accounts/login/">Admin Login</a></li>
+			{% if login_req %}
+				{% if not user.is_authenticated %}
+					<li class="nav-item"><a href="/accounts/login/">Login</a></li>
+				{% else %}
+					<li class="nav-item"><a href="/accounts/logout/">Logout</a></li>
+					<li class="nav-item">Hello, {{ user.username }}</li>
+					<li class="nav-item"><a href="/upload/">Upload Paper</a></li>
+					<li class="nav-item"><a href="/request/">Request Paper</a></li>
+				{% endif %}
 			{% else %}
-				<li class="nav-item"><a href="/accounts/logout/">Logout</a></li>
-				<li class="nav-item">Hello, {{ user.username }}</li>
+				{% if not user.is_authenticated %}
+						<li class="nav-item"><a href="/accounts/login/">Login</a></li>
+					{% else %}
+						<li class="nav-item"><a href="/accounts/logout/">Logout</a></li>
+						<li class="nav-item">Hello, {{ user.username }}</li>
+					{% endif %}
+					<li class="nav-item"><a href="/upload/">Upload Paper</a></li>
+					<li class="nav-item"><a href="/request/">Request Paper</a></li>
 			{% endif %}
-				<li class="nav-item"><a href="/upload/">Upload Paper</a></li>
-				<li class="nav-item"><a href="/request/">Request Paper</a></li>
 			</ul>
 		</div>
     </div>

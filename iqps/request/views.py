@@ -6,6 +6,8 @@ from django.contrib import messages
 from .forms import RequestForm
 from .models import PaperRequest
 
+import os
+
 LOG = logging.getLogger(__name__)
 
 
@@ -23,6 +25,7 @@ def paperRequest(request):
     reqarr = [dict(x) for x in reqs]
     ctx = {
             'form': RequestForm(),
-            'reqs': reqarr
+            'reqs': reqarr,
+            "login_req": os.environ['LOGIN_REQUIRED']
           }
     return render(request, "requestpage.html", ctx)

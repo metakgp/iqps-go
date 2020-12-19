@@ -1,7 +1,7 @@
 import logging
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-
+import os
 from .forms import UserLoginForm, UserRegisterForm
 
 app_name = "accounts"
@@ -25,7 +25,8 @@ def loginView(request):
         return redirect("/")
 
     context = {
-        "form": form
+        "form": form,
+        "login_req": os.environ['LOGIN_REQUIRED']
     }
 
     return render(request, "login.html", context)
@@ -58,7 +59,8 @@ def signupView(request):
         return redirect("/")
 
     context = {
-        "form": form
+        "form": form,
+        "login_req": os.environ['LOGIN_REQUIRED']
     }
 
     return render(request, "register.html", context)
