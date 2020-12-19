@@ -1,6 +1,8 @@
 Installation
 ############
 
+If you are installing on Windows then it is recommended to first install Windows Subsystem for Linux(WSL). Then install Linux distribution of your choice. Rest of the steps are same as for installing it on a Linux machine.
+
 Installation can be easily done using Docker.
 
 Source Installation is a lengthy process, the notes for the same are `here <SourceInstall.html>`_.
@@ -24,7 +26,7 @@ Steps
     git clone https://github.com/grapheo12/iqps.git
     cd iqps
 
-#. Go to https://developers.google.com/drive/api/v3/quickstart/python. Click on ``Enable Drive API`` then click ``Create`` in the modal.
+#. Go to https://developers.google.com/drive/api/v3/quickstart/python. Click on ``Enable Drive API`` then click ``Create`` after selecting Desktop App in the modal.
    It will generate a ``credentials.json`` file. Move it to ``iqps/conf`` folder inside the repo.
 
 #. Now in Google Drive top-level directory, open a new folder called (for example) ``iqps_static``. This is where the uploaded question papers go.
@@ -34,6 +36,8 @@ Steps
    .. code-block:: bash
 
     ./install.sh
+
+Use sudo with the above command if there is an error executing the above command.
 
 This will ask for app permissions. Sign in with the account you used in step-3. Accept all risks.
 
@@ -61,6 +65,7 @@ Then kill the process by hitting ``CTRL+C``.
 
     docker-compose up -d
 
+Use sudo docker-compose up -d if there is a problem executing the above command.
 #. You can also stop the service by running:
 
    .. code-block:: bash

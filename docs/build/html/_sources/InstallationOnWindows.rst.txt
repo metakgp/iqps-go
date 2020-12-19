@@ -1,18 +1,18 @@
-Installation
-############
+Installation on Windows
+#######################
 
-If you are installing on Windows then it is recommended to first install Windows Subsystem for Linux(WSL). Then install Linux distribution of your choice. Rest of the steps are same as for installing it on a Linux machine.
-
+It is preferrable to install this app on a Linux based system. So firstly install Windows Subsystem for Linux(WSL). Select the Linux Distribution that you want to install and install it.
+The home directory of your WSL can be accessed by typing \\wsl$\<Linux Distribution you installed> in the Windows explorer.
+ 
 Installation can be easily done using Docker.
 
 Source Installation is a lengthy process, the notes for the same are `here <SourceInstall.html>`_.
 
-To install with Docker, first install git, Docker-CE and docker-compose (Install scripts work only on Unix based systems)
+To install with Docker, you need to first install git, Docker-CE and docker-compose (Install scripts work only on Unix based systems) in your WSL.
 
 Follow the steps given in the official website of Docker. This varies from OS to OS.
 
-Although, it is advisable not to use the default docker versions available in your OS's repos,
-unless the Docker docs tell you to do so.
+
 
 Once everything is installed, follow the following steps:
 
@@ -36,8 +36,6 @@ Steps
    .. code-block:: bash
 
     ./install.sh
-
-Use sudo with the above command if there is an error executing the above command.
 
 This will ask for app permissions. Sign in with the account you used in step-3. Accept all risks.
 
@@ -65,7 +63,6 @@ Then kill the process by hitting ``CTRL+C``.
 
     docker-compose up -d
 
-Use sudo docker-compose up -d if there is a problem executing the above command.
 #. You can also stop the service by running:
 
    .. code-block:: bash
@@ -78,4 +75,3 @@ However, if you want to bring up a development system, setting up a server is un
 To do that, while the server is down, change ``MODE=prod`` to ``MODE=dev`` in ``iqps/conf/app.env``.
 Also, in ``docker-compose.yml`` change the line ``command: gunicorn iqps.wsgi -w 4 -b 0.0.0.0:8000 --access-logfile /var/log/iqps/gunicorn.log``
 to ``command: python manage.py runserver 0.0.0.0:8000``.
-

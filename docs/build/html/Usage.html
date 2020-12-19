@@ -1,17 +1,19 @@
 
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Usage &#8212; IQPS 1.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Admin Roles" href="AdminRoles.html" />
@@ -38,6 +40,7 @@
 <div class="section" id="searching-for-a-question-paper">
 <h2>1. Searching for a Question Paper<a class="headerlink" href="#searching-for-a-question-paper" title="Permalink to this headline">¶</a></h2>
 <a class="reference internal image-reference" href="_images/search.png"><img alt="_images/search.png" src="_images/search.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="_images/search2.png"><img alt="_images/search2.png" src="_images/search2.png" style="width: 400px;" /></a>
 <p>Searching is done through AJAX. It uses debounced calls to our API.
 Several filters can be added as shown in the image.</p>
 <p>Besides, user can search for papers which are tagged with specific keywords.
@@ -51,9 +54,9 @@ or added by the admin.</p>
 <p>Uploading a paper is done one at a time for a normal user by the interface as shown above.
 Keywords to be considered while adding papers:</p>
 <ul class="simple">
-<li><p>Difficulty: Hard/Easy</p></li>
-<li><p>Concepts covered</p></li>
-<li><p>Paper setter etc.</p></li>
+<li>Difficulty: Hard/Easy</li>
+<li>Concepts covered</li>
+<li>Paper setter etc.</li>
 </ul>
 <p>The uploaded papers are sent to Google Drive.</p>
 <p>However, occassionally admin needs to scrape paper links from the Library Site and add them in a bulk.
@@ -80,11 +83,11 @@ However, they can still create an account to let us know who are the curators of
 <p>The default route for it is: <code class="docutils literal notranslate"><span class="pre">/search/api</span></code>.</p>
 <p>Supports <code class="docutils literal notranslate"><span class="pre">GET</span></code> requests with the following parameters:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">q</span></code>: The search query (on subject name)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">year</span></code>: Year filter</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dep</span></code>: Department filter</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">typ</span></code>: Paper type filter</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code>: Comma separated list of keywords to search for.</p></li>
+<li><code class="docutils literal notranslate"><span class="pre">q</span></code>: The search query (on subject name)</li>
+<li><code class="docutils literal notranslate"><span class="pre">year</span></code>: Year filter</li>
+<li><code class="docutils literal notranslate"><span class="pre">dep</span></code>: Department filter</li>
+<li><code class="docutils literal notranslate"><span class="pre">typ</span></code>: Paper type filter</li>
+<li><code class="docutils literal notranslate"><span class="pre">key</span></code>: Comma separated list of keywords to search for.</li>
 </ul>
 </div>
 </div>
@@ -96,7 +99,7 @@ However, they can still create an account to let us know who are the curators of
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">IQPS</a></h1>
+<h1 class="logo"><a href="contents.html">IQPS</a></h1>
 
 
 
@@ -125,22 +128,24 @@ However, they can still create an account to let us know who are the curators of
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
-  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="contents.html">Documentation overview</a><ul>
       <li>Previous: <a href="SourceInstall.html" title="previous chapter">Source Installation</a></li>
       <li>Next: <a href="AdminRoles.html" title="next chapter">Admin Roles</a></li>
   </ul></li>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
+  <h3>Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script type="text/javascript">$('#searchbox').show(0);</script>
 
 
 
@@ -157,7 +162,7 @@ However, they can still create an account to let us know who are the curators of
       &copy;2020, Shubham Mishra.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

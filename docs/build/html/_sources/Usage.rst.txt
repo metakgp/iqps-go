@@ -9,6 +9,9 @@ The main user interfaces are described as follows:
 .. image:: _static/search.png
    :width: 400
 
+.. image:: _static/search2.png
+   :width: 400
+
 Searching is done through AJAX. It uses debounced calls to our API.
 Several filters can be added as shown in the image.
 

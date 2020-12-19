@@ -72,6 +72,7 @@ Use sudo docker-compose up -d if there is a problem executing the above command.
 
     docker-compose down
 
+Use sudo docker-compose down if there is a problem executing the above command.
 The next step is to configure a Server eg, Apache or Nginx to act as a Reverse-Proxy and serve the static files.
 
 However, if you want to bring up a development system, setting up a server is unnecessary.

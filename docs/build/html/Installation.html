@@ -1,21 +1,23 @@
 
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Installation &#8212; IQPS 1.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Source Installation" href="SourceInstall.html" />
-    <link rel="prev" title="Welcome to IQPS’s documentation!" href="index.html" />
+    <link rel="prev" title="Welcome to IQPS’s documentation!" href="contents.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -34,6 +36,7 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>If you are installing on Windows then it is recommended to first install Windows Subsystem for Linux(WSL). Then install Linux distribution of your choice. Rest of the steps are same as for installing it on a Linux machine.</p>
 <p>Installation can be easily done using Docker.</p>
 <p>Source Installation is a lengthy process, the notes for the same are <a class="reference external" href="SourceInstall.html">here</a>.</p>
 <p>To install with Docker, first install git, Docker-CE and docker-compose (Install scripts work only on Unix based systems)</p>
@@ -44,26 +47,30 @@ unless the Docker docs tell you to do so.</p>
 <div class="section" id="steps">
 <h2>Steps<a class="headerlink" href="#steps" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
-<li><p>Clone the repository:</p>
+<li><p class="first">Clone the repository:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/grapheo12/iqps.git
 <span class="nb">cd</span> iqps
 </pre></div>
 </div>
 </li>
-<li><p>Go to <a class="reference external" href="https://developers.google.com/drive/api/v3/quickstart/python">https://developers.google.com/drive/api/v3/quickstart/python</a>. Click on <code class="docutils literal notranslate"><span class="pre">Enable</span> <span class="pre">Drive</span> <span class="pre">API</span></code> then click <code class="docutils literal notranslate"><span class="pre">Create</span></code> in the modal.
-It will generate a <code class="docutils literal notranslate"><span class="pre">credentials.json</span></code> file. Move it to <code class="docutils literal notranslate"><span class="pre">iqps/conf</span></code> folder inside the repo.</p></li>
-<li><p>Now in Google Drive top-level directory, open a new folder called (for example) <code class="docutils literal notranslate"><span class="pre">iqps_static</span></code>. This is where the uploaded question papers go.</p></li>
-<li><p>Run the install script for the first time:</p>
+<li><p class="first">Go to <a class="reference external" href="https://developers.google.com/drive/api/v3/quickstart/python">https://developers.google.com/drive/api/v3/quickstart/python</a>. Click on <code class="docutils literal notranslate"><span class="pre">Enable</span> <span class="pre">Drive</span> <span class="pre">API</span></code> then click <code class="docutils literal notranslate"><span class="pre">Create</span></code> after selecting Desktop App in the modal.
+It will generate a <code class="docutils literal notranslate"><span class="pre">credentials.json</span></code> file. Move it to <code class="docutils literal notranslate"><span class="pre">iqps/conf</span></code> folder inside the repo.</p>
+</li>
+<li><p class="first">Now in Google Drive top-level directory, open a new folder called (for example) <code class="docutils literal notranslate"><span class="pre">iqps_static</span></code>. This is where the uploaded question papers go.</p>
+</li>
+<li><p class="first">Run the install script for the first time:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./install.sh
 </pre></div>
 </div>
 </li>
 </ol>
+<p>Use sudo with the above command if there is an error executing the above command.</p>
 <p>This will ask for app permissions. Sign in with the account you used in step-3. Accept all risks.</p>
 <ol class="arabic">
-<li><p>You can move the project folder to the intended app server now, or (for development) you can keep it in the local machine.
-Run the install script <strong>FOR THE SECOND TIME</strong>. Provide the details as asked.</p></li>
-<li><p>Wait till the logs look like following:</p>
+<li><p class="first">You can move the project folder to the intended app server now, or (for development) you can keep it in the local machine.
+Run the install script <strong>FOR THE SECOND TIME</strong>. Provide the details as asked.</p>
+</li>
+<li><p class="first">Wait till the logs look like following:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>db_1   <span class="p">|</span> <span class="m">2020</span>-05-25 <span class="m">16</span>:37:33 <span class="m">0</span> <span class="o">[</span>Note<span class="o">]</span> mysqld: ready <span class="k">for</span> connections.
 db_1   <span class="p">|</span> Version: <span class="s1">&#39;10.4.12-MariaDB-1:10.4.12+maria~bionic&#39;</span>  socket: <span class="s1">&#39;/var/run/mysqld/mysqld.sock&#39;</span>  port: <span class="m">3306</span>  mariadb.org binary distribution
 </pre></div>
@@ -72,22 +79,24 @@ db_1   <span class="p">|</span> Version: <span class="s1">&#39;10.4.12-MariaDB-1
 </ol>
 <p>Then kill the process by hitting <code class="docutils literal notranslate"><span class="pre">CTRL+C</span></code>.</p>
 <ol class="arabic">
-<li><p>Run the initialization script. It will ask for creation of super-user account:</p>
+<li><p class="first">Run the initialization script. It will ask for creation of super-user account:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./init.sh
 </pre></div>
 </div>
 </li>
-<li><p>Run (and daemonize) the app by executing:</p>
+<li><p class="first">Run (and daemonize) the app by executing:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose up -d
 </pre></div>
 </div>
 </li>
-<li><p>You can also stop the service by running:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose down
+</ol>
+<p>Use sudo docker-compose up -d if there is a problem executing the above command.
+#. You can also stop the service by running:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose down
 </pre></div>
 </div>
-</li>
-</ol>
+</div></blockquote>
 <p>The next step is to configure a Server eg, Apache or Nginx to act as a Reverse-Proxy and serve the static files.</p>
 <p>However, if you want to bring up a development system, setting up a server is unnecessary.
 To do that, while the server is down, change <code class="docutils literal notranslate"><span class="pre">MODE=prod</span></code> to <code class="docutils literal notranslate"><span class="pre">MODE=dev</span></code> in <code class="docutils literal notranslate"><span class="pre">iqps/conf/app.env</span></code>.
@@ -103,7 +112,7 @@ to <code class="docutils literal notranslate"><span class="pre">command:</span> 
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">IQPS</a></h1>
+<h1 class="logo"><a href="contents.html">IQPS</a></h1>
 
 
 
@@ -128,22 +137,24 @@ to <code class="docutils literal notranslate"><span class="pre">command:</span> 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">Welcome to IQPS’s documentation!</a></li>
+  <li><a href="contents.html">Documentation overview</a><ul>
+      <li>Previous: <a href="contents.html" title="previous chapter">Welcome to IQPS’s documentation!</a></li>
       <li>Next: <a href="SourceInstall.html" title="next chapter">Source Installation</a></li>
   </ul></li>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
+  <h3>Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script type="text/javascript">$('#searchbox').show(0);</script>
 
 
 
@@ -160,7 +171,7 @@ to <code class="docutils literal notranslate"><span class="pre">command:</span> 
       &copy;2020, Shubham Mishra.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
