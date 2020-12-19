@@ -91,11 +91,10 @@ function queryApiCaller(data) {
                     data.papers.forEach((elt) => {
                         let htmlResult = `
                             <div class="result">
-                            <span class="result-name">${elt[0]}</span>
+                            <span class="result-name"><a href="${elt[4]}" target="_blank" onclick="saveHistory(event)"}>${elt[0]}</a></span>
                             <span><span class="result-type">${elt[1]}-${elt[3]}</span>
                             <span class="result-dep">${elt[2]}</span></span>
-                            <span><a href="${elt[4]}" class="result-link" target="_blank" onclick="saveHistory(event)"}>Download</a>
-                            <a href="/report/${elt[5]}" class="result-link"><small>[Report Link]</small></a></span>`;
+                            <span><a href="/report/${elt[5]}" class="result-link"><small>[Report Link]</small></a></span>`;
                         if (elt.length == 7)
                             htmlResult += `<span class="result-keywords">Keywords: ${elt[6].replace(",", ", ")}</span></div>`;
                         else
