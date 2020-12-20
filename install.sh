@@ -1,3 +1,4 @@
+ 
 echo -e
 
 #Checkpoint 0
@@ -281,68 +282,62 @@ echo "When output says DB is ready to receive connections, hit CTRL+C and move o
 
 sleep 5 #So that user reads the above lines properly
 
-docker-compose up
+docker-compose up -d
 
-# Code for merging init.sh and install.sh
+if test -f ".log.txt"; then
+    sed -i 's/mysqld: ready for connections/mysqld: was ready for connections/gI' .log.txt
+else
+    docker-compose logs --no-color > ".log.txt";
+    sed -i 's/mysqld: ready for connections/mysqld: was ready for connections/gI' .log.txt
+fi
 
-# gnome-terminal -- docker-compose up
+lines=0
+seen=0
+while [ $seen -eq 0 ]
+do
+    sleep 5
+    docker-compose logs --no-color > ".log.txt";
+    input=".log.txt";
+    STR="mysqld: ready for connections";
+    while IFS= read -r line
+    do
+        if grep -q "$STR" <<< "$line"; then
+            echo "It is there. You can exit!";
+            seen=1
+            break        
+        fi
+    done < "$input"
+    if [ $seen -eq 1 ]; then
+        break;
+    fi
+done
 
-# if test -f "log.txt"; then
-#     sed -i 's/mysqld: ready for connections/mysqld: was ready for connections/gI' log.txt
-# else
-#     docker-compose logs --no-color > "log.txt";
-#     sed -i 's/mysqld: ready for connections/mysqld: was ready for connections/gI' log.txt
-# fi
+if [ $seen -eq 1 ]; then
+    echo "Killing docker-compose!";
+    docker-compose stop;
+fi
 
-# seen=0
+echo "Starting app"
+docker-compose up -d
 
-# lines=0
-# while [ $seen -eq 0 ]
-# do
-#     sleep 5
-#     docker-compose logs --no-color > "log.txt";
-#     input="log.txt";
-#     STR="mysqld: ready for connections";
-#     while IFS= read -r line
-#     do
-#         if grep -q "$STR" <<< "$line"; then
-#             echo "It is there. You can exit!";
-#             seen=1
-#             break        
-#         fi
-#     done < "$input"
-#     echo $seen;
-#     if [ $seen -eq 1 ]; then
-#         break;grep -q "$SUB" <<< "$STR"
-#     else
-#         echo "Still not there. Trying again";
-#     fi
-# done
+echo "Running Database Migrations"
 
-# if [ $seen -eq 1 ]; then
-#     echo "Killing docker-compose!";
-#     docker-compose stop;
-# fi
+docker-compose run web python manage.py migrate --skip-checks
 
-# echo "Starting app"
-# docker-compose up -d
+echo "Creating Django superuser"
 
-# echo "Running Database Migrations"
+docker-compose run web python manage.py createsuperuser
 
-# docker-compose run web python manage.py migrate --skip-checks
+echo "Saving Static Files"
 
-# echo "Creating Django superuser"
+docker-compose run web python manage.py collectstatic
 
-# docker-compose run web python manage.py createsuperuser
+echo "Initiation completed successfully"
+echo "Shutting down containers"
 
-# echo "Saving Static Files"
+docker-compose down
 
-# docker-compose run web python manage.py collectstatic
+echo "To run the app, run in this directory:"
+echo 'docker-compose up -d'
 
-# echo "Initiation completed successfully"
-# echo "Shutting down containers"
-
-# docker-compose down
-
-# echo "To run the app, run in this directory:"
-# echo 'docker-compose up -d'
+rm .log.txt
