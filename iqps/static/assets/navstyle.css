@@ -18,15 +18,18 @@
     flex-direction: row-reverse;
     padding-right: 20px;
     list-style-type: none;
+    
 }
 .nav-item{
-    display: block;
+    display: flow-root;
     padding: 5px 5px 5px 5px;
     color: white;
     text-decoration: none;
     transition: background-color 1s;
     margin-top: 0px;
     margin-bottom: 0px;
+    background-color: crimson;
+    margin: -3px 5px 2px 4px;
 }
 .nav-item:hover{
     background-color: rgb(105, 97, 96);
@@ -41,4 +44,5 @@
     display: flex;
     justify-content: center;
     flex-direction: column;
+    background-color: crimson;
 }

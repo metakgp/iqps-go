@@ -10,6 +10,7 @@
 			{% if login_req %}
 				{% if not user.is_authenticated %}
 					<li class="nav-item"><a href="/accounts/login/">Login</a></li>
+					<li class="nav-item"><a href="/accounts/register/">Register</a></li>
 				{% else %}
 					<li class="nav-item"><a href="/accounts/logout/">Logout</a></li>
 					<li class="nav-item">Hello, {{ user.username }}</li>
