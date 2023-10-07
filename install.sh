@@ -118,7 +118,8 @@ if [ $i -le $lines_in_file ]; then
     echo "${array[$(($i-1))]}[$APP_MODE]"; 
 else 
     echo -n "${arrayques[$(($i-1))]}"
-    read APP_MODE;
+    # read APP_MODE;
+    APP_MODE=dev
     echo $APP_MODE >> $file;    
 fi
 sed -i "s/mode/$APP_MODE/" $CONF_PATH
@@ -132,7 +133,8 @@ if [ $i -le $lines_in_file ]; then
     echo "${array[$(($i-1))]}[$APP_SECRET_KEY]"    
 else 
     echo -n "${arrayques[$(($i-1))]}"
-    read APP_SECRET_KEY;
+    # read APP_SECRET_KEY;
+    APP_SECRET_KEY="alkjdlajkasd"
     echo $APP_SECRET_KEY >> $file;
 fi
 sed -i "s/secret_key/$APP_SECRET_KEY/" $CONF_PATH
@@ -147,7 +149,8 @@ if [ $i -le $lines_in_file ]; then
     echo "${array[$(($i-1))]}[$APP_DB_USER_PWD]"    
 else 
     echo -n "${arrayques[$(($i-1))]}"
-    read APP_DB_USER_PWD;
+    # read APP_DB_USER_PWD;
+    APP_DB_USER_PWD="1234"
     echo $APP_DB_USER_PWD >> $file;
 fi
 sed -i "s/DB_PWD/$APP_DB_USER_PWD/" $CONF_PATH
@@ -162,7 +165,8 @@ if [ $i -le $lines_in_file ]; then
     echo "${array[$(($i-1))]}[$APP_DB_PWD]"    
 else 
     echo -n "${arrayques[$(($i-1))]}"
-    read APP_DB_PWD;
+    # read APP_DB_PWD;
+    APP_DB_PWD="1234"
     echo $APP_DB_PWD >> $file;
 fi
 sed -i "s/DB_ROOT_PWD/$APP_DB_PWD/g" docker-compose.yml
@@ -176,7 +180,8 @@ if [ $i -le $lines_in_file ]; then
     echo "${array[$(($i-1))]}[$APP_GDRIVE_DIR]"    
 else 
     echo -n "${arrayques[$(($i-1))]}"
-    read APP_GDRIVE_DIR;
+    # read APP_GDRIVE_DIR;
+    APP_GDRIVE_DIR="iqps_static"
     echo $APP_GDRIVE_DIR >> $file;
 fi
 sed -i "s/iqps_static/$APP_GDRIVE_DIR/" $CONF_PATH
@@ -226,7 +231,10 @@ else
     APP_DATA_DB_PATH="${pwd}/local-data/database"
     echo $APP_DATA_DB_PATH >> $file;
 fi
+echo "ME HERE!!!!"
+whoami
 mkdir -p $APP_DATA_DB_PATH
+sudo chown -R $(whoami):$(whoami) ${APP_DATA_DB_PATH}/*
 sed -i "s+local_db_data_path+$APP_DATA_DB_PATH+" docker-compose.yml
 i=$(($i+1));
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
@@ -284,7 +292,7 @@ echo "When output says DB is ready to receive connections, hit CTRL+C and move o
 
 sleep 5 #So that user reads the above lines properly
 
-docker-compose up -d
+docker-compose up
 
 if test -f ".log.txt"; then
     sed -i 's/mysqld: ready for connections/mysqld: was ready for connections/gI' .log.txt
@@ -319,8 +327,9 @@ if [ $seen -eq 1 ]; then
     docker-compose stop;
 fi
 
+echo "RUNNING INIT.SH"
 echo "Starting app"
-docker-compose up -d
+docker-compose up
 
 echo "Running Database Migrations"
 
@@ -340,6 +349,6 @@ echo "Shutting down containers"
 docker-compose down
 
 echo "To run the app, run in this directory:"
-echo 'docker-compose up -d'
+echo 'docker-compose up'
 
 rm .log.txt

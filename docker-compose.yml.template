@@ -32,6 +32,8 @@ services:
     build: .
     command: gunicorn iqps.wsgi -w 4 -b 0.0.0.0:8000 --access-logfile /var/log/iqps/gunicorn.log
     restart: always
+    ports:
+      - "8000:8000"
     volumes:
       - .:/iqps/
       - local_static_root_path:/var/www/static/
