@@ -1,0 +1,4 @@
+# Garbage & not required config files
+.DS_Store
+.vscode
+node-modules/
