@@ -28,8 +28,7 @@ if test -f "$TOKEN_FILE"; then
 else
     echo "Generating token file......"
     echo "  Creating Python environment"
-    python3 -m pip install virtualenv
-    python3 -m virtualenv mini_venv
+    python3 -m venv mini_venv
     echo "  Installing dependencies"
     mini_venv/bin/pip3 install -r mini_requirements.txt
     echo "  Authorizing application."
@@ -191,7 +190,8 @@ if [ $i -le $lines_in_file ]; then
     echo "${array[$(($i-1))]}[$APP_STATIC_ROOT]"    
 else 
     echo -n "${arrayques[$(($i-1))]}"
-    read APP_STATIC_ROOT;
+    # read APP_STATIC_ROOT;
+    APP_STATIC_ROOT="${pwd}/local-data/qps"
     echo $APP_STATIC_ROOT >> $file;
 fi
 mkdir -p $APP_STATIC_ROOT
@@ -206,7 +206,8 @@ if [ $i -le $lines_in_file ]; then
     echo "${array[$(($i-1))]}[$APP_LOG_PATH]"    
 else 
     echo -n "${arrayques[$(($i-1))]}"
-    read APP_LOG_PATH;
+    # read APP_LOG_PATH;
+    APP_LOG_PATH="${pwd}/local-data/logs"
     echo $APP_LOG_PATH >> $file;
 fi
 mkdir -p $APP_LOG_PATH
@@ -221,7 +222,8 @@ if [ $i -le $lines_in_file ]; then
     echo "${array[$(($i-1))]}[$APP_LOG_PATH]"    
 else 
     echo -n "${arrayques[$(($i-1))]}"
-    read APP_DATA_DB_PATH;
+    # read APP_DATA_DB_PATH;
+    APP_DATA_DB_PATH="${pwd}/local-data/database"
     echo $APP_DATA_DB_PATH >> $file;
 fi
 mkdir -p $APP_DATA_DB_PATH
