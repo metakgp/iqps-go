@@ -329,7 +329,7 @@ fi
 
 echo "RUNNING INIT.SH"
 echo "Starting app"
-docker-compose up
+docker-compose up -d
 
 echo "Running Database Migrations"
 
