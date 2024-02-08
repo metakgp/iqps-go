@@ -2,6 +2,8 @@ import { createSignal, onMount } from "solid-js";
 import SearchResults from "./SearchResults";
 import type { SearchResult } from "../types/types";
 
+import "../styles/styles.scss";
+
 const sampleSearchResults: SearchResult[] = [
   {
     id: 1,
@@ -51,7 +53,7 @@ function CourseSearchForm() {
   const [year, setYear] = createSignal<number>(0);
   const [semester, setSemester] = createSignal("");
   const [years, setYears] = createSignal<number[]>([]);
-  const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]); // Signal to store search results
+  const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
 
   async function fetchYears() {
     try {
@@ -63,7 +65,6 @@ function CourseSearchForm() {
     }
   }
 
-  // Fetch years when the component mounts
   onMount(() => {
     fetchYears();
   });
@@ -92,7 +93,7 @@ function CourseSearchForm() {
   };
 
   return (
-    <div>
+    <div class="search-form">
       <form onSubmit={handleSubmit}>
         <div>
           <label for="courseCode">Course Code:</label>

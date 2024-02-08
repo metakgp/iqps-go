@@ -3,10 +3,8 @@ import CourseSearchForm from "./components/searchForm";
 const App: Component = () => {
   return (
     <div>
-      <div>
-        <h1>Course Search</h1>
-        <CourseSearchForm />
-      </div>
+      <h1>Course Search</h1>
+      <CourseSearchForm />
     </div>
   );
 };
