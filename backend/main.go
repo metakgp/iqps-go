@@ -113,7 +113,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	var err error
-	db, err = sql.Open("sqlite3", "iqps.db")
+	db, err = sql.Open("sqlite3", "/db/iqps.db")
 
 	if err != nil {
 		log.Fatal(err)
