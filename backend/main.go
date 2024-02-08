@@ -44,10 +44,22 @@ func search(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "course is required", http.StatusBadRequest)
 		return
 	}
-	year, _ := strconv.Atoi(r.URL.Query().Get("year"))
-	exam := r.URL.Query().Get("exam")
+	query := fmt.Sprintf(`SELECT * FROM qp WHERE course_name like '%%%s%%'`, course)
 
-	query := fmt.Sprintf(`SELECT * FROM qp WHERE course_name like '%%%s%%' AND year = %d AND exam = '%s';`, course, year, exam)
+	year := r.URL.Query().Get("year")
+	if year != "" {
+		yearInt, err := strconv.Atoi(year)
+		if err != nil {
+			http.Error(w, "year must be a number", http.StatusBadRequest)
+			return
+		}
+		query = fmt.Sprintf(`%s AND year = %d`, query, yearInt)
+	}
+
+	exam := r.URL.Query().Get("exam")
+	if exam != "" {
+		query = fmt.Sprintf(`%s AND exam = '%s'`, query, exam)
+	}
 
 	rows, err := db.Query(query)
 	if err != nil {
