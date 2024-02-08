@@ -10,6 +10,17 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const init_db = `
+CREATE TABLE IF NOT EXISTS qp (
+	id INTEGER PRIMARY KEY,
+	course_code TEXT NOT NULL,
+	course_name TEXT NOT NULL DEFAULT '',
+	year INTEGER NOT NULL,
+	exam TEXT CHECK (exam IN ('midsem', 'endsem')) NOT NULL,
+	filename TEXT NOT NULL
+);
+`
+
 func health(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Yes, I'm alive!")
 }
@@ -23,12 +34,10 @@ func main() {
 
 	defer db.Close()
 
-	var version string
-	err = db.QueryRow("SELECT SQLITE_VERSION();").Scan(&version)
+	_, err = db.Exec(init_db)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(version)
 
 	http.HandleFunc("/health", health)
 
