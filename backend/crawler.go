@@ -50,7 +50,7 @@ func Crawl() string {
 			}
 
 			fmt.Println(name, year, typ)
-			sql_query = sql_query + "("+name+", "+fmt.Sprint(year)+", "+typ+")\n"
+			sql_query = sql_query + "("+name+", "+fmt.Sprint(year)+", "+typ+"),\n"
 		}
 
 		c.Visit(e.Request.AbsoluteURL(link))
