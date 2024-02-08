@@ -1,7 +1,6 @@
 import { createSignal, onMount } from "solid-js";
 import SearchResults from "./SearchResults";
 import type { SearchResult } from "../types/types";
-
 import "../styles/styles.scss";
 
 const sampleSearchResults: SearchResult[] = [
