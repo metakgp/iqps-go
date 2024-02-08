@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -36,6 +37,28 @@ CREATE TABLE IF NOT EXISTS qp (
 
 func health(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Yes, I'm alive!")
+}
+
+func year(w http.ResponseWriter, r *http.Request) {
+	min := db.QueryRow("SELECT MIN(year) FROM qp")
+	max := db.QueryRow("SELECT MAX(year) FROM qp")
+
+	var minYear, maxYear int
+	err := min.Scan(&minYear)
+	if err != nil {
+		minYear = time.Now().Year()
+	}
+	err = max.Scan(&maxYear)
+	if err != nil {
+		maxYear = time.Now().Year()
+	}
+
+	http.Header.Add(w.Header(), "content-type", "application/json")
+	err = json.NewEncoder(w).Encode(map[string]int{"min": minYear, "max": maxYear})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
@@ -105,6 +128,7 @@ func main() {
 
 	http.HandleFunc("/health", health)
 	http.HandleFunc("/search", search)
+	http.HandleFunc("/year", year)
 
 	fmt.Println("Starting server on port 5000")
 	err = http.ListenAndServe(":5000", nil)
