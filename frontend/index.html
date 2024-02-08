@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Question Paper Search</title>
+    <script
+      src="https://unpkg.com/htmx.org@1.9.10"
+      integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <h1>Question Paper Search</h1>
+    <form hx-get="/search" hx-trigger="submit">
+      <input type="text" name="name" placeholder="course name/code" />
+      <input type="number" id="input-year" min="2000" name="year" placeholder="year" />
+      <select name="semester">
+        <option value="all">All</option>
+        <option value="autumn">Autumn</option>
+        <option value="spring">Spring</option>
+      </select>
+      <select name="type">
+        <option value="all">All</option>
+        <option value="midsem">Midsem</option>
+        <option value="endsem">Endsem</option>
+      </select>
+      <button type="submit">Search</button>
+    </form>
+  </body>
+  <script>
+    document.getElementById("input-year").setAttribute("max", new Date().getFullYear());
+  </script>
+</html>
