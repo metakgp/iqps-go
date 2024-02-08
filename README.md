@@ -4,17 +4,14 @@
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links-->
 <div align="center">
 
-<<<<<<< HEAD
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
 [![Wiki][wiki-shield]][wiki-url]
-=======
-![Search Interface](docs/source/_static/search.png?)
 
-> > > > > > > c09a96c (Fix image cache)
+![Search Interface](docs/source/_static/search.png?)
 
 </div>
 
