@@ -26,10 +26,10 @@ var db *sql.DB
 const init_db = `
 CREATE TABLE IF NOT EXISTS qp (
 	id INTEGER PRIMARY KEY,
-	course_code TEXT NOT NULL,
-	course_name TEXT NOT NULL DEFAULT '',
+	course_code TEXT NOT NULL DEFAULT '',
+	course_name TEXT NOT NULL,
 	year INTEGER NOT NULL,
-	exam TEXT CHECK (exam IN ('midsem', 'endsem')) NOT NULL,
+	exam TEXT CHECK (exam IN ('midsem', 'endsem')),
 	filelink TEXT NOT NULL
 );
 `
