@@ -44,7 +44,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "course is required", http.StatusBadRequest)
 		return
 	}
-	query := fmt.Sprintf(`SELECT * FROM qp WHERE course_name like '%%%s%%'`, course)
+	query := fmt.Sprintf(`SELECT * FROM qp WHERE course_name like '%%%s%%' OR course_code like '%%%s%%'`, course, course)
 
 	year := r.URL.Query().Get("year")
 	if year != "" {
