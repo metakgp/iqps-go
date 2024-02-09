@@ -14,12 +14,13 @@ import (
 )
 
 type QuestionPaper struct {
-	ID         int    `json:"id"`
-	CourseCode string `json:"course_code"`
-	CourseName string `json:"course_name"`
-	Year       int    `json:"year"`
-	Exam       string `json:"exam"`
-	FileLink   string `json:"filelink"`
+	ID          int    `json:"id"`
+	CourseCode  string `json:"course_code"`
+	CourseName  string `json:"course_name"`
+	Year        int    `json:"year"`
+	Exam        string `json:"exam"`
+	FileLink    string `json:"filelink"`
+	FromLibrary bool   `json:"from_library"`
 }
 
 var db *sql.DB
@@ -31,7 +32,8 @@ CREATE TABLE IF NOT EXISTS qp (
 	course_name TEXT NOT NULL,
 	year INTEGER NOT NULL,
 	exam TEXT CHECK (exam IN ('midsem', 'endsem')),
-	filelink TEXT NOT NULL
+	filelink TEXT NOT NULL,
+	from_library BOOLEAN DEFAULT 0
 );
 `
 
@@ -55,6 +57,32 @@ func year(w http.ResponseWriter, r *http.Request) {
 
 	http.Header.Add(w.Header(), "content-type", "application/json")
 	err = json.NewEncoder(w).Encode(map[string]int{"min": minYear, "max": maxYear})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func library(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.Query("SELECT * FROM qp WHERE from_library = 1")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var qps []QuestionPaper
+	for rows.Next() {
+		var qp = QuestionPaper{}
+		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		qps = append(qps, qp)
+	}
+	http.Header.Add(w.Header(), "content-type", "application/json")
+	err = json.NewEncoder(w).Encode(&qps)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -129,6 +157,7 @@ func main() {
 	http.HandleFunc("/health", health)
 	http.HandleFunc("/search", search)
 	http.HandleFunc("/year", year)
+	http.HandleFunc("/library", library)
 
 	fmt.Println("Starting server on port 5000")
 	err = http.ListenAndServe(":5000", nil)

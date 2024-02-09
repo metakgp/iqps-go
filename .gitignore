@@ -1,4 +1,7 @@
 node_modules
 dist
 
+db/
 iqps.db
+
+crawler/cache
