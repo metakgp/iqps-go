@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS qp (
 	course_code TEXT NOT NULL DEFAULT '',
 	course_name TEXT NOT NULL,
 	year INTEGER NOT NULL,
-	exam TEXT CHECK (exam IN ('midsem', 'endsem')),
+	exam TEXT CHECK (exam IN ('midsem', 'endsem') OR exam = '') DEFAULT '',
 	filelink TEXT NOT NULL,
 	from_library BOOLEAN DEFAULT 0
 );
@@ -64,7 +64,7 @@ func year(w http.ResponseWriter, r *http.Request) {
 }
 
 func library(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT * FROM qp WHERE from_library = 1")
+	rows, err := db.Query("SELECT * FROM qp WHERE from_library = 'true'")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -74,7 +74,7 @@ func library(w http.ResponseWriter, r *http.Request) {
 	var qps []QuestionPaper
 	for rows.Next() {
 		var qp = QuestionPaper{}
-		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink)
+		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -122,7 +122,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 	var qps []QuestionPaper
 	for rows.Next() {
 		var qp = QuestionPaper{}
-		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink)
+		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

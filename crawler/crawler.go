@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -21,20 +24,45 @@ type QuestionPaper struct {
 }
 
 type qpRaw struct {
-	name      string
-	year      int
-	exam_type string
+	Filename string `json:"filename"`
+	Name     string `json:"name"`
+	Year     int    `json:"year"`
+	ExamType string `json:"exam_type"`
+	Url      string `json:"url"`
+}
+
+func downloadFile(new_qp qpRaw) {
+
+	res, err := http.Get(new_qp.Url)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	if res.StatusCode != 200 {
+		fmt.Printf("Failed to download file: %s. Status Code: %d", new_qp.Name, res.StatusCode)
+		return
+	}
+
+	defer res.Body.Close()
+
+	file, err := os.Create("./qp/" + new_qp.Filename)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	_, err = io.Copy(file, res.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
 }
 
 func main() {
 
-	sql_query := "INSERT INTO qp (name, year, exam) VALUES\n"
-
 	c := colly.NewCollector(
 		colly.AllowedDomains("10.18.24.75"),
-		colly.CacheDir("./cache"),
 		colly.MaxDepth(9),
-		colly.Async(true),
 	)
 
 	res, err := http.Get("http://localhost:5000/library")
@@ -49,6 +77,9 @@ func main() {
 	var new_qp []qpRaw
 
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+		if e.Text == "Parent Directory" || e.Text == "Name" || e.Text == "Last modified" || e.Text == "Size" || e.Text == "Description" {
+			return
+		}
 		link := e.Attr("href")
 		url := e.Request.AbsoluteURL(link)
 		var name string
@@ -84,9 +115,7 @@ func main() {
 				}
 			}
 
-			fmt.Println(name, year, exam_type)
-			new_qp = append(new_qp, qpRaw{name, year, exam_type})
-			sql_query = sql_query + "(" + name + ", " + fmt.Sprint(year) + ", " + exam_type + "),\n"
+			new_qp = append(new_qp, qpRaw{strings.Join(temp[4:], "_"), name, year, exam_type, url})
 		}
 
 		c.Visit(e.Request.AbsoluteURL(link))
@@ -95,5 +124,42 @@ func main() {
 	c.Visit("http://10.18.24.75/peqp")
 	c.Wait()
 
-	fmt.Println(sql_query)
+	file, err := os.Create("qp.csv")
+	if err != nil {
+		fmt.Println("Error creating CSV file:", err)
+		return
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	header := []string{"course_name", "year", "exam", "filelink", "from_library"}
+	if err := writer.Write(header); err != nil {
+		fmt.Println("Error writing header to CSV:", err)
+		return
+	}
+
+	for i := range new_qp {
+		var exam_type string
+		if new_qp[i].ExamType != "" {
+			exam_type = new_qp[i].ExamType + "sem"
+		}
+		var row = []string{
+			strings.Trim(new_qp[i].Name, ".pdf"),
+			fmt.Sprint(new_qp[i].Year),
+			exam_type,
+			new_qp[i].Filename,
+			"true"}
+		if err := writer.Write(row); err != nil {
+			fmt.Println("Error writing row to CSV:", err)
+			return
+		}
+	}
+	fmt.Println("CSV file created successfully")
+
+	for i := range new_qp {
+		fmt.Printf("%d/%d: Downloading %s\n", i+1, len(new_qp), new_qp[i].Name)
+		downloadFile(new_qp[i])
+	}
 }

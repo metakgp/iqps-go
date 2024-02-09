@@ -5,3 +5,6 @@ db/
 iqps.db
 
 crawler/cache
+crawler/qp/*.pdf
+qp.csv
+qp.tar.xz
