@@ -88,24 +88,14 @@ func main() {
 
 		if strings.Contains(url, ".pdf") {
 			temp := strings.Split(url, "/")
-			if len(temp) == 8 {
-				name = temp[7]
-				year, _ = strconv.Atoi(temp[4])
-				exam_type = strings.ToLower(temp[5])
-				i := strings.Index(exam_type, "mid")
-				if i != -1 {
-					exam_type = exam_type[i : i+3]
-				} else {
-					i = strings.Index(exam_type, "end")
-					if i != -1 {
-						exam_type = exam_type[i : i+3]
-					} else {
-						exam_type = ""
-					}
-				}
+			name = temp[len(temp)-1]
+			year, _ = strconv.Atoi(temp[4])
+			exam_type = strings.ToLower(temp[5])
+			if strings.Contains(exam_type, "mid") {
+				exam_type = "mid"
+			} else if strings.Contains(exam_type, "end") {
+				exam_type = "end"
 			} else {
-				name = temp[6]
-				year, _ = strconv.Atoi(temp[4])
 				exam_type = ""
 			}
 
