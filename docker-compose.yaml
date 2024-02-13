@@ -2,8 +2,6 @@ services:
   iqps-backend:
     image: iqps-backend
     build: ./backend
-    ports:
-      - "5000:5000"
     networks:
       metaploy-network:
         aliases:

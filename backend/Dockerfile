@@ -16,7 +16,6 @@ RUN chmod +x /postinstall.sh
 
 # Copy the binary from the builder
 COPY --from=builder /app /app
-EXPOSE 5000
 
 # Run postinstall script and the binary
 CMD ["/postinstall.sh", "/app"]
