@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 cleanup() {
 	echo "Container stopped. Removing nginx configuration."

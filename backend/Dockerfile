@@ -1,15 +1,20 @@
 FROM golang:1.21 AS builder
 
-# Copy metaploy configuration
-COPY metaploy/iqps.metaploy.conf /
-COPY metaploy/postinstall.sh /
-
 WORKDIR /src
 COPY . .
 RUN go mod download
 RUN CGO_ENABLED=1 GOOS=linux go build -o /app -a -ldflags '-linkmode external -extldflags "-static"' .
 
 FROM busybox:1.36-musl
+
+# Copy metaploy configuration
+COPY metaploy/iqps.metaploy.conf /
+COPY metaploy/postinstall.sh /
+
+# Set the postinstall script as executable
+RUN chmod +x /postinstall.sh
+
+# Copy the binary from the builder
 COPY --from=builder /app /app
 EXPOSE 5000
 
