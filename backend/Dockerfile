@@ -1,5 +1,9 @@
 FROM golang:1.21 AS builder
 
+# Copy metaploy configuration
+COPY ../metaploy/iqps.metaploy.conf /
+COPY ../metaploy/postinstall.sh /
+
 WORKDIR /src
 COPY . .
 RUN go mod download
@@ -9,4 +13,5 @@ FROM busybox:1.36-musl
 COPY --from=builder /app /app
 EXPOSE 5000
 
-ENTRYPOINT ["/app"]
+# Run postinstall script and the binary
+CMD ["/postinstall.sh", "/app"]
