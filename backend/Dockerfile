@@ -1,8 +1,8 @@
 FROM golang:1.21 AS builder
 
 # Copy metaploy configuration
-COPY ../metaploy/iqps.metaploy.conf /
-COPY ../metaploy/postinstall.sh /
+COPY metaploy/iqps.metaploy.conf /
+COPY metaploy/postinstall.sh /
 
 WORKDIR /src
 COPY . .
