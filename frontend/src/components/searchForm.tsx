@@ -9,28 +9,32 @@ function CourseSearchForm() {
   const [exam, setExam] = createSignal("");
   const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
   const [noResultsFound, setNoResultsFound] = createSignal<boolean>(false);
+  const [awaitingResponse, setAwaitingResponse] = createSignal<boolean>(false);
 
   // Function to handle form submission
   const handleSubmit = async (event: any) => {
     event.preventDefault(); // Prevent the default form submit action
 
-    console.log("Form submitted!", courseName(), exam());
+    if (!awaitingResponse()) {
+      const params = new URLSearchParams();
+      if (courseName()) params.append("course", courseName());
+      if (exam()) params.append("exam", exam());
 
-    const params = new URLSearchParams();
-    if (courseName()) params.append("course", courseName());
-    if (exam()) params.append("exam", exam());
+      try {
+        setAwaitingResponse(true);
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/search?${params}`, {
+          method: "GET", // GET request
+        });
+        setAwaitingResponse(false);
 
-    try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/search?${params}`, {
-        method: "GET", // GET request
-      });
+        const data: SearchResult[] = await response.json();
 
-      const data: SearchResult[] = await response.json();
-
-      setSearchResults(data); // Handle the response data
-      setNoResultsFound(data.length === 0); // Show a message if no results are found
-    } catch (error) {
-      console.error("Error fetching data:", error);
+        setSearchResults(data); // Handle the response data
+        setNoResultsFound(data.length === 0); // Show a message if no results are found
+      } catch (error) {
+        setAwaitingResponse(false);
+        console.error("Error fetching data:", error);
+      }
     }
   };
 
@@ -49,7 +53,7 @@ function CourseSearchForm() {
             <option value="endsem">End Semester</option>
           </select>
         </div>
-        <button type="submit">Search</button>
+        <button type="submit" disabled={awaitingResponse()}>Search</button>
       </form>
       <SearchResults results={searchResults()} noResultsFound={noResultsFound()} />
     </div>

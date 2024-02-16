@@ -18,7 +18,8 @@ const SearchResults: Component<Props> = (props) => {
   return (
     <div class="search-results">
       {
-        props.noResultsFound || props.results.length === 0 ? <p>No results found. Try a different query.</p> :
+        props.noResultsFound ? <p>No results found. Try a different query.</p> :
+        props.results.length > 0 &&
         <table class="search-results-table">
           <thead>
             <tr>

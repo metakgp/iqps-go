@@ -37,6 +37,14 @@
     &:hover {
       background-color: darken(#007bff, 5%);
     }
+
+    &:disabled {
+      background-color: hsl(211, 30%, 70%);
+
+      &:hover {
+        cursor: default;
+      }
+    }
   }
 }
 
