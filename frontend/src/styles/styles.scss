@@ -131,8 +131,9 @@ a {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  justify-content: center;
 
-  margin: 1rem 0 0.2rem 0;
+  margin: 1rem 0 0.2rem 0.5rem;
   align-items: center;
 
   select {
@@ -142,13 +143,14 @@ a {
 }
 
 .search-results {
+  padding: 0.5rem 1rem;
+  background-color: rgba($surface-1, 0.2);
+
   .search-results-table {
     width: 100%;
     margin-top: 1.5rem;
 
-    background-color: rgba($surface-1, 0.2);
     border-radius: 10px;
-    padding: 0.5rem 1rem;
 
     .download-btn-container {
       display: flex;

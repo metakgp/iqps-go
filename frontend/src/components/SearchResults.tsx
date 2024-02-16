@@ -1,5 +1,5 @@
 import { Component, For, createSignal, onMount } from "solid-js";
-import { FiDownload as DownloadIcon} from 'solid-icons/fi';
+import { FiDownload as DownloadIcon, FiFilter as FilterIcon } from 'solid-icons/fi';
 import type { SearchResult } from "../types/types";
 
 type Props = {
@@ -52,6 +52,7 @@ const SearchResults: Component<Props> = (props) => {
         displayedResults().length > 0 && (
           <>
             <div class="row results-filter">
+              {/* <FilterIcon size={'1.5rem'} /> */}
               <select id="year" value={(filterByYear() ?? "null").toString()} onInput={(e) => {
                 setFilterByYear(e.target.value === "null" ? null : parseInt(e.target.value));
                 updateDisplayedResults();
