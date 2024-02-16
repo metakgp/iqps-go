@@ -37,10 +37,40 @@
     &:hover {
       background-color: darken(#007bff, 5%);
     }
+
+    &:disabled {
+      background-color: hsl(211, 30%, 70%);
+
+      &:hover {
+        cursor: default;
+      }
+    }
+  }
+}
+
+.results-filter {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0 0.2rem 0;
+  align-items: center;
+
+  select {
+    width: fit-content;
+    margin-bottom: 0;
   }
 }
 
 .search-results {
+  .search-results-table {
+    th, td {
+      padding: 0.5rem 1rem 0.5rem 0;
+    }
+
+    th {
+      text-align: left;
+    }
+  }
+
   .result-card {
     background: #ffffff;
     padding: 15px;
@@ -73,4 +103,24 @@
       }
     }
   }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  margin: 1rem 0;
+  width: 2rem;
+  height: 2rem;
+
+  fill: #388eea;
+  color: #333;
+  animation: spin 1s infinite;
 }
