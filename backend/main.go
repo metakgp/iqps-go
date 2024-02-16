@@ -103,9 +103,9 @@ func search(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "course is required", http.StatusBadRequest)
 		return
 	}
-	query := fmt.Sprintf(`SELECT * FROM qp WHERE course_name like '%%?%%' OR course_code like '%%?%%'`)
+	query := `SELECT * FROM qp WHERE rowid IN (SELECT rowid FROM qp_better WHERE course_name MATCH ?)`
 	var params []interface{}
-	params = append(params, course, course)
+	params = append(params, course)
 
 	year := r.URL.Query().Get("year")
 	if year != "" {
