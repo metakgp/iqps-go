@@ -92,3 +92,23 @@
     }
   }
 }
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  margin: 1rem 0;
+  width: 2rem;
+  height: 2rem;
+
+  fill: #388eea;
+  color: #333;
+  animation: spin 1s infinite;
+}
