@@ -14,21 +14,20 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"github.com/lithammer/fuzzysearch/fuzzy"
 	"github.com/rs/cors"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type QuestionPaper struct {
-	ID          int    `json:"id"`
-	CourseCode  string `json:"course_code"`
-	CourseName  string `json:"course_name"`
-	Year        int    `json:"year"`
-	Exam        string `json:"exam"`
-	FileLink    string `json:"filelink"`
-	FromLibrary bool   `json:"from_library"`
-	Score       int    `json:"score"`
+	ID          int     `json:"id"`
+	CourseCode  string  `json:"course_code"`
+	CourseName  string  `json:"course_name"`
+	Year        int     `json:"year"`
+	Exam        string  `json:"exam"`
+	FileLink    string  `json:"filelink"`
+	FromLibrary bool    `json:"from_library"`
+	Score       float64 `json:"score"`
 }
 
 var (
@@ -135,7 +134,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		}
 		qp.FileLink = fmt.Sprintf("%s/%s", staticFilesUrl, url.PathEscape(qp.FileLink))
 		qp.CourseName = strings.ReplaceAll(qp.CourseName, "_", "")
-		qp.Score = fuzzy.RankMatchFold(course, qp.CourseName)
+		qp.Score = StringScore(qp.FileLink, course, 0.3)
 
 		if qp.Score > 0 {
 			qps = append(qps, qp)
@@ -143,12 +142,12 @@ func search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sort.Slice(qps, func(i, j int) bool {
-		return qps[i].Score < qps[j].Score
+		return qps[i].Score > qps[j].Score
 	})
 
-	// if len(qps) > 10 {
-	// 	qps = qps[:10]
-	// }
+	if len(qps) > 15 {
+		qps = qps[:15]
+	}
 
 	http.Header.Add(w.Header(), "content-type", "application/json")
 	err = json.NewEncoder(w).Encode(&qps)
