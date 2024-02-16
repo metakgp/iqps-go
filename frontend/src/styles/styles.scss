@@ -1,10 +1,63 @@
+// Light mode. This is only for archival purposes. It should NEVER BE USED.
+// :root {
+//   --accent-color: hsl(217, 80%, 40%);
+//   --accent-color-darker: hsl(217, 80%, 30%);
+//   --bg-color: #e8e5e5;
+//   --surface-1: #fff;
+//   --fg-color: #333;
+//   --fg-inverse: #fff;
+// }
+
+:root {
+  --accent-color: hsl(217, 80%, 40%);
+  --accent-color-lighter: hsl(217, 80%, 60%);
+  --accent-color-darker: hsl(217, 80%, 30%);
+  --accent-color-disabled: hsl(217, 40%, 40%);
+  --bg-color: #222222;
+  --surface-1: #353535;
+  --surface-2: #4b4b4b;
+  --fg-color: #dedede;
+  --fg-inverse: #3d3d3d;
+}
+
+body {
+  color: var(--fg-color);
+  background-color: var(--bg-color);
+}
+
+a {
+  color: var(--accent-color-lighter);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+
+  background-color: var(--surface-2);
+  color: var(--fg-color);
+
+  &:focus {
+    border-color: var(--accent-color);
+    outline: none;
+  }
+}
+
 .title {
   margin-bottom: 2rem;
   text-align: center;
 }
 
 .search-form {
-  background: #ffffff;
+  background: var(--surface-1);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -13,38 +66,23 @@
   label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #333;
-  }
-
-  input,
-  select {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 1rem;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-
-    &:focus {
-      border-color: #007bff;
-      outline: none;
-    }
   }
 
   button {
-    background-color: #007bff;
-    color: #ffffff;
+    background-color: var(--accent-color);
+    color: var(--fg-color);
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
+    font-weight: bold;
     cursor: pointer;
 
     &:hover {
-      background-color: darken(#007bff, 5%);
+      background-color: var(--accent-color-darker);
     }
 
     &:disabled {
-      background-color: hsl(211, 30%, 70%);
+      background-color: var(--accent-color-disabled);
 
       &:hover {
         cursor: default;
@@ -86,7 +124,7 @@
   }
 
   .result-card {
-    background: #ffffff;
+    background: --surface-1;
     padding: 15px;
     margin-bottom: 1rem;
     border-radius: 8px;
@@ -107,15 +145,6 @@
         font-weight: bold;
       }
     }
-
-    a {
-      color: #007bff;
-      text-decoration: none;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
   }
 }
 
@@ -134,7 +163,7 @@
   width: 2rem;
   height: 2rem;
 
-  fill: #388eea;
-  color: #333;
+  fill: var(--accent-color);
+  color: var(--fg-color);
   animation: spin 1s infinite;
 }
