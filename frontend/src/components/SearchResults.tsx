@@ -92,7 +92,7 @@ const SearchResults: Component<Props> = (props) => {
                 {(result) => (
                   <tr class="result-card">
                     <td>
-                      {decodeURIComponent(result.course_name)} &nbsp;
+                      {decodeURIComponent(result.course_name).replaceAll('_', ' ')} &nbsp;
                       [<a href={result.filelink} target="_blank" rel="noopener noreferrer">
                         PDF
                       </a>]
