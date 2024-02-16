@@ -139,6 +139,10 @@ a {
   select {
     width: fit-content;
     margin-bottom: 0;
+
+    @media (max-width: 560px)  {
+      width: 100%;
+    }
   }
 }
 
