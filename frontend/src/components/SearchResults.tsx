@@ -16,6 +16,8 @@ const examMap = (exam: string) => {
 const SearchResults: Component<Props> = (props) => {
   const [displayedResults, setDisplayedResults] = createSignal<SearchResult[]>(props.results);
   const [filterByYear, setFilterByYear] = createSignal<number | null>(null);
+  const [sortBy, setSortBy] = createSignal<'course_name' | 'year'>('year');
+  const [sortOrder, setSortOrder] = createSignal<'ascending' | 'descending'>('descending');
   const [availableYears, setAvailableYears] = createSignal<number[]>([]);
 
   onMount(() => {
@@ -28,7 +30,17 @@ const SearchResults: Component<Props> = (props) => {
     let filtered_results = props.results.slice();
     if (filterByYear() !== null) filtered_results = filtered_results.filter((result) => result.year === filterByYear());
 
-    const sorted_results = filtered_results.sort((a, b) => b.year - a.year);
+    const sorted_results = filtered_results.sort((a, b) => {
+      const first = sortOrder() === 'ascending' ? a : b;
+      const second = sortOrder() === 'ascending' ? b : a;
+
+      switch (sortBy()) {
+        case 'year':
+          return first.year - second.year;
+        case 'course_name':
+          return first.course_name.localeCompare(second.course_name);
+      }
+    });
     setDisplayedResults(sorted_results);
   }
 
@@ -49,6 +61,22 @@ const SearchResults: Component<Props> = (props) => {
                       <option value={year.toString()}>{year}</option>
                     )}
                   </For>
+              </select>
+
+              <select id="sortBy" value={sortBy()} onInput={(e) => {
+                setSortBy(e.target.value as 'course_name' | 'year');
+                updateDisplayedResults();
+              }}>
+                <option value="year">Sort by Year</option>
+                <option value="course_name">Sort by Course Name</option>
+              </select>
+
+              <select id="sortOrder" value={sortOrder()} onInput={(e) => {
+                setSortOrder(e.target.value as 'ascending' | 'descending');
+                updateDisplayedResults();
+              }}>
+                <option value="ascending">Ascending</option>
+                <option value="descending">Descending</option>
               </select>
             </div>
 
