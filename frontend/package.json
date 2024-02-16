@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@vercel/analytics": "^1.2.0",
+    "solid-icons": "^1.1.0",
     "solid-js": "^1.8.11"
   }
 }

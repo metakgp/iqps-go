@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+import { IoSearch as SearchIcon } from "solid-icons/io";
 import SearchResults from "./SearchResults";
 import type { SearchResult } from "../types/types";
 import "../styles/styles.scss";
@@ -45,23 +46,29 @@ function CourseSearchForm() {
       <form onSubmit={handleSubmit}>
         <div>
           <label for="course">Course Name:</label>
-          <input id="course" value={courseName()} onInput={(e) => setCourseName(e.target.value)} />
+          <input autofocus={true} id="course" value={courseName()} onInput={(e) => setCourseName(e.target.value)} />
         </div>
         <div>
           <label for="exam">Exam:</label>
-          <select id="exam" value={exam()} onInput={(e) => setExam(e.target.value)}>
-            <option value="">Select an exam</option>
-            <option value="midsem">Mid Semester</option>
-            <option value="endsem">End Semester</option>
-          </select>
+          <div class="select-wrapper">
+            <select id="exam" value={exam()} onInput={(e) => setExam(e.target.value)}>
+              <option value="">Mid / End Semester</option>
+              <option value="midsem">Mid Semester</option>
+              <option value="endsem">End Semester</option>
+            </select>
+          </div>
         </div>
-        <button type="submit" disabled={awaitingResponse()}>Search</button>
+        <button class="icon-btn" type="submit" disabled={awaitingResponse()}>
+          Search <SearchIcon />
+        </button>
       </form>
-      {
-        awaitingResponse() ? <Spinner /> :
-        noResultsFound() ? <p>No results found. Try another query.</p> :
+      {awaitingResponse() ? (
+        <Spinner />
+      ) : noResultsFound() ? (
+        <p>No results found. Try another query.</p>
+      ) : (
         <SearchResults results={searchResults()} />
-      }
+      )}
     </div>
   );
 }
