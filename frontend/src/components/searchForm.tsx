@@ -45,12 +45,12 @@ function CourseSearchForm() {
       <form onSubmit={handleSubmit}>
         <div>
           <label for="course">Course Name:</label>
-          <input id="course" value={courseName()} onInput={(e) => setCourseName(e.target.value)} />
+          <input autofocus={true} id="course" value={courseName()} onInput={(e) => setCourseName(e.target.value)} />
         </div>
         <div>
           <label for="exam">Exam:</label>
           <select id="exam" value={exam()} onInput={(e) => setExam(e.target.value)}>
-            <option value="">Select an exam</option>
+            <option value="">Mid / End Semester</option>
             <option value="midsem">Mid Semester</option>
             <option value="endsem">End Semester</option>
           </select>
