@@ -120,7 +120,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 
 	exam := r.URL.Query().Get("exam")
 	if exam != "" {
-		query = fmt.Sprintf(`%s AND exam = '?'`, query)
+		query = fmt.Sprintf(`%s AND exam = ?`, query)
 		params = append(params, exam)
 	}
 
