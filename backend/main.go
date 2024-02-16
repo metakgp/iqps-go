@@ -28,8 +28,10 @@ type QuestionPaper struct {
 	FromLibrary bool   `json:"from_library"`
 }
 
-var db *sql.DB
-var staticFilesUrl string
+var (
+	db             *sql.DB
+	staticFilesUrl string
+)
 
 const init_db = `
 CREATE TABLE IF NOT EXISTS qp (
@@ -79,7 +81,7 @@ func library(w http.ResponseWriter, r *http.Request) {
 
 	var qps []QuestionPaper = make([]QuestionPaper, 0)
 	for rows.Next() {
-		var qp = QuestionPaper{}
+		qp := QuestionPaper{}
 		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -101,7 +103,9 @@ func search(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "course is required", http.StatusBadRequest)
 		return
 	}
-	query := fmt.Sprintf(`SELECT * FROM qp WHERE course_name like '%%%s%%' OR course_code like '%%%s%%'`, course, course)
+	query := `SELECT * FROM qp WHERE rowid IN (SELECT rowid FROM qp_better WHERE course_name MATCH ?)`
+	var params []interface{}
+	params = append(params, course)
 
 	year := r.URL.Query().Get("year")
 	if year != "" {
@@ -110,15 +114,17 @@ func search(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "year must be a number", http.StatusBadRequest)
 			return
 		}
-		query = fmt.Sprintf(`%s AND year = %d`, query, yearInt)
+		query = fmt.Sprintf(`%s AND year = ?`, query)
+		params = append(params, strconv.Itoa(yearInt))
 	}
 
 	exam := r.URL.Query().Get("exam")
 	if exam != "" {
-		query = fmt.Sprintf(`%s AND exam = '%s'`, query, exam)
+		query = fmt.Sprintf(`%s AND exam = '?'`, query)
+		params = append(params, exam)
 	}
 
-	rows, err := db.Query(query)
+	rows, err := db.Query(query, params...)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -127,7 +133,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 
 	var qps []QuestionPaper = make([]QuestionPaper, 0)
 	for rows.Next() {
-		var qp = QuestionPaper{}
+		qp := QuestionPaper{}
 		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -146,7 +152,6 @@ func search(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(err)

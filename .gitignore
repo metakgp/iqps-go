@@ -9,3 +9,5 @@ crawler/cache
 crawler/qp/*.pdf
 qp.csv
 qp.tar.xz
+
+go.work.sum
