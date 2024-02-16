@@ -55,7 +55,7 @@ function CourseSearchForm() {
     <div class="search-form">
       <form onSubmit={handleSubmit}>
         <div>
-          <label for="courseName">Course Name:</label>
+          <label for="course">Course Name:</label>
           <input id="course" value={courseName()} onInput={(e) => setCourseName(e.target.value)} />
         </div>
         <div>
