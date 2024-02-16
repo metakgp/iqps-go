@@ -38,13 +38,12 @@ const SearchResults: Component<Props> = (props) => {
       {
         displayedResults().length > 0 && (
           <>
-            <div class="row">
-              Filter by year:
-              <select id="year" value={filterByYear()?.toString()} onInput={(e) => {
+            <div class="row results-filter">
+              <select id="year" value={(filterByYear() ?? "null").toString()} onInput={(e) => {
                 setFilterByYear(e.target.value === "null" ? null : parseInt(e.target.value));
                 updateDisplayedResults();
               }}>
-                <option value="null">Select a year</option>
+                <option value="null">All Years</option>
                 <For each={availableYears()}>
                     {(year) => (
                       <option value={year.toString()}>{year}</option>

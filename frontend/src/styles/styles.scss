@@ -48,6 +48,18 @@
   }
 }
 
+.results-filter {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0 0.2rem 0;
+  align-items: center;
+
+  select {
+    width: fit-content;
+    margin-bottom: 0;
+  }
+}
+
 .search-results {
   .search-results-table {
     th, td {
