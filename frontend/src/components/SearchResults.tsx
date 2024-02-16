@@ -9,19 +9,34 @@ type Props = {
 const SearchResults: Component<Props> = (props) => {
   return (
     <div class="search-results">
-      {props.noResultsFound && <p>No results found. Try a different query.</p>}
-      <For each={props.results}>
-        {(result) => (
-          <div class="result-card">
-            <p>Course Name: {decodeURIComponent(result.course_name)}</p>
-            <p>Year: {result.year}</p>
-            <p>Exam: {result.exam}</p>
-            <a href={result.filelink} target="_blank" rel="noopener noreferrer">
-              Download File
-            </a>
-          </div>
-        )}
-      </For>
+      {
+        props.noResultsFound ? <p>No results found. Try a different query.</p>:
+        props.results.length > 0 &&
+        <table class="search-results-table">
+          <thead>
+            <tr>
+              <th>Course Name</th>
+              <th>Year</th>
+              <th>Exam</th>
+            </tr>
+          </thead>
+          <For each={props.results}>
+            {(result) => (
+              <tr class="result-card">
+                <td>
+                  {decodeURIComponent(result.course_name)} &nbsp;
+                  [<a href={result.filelink} target="_blank" rel="noopener noreferrer">
+                    PDF
+                  </a>]
+                </td>
+                <td>{result.year}</td>
+                <td>{result.exam === '' ? 'Unknown' : result.exam}</td>
+
+              </tr>
+            )}
+          </For>
+        </table>
+      }
     </div>
   );
 };
