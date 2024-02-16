@@ -9,7 +9,7 @@ type Props = {
 const SearchResults: Component<Props> = (props) => {
   return (
     <div class="search-results">
-      {props.noResultsFound && 'No results found. Try a different query.'}
+      {props.noResultsFound && <p>'No results found. Try a different query.'</p>}
       <For each={props.results}>
         {(result) => (
           <div class="result-card">
