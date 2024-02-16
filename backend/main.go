@@ -104,7 +104,9 @@ func search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	query := fmt.Sprintf(`SELECT * FROM qp WHERE course_name like '%%?%%' OR course_code like '%%?%%'`)
-	params := []string{course, course}
+	var params []interface{}
+	params = append(params, course, course)
+
 	year := r.URL.Query().Get("year")
 	if year != "" {
 		yearInt, err := strconv.Atoi(year)
@@ -122,7 +124,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		params = append(params, exam)
 	}
 
-	rows, err := db.Query(query, params)
+	rows, err := db.Query(query, params...)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
