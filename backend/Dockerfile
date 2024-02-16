@@ -17,5 +17,8 @@ RUN chmod +x /postinstall.sh
 # Copy the binary from the builder
 COPY --from=builder /app /app
 
+# Copy .env file
+COPY .env /
+
 # Run postinstall script and the binary
 CMD ["/postinstall.sh", "/app"]
