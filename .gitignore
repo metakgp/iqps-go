@@ -3,6 +3,7 @@ dist
 
 db/
 iqps.db
+.env
 
 crawler/cache
 crawler/qp/*.pdf

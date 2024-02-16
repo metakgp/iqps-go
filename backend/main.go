@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
+	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -24,6 +26,7 @@ type QuestionPaper struct {
 }
 
 var db *sql.DB
+var staticFilesUrl string
 
 const init_db = `
 CREATE TABLE IF NOT EXISTS qp (
@@ -127,6 +130,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		qp.FileLink = fmt.Sprintf("%s/%s", staticFilesUrl, qp.FileLink)
 		qps = append(qps, qp)
 	}
 
@@ -140,8 +144,15 @@ func search(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	var err error
-	db, err = sql.Open("sqlite3", "/db/iqps.db")
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dbPath := os.Getenv("DB_PATH")
+	staticFilesUrl = os.Getenv("STATIC_FILES_URL")
+
+	db, err = sql.Open("sqlite3", dbPath)
 
 	if err != nil {
 		log.Fatal(err)

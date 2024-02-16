@@ -1,7 +1,7 @@
 services:
   iqps-backend:
     image: iqps-backend
-    build: ./backend
+    build: .
     networks:
       metaploy-network:
         aliases:
