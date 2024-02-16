@@ -10,6 +10,7 @@ function CourseSearchForm() {
   const [semester, setSemester] = createSignal("");
   const [years, setYears] = createSignal<number[]>([]);
   const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
+  const [noResultsFound, setNoResultsFound] = createSignal<boolean>(false);
 
   async function fetchYears() {
     try {
@@ -40,8 +41,11 @@ function CourseSearchForm() {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/search?${params}`, {
         method: "GET", // GET request
       });
+
       const data: SearchResult[] = await response.json();
+
       setSearchResults(data); // Handle the response data
+      setNoResultsFound(data.length === 0); // Show a message if no results are found
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -73,7 +77,7 @@ function CourseSearchForm() {
         </div>
         <button type="submit">Search</button>
       </form>
-      <SearchResults results={searchResults()} />
+      <SearchResults results={searchResults()} noResultsFound={noResultsFound()} />
     </div>
   );
 }

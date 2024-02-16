@@ -3,11 +3,13 @@ import type { SearchResult } from "../types/types";
 
 type Props = {
   results: SearchResult[];
+  noResultsFound: boolean;
 };
 
 const SearchResults: Component<Props> = (props) => {
   return (
     <div class="search-results">
+      {props.noResultsFound && 'No results found. Try a different query.'}
       <For each={props.results}>
         {(result) => (
           <div class="result-card">
