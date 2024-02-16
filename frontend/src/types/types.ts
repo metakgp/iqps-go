@@ -1,8 +1,9 @@
 export type SearchResult = {
   id: number;
-  courseName: string;
-  courseCode: string;
+  course_name: string;
+  course_code: string;
   year: number;
-  semester: string;
-  fileLink: string;
+  exam: string;
+  filelink: string;
+  from_library: boolean;
 };

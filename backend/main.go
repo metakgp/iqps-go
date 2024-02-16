@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -171,8 +173,12 @@ func main() {
 	http.HandleFunc("/year", year)
 	http.HandleFunc("/library", library)
 
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"https://beta.qp.metakgp.org", "http://localhost:3000"},
+	})
+
 	fmt.Println("Starting server on port 5000")
-	err = http.ListenAndServe(":5000", nil)
+	err = http.ListenAndServe(":5000", c.Handler(http.DefaultServeMux))
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
 	} else if err != nil {
