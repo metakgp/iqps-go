@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import CourseSearchForm from "./components/searchForm";
+import CourseSearchForm from "./components/SearchForm";
 import "./styles/styles.scss";
 
 const App: Component = () => {
