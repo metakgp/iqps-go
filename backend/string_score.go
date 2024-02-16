@@ -1,3 +1,5 @@
+// Credits: http://joshaven.com/string_score/
+
 package main
 
 import (
