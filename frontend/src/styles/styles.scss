@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
 // Light mode. This is only for archival purposes. It should NEVER BE USED.
 // :root {
 //   --accent-color: hsl(217, 80%, 40%);
@@ -8,46 +10,45 @@
 //   --fg-inverse: #fff;
 // }
 
-:root {
-  --accent-color: hsl(217, 80%, 40%);
-  --accent-color-lighter: hsl(217, 80%, 60%);
-  --accent-color-darker: hsl(217, 80%, 30%);
-  --accent-color-disabled: hsl(217, 40%, 40%);
-  --bg-color: #222222;
-  --surface-1: #353535;
-  --surface-2: #4b4b4b;
-  --fg-color: #dedede;
-  --fg-inverse: #3d3d3d;
-}
+$accent-color: hsl(217, 80%, 40%);
+$accent-color-lighter: hsl(217, 80%, 60%);
+$accent-color-darker: hsl(217, 80%, 30%);
+$accent-color-disabled: hsl(217, 40%, 40%);
+$bg-color: #0d0d0d;
+$surface-1: #413e3f;
+$surface-2: #4b4b4b;
+$fg-color: #f7f7f7;
+$fg-inverse: #3d3d3d;
 
 body {
-  color: var(--fg-color);
-  background-color: var(--bg-color);
+  color: rgba($fg-color, 0.8);
+  background-color: $bg-color;
+  font-family: "Hanken Grotesk", sans-serif;
+
+  &::-webkit-scrollbar-track {
+    background-color: rgba($bg-color, 0.5);
+    border-radius: 100px;
+  }
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    background-color: rgba($bg-color, 0.5);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba($fg-color, 0.4);
+    border-radius: 100px;
+  }
+
+  scrollbar-gutter: stable;
 }
 
 a {
-  color: var(--accent-color-lighter);
+  color: $accent-color-lighter;
   text-decoration: none;
 
   &:hover {
     text-decoration: underline;
-  }
-}
-
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 1rem;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-
-  background-color: var(--surface-2);
-  color: var(--fg-color);
-
-  &:focus {
-    border-color: var(--accent-color);
-    outline: none;
   }
 }
 
@@ -57,7 +58,6 @@ input, select {
 }
 
 .search-form {
-  background: var(--surface-1);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -66,23 +66,52 @@ input, select {
   label {
     display: block;
     margin-bottom: 0.5rem;
+    color: rgba($fg-color, 0.7);
+    font-size: 0.9rem;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 1rem;
+    outline: none;
+    border: 2px solid rgba($fg-color, 0.5);
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: "Hanken Grotesk", sans-serif;
+    font-size: 1rem;
+
+    background-color: rgba($surface-1, 0.2);
+    color: rgba($fg-color, 0.8);
+
+    &:focus {
+      border-color: rgba($fg-color, 0.8);
+    }
+  }
+
+  select option {
+    background-color: $bg-color;
+    color: rgba($fg-color, 0.8);
   }
 
   button {
-    background-color: var(--accent-color);
-    color: var(--fg-color);
+    background-color: rgba($accent-color, 0.8);
+    color: rgba($fg-color, 0.75);
     padding: 10px 15px;
+    margin-bottom: 1rem;
     border: none;
     border-radius: 5px;
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 1rem;
     cursor: pointer;
 
     &:hover {
-      background-color: var(--accent-color-darker);
+      background-color: $accent-color-darker;
     }
 
     &:disabled {
-      background-color: var(--accent-color-disabled);
+      background-color: $accent-color-disabled;
 
       &:hover {
         cursor: default;
@@ -109,13 +138,19 @@ input, select {
 .search-results {
   .search-results-table {
     width: 100%;
+    margin-top: 1.5rem;
+
+    background-color: rgba($surface-1, 0.2);
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
 
     tr {
       width: fit-content;
     }
 
-    th, td {
-      padding: 0.5rem 1rem 0.5rem 0;
+    th,
+    td {
+      padding: 0.5rem 1rem 0.5rem 1rem;
     }
 
     th {
@@ -124,24 +159,20 @@ input, select {
   }
 
   .result-card {
-    background: --surface-1;
     padding: 15px;
     margin-bottom: 1rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
     h3 {
-      color: #333;
       margin-top: 0;
     }
 
     p {
-      color: #666;
       margin: 5px 0;
 
       &.course-name,
       &.course-code {
-        color: #333;
         font-weight: bold;
       }
     }
@@ -163,7 +194,7 @@ input, select {
   width: 2rem;
   height: 2rem;
 
-  fill: var(--accent-color);
-  color: var(--fg-color);
+  fill: rgba($accent-color, 0.8);
+  color: rgba($fg-color, 0.8);
   animation: spin 1s infinite;
 }
