@@ -77,7 +77,7 @@ func library(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var qps []QuestionPaper
+	var qps []QuestionPaper = make([]QuestionPaper, 0)
 	for rows.Next() {
 		var qp = QuestionPaper{}
 		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary)
@@ -125,7 +125,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var qps []QuestionPaper
+	var qps []QuestionPaper = make([]QuestionPaper, 0)
 	for rows.Next() {
 		var qp = QuestionPaper{}
 		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary)
