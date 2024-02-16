@@ -6,12 +6,22 @@ type Props = {
   noResultsFound: boolean;
 };
 
+const examMap = (exam: string) => {
+  switch (exam) {
+    case 'midsem': return 'Mid Semester';
+    case 'endsem': return 'End Semester';
+    default: return 'Unknown';
+  }
+}
+
 const SearchResults: Component<Props> = (props) => {
+  const sortedResults = props.results.sort((a, b) => b.year - a.year);
+
   return (
     <div class="search-results">
       {
         props.noResultsFound ? <p>No results found. Try a different query.</p>:
-        props.results.length > 0 &&
+        sortedResults.length > 0 &&
         <table class="search-results-table">
           <thead>
             <tr>
@@ -20,7 +30,7 @@ const SearchResults: Component<Props> = (props) => {
               <th>Exam</th>
             </tr>
           </thead>
-          <For each={props.results}>
+          <For each={sortedResults}>
             {(result) => (
               <tr class="result-card">
                 <td>
@@ -30,7 +40,7 @@ const SearchResults: Component<Props> = (props) => {
                   </a>]
                 </td>
                 <td>{result.year}</td>
-                <td>{result.exam === '' ? 'Unknown' : result.exam}</td>
+                <td>{examMap(result.exam)}</td>
 
               </tr>
             )}

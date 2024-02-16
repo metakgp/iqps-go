@@ -41,6 +41,16 @@
 }
 
 .search-results {
+  .search-results-table {
+    th, td {
+      padding: 0.5rem 1rem 0.5rem 0;
+    }
+
+    th {
+      text-align: left;
+    }
+  }
+
   .result-card {
     background: #ffffff;
     padding: 15px;
