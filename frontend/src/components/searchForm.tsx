@@ -26,12 +26,13 @@ function CourseSearchForm() {
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/search?${params}`, {
           method: "GET", // GET request
         });
-        setAwaitingResponse(false);
 
         const data: SearchResult[] = await response.json();
 
         setSearchResults(data); // Handle the response data
         setNoResultsFound(data.length === 0); // Show a message if no results are found
+
+        setAwaitingResponse(false);
       } catch (error) {
         setAwaitingResponse(false);
         console.error("Error fetching data:", error);

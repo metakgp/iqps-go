@@ -22,14 +22,17 @@ const SearchResults: Component<Props> = (props) => {
     const unique_years: Set<number> = new Set();
     props.results.forEach((result) => unique_years.add(result.year));
     setAvailableYears(Array.from(unique_years.values()));
+  })
 
-    let filtered_results = props.results;
-    if (filterByYear() !== null) filtered_results = props.results.filter((result) => result.year === filterByYear());
+  const updateDisplayedResults = () => {
+    let filtered_results = props.results.slice();
+    if (filterByYear() !== null) filtered_results = filtered_results.filter((result) => result.year === filterByYear());
 
     const sorted_results = filtered_results.sort((a, b) => b.year - a.year);
     setDisplayedResults(sorted_results);
-  })
+  }
 
+  updateDisplayedResults();
   return (
     <div class="search-results">
       {
@@ -37,7 +40,10 @@ const SearchResults: Component<Props> = (props) => {
           <>
             <div class="row">
               Filter by year:
-              <select id="year" value={filterByYear()?.toString()} onInput={(e) => setFilterByYear(e.target.value === "null" ? null : parseInt(e.target.value))}>
+              <select id="year" value={filterByYear()?.toString()} onInput={(e) => {
+                setFilterByYear(e.target.value === "null" ? null : parseInt(e.target.value));
+                updateDisplayedResults();
+              }}>
                 <option value="null">Select a year</option>
                 <For each={availableYears()}>
                     {(year) => (
