@@ -15,13 +15,10 @@ const examMap = (exam: string) => {
 }
 
 const SearchResults: Component<Props> = (props) => {
-  const sortedResults = props.results.sort((a, b) => b.year - a.year);
-
   return (
     <div class="search-results">
       {
-        props.noResultsFound ? <p>No results found. Try a different query.</p>:
-        sortedResults.length > 0 &&
+        props.noResultsFound || props.results.length === 0 ? <p>No results found. Try a different query.</p> :
         <table class="search-results-table">
           <thead>
             <tr>
@@ -30,7 +27,7 @@ const SearchResults: Component<Props> = (props) => {
               <th>Exam</th>
             </tr>
           </thead>
-          <For each={sortedResults}>
+          <For each={props.results.sort((a, b) => b.year - a.year)}>
             {(result) => (
               <tr class="result-card">
                 <td>
