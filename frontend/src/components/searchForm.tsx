@@ -1,4 +1,4 @@
-import { createSignal, onMount } from "solid-js";
+import { createSignal } from "solid-js";
 import SearchResults from "./SearchResults";
 import type { SearchResult } from "../types/types";
 import "../styles/styles.scss";
@@ -10,7 +10,7 @@ function CourseSearchForm() {
   const [exam, setExam] = createSignal("");
   const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
   const [noResultsFound, setNoResultsFound] = createSignal<boolean>(false);
-  const [awaitingResponse, setAwaitingResponse] = createSignal<boolean>(true);
+  const [awaitingResponse, setAwaitingResponse] = createSignal<boolean>(false);
 
   // Function to handle form submission
   const handleSubmit = async (event: any) => {
@@ -58,7 +58,8 @@ function CourseSearchForm() {
       </form>
       {
         awaitingResponse() ? <Spinner /> :
-        <SearchResults results={searchResults()} noResultsFound={noResultsFound()} />
+        noResultsFound() ? <p>No results found. Try another query.</p> :
+        <SearchResults results={searchResults()} />
       }
     </div>
   );
