@@ -93,14 +93,16 @@ const SearchResults: Component<Props> = (props) => {
               <For each={displayedResults()}>
                 {(result) => (
                   <tr class="result-card">
-                    <td>{result.year}</td>
                     <td>
                       <span class="download-btn-container">
-                        {decodeURIComponent(result.course_name).replaceAll('_', ' ')}
                         <a class="download-btn" href={result.filelink} target="_blank" rel="noopener noreferrer">
-                            <DownloadIcon />
+                          <DownloadIcon />
                         </a>
+                          {result.year}
                       </span>
+                    </td>
+                    <td>
+                      {decodeURIComponent(result.course_name).replaceAll('_', ' ')}
                     </td>
                     <td>{examMap(result.exam)}</td>
                   </tr>

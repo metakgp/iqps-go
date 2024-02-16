@@ -156,13 +156,14 @@ a {
     margin-top: 1rem;
 
     .download-btn-container {
+      justify-content: center;
       display: flex;
       align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .download-btn {
-      margin-left: auto;
       align-self: center;
       margin-top: auto;
       margin-bottom: auto;
