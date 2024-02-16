@@ -1,0 +1,76 @@
+.search-form {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+  }
+
+  button {
+    background-color: #007bff;
+    color: #ffffff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: darken(#007bff, 5%);
+    }
+  }
+}
+
+.search-results {
+  .result-card {
+    background: #ffffff;
+    padding: 15px;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    h3 {
+      color: #333;
+      margin-top: 0;
+    }
+
+    p {
+      color: #666;
+      margin: 5px 0;
+
+      &.course-name,
+      &.course-code {
+        color: #333;
+        font-weight: bold;
+      }
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

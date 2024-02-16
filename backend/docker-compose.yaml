@@ -1,0 +1,21 @@
+services:
+  iqps-backend:
+    image: iqps-backend
+    build: .
+    networks:
+      metaploy-network:
+        aliases:
+          - iqps-backend
+    volumes:
+      - ./db:/db
+      - nginx-config-volume:/etc/nginx/sites-enabled
+
+networks:
+  metaploy-network:
+    external: true
+    name: metaploy-network
+
+volumes:
+  nginx-config-volume:
+    external: true
+    name: metaploy-nginx-config-volume

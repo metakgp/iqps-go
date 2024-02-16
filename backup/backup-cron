@@ -1,4 +1,0 @@
-# minute(s) hour(s) day(s)_of_month month(s) day(s)_of_week user command
-23          4       *               *        *              root /root/run_backup.sh >> /var/log/cron.log 2>&1
-
-# needs empty line at the end
