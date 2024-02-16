@@ -102,10 +102,10 @@ const SearchResults: Component<Props> = (props) => {
                       {/* </span> */}
                     </td>
                     <td>
+                      {decodeURIComponent(result.course_name).replaceAll('_', ' ')} &nbsp;
                       [<a class="download-btn" style={{display: 'inline-flex', gap: '5px', "align-items": 'center'}} href={result.filelink} target="_blank" rel="noopener noreferrer">
                         PDF
-                      </a>] &nbsp;
-                      {decodeURIComponent(result.course_name).replaceAll('_', ' ')}
+                      </a>]
                     </td>
                     <td>{examMap(result.exam)}</td>
                   </tr>
