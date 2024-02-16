@@ -144,13 +144,12 @@ a {
 
 .search-results {
   padding: 0.5rem 1rem;
+  border-radius: 10px;
   background-color: rgba($surface-1, 0.2);
 
   .search-results-table {
     width: 100%;
-    margin-top: 1.5rem;
-
-    border-radius: 10px;
+    margin-top: 1rem;
 
     .download-btn-container {
       display: flex;
