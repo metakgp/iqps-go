@@ -57,6 +57,12 @@ a {
   text-align: center;
 }
 
+.icon-btn {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
 .search-form {
   padding: 20px;
   border-radius: 8px;
@@ -143,6 +149,24 @@ a {
     background-color: rgba($surface-1, 0.2);
     border-radius: 10px;
     padding: 0.5rem 1rem;
+
+    .download-btn-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .download-btn {
+      margin-left: auto;
+      align-self: center;
+      margin-top: auto;
+      margin-bottom: auto;
+
+      padding: 3px 5px;
+      border-radius: 5px;
+      background-color: rgba($accent-color, 0.8);
+      color: $fg-color;
+    }
 
     tr {
       width: fit-content;

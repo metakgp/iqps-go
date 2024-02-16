@@ -1,4 +1,5 @@
 import { Component, For, createSignal, onMount } from "solid-js";
+import { FiDownload as DownloadIcon} from 'solid-icons/fi';
 import type { SearchResult } from "../types/types";
 
 type Props = {
@@ -93,10 +94,12 @@ const SearchResults: Component<Props> = (props) => {
                   <tr class="result-card">
                     <td>{result.year}</td>
                     <td>
-                      {decodeURIComponent(result.course_name).replaceAll('_', ' ')} &nbsp;
-                      [<a href={result.filelink} target="_blank" rel="noopener noreferrer">
-                        PDF
-                      </a>]
+                      <span class="download-btn-container">
+                        {decodeURIComponent(result.course_name).replaceAll('_', ' ')}
+                        <a class="download-btn" href={result.filelink} target="_blank" rel="noopener noreferrer">
+                            <DownloadIcon />
+                        </a>
+                      </span>
                     </td>
                     <td>{examMap(result.exam)}</td>
                   </tr>

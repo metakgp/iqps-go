@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+import { IoSearch as SearchIcon } from 'solid-icons/io';
 import SearchResults from "./SearchResults";
 import type { SearchResult } from "../types/types";
 import "../styles/styles.scss";
@@ -55,7 +56,7 @@ function CourseSearchForm() {
             <option value="endsem">End Semester</option>
           </select>
         </div>
-        <button type="submit" disabled={awaitingResponse()}>Search</button>
+        <button class="icon-btn" type="submit" disabled={awaitingResponse()}>Search <SearchIcon /></button>
       </form>
       {
         awaitingResponse() ? <Spinner /> :
