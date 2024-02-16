@@ -9,10 +9,12 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/lithammer/fuzzysearch/fuzzy"
 	"github.com/rs/cors"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -26,6 +28,7 @@ type QuestionPaper struct {
 	Exam        string `json:"exam"`
 	FileLink    string `json:"filelink"`
 	FromLibrary bool   `json:"from_library"`
+	Score       int    `json:"score"`
 }
 
 var (
@@ -103,26 +106,18 @@ func search(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "course is required", http.StatusBadRequest)
 		return
 	}
-	query := fmt.Sprintf(`SELECT * FROM qp WHERE course_name like '%%?%%' OR course_code like '%%?%%'`)
+	fmt.Println(course)
+	query := "SELECT * FROM qp"
 	var params []interface{}
-	params = append(params, course, course)
-
-	year := r.URL.Query().Get("year")
-	if year != "" {
-		yearInt, err := strconv.Atoi(year)
-		if err != nil {
-			http.Error(w, "year must be a number", http.StatusBadRequest)
-			return
-		}
-		query = fmt.Sprintf(`%s AND year = ?`, query)
-		params = append(params, strconv.Itoa(yearInt))
-	}
 
 	exam := r.URL.Query().Get("exam")
 	if exam != "" {
-		query = fmt.Sprintf(`%s AND exam = '?'`, query)
+		query = "SELECT * FROM qp WHERE exam = ? OR exam=''"
 		params = append(params, exam)
 	}
+	fmt.Println(query)
+	fmt.Println(params...)
+	// help me do search using fuzzy search usign fuzzy package
 
 	rows, err := db.Query(query, params...)
 	if err != nil {
@@ -130,7 +125,6 @@ func search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer rows.Close()
-
 	var qps []QuestionPaper = make([]QuestionPaper, 0)
 	for rows.Next() {
 		qp := QuestionPaper{}
@@ -140,8 +134,21 @@ func search(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		qp.FileLink = fmt.Sprintf("%s/%s", staticFilesUrl, url.PathEscape(qp.FileLink))
-		qps = append(qps, qp)
+		qp.CourseName = strings.ReplaceAll(qp.CourseName, "_", "")
+		qp.Score = fuzzy.RankMatchFold(course, qp.CourseName)
+
+		if qp.Score > 0 {
+			qps = append(qps, qp)
+		}
 	}
+
+	sort.Slice(qps, func(i, j int) bool {
+		return qps[i].Score < qps[j].Score
+	})
+
+	// if len(qps) > 10 {
+	// 	qps = qps[:10]
+	// }
 
 	http.Header.Add(w.Header(), "content-type", "application/json")
 	err = json.NewEncoder(w).Encode(&qps)
