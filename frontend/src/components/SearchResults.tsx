@@ -3,17 +3,19 @@ import type { SearchResult } from "../types/types";
 
 type Props = {
   results: SearchResult[];
+  noResultsFound: boolean;
 };
 
 const SearchResults: Component<Props> = (props) => {
   return (
     <div class="search-results">
+      {props.noResultsFound && <p>No results found. Try a different query.</p>}
       <For each={props.results}>
         {(result) => (
           <div class="result-card">
             <p>Course Name: {decodeURIComponent(result.course_name)}</p>
             <p>Year: {result.year}</p>
-            <p>Semester: {result.exam}</p>
+            <p>Exam: {result.exam}</p>
             <a href={result.filelink} target="_blank" rel="noopener noreferrer">
               Download File
             </a>

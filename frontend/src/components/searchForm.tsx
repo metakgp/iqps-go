@@ -7,9 +7,10 @@ function CourseSearchForm() {
   // Create signals for each form input
   const [courseName, setCourseName] = createSignal("");
   const [year, setYear] = createSignal<number>(0);
-  const [semester, setSemester] = createSignal("");
+  const [exam, setExam] = createSignal("");
   const [years, setYears] = createSignal<number[]>([]);
   const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
+  const [noResultsFound, setNoResultsFound] = createSignal<boolean>(false);
 
   async function fetchYears() {
     try {
@@ -29,19 +30,22 @@ function CourseSearchForm() {
   const handleSubmit = async (event: any) => {
     event.preventDefault(); // Prevent the default form submit action
 
-    console.log("Form submitted!", courseName(), year(), semester());
+    console.log("Form submitted!", courseName(), year(), exam());
 
     const params = new URLSearchParams();
     if (courseName()) params.append("course", courseName());
     if (year()) params.append("year", year().toString());
-    if (semester()) params.append("semester", semester());
+    if (exam()) params.append("exam", exam());
 
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/search?${params}`, {
         method: "GET", // GET request
       });
+
       const data: SearchResult[] = await response.json();
+
       setSearchResults(data); // Handle the response data
+      setNoResultsFound(data.length === 0); // Show a message if no results are found
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -64,16 +68,16 @@ function CourseSearchForm() {
           </select>
         </div>
         <div>
-          <label for="semester">Semester:</label>
-          <select id="semester" value={semester()} onInput={(e) => setSemester(e.target.value)}>
-            <option value="">Select a semester</option>
+          <label for="exam">Exam:</label>
+          <select id="exam" value={exam()} onInput={(e) => setExam(e.target.value)}>
+            <option value="">Select an exam</option>
             <option value="Mid Sem">Mid Sem</option>
             <option value="End Sem">End Sem</option>
           </select>
         </div>
         <button type="submit">Search</button>
       </form>
-      <SearchResults results={searchResults()} />
+      <SearchResults results={searchResults()} noResultsFound={noResultsFound()} />
     </div>
   );
 }
