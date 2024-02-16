@@ -49,8 +49,11 @@
 }
 
 .results-filter {
+  width: 100%;
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
+
   margin: 1rem 0 0.2rem 0;
   align-items: center;
 
@@ -62,6 +65,12 @@
 
 .search-results {
   .search-results-table {
+    width: 100%;
+
+    tr {
+      width: fit-content;
+    }
+
     th, td {
       padding: 0.5rem 1rem 0.5rem 0;
     }
