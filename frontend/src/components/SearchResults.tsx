@@ -15,7 +15,7 @@ const SearchResults: Component<Props> = (props) => {
           <div class="result-card">
             <p>Course Name: {decodeURIComponent(result.course_name)}</p>
             <p>Year: {result.year}</p>
-            <p>Semester: {result.exam}</p>
+            <p>Exam: {result.exam}</p>
             <a href={result.filelink} target="_blank" rel="noopener noreferrer">
               Download File
             </a>
