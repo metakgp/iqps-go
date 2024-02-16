@@ -83,21 +83,21 @@ const SearchResults: Component<Props> = (props) => {
             <table class="search-results-table">
               <thead>
                 <tr>
-                  <th>Course Name</th>
                   <th>Year</th>
+                  <th>Course Name</th>
                   <th>Exam</th>
                 </tr>
               </thead>
               <For each={displayedResults()}>
                 {(result) => (
                   <tr class="result-card">
+                    <td>{result.year}</td>
                     <td>
                       {decodeURIComponent(result.course_name).replaceAll('_', ' ')} &nbsp;
                       [<a href={result.filelink} target="_blank" rel="noopener noreferrer">
                         PDF
                       </a>]
                     </td>
-                    <td>{result.year}</td>
                     <td>{examMap(result.exam)}</td>
                   </tr>
                 )}
