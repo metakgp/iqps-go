@@ -140,7 +140,7 @@ a {
     width: fit-content;
     margin-bottom: 0;
 
-    @media (max-width: 560px)  {
+    @media (max-width: 560px) {
       width: 100%;
     }
   }
@@ -154,6 +154,7 @@ a {
   .search-results-table {
     width: 100%;
     margin-top: 1rem;
+    border-collapse: collapse;
 
     // .download-btn-container {
     //   justify-content: center;
@@ -176,6 +177,15 @@ a {
 
     tr {
       width: fit-content;
+    }
+
+    tbody tr {
+      border: 1px solid transparent;
+      border-radius: 8px;
+
+      &:nth-of-type(odd) {
+        background-color: rgba($fg-color, 0.05);
+      }
     }
 
     th,
