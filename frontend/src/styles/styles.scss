@@ -155,24 +155,24 @@ a {
     width: 100%;
     margin-top: 1rem;
 
-    .download-btn-container {
-      justify-content: center;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+    // .download-btn-container {
+    //   justify-content: center;
+    //   display: flex;
+    //   align-items: center;
+    //   gap: 10px;
+    //   flex-wrap: wrap;
+    // }
 
-    .download-btn {
-      align-self: center;
-      margin-top: auto;
-      margin-bottom: auto;
+    // .download-btn {
+    //   align-self: center;
+    //   margin-top: auto;
+    //   margin-bottom: auto;
 
-      padding: 3px 5px;
-      border-radius: 5px;
-      background-color: rgba($accent-color, 0.8);
-      color: $fg-color;
-    }
+    //   padding: 3px 5px;
+    //   border-radius: 5px;
+    //   background-color: rgba($accent-color, 0.8);
+    //   color: $fg-color;
+    // }
 
     tr {
       width: fit-content;

@@ -94,14 +94,17 @@ const SearchResults: Component<Props> = (props) => {
                 {(result) => (
                   <tr class="result-card">
                     <td>
-                      <span class="download-btn-container">
-                        <a class="download-btn" href={result.filelink} target="_blank" rel="noopener noreferrer">
+                      {/* <span class="download-btn-container"> */}
+                        {/* <a class="download-btn" href={result.filelink} target="_blank" rel="noopener noreferrer">
                           <DownloadIcon />
-                        </a>
+                        </a> */}
                           {result.year}
-                      </span>
+                      {/* </span> */}
                     </td>
                     <td>
+                      [<a class="download-btn" style={{display: 'inline-flex', gap: '5px', "align-items": 'center'}} href={result.filelink} target="_blank" rel="noopener noreferrer">
+                        PDF
+                      </a>] &nbsp;
                       {decodeURIComponent(result.course_name).replaceAll('_', ' ')}
                     </td>
                     <td>{examMap(result.exam)}</td>
