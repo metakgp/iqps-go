@@ -9,9 +9,6 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
-[![Wiki][wiki-shield]][wiki-url]
-
-![Search Interface](docs/source/_static/search.png?)
 
 </div>
 
@@ -29,9 +26,9 @@
   <!-- UPDATE -->
     <i>An automated platform for searching and uploading semester question papers.</i>
     <br />
-    <a href="https://github.com/metakgp/PROJECT_NAME/issues">Report Bug</a>
+    <a href="https://github.com/metakgp/iqps-go/issues">Report Bug</a>
     ·
-    <a href="https://github.com/metakgp/PROJECT_NAME/issues">Request Feature</a>
+    <a href="https://github.com/metakgp/iqps-go/issues">Request Feature</a>
   </p>
 </div>
 
@@ -184,15 +181,15 @@ Use this space to show useful examples of how this project can be used. Addition
 
 <!-- MARKDOWN LINKS & IMAGES -->
 
-[contributors-shield]: https://img.shields.io/github/contributors/metakgp/PROJECT_NAME.svg?style=for-the-badge
-[contributors-url]: https://github.com/metakgp/PROJECT_NAME/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/metakgp/PROJECT_NAME.svg?style=for-the-badge
-[forks-url]: https://github.com/metakgp/PROJECT_NAME/network/members
-[stars-shield]: https://img.shields.io/github/stars/metakgp/PROJECT_NAME.svg?style=for-the-badge
-[stars-url]: https://github.com/metakgp/PROJECT_NAME/stargazers
-[issues-shield]: https://img.shields.io/github/issues/metakgp/PROJECT_NAME.svg?style=for-the-badge
-[issues-url]: https://github.com/metakgp/PROJECT_NAME/issues
-[license-shield]: https://img.shields.io/github/license/metakgp/PROJECT_NAME.svg?style=for-the-badge
-[license-url]: https://github.com/metakgp/PROJECT_NAME/blob/master/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/metakgp/iqps-go.svg?style=for-the-badge
+[contributors-url]: https://github.com/metakgp/iqps-go/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/metakgp/iqps-go.svg?style=for-the-badge
+[forks-url]: https://github.com/metakgp/iqps-go/network/members
+[stars-shield]: https://img.shields.io/github/stars/metakgp/iqps-go.svg?style=for-the-badge
+[stars-url]: https://github.com/metakgp/iqps-go/stargazers
+[issues-shield]: https://img.shields.io/github/issues/metakgp/iqps-go.svg?style=for-the-badge
+[issues-url]: https://github.com/metakgp/iqps-go/issues
+[license-shield]: https://img.shields.io/github/license/metakgp/iqps-go.svg?style=for-the-badge
+[license-url]: https://github.com/metakgp/iqps-go/blob/master/LICENSE
 [wiki-shield]: https://custom-icon-badges.demolab.com/badge/metakgp_wiki-grey?logo=metakgp_logo&style=for-the-badge
 [wiki-url]: https://wiki.metakgp.org
