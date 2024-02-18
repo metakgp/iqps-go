@@ -16,12 +16,12 @@
     <img width="140" alt="image" src="https://raw.githubusercontent.com/metakgp/design/main/logos/logo.jpg">
   </a>
 
-  <h3 align="center">IQPS - Intelligent Question Paper Search</h3>
+  <h3 align="center">IQPS</h3>
 
   <p align="center">
-    <i>An automated platform for searching and uploading semester question papers.</i>
+    <i>Intelligent Question Paper Search</i>
     <br />
-    <a href="https://qp.metakgp.org">Website</a>
+    <a href="https://beta.qp.metakgp.org">Website</a>
     ·
     <a href="https://github.com/metakgp/iqps-go/issues">Report Bug / Request Feature</a>
   </p>
@@ -41,9 +41,11 @@
 </details>
 
 ## About The Project
+IQPS is a platform for searching and uploading past year question papers for IIT Kharagpur students.
+> **NOTE:** IQPS is currently in active development. The beta version is deployed at [beta.qp.metakgp.org](https://beta.qp.metakgp.org/)
 
 ## Development
-To set up a local instance of the application, follow the steps below.
+[WIP: Steps to locally set up crawler, backend and frontend]
 
 ## Deployment
 [WIP: Steps to deploy the application and notes for the sysadmin]
@@ -56,7 +58,7 @@ To set up a local instance of the application, follow the steps below.
 ## Contact
 
 <p>
-📫 Metakgp -
+📫 MetaKGP -
 <a href="https://bit.ly/metakgp-slack">
   <img align="center" alt="Metakgp's slack invite" width="22px" src="https://raw.githubusercontent.com/edent/SuperTinyIcons/master/images/svg/slack.svg" />
 </a>
