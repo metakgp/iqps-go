@@ -42,7 +42,7 @@
 
 ## About The Project
 IQPS is a platform for searching and uploading past year question papers for IIT Kharagpur students.
-> **NOTE:** IQPS is currently in active development. The beta version is deployed at [beta.qp.metakgp.org](https://beta.qp.metakgp.org/)
+> **NOTE:** Currently in active development. Get involved at our [Slack](https://slack.metakgp.org/).
 
 ## Development
 [WIP: Steps to locally set up crawler, backend and frontend]
