@@ -1,4 +1,4 @@
-import { Component, For, createEffect, createSignal, onMount } from "solid-js";
+import { Component, For, createEffect, createSignal } from "solid-js";
 import type { SearchResult } from "../types/types";
 import { Spinner } from "./Spinner";
 

@@ -3,7 +3,6 @@ import { IoSearch as SearchIcon } from "solid-icons/io";
 import SearchResults from "./SearchResults";
 import type { SearchResult } from "../types/types";
 import "../styles/styles.scss";
-import { Spinner } from "./Spinner";
 
 function CourseSearchForm() {
   // Create signals for each form input
