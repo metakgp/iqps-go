@@ -62,13 +62,7 @@ function CourseSearchForm() {
           Search <SearchIcon />
         </button>
       </form>
-      {awaitingResponse() ? (
-        <Spinner />
-      ) : noResultsFound() ? (
-        <p>No results found. Try another query.</p>
-      ) : (
-        <SearchResults results={searchResults()} />
-      )}
+      <SearchResults awaitingResults={awaitingResponse()} noResultsFound={noResultsFound()} results={searchResults()} />
     </div>
   );
 }
