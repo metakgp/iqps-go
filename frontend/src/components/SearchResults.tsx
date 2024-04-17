@@ -16,11 +16,14 @@ const examMap = (exam: string) => {
   }
 };
 
+type SortBy = 'course_name' | 'year';
+type SortOrder = 'ascending' | 'descending';
+
 const SearchResults: Component<Props> = (props) => {
   const [displayedResults, setDisplayedResults] = createSignal<SearchResult[]>(props.results);
   const [filterByYear, setFilterByYear] = createSignal<number | null>(null);
-  const [sortBy, setSortBy] = createSignal<"course_name" | "year">("year");
-  const [sortOrder, setSortOrder] = createSignal<"ascending" | "descending">("descending");
+  const [sortBy, setSortBy] = createSignal<SortBy>("year");
+  const [sortOrder, setSortOrder] = createSignal<SortOrder>("descending");
   const [availableYears, setAvailableYears] = createSignal<number[]>([]);
 
   onMount(() => {
@@ -34,16 +37,23 @@ const SearchResults: Component<Props> = (props) => {
     if (filterByYear() !== null) filtered_results = filtered_results.filter((result) => result.year === filterByYear());
 
     const sorted_results = filtered_results.sort((a, b) => {
-      const first = sortOrder() === "ascending" ? a : b;
-      const second = sortOrder() === "ascending" ? b : a;
+      // Fall back to course name sorting when results are filtered by year.
+      const fallback_sorting = sortBy() === 'year'  && filterByYear() !== null;
 
-      switch (sortBy()) {
+      const sort_by: SortBy = fallback_sorting ? 'course_name' : sortBy();
+      const sort_order: SortOrder = fallback_sorting ? 'ascending' : sortOrder();
+
+      const first = sort_order === "ascending" ? a : b;
+      const second = sort_order === "ascending" ? b : a;
+
+      switch (sort_by) {
         case "year":
           return first.year - second.year;
         case "course_name":
           return first.course_name.localeCompare(second.course_name);
       }
     });
+
     setDisplayedResults(sorted_results);
   };
 
