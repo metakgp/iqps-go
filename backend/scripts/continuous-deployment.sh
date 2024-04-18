@@ -8,15 +8,15 @@ cd "$SCRIPT_DIR" >/dev/null 2>&1 || { echo "[ERROR]: Failed to cd into 'scripts'
 cd ../../ >/dev/null 2>&1 || { echo "[ERROR]: Failed to cd into 'iqps-go' directory" && exit 1; }
 
 ### Sync with remote repository
-git fetch origin
-git reset --hard origin/main
+sudo git fetch origin
+sudo git reset --hard origin/main
 
 ## Move to backend subdirectory
 cd backend/ >/dev/null 2>&1 || { echo "[ERROR]: Failed to cd into 'backend' directory" && exit 1; }
 
 ### Build Stage
-docker compose build
+sudo docker compose build
 
 ### Deploy Stage
-docker compose down
-docker compose up -d
+sudo docker compose down
+sudo docker compose up -d
