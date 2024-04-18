@@ -1,21 +1,22 @@
 name: Deploy on push
 
 on:
-  push:
-    branches: ["main"]
+    push:
+        branches: ["main"]
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+    deploy:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: SSH & execute the deploy script
-        uses: appleboy/ssh-action@master
-        env:
-            SCRIPTS_DIR: ${{ secrets.SCRIPTS_DIR }}
-        with:
-          host: ${{ secrets.HOSTNAME }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: SCRIPTS_DIR
-          script: eval "${SCRIPTS_DIR}/continuous-deployment.sh"
+        steps:
+            - name: SSH & execute the deploy script
+              uses: appleboy/ssh-action@master
+              env:
+                  SCRIPTS_DIR: ${{ secrets.SCRIPTS_DIR }}
+              with:
+                  host: ${{ secrets.HOSTNAME }}
+                  username: ${{ secrets.USERNAME }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  passphrase: ${{ secrets.PASSPHRASE }}
+                  envs: SCRIPTS_DIR
+                  script: eval "${SCRIPTS_DIR}/continuous-deployment.sh"
