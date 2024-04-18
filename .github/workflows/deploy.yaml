@@ -78,7 +78,7 @@ jobs:
                   envs: IQPS_DIR
                   script: |
                       cd "${IQPS_DIR}/backend/" >/dev/null 2>&1 || { 
-                            echo "[ERROR]: Failed to cd into 'scripts' directory"
+                            echo "[ERROR]: Failed to cd into 'backend' directory"
                             exit 1
                         }
                       sudo docker compose down || { 
