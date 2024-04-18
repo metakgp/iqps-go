@@ -147,6 +147,13 @@ select option {
   padding: 0.5rem 1rem;
   background-color: rgba($surface-1, 0.2);
 
+  .error-message {
+    padding: 0.5rem 0;
+    margin: 0;
+    text-align: center;
+    font-size: 1.2rem;
+  }
+
   .results-filter {
     width: 100%;
     display: flex;

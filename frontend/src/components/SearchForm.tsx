@@ -3,7 +3,6 @@ import { IoSearch as SearchIcon } from "solid-icons/io";
 import SearchResults from "./SearchResults";
 import type { SearchResult } from "../types/types";
 import "../styles/styles.scss";
-import { Spinner } from "./Spinner";
 
 function CourseSearchForm() {
   // Create signals for each form input
@@ -62,13 +61,7 @@ function CourseSearchForm() {
           Search <SearchIcon />
         </button>
       </form>
-      {awaitingResponse() ? (
-        <Spinner />
-      ) : noResultsFound() ? (
-        <p>No results found. Try another query.</p>
-      ) : (
-        <SearchResults results={searchResults()} />
-      )}
+      <SearchResults awaitingResults={awaitingResponse()} noResultsFound={noResultsFound()} results={searchResults()} />
     </div>
   );
 }
