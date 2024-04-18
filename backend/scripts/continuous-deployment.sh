@@ -5,9 +5,9 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 cd "$SCRIPT_DIR" >/dev/null 2>&1 ||
     { echo "[ERROR]: Failed to cd into 'scripts' directory" && exit 1; }
 
-## Move to root direcotry of the project - iqps-go
+## Move to root direcotry of the project - iqps
 cd ../../ >/dev/null 2>&1 ||
-    { echo "[ERROR]: Failed to cd into 'iqps-go' directory" && exit 1; }
+    { echo "[ERROR]: Failed to cd into 'iqps' directory" && exit 1; }
 
 ### Sync with remote repository
 sudo git fetch origin ||
