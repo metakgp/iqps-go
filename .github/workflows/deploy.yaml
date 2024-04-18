@@ -1,22 +1,91 @@
-name: Deploy on push
+name: Continuous Deployment
 
 on:
     push:
         branches: ["main"]
 
 jobs:
-    deploy:
+    pull:
+        name: Pull Stage
         runs-on: ubuntu-latest
 
         steps:
-            - name: SSH & execute the deploy script
+            - name: Sync with remote repository
               uses: appleboy/ssh-action@master
               env:
-                  SCRIPTS_DIR: ${{ secrets.SCRIPTS_DIR }}
+                  IQPS_DIR: ${{ secrets.IQPS_DIR }}
               with:
                   host: ${{ secrets.HOSTNAME }}
                   username: ${{ secrets.USERNAME }}
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   passphrase: ${{ secrets.PASSPHRASE }}
-                  envs: SCRIPTS_DIR
-                  script: eval "${SCRIPTS_DIR}/continuous-deployment.sh"
+                  envs: IQPS_DIR
+                  script: |
+                      cd "$IQPS_DIR" >/dev/null 2>&1 || { 
+                            echo "[ERROR]: Failed to cd into 'iqps' directory"
+                            exit 1 
+                        }
+                      sudo git fetch origin || { 
+                            echo "[ERROR]: Failed to fetch origin"
+                            exit 1 
+                        }
+                      sudo git reset --hard origin/main || { 
+                            echo "[ERROR]: Failed to sync with remote repo"
+                            exit 1
+                        }
+
+    build:
+        name: Build Stage
+        needs: pull
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Build the latest docker container
+              uses: appleboy/ssh-action@master
+              env:
+                  IQPS_DIR: ${{ secrets.IQPS_DIR }}
+              with:
+                  host: ${{ secrets.HOSTNAME }}
+                  username: ${{ secrets.USERNAME }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  passphrase: ${{ secrets.PASSPHRASE }}
+                  envs: IQPS_DIR
+                  script: |
+                      cd "${IQPS_DIR}/backend/" >/dev/null 2>&1 || { 
+                            echo "[ERROR]: Failed to cd into 'backend' directory"
+                            exit 1
+                        }
+                      sudo docker compose build || { 
+                            echo "[ERROR]: Build stage failed"
+                            exit 1
+                        }
+
+    deploy:
+        name: Deploy Stage
+        needs: [pull, build]
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Deploy the latest build
+              uses: appleboy/ssh-action@master
+              env:
+                  IQPS_DIR: ${{ secrets.IQPS_DIR }}
+              with:
+                  host: ${{ secrets.HOSTNAME }}
+                  username: ${{ secrets.USERNAME }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  passphrase: ${{ secrets.PASSPHRASE }}
+                  envs: IQPS_DIR
+                  script: |
+                      cd "${IQPS_DIR}/backend/" >/dev/null 2>&1 || { 
+                            echo "[ERROR]: Failed to cd into 'scripts' directory"
+                            exit 1
+                        }
+                      sudo docker compose down || { 
+                            echo "[ERROR]: Failed to takedown the previous deployment"
+                            exit 1
+                        }
+                      sudo docker compose up -d || { 
+                            echo "[ERROR]: Failed to deploy the latest version"
+                            exit 1
+                        }
