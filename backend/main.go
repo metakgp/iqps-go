@@ -179,7 +179,7 @@ func main() {
 	http.HandleFunc("/library", library)
 
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"https://beta.qp.metakgp.org", "http://localhost:3000"},
+		AllowedOrigins: []string{"https://qp.metakgp.org", "http://localhost:3000"},
 	})
 
 	fmt.Println("Starting server on port 5000")
