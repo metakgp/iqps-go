@@ -2,6 +2,7 @@ import { Component, For, createEffect, createSignal } from "solid-js";
 import type { SearchResult } from "../types/types";
 import { Spinner } from "./Spinner";
 import { FiDownload as DownloadIcon } from "solid-icons/fi";
+import {IoLink as ShareIcon } from "solid-icons/io";
 
 type Props = {
   results: SearchResult[];
@@ -39,6 +40,11 @@ const SearchResults: Component<Props> = (props) => {
 
     updateDisplayedResults();
   })
+
+  const handleCopyPDFLink = (e: any, link: string) => {
+    e.preventDefault();
+    navigator.clipboard.writeText(link);
+  }
 
   const updateDisplayedResults = () => {
     let filtered_results = props.results.slice();
@@ -133,14 +139,22 @@ const SearchResults: Component<Props> = (props) => {
                               <p>
                               {result.course_name}&nbsp;
                               </p>
+                              <div class="result-card-btns">
                                 <a
-                                  class="download-btn icon-btn"
+                                  class="result-card-btn icon-btn"
                                   href={result.filelink}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
-                                  {examMap(result.exam)} <DownloadIcon />
+                                  <DownloadIcon />
                                 </a>
+                                <button
+                                  class="result-card-btn icon-btn"
+                                  onClick={(e) => handleCopyPDFLink(e, result.filelink)}
+                                >
+                                  <ShareIcon />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         )}
