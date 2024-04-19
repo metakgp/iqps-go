@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -146,6 +149,106 @@ func search(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func upload(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	// Max total size of 50MB
+	const MaxBodySize = 100 << 20
+	r.Body = http.MaxBytesReader(w, r.Body, MaxBodySize)
+
+	err := r.ParseMultipartForm(MaxBodySize)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	files := r.MultipartForm.File["file"]
+	for _, fileHeader := range files {
+		file, err := fileHeader.Open()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer file.Close()
+
+		// Validating file type
+		buff := make([]byte, 512)
+		_, err = file.Read(buff)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fileType := http.DetectContentType(buff)
+		if fileType != "application/pdf" {
+			http.Error(w, "invalid file type. Only PDFs are supported", http.StatusBadRequest)
+			return
+		}
+		_, err = file.Seek(0, io.SeekCurrent)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// TODO: add file size check
+
+		fmt.Println("Filename:", fileHeader.Filename)
+		fmt.Println("Size", fileHeader.Size)
+
+		filename := strings.ReplaceAll(fileHeader.Filename, ":", "_")
+		qpsPath := os.Getenv("QPS_PATH")
+		filePath := filepath.Join(qpsPath, filename) 
+
+		dest, err := os.Create(filePath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer dest.Close()
+
+		if _, err := io.Copy(dest, file); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		populateDB(fileHeader.Filename)
+	}
+
+	fmt.Fprintf(w, "File upload successful\n")
+}
+
+func populateDB(filename string) {
+	qpData := strings.Split(filename, ":")
+
+	courseCode := qpData[0]
+	courseName := mapCodeToName(courseCode)
+	year, _ := strconv.Atoi(qpData[1])
+	exam := qpData[2]
+	fromLibrary := false
+	fileLink := fmt.Sprintf("%s/%s", staticFilesUrl, strings.Join(qpData, "_"))
+
+	query := fmt.Sprintf("INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library) VALUES (%s, %s, %d, %s, %s, %t)", courseCode, courseName, year, exam, fileLink, fromLibrary)
+
+	_, err := db.Exec(query)
+	if err != nil {
+		fmt.Printf("failed to add qp to database: %v\n", err)
+	}
+
+}
+
+func mapCodeToName(code string) string {
+	fileByte, err := os.ReadFile("courses.json")
+	if err != nil {
+		fmt.Printf("error reading courses map file: %v\n", err)
+	}
+
+	courses := make(map[string]string)
+	json.Unmarshal(fileByte, &courses)
+
+	return courses[code]
+}
+
 func CheckError(err error) {
 	if err != nil {
 		panic(err)
@@ -185,6 +288,7 @@ func main() {
 	http.HandleFunc("/search", search)
 	http.HandleFunc("/year", year)
 	http.HandleFunc("/library", library)
+	http.HandleFunc("/upload", upload)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"https://qp.metakgp.org", "http://localhost:3000"},
