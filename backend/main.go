@@ -108,7 +108,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// query := `SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status FROM qp WHERE course_code_tsvector @@ websearch_to_tsquery('english', $1)`
-	query := `SELECT * FROM (SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status FROM qp WHERE course_code_tsvector @@ websearch_to_tsquery('simple', $1) UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_code %>> $1 UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_code_tsvector @@ to_tsquery('simple', $1 ||':*'))`
+	query := `SELECT * FROM (SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status FROM qp WHERE course_code_tsvector @@ websearch_to_tsquery('simple', $1) UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_code %>> $1 UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_code_tsvector @@ websearch_to_tsquery('simple', $1 ||':*'))`
 
 	var params []interface{}
 	params = append(params, course)
