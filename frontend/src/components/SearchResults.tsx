@@ -2,7 +2,7 @@ import { Component, For, createEffect, createSignal } from "solid-js";
 import type { SearchResult } from "../types/types";
 import { Spinner } from "./Spinner";
 import { FiDownload as DownloadIcon } from "solid-icons/fi";
-import {IoLink as ShareIcon } from "solid-icons/io";
+import { BiSolidCopy as ShareIcon } from "solid-icons/bi";
 
 type Props = {
   results: SearchResult[];
@@ -12,14 +12,7 @@ type Props = {
 };
 
 const examMap = (exam: string) => {
-  switch (exam) {
-    case "midsem":
-      return "Midsem";
-    case "endsem":
-      return "Endsem";
-    default:
-      return "Unknown";
-  }
+  return exam.toUpperCase();
 };
 
 type SortBy = 'course_name' | 'year';
@@ -138,6 +131,7 @@ const SearchResults: Component<Props> = (props) => {
                             <td style={{display: 'flex', "align-items": 'center'}}>
                               <p>
                               {result.course_name}&nbsp;
+                              <span class="result-card-tag">{examMap(result.exam)}</span>
                               </p>
                               <div class="result-card-btns">
                                 <a
