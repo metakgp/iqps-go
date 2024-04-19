@@ -95,7 +95,7 @@ function CourseSearchForm() {
             Search <SearchIcon />
           </button>
           <button class="icon-btn" onClick={handleCopyResultsLink} disabled={awaitingResponse() || !success()}>
-            Copy Link to Results <ShareIcon />
+            Share Results <ShareIcon />
           </button>
         </div>
       </form>
