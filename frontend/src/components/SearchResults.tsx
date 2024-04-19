@@ -3,6 +3,7 @@ import type { SearchResult } from "../types/types";
 import { Spinner } from "./Spinner";
 import { FiDownload as DownloadIcon } from "solid-icons/fi";
 import { BiSolidCopy as ShareIcon } from "solid-icons/bi";
+import { copyLink } from "../utils/copyLink";
 
 type Props = {
   results: SearchResult[];
@@ -33,11 +34,6 @@ const SearchResults: Component<Props> = (props) => {
 
     updateDisplayedResults();
   })
-
-  const handleCopyPDFLink = (e: any, link: string) => {
-    e.preventDefault();
-    navigator.clipboard.writeText(link);
-  }
 
   const updateDisplayedResults = () => {
     let filtered_results = props.results.slice();
@@ -144,7 +140,7 @@ const SearchResults: Component<Props> = (props) => {
                                 </a>
                                 <button
                                   class="result-card-btn icon-btn"
-                                  onClick={(e) => handleCopyPDFLink(e, result.filelink)}
+                                  onClick={(e) => copyLink(e, result.filelink)}
                                 >
                                   <ShareIcon />
                                 </button>

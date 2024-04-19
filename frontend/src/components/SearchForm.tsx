@@ -1,8 +1,10 @@
 import { createSignal } from "solid-js";
+import { toast } from 'solid-toast';
 import { IoSearch as SearchIcon, IoLink as ShareIcon } from "solid-icons/io";
 import SearchResults from "./SearchResults";
 import type { SearchResult } from "../types/types";
 import "../styles/styles.scss";
+import { copyLink } from "../utils/copyLink";
 
 function CourseSearchForm() {
   const currentURL = new URL(window.location.toString());
@@ -64,11 +66,6 @@ function CourseSearchForm() {
     window.history.replaceState(window.history.state, "", url);
   };
 
-  const handleCopyResultsLink = (e: any) => {
-    e.preventDefault();
-    navigator.clipboard.writeText(window.location.toString());
-  }
-
   if (courseName() !== '') {
     searchQuery();
   }
@@ -94,7 +91,7 @@ function CourseSearchForm() {
           <button class="icon-btn" type="submit" disabled={awaitingResponse()}>
             Search <SearchIcon />
           </button>
-          <button class="icon-btn" onClick={handleCopyResultsLink} disabled={awaitingResponse() || !success()}>
+          <button class="icon-btn" onClick={(e) => copyLink(e, window.location.toString())} disabled={awaitingResponse() || !success()}>
             Share Results <ShareIcon />
           </button>
         </div>
