@@ -131,7 +131,7 @@ const SearchResults: Component<Props> = (props) => {
                             <td>{result.year}</td>
                             <td style={{display: 'flex', "align-items": 'center'}}>
                               <p>
-                              {decodeURIComponent(result.course_name).replaceAll("_", " ")}&nbsp;
+                              {result.course_name}&nbsp;
                               </p>
                                 <a
                                   class="download-btn icon-btn"
