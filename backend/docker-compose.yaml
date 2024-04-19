@@ -2,6 +2,7 @@ services:
   iqps-backend:
     image: iqps-backend
     build: .
+    restart: always
     networks:
       metaploy-network:
         aliases:
