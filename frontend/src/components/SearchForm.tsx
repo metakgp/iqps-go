@@ -9,7 +9,7 @@ function CourseSearchForm() {
 
   // Create signals for each form input
   const [courseName, setCourseName] = createSignal(currentURL.searchParams.get('query') ?? "");
-  const [exam, setExam] = createSignal("");
+  const [exam, setExam] = createSignal(currentURL.searchParams.get('exam') ?? "");
   const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
   const [success, setSuccess] = createSignal<boolean>(false);
   const [awaitingResponse, setAwaitingResponse] = createSignal<boolean>(false);
@@ -59,6 +59,7 @@ function CourseSearchForm() {
     // Add the query to the URL
     const url = new URL(window.location.toString());
     url.searchParams.set('query', courseName());
+    url.searchParams.set('exam', exam());
 
     window.history.replaceState(window.history.state, "", url);
   };
