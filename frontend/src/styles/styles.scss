@@ -106,7 +106,7 @@ select option {
 }
 
 .search-form {
-  padding: 20px;
+  padding: 20px 15%;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
@@ -178,6 +178,16 @@ select option {
     width: 100%;
     border-collapse: collapse;
 
+    .download-btn {
+      background-color: rgba($accent-color, 0.8);
+      color: rgba($fg-color, 0.75);
+      margin-left: auto;
+      font-weight: bold;
+
+      padding: 5px 8px;
+      border-radius: 5px;
+    }
+
     tr {
       width: fit-content;
     }
@@ -240,4 +250,30 @@ select option {
   fill: rgba($accent-color, 0.8);
   color: rgba($fg-color, 0.8);
   animation: spin 1s infinite;
+}
+
+
+@media only screen and (max-width: 768px) {
+  .search-form {
+    padding: 0;
+  }
+
+  .search-results {
+    padding: 0.5rem 0;
+
+    .results-filter {
+      gap: 0rem;
+      padding: 0 1rem;
+
+      .select-wrapper {
+        width: 100%;
+      }
+    }
+
+    .search-results-table {
+      td,th {
+        padding: 10px;
+      }
+    }
+  }
 }

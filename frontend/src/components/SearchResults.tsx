@@ -1,6 +1,7 @@
 import { Component, For, createEffect, createSignal } from "solid-js";
 import type { SearchResult } from "../types/types";
 import { Spinner } from "./Spinner";
+import { FiDownload as DownloadIcon } from "solid-icons/fi";
 
 type Props = {
   results: SearchResult[];
@@ -12,9 +13,9 @@ type Props = {
 const examMap = (exam: string) => {
   switch (exam) {
     case "midsem":
-      return "Mid Semester";
+      return "Midsem";
     case "endsem":
-      return "End Semester";
+      return "Endsem";
     default:
       return "Unknown";
   }
@@ -121,7 +122,6 @@ const SearchResults: Component<Props> = (props) => {
                       <tr>
                         <th>Year</th>
                         <th>Course Name</th>
-                        <th>Exam</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -129,20 +129,19 @@ const SearchResults: Component<Props> = (props) => {
                         {(result) => (
                           <tr class="result-card">
                             <td>{result.year}</td>
-                            <td>
-                              {decodeURIComponent(result.course_name).replaceAll("_", " ")} &nbsp; [
-                              <a
-                                class="download-btn"
-                                style={{ display: "inline-flex", gap: "5px", "align-items": "center" }}
-                                href={result.filelink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                PDF
-                              </a>
-                              ]
+                            <td style={{display: 'flex', "align-items": 'center'}}>
+                              <p>
+                              {decodeURIComponent(result.course_name).replaceAll("_", " ")}&nbsp;
+                              </p>
+                                <a
+                                  class="download-btn icon-btn"
+                                  href={result.filelink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {examMap(result.exam)} <DownloadIcon />
+                                </a>
                             </td>
-                            <td>{examMap(result.exam)}</td>
                           </tr>
                         )}
                       </For>
