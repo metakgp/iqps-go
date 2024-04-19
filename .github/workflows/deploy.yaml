@@ -2,7 +2,10 @@ name: Continuous Deployment for backend
 
 on:
     push:
-        branches: ["main"]
+        branches: 
+            - 'main'
+        paths:
+            - 'backend/**'
 
 jobs:
     pull:
