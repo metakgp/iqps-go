@@ -15,6 +15,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -35,7 +36,26 @@ var (
 	staticFilesUrl string
 )
 
-const init_db = "./sql/init_table.sql"
+const init_db = `CREATE TABLE IF NOT EXISTS qp (
+    id SERIAL PRIMARY KEY,
+    course_code TEXT NOT NULL DEFAULT '',
+    course_name TEXT NOT NULL,
+    year INTEGER NOT NULL,
+    exam TEXT CHECK (exam IN ('midsem', 'endsem') OR exam = ''),
+    filelink TEXT NOT NULL,
+    from_library BOOLEAN DEFAULT FALSE,
+    upload_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    approve_status BOOLEAN DEFAULT FALSE
+);
+`
+
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "postgres"
+	password = "<password>"
+	dbname   = "postgres"
+)
 
 func health(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Yes, I'm alive!")
@@ -143,21 +163,28 @@ func search(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func CheckError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dbPath := os.Getenv("DB_PATH")
 	staticFilesUrl = os.Getenv("STATIC_FILES_URL")
 
-	db, err = sql.Open("sqlite3", dbPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
+	db, err := sql.Open("postgres", psqlconn)
+	CheckError(err)
 	defer db.Close()
+
+	err = db.Ping()
+	CheckError(err)
 
 	_, err = db.Exec(init_db)
 	if err != nil {
