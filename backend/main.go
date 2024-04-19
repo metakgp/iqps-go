@@ -118,17 +118,6 @@ func search(w http.ResponseWriter, r *http.Request) {
 	var params []interface{}
 	params = append(params, course)
 
-	year := r.URL.Query().Get("year")
-	if year != "" {
-		yearInt, err := strconv.Atoi(year)
-		if err != nil {
-			http.Error(w, "year must be a number", http.StatusBadRequest)
-			return
-		}
-		query = fmt.Sprintf(`%s AND year = ?`, query)
-		params = append(params, strconv.Itoa(yearInt))
-	}
-
 	exam := r.URL.Query().Get("exam")
 	if exam != "" {
 		query = fmt.Sprintf(`%s AND (exam = $2 OR exam = '')`, query)
