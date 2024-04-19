@@ -5,18 +5,17 @@ import type { SearchResult } from "../types/types";
 import "../styles/styles.scss";
 
 function CourseSearchForm() {
+  const currentURL = new URL(window.location.toString());
+
   // Create signals for each form input
-  const [courseName, setCourseName] = createSignal("");
+  const [courseName, setCourseName] = createSignal(currentURL.searchParams.get('query') ?? "");
   const [exam, setExam] = createSignal("");
   const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
   const [success, setSuccess] = createSignal<boolean>(false);
   const [awaitingResponse, setAwaitingResponse] = createSignal<boolean>(false);
   const [errMsg, setErrMsg] = createSignal<string>("Search for something.");
 
-  // Function to handle form submission
-  const handleSubmit = async (event: any) => {
-    event.preventDefault(); // Prevent the default form submit action
-
+  const searchQuery = async () => {
     if (!awaitingResponse()) {
       const params = new URLSearchParams();
       if (courseName()) params.append("course", courseName());
@@ -50,7 +49,23 @@ function CourseSearchForm() {
         console.error("Error fetching data:", error);
       }
     }
+  }
+
+  // Function to handle form submission
+  const handleSubmit = async (event: any) => {
+    event.preventDefault(); // Prevent the default form submit action
+    await searchQuery(); // Search the query
+
+    // Add the query to the URL
+    const url = new URL(window.location.toString());
+    url.searchParams.set('query', courseName());
+
+    window.history.replaceState(window.history.state, "", url);
   };
+
+  if (courseName() !== '') {
+    searchQuery();
+  }
 
   return (
     <div class="search-form">
