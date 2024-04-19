@@ -147,6 +147,10 @@ select option {
   padding: 0.5rem 1rem;
   background-color: rgba($surface-1, 0.2);
 
+  .spinner {
+    margin: auto;
+  }
+
   .error-message {
     padding: 0.5rem 0;
     margin: 0;
