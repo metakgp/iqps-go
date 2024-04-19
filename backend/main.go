@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -46,14 +47,6 @@ const init_db = `CREATE TABLE IF NOT EXISTS qp (
     approve_status BOOLEAN DEFAULT FALSE
 );
 `
-
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "<password>"
-	dbname   = "postgres"
-)
 
 func health(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Yes, I'm alive!")
@@ -162,6 +155,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	host := os.Getenv("DB_HOST")
+	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
+	CheckError(err)
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
 
 	staticFilesUrl = os.Getenv("STATIC_FILES_URL")
 
