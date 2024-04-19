@@ -8,8 +8,8 @@ function CourseSearchForm() {
   const currentURL = new URL(window.location.toString());
 
   // Create signals for each form input
-  const [courseName, setCourseName] = createSignal(currentURL.searchParams.get('query') ?? "");
-  const [exam, setExam] = createSignal(currentURL.searchParams.get('exam') ?? "");
+  const [courseName, setCourseName] = createSignal(currentURL.searchParams.get("query") ?? "");
+  const [exam, setExam] = createSignal(currentURL.searchParams.get("exam") ?? "");
   const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
   const [success, setSuccess] = createSignal<boolean>(false);
   const [awaitingResponse, setAwaitingResponse] = createSignal<boolean>(false);
@@ -49,7 +49,7 @@ function CourseSearchForm() {
         console.error("Error fetching data:", error);
       }
     }
-  }
+  };
 
   // Function to handle form submission
   const handleSubmit = async (event: any) => {
@@ -58,8 +58,8 @@ function CourseSearchForm() {
 
     // Add the query to the URL
     const url = new URL(window.location.toString());
-    url.searchParams.set('query', courseName());
-    url.searchParams.set('exam', exam());
+    url.searchParams.set("query", courseName());
+    url.searchParams.set("exam", exam());
 
     window.history.replaceState(window.history.state, "", url);
   };
@@ -67,9 +67,9 @@ function CourseSearchForm() {
   const handleCopyResultsLink = (e: any) => {
     e.preventDefault();
     navigator.clipboard.writeText(window.location.toString());
-  }
+  };
 
-  if (courseName() !== '') {
+  if (courseName() !== "") {
     searchQuery();
   }
 
@@ -78,7 +78,13 @@ function CourseSearchForm() {
       <form onSubmit={handleSubmit}>
         <div>
           <label for="course">Course Name:</label>
-          <input autofocus={true} id="course" value={courseName()} onInput={(e) => setCourseName(e.target.value)} />
+          <input
+            required
+            autofocus={true}
+            id="course"
+            value={courseName()}
+            onInput={(e) => setCourseName(e.target.value)}
+          />
         </div>
         <div>
           <label for="exam">Exam:</label>
