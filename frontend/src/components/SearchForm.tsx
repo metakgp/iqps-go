@@ -1,5 +1,6 @@
 import { createSignal } from "solid-js";
 import { IoSearch as SearchIcon, IoLink as ShareIcon } from "solid-icons/io";
+import toast from "solid-toast";
 import SearchResults from "./SearchResults";
 import type { SearchResult } from "../types/types";
 import "../styles/styles.scss";
@@ -66,7 +67,11 @@ function CourseSearchForm() {
 
   const handleCopyResultsLink = (e: any) => {
     e.preventDefault();
-    navigator.clipboard.writeText(window.location.toString());
+    toast.promise(navigator.clipboard.writeText(window.location.toString()), {
+      loading: "Copying link to clipboard...",
+      success: "Link copied to clipboard!",
+      error: "Failed to copy link to clipboard.",
+    });
   };
 
   if (courseName() !== "") {
@@ -101,7 +106,7 @@ function CourseSearchForm() {
             Search <SearchIcon />
           </button>
           <button class="icon-btn" onClick={handleCopyResultsLink} disabled={awaitingResponse() || !success()}>
-            Copy Link to Results <ShareIcon />
+            Share with your friends <ShareIcon />
           </button>
         </div>
       </form>

@@ -14,6 +14,9 @@ dependencies:
   solid-js:
     specifier: ^1.8.11
     version: 1.8.11
+  solid-toast:
+    specifier: ^0.5.0
+    version: 0.5.0(solid-js@1.8.11)
 
 devDependencies:
   sass:
@@ -1387,6 +1390,14 @@ packages:
       '@babel/types': 7.23.6
       solid-js: 1.8.11
     dev: true
+
+  /solid-toast@0.5.0(solid-js@1.8.11):
+    resolution: {integrity: sha512-t770JakjyS2P9b8Qa1zMLOD51KYKWXbTAyJePVUoYex5c5FH5S/HtUBUbZAWFcqRCKmAE8KhyIiCvDZA8bOnxQ==}
+    peerDependencies:
+      solid-js: ^1.5.4
+    dependencies:
+      solid-js: 1.8.11
+    dev: false
 
   /source-map-js@1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}
