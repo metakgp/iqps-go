@@ -1,14 +1,11 @@
 import { toast } from 'solid-toast';
 
-export async function copyLink(e: Event, link: string) {
+export function copyLink(e: Event, link: string) {
 	e.preventDefault();
 
-    try {
-      await navigator.clipboard.writeText(link);
-      toast('Link copied to clipboard.');
-    } catch (e) {
-      toast('Error copying link to the clipboard.', {
-        className: "toast toast-err"
-      });
-    }
+  toast.promise(navigator.clipboard.writeText(link), {
+    loading: "Copying link to clipboard...",
+    success: "Link copied to clipboard.",
+    error: "Failed to copy link to clipboard."
+  })
 }
