@@ -35,7 +35,7 @@ const SearchResults: Component<Props> = (props) => {
     const unique_years: Set<number> = new Set();
 
     props.results.forEach((result) => unique_years.add(result.year));
-    setAvailableYears(Array.from(unique_years.values()));
+    setAvailableYears(Array.from(unique_years.values()).sort().reverse());
 
     updateDisplayedResults();
   })
