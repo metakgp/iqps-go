@@ -1,4 +1,5 @@
 import type { Component } from "solid-js";
+import { Toaster } from 'solid-toast';
 import CourseSearchForm from "./components/SearchForm";
 import "./styles/styles.scss";
 
@@ -11,6 +12,10 @@ const App: Component = () => {
         <p>Made with ❤️ and {"</>"} by <a href="https://github.com/metakgp/iqps-go" target="_blank">MetaKGP</a></p>
       </div>
       <CourseSearchForm />
+      <Toaster toastOptions={{
+        position: 'bottom-center',
+        className: 'toast'
+      }} />
     </div>
   );
 };
