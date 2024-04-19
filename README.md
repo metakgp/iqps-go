@@ -35,8 +35,9 @@
 - [Development](#development)
 - [Deployment](#deployment)
   - [Environment Variables](#environment-variables)
-- [Maintainer(s)](#maintainers)
 - [Contact](#contact)
+  - [Maintainer(s)](#maintainers)
+  - [Creator(s)](#creators)
 - [Additional documentation](#additional-documentation)
 
 </details>
@@ -45,7 +46,8 @@
 IQPS is a platform for searching and uploading previous year question papers for IIT Kharagpur students. The frontend is deployed at https://qp.metakgp.org and the backend is hosted on a DigitalOcean droplet with 2GB RAM and a single CPU. See [MetaPloy](https://github.com/metakgp/metaploy) for the deployment architecture.
 IQPS was originally created by [Shubham Mishra](https://github.com/grapheo12) in python. You can find it [here](https://github.com/grapheo12/iqps).
 
-> **NOTE:** Currently in active development. Get involved at our [Slack](https://slack.metakgp.org/).
+> [!Note]
+> Currently in active development. Get involved at our [Slack](https://slack.metakgp.org/).
 
 ## Development
 1. Clone this repository.
@@ -75,12 +77,6 @@ Environment variables can be set using a `.env` file. Use the `.env.template` fi
 #### Frontend
 - `VITE_BACKEND_URL`: The IQPS backend URL. Use `http://localhost:5000` in development.
 
-## Maintainer(s)
-- [Rajiv Harlalka](https://github.com/rajivharlalka)
-- [Arpit Bhardwaj](https://github.com/proffapt)
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
 ## Contact
 
 <p>
@@ -104,6 +100,19 @@ Environment variables can be set using a `.env` file. Use the `.env.template` fi
   <img align="center" alt="metakgp's Instagram" width="22px" src="https://raw.githubusercontent.com/edent/SuperTinyIcons/master/images/svg/instagram.svg" />
 </a>
 </p>
+
+### Maintainer(s)
+
+The currently active maintainer(s) of this project.
+
+- [Rajiv Harlalka](https://github.com/rajivharlalka)
+- [Arpit Bhardwaj](https://github.com/proffapt)
+
+### Creator(s)
+
+Honoring the original creator(s) and ideator(s) of this project.
+
+- [Shubham Mishra](https://github.com/grapheo12)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
