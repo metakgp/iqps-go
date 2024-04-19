@@ -111,6 +111,11 @@ select option {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 
+  .search-form-btns {
+    display: flex;
+    gap: 1rem;
+  }
+
   label {
     display: block;
     margin-bottom: 0.5rem;
