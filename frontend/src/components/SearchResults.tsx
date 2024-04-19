@@ -1,6 +1,7 @@
 import { Component, For, createEffect, createSignal } from "solid-js";
 import type { SearchResult } from "../types/types";
 import { Spinner } from "./Spinner";
+import { FiDownload as DownloadIcon } from "solid-icons/fi";
 
 type Props = {
   results: SearchResult[];
@@ -129,18 +130,16 @@ const SearchResults: Component<Props> = (props) => {
                         {(result) => (
                           <tr class="result-card">
                             <td>{result.year}</td>
-                            <td>
-                              {decodeURIComponent(result.course_name).replaceAll("_", " ")} &nbsp; [
+                            <td style={{display: 'flex', "align-items": 'center'}}>
+                              {decodeURIComponent(result.course_name).replaceAll("_", " ")} &nbsp;
                               <a
-                                class="download-btn"
-                                style={{ display: "inline-flex", gap: "5px", "align-items": "center" }}
+                                class="download-btn icon-btn"
                                 href={result.filelink}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
-                                PDF
+                                <DownloadIcon size="1.3rem" />
                               </a>
-                              ]
                             </td>
                             <td>{examMap(result.exam)}</td>
                           </tr>

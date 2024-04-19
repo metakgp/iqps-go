@@ -178,6 +178,15 @@ select option {
     width: 100%;
     border-collapse: collapse;
 
+    .download-btn {
+      background-color: rgba($accent-color, 0.8);
+      color: rgba($fg-color, 0.75);
+      margin-left: auto;
+
+      padding: 5px 5px;
+      border-radius: 5px;
+    }
+
     tr {
       width: fit-content;
     }
