@@ -9,6 +9,7 @@ services:
     volumes:
       - ./db:/db
       - nginx-config-volume:/etc/nginx/sites-enabled
+      - odins-vault:/srv/static
 
 networks:
   metaploy-network:
@@ -19,3 +20,6 @@ volumes:
   nginx-config-volume:
     external: true
     name: metaploy-nginx-config-volume
+  odins-vault:
+    external: true
+    name: odins-vault
