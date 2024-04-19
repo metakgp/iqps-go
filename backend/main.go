@@ -15,17 +15,19 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 )
 
 type QuestionPaper struct {
-	ID          int    `json:"id"`
-	CourseCode  string `json:"course_code"`
-	CourseName  string `json:"course_name"`
-	Year        int    `json:"year"`
-	Exam        string `json:"exam"`
-	FileLink    string `json:"filelink"`
-	FromLibrary bool   `json:"from_library"`
+	ID              int    `json:"id"`
+	CourseCode      string `json:"course_code"`
+	CourseName      string `json:"course_name"`
+	Year            int    `json:"year"`
+	Exam            string `json:"exam"`
+	FileLink        string `json:"filelink"`
+	FromLibrary     bool   `json:"from_library"`
+	UploadTimestamp string `json:"upload_timestamp"`
+	ApproveStatus   bool   `json:"approve_status"`
 }
 
 var (
@@ -33,15 +35,16 @@ var (
 	staticFilesUrl string
 )
 
-const init_db = `
-CREATE TABLE IF NOT EXISTS qp (
-	id INTEGER PRIMARY KEY,
-	course_code TEXT NOT NULL DEFAULT '',
-	course_name TEXT NOT NULL,
-	year INTEGER NOT NULL,
-	exam TEXT CHECK (exam IN ('midsem', 'endsem') OR exam = '') DEFAULT '',
-	filelink TEXT NOT NULL,
-	from_library BOOLEAN DEFAULT 0
+const init_db = `CREATE TABLE IF NOT EXISTS qp (
+    id SERIAL PRIMARY KEY,
+    course_code TEXT NOT NULL DEFAULT '',
+    course_name TEXT NOT NULL,
+    year INTEGER NOT NULL,
+    exam TEXT CHECK (exam IN ('midsem', 'endsem') OR exam = ''),
+    filelink TEXT NOT NULL,
+    from_library BOOLEAN DEFAULT FALSE,
+    upload_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    approve_status BOOLEAN DEFAULT FALSE
 );
 `
 
@@ -103,24 +106,16 @@ func search(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "course is required", http.StatusBadRequest)
 		return
 	}
-	query := `SELECT * FROM qp WHERE rowid IN (SELECT rowid FROM qp_better WHERE course_name MATCH ?)`
+
+	// query := `SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status FROM qp WHERE course_code_tsvector @@ websearch_to_tsquery('english', $1)`
+	query := `SELECT * FROM (SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status FROM qp WHERE course_code_tsvector @@ websearch_to_tsquery('simple', $1) UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_code %>> $1 UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_code_tsvector @@ to_tsquery('simple', $1 ||':*'))`
+
 	var params []interface{}
 	params = append(params, course)
 
-	year := r.URL.Query().Get("year")
-	if year != "" {
-		yearInt, err := strconv.Atoi(year)
-		if err != nil {
-			http.Error(w, "year must be a number", http.StatusBadRequest)
-			return
-		}
-		query = fmt.Sprintf(`%s AND year = ?`, query)
-		params = append(params, strconv.Itoa(yearInt))
-	}
-
 	exam := r.URL.Query().Get("exam")
 	if exam != "" {
-		query = fmt.Sprintf(`%s AND (exam = ? OR exam = '')`, query)
+		query = fmt.Sprintf(`%s WHERE (exam = $2 OR exam = '')`, query)
 		params = append(params, exam)
 	}
 
@@ -134,7 +129,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 	var qps []QuestionPaper = make([]QuestionPaper, 0)
 	for rows.Next() {
 		qp := QuestionPaper{}
-		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary)
+		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary, &qp.UploadTimestamp, &qp.ApproveStatus)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -151,22 +146,35 @@ func search(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func CheckError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dbPath := os.Getenv("DB_PATH")
+	host := os.Getenv("DB_HOST")
+	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
+	CheckError(err)
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+
 	staticFilesUrl = os.Getenv("STATIC_FILES_URL")
 
-	db, err = sql.Open("sqlite3", dbPath)
+	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	db, err = sql.Open("postgres", psqlconn)
+	CheckError(err)
 	defer db.Close()
+
+	err = db.Ping()
+	CheckError(err)
 
 	_, err = db.Exec(init_db)
 	if err != nil {

@@ -6,6 +6,7 @@ services:
       metaploy-network:
         aliases:
           - iqps-backend
+      metaploy-private-network:
     volumes:
       - ./db:/db
       - nginx-config-volume:/etc/nginx/sites-enabled
@@ -15,6 +16,9 @@ networks:
   metaploy-network:
     external: true
     name: metaploy-network
+  metaploy-private-network:
+    external: true
+    name: metaploy-private-network
 
 volumes:
   nginx-config-volume:
