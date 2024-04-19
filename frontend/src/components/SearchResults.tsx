@@ -12,7 +12,7 @@ type Props = {
 };
 
 const examMap = (exam: string) => {
-  return exam.toUpperCase();
+  return exam.slice(0, 3).toUpperCase();
 };
 
 type SortBy = 'course_name' | 'year';
