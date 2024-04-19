@@ -9,8 +9,9 @@ function CourseSearchForm() {
   const [courseName, setCourseName] = createSignal("");
   const [exam, setExam] = createSignal("");
   const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
-  const [noResultsFound, setNoResultsFound] = createSignal<boolean>(false);
+  const [success, setSuccess] = createSignal<boolean>(false);
   const [awaitingResponse, setAwaitingResponse] = createSignal<boolean>(false);
+  const [errMsg, setErrMsg] = createSignal<string>("Search for something.");
 
   // Function to handle form submission
   const handleSubmit = async (event: any) => {
@@ -30,11 +31,22 @@ function CourseSearchForm() {
         const data: SearchResult[] = await response.json();
 
         setSearchResults(data); // Handle the response data
-        setNoResultsFound(data.length === 0); // Show a message if no results are found
+
+        // Show a message if no results are found
+        if (data.length === 0) {
+          setSuccess(false);
+          setErrMsg("No results found. Try another query.");
+        } else {
+          setSuccess(true);
+          setErrMsg("");
+        }
 
         setAwaitingResponse(false);
       } catch (error) {
+        setSuccess(false);
         setAwaitingResponse(false);
+        setErrMsg("Error fetching data. Please try again later.");
+
         console.error("Error fetching data:", error);
       }
     }
@@ -61,7 +73,12 @@ function CourseSearchForm() {
           Search <SearchIcon />
         </button>
       </form>
-      <SearchResults awaitingResults={awaitingResponse()} noResultsFound={noResultsFound()} results={searchResults()} />
+      <SearchResults
+        awaitingResults={awaitingResponse()}
+        success={success()}
+        errMsg={errMsg()}
+        results={searchResults()}
+      />
     </div>
   );
 }

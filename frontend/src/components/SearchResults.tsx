@@ -5,7 +5,8 @@ import { Spinner } from "./Spinner";
 type Props = {
   results: SearchResult[];
   awaitingResults: boolean;
-  noResultsFound: boolean;
+  success: boolean;
+  errMsg: string;
 };
 
 const examMap = (exam: string) => {
@@ -69,7 +70,7 @@ const SearchResults: Component<Props> = (props) => {
         props.awaitingResults ? <Spinner /> :
           <div class="search-results">
             {
-              props.noResultsFound ? <p class="error-message">No results found. Try another query.</p> : (
+              !props.success ? <p class="error-message">{props.errMsg}</p> : (
                 displayedResults().length > 0 && (
                   <>
                     <div class="row results-filter">
