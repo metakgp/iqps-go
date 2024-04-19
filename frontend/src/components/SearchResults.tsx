@@ -13,9 +13,9 @@ type Props = {
 const examMap = (exam: string) => {
   switch (exam) {
     case "midsem":
-      return "Mid Semester";
+      return "Midsem";
     case "endsem":
-      return "End Semester";
+      return "Endsem";
     default:
       return "Unknown";
   }
@@ -122,7 +122,6 @@ const SearchResults: Component<Props> = (props) => {
                       <tr>
                         <th>Year</th>
                         <th>Course Name</th>
-                        <th>Exam</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -131,17 +130,18 @@ const SearchResults: Component<Props> = (props) => {
                           <tr class="result-card">
                             <td>{result.year}</td>
                             <td style={{display: 'flex', "align-items": 'center'}}>
-                              {decodeURIComponent(result.course_name).replaceAll("_", " ")} &nbsp;
-                              <a
-                                class="download-btn icon-btn"
-                                href={result.filelink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <DownloadIcon size="1.3rem" />
-                              </a>
+                              <p>
+                              {decodeURIComponent(result.course_name).replaceAll("_", " ")}&nbsp;
+                              </p>
+                                <a
+                                  class="download-btn icon-btn"
+                                  href={result.filelink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {examMap(result.exam)} <DownloadIcon />
+                                </a>
                             </td>
-                            <td>{examMap(result.exam)}</td>
                           </tr>
                         )}
                       </For>
