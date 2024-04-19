@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import { IoSearch as SearchIcon } from "solid-icons/io";
+import { IoSearch as SearchIcon, IoLink as ShareIcon } from "solid-icons/io";
 import SearchResults from "./SearchResults";
 import type { SearchResult } from "../types/types";
 import "../styles/styles.scss";
@@ -64,6 +64,11 @@ function CourseSearchForm() {
     window.history.replaceState(window.history.state, "", url);
   };
 
+  const handleCopyResultsLink = (e: any) => {
+    e.preventDefault();
+    navigator.clipboard.writeText(window.location.toString());
+  }
+
   if (courseName() !== '') {
     searchQuery();
   }
@@ -85,9 +90,14 @@ function CourseSearchForm() {
             </select>
           </div>
         </div>
-        <button class="icon-btn" type="submit" disabled={awaitingResponse()}>
-          Search <SearchIcon />
-        </button>
+        <div class="search-form-btns">
+          <button class="icon-btn" type="submit" disabled={awaitingResponse()}>
+            Search <SearchIcon />
+          </button>
+          <button class="icon-btn" onClick={handleCopyResultsLink} disabled={awaitingResponse() || !success()}>
+            Copy Link to Results <ShareIcon />
+          </button>
+        </div>
       </form>
       <SearchResults
         awaitingResults={awaitingResponse()}
