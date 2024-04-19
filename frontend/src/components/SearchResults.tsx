@@ -5,7 +5,8 @@ import { Spinner } from "./Spinner";
 type Props = {
   results: SearchResult[];
   awaitingResults: boolean;
-  noResultsFound: boolean;
+  success: boolean;
+  errMsg: string;
 };
 
 const examMap = (exam: string) => {
@@ -65,95 +66,93 @@ const SearchResults: Component<Props> = (props) => {
 
   return (
     <>
-      {
-        props.awaitingResults ? <Spinner /> :
-          <div class="search-results">
-            {
-              props.noResultsFound ? <p class="error-message">No results found. Try another query.</p> : (
-                displayedResults().length > 0 && (
-                  <>
-                    <div class="row results-filter">
-                      <div class="select-wrapper">
-                        <select
-                          id="year"
-                          value={(filterByYear() ?? "null").toString()}
-                          onInput={(e) => {
-                            setFilterByYear(e.target.value === "null" ? null : parseInt(e.target.value));
-                            updateDisplayedResults();
-                          }}
-                        >
-                          <option value="null">All Years</option>
-                          <For each={availableYears()}>{(year) => <option value={year.toString()}>{year}</option>}</For>
-                        </select>
-                      </div>
-
-                      <div class="select-wrapper">
-                        <select
-                          id="sortBy"
-                          value={sortBy()}
-                          onInput={(e) => {
-                            setSortBy(e.target.value as "course_name" | "year");
-                            updateDisplayedResults();
-                          }}
-                        >
-                          <option value="year">Sort by Year</option>
-                          <option value="course_name">Sort by Course Name</option>
-                        </select>
-                      </div>
-
-                      <div class="select-wrapper">
-                        <select
-                          id="sortOrder"
-                          value={sortOrder()}
-                          onInput={(e) => {
-                            setSortOrder(e.target.value as "ascending" | "descending");
-                            updateDisplayedResults();
-                          }}
-                        >
-                          <option value="ascending">Ascending</option>
-                          <option value="descending">Descending</option>
-                        </select>
-                      </div>
+      <div class="search-results">
+        {
+          props.awaitingResults ? <div class="spinner"><Spinner /></div> :
+            !props.success ? <p class="error-message">{props.errMsg}</p> : (
+              displayedResults().length > 0 && (
+                <>
+                  <div class="row results-filter">
+                    <div class="select-wrapper">
+                      <select
+                        id="year"
+                        value={(filterByYear() ?? "null").toString()}
+                        onInput={(e) => {
+                          setFilterByYear(e.target.value === "null" ? null : parseInt(e.target.value));
+                          updateDisplayedResults();
+                        }}
+                      >
+                        <option value="null">All Years</option>
+                        <For each={availableYears()}>{(year) => <option value={year.toString()}>{year}</option>}</For>
+                      </select>
                     </div>
 
-                    <table class="search-results-table">
-                      <thead>
-                        <tr>
-                          <th>Year</th>
-                          <th>Course Name</th>
-                          <th>Exam</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <For each={displayedResults()}>
-                          {(result) => (
-                            <tr class="result-card">
-                              <td>{result.year}</td>
-                              <td>
-                                {decodeURIComponent(result.course_name).replaceAll("_", " ")} &nbsp; [
-                                <a
-                                  class="download-btn"
-                                  style={{ display: "inline-flex", gap: "5px", "align-items": "center" }}
-                                  href={result.filelink}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  PDF
-                                </a>
-                                ]
-                              </td>
-                              <td>{examMap(result.exam)}</td>
-                            </tr>
-                          )}
-                        </For>
-                      </tbody>
-                    </table>
-                  </>
-                )
+                    <div class="select-wrapper">
+                      <select
+                        id="sortBy"
+                        value={sortBy()}
+                        onInput={(e) => {
+                          setSortBy(e.target.value as "course_name" | "year");
+                          updateDisplayedResults();
+                        }}
+                      >
+                        <option value="year">Sort by Year</option>
+                        <option value="course_name">Sort by Course Name</option>
+                      </select>
+                    </div>
+
+                    <div class="select-wrapper">
+                      <select
+                        id="sortOrder"
+                        value={sortOrder()}
+                        onInput={(e) => {
+                          setSortOrder(e.target.value as "ascending" | "descending");
+                          updateDisplayedResults();
+                        }}
+                      >
+                        <option value="ascending">Ascending</option>
+                        <option value="descending">Descending</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <table class="search-results-table">
+                    <thead>
+                      <tr>
+                        <th>Year</th>
+                        <th>Course Name</th>
+                        <th>Exam</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <For each={displayedResults()}>
+                        {(result) => (
+                          <tr class="result-card">
+                            <td>{result.year}</td>
+                            <td>
+                              {decodeURIComponent(result.course_name).replaceAll("_", " ")} &nbsp; [
+                              <a
+                                class="download-btn"
+                                style={{ display: "inline-flex", gap: "5px", "align-items": "center" }}
+                                href={result.filelink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                PDF
+                              </a>
+                              ]
+                            </td>
+                            <td>{examMap(result.exam)}</td>
+                          </tr>
+                        )}
+                      </For>
+                    </tbody>
+                  </table>
+                </>
               )
-            }
-          </div>
-      }
+            )
+        }
+      </div>
     </>
   );
 };
