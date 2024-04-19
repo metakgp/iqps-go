@@ -9,14 +9,12 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 
 	_ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type QuestionPaper struct {
@@ -115,7 +113,8 @@ func search(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "course is required", http.StatusBadRequest)
 		return
 	}
-	query := `SELECT * FROM qp WHERE rowid IN (SELECT rowid FROM qp_better WHERE course_name MATCH ?)`
+
+	query := `SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status FROM qp WHERE course_code_tsvector @@ websearch_to_tsquery('english', $1)`
 	var params []interface{}
 	params = append(params, course)
 
@@ -132,7 +131,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 
 	exam := r.URL.Query().Get("exam")
 	if exam != "" {
-		query = fmt.Sprintf(`%s AND (exam = ? OR exam = '')`, query)
+		query = fmt.Sprintf(`%s AND (exam = $2 OR exam = '')`, query)
 		params = append(params, exam)
 	}
 
@@ -146,7 +145,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 	var qps []QuestionPaper = make([]QuestionPaper, 0)
 	for rows.Next() {
 		qp := QuestionPaper{}
-		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary)
+		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary, &qp.UploadTimestamp, &qp.ApproveStatus)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -179,7 +178,7 @@ func main() {
 
 	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
-	db, err := sql.Open("postgres", psqlconn)
+	db, err = sql.Open("postgres", psqlconn)
 	CheckError(err)
 	defer db.Close()
 
