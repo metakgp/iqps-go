@@ -21,7 +21,7 @@
   <p align="center">
     <i>Intelligent Question Paper Search</i>
     <br />
-    <a href="https://beta.qp.metakgp.org">Website</a>
+    <a href="https://qp.metakgp.org">Website</a>
     ·
     <a href="https://github.com/metakgp/iqps-go/issues">Report Bug / Request Feature</a>
   </p>
@@ -52,6 +52,8 @@ IQPS is a platform for searching and uploading past year question papers for IIT
 
 ## Maintainer(s)
 - [Chirag Ghosh](https://github.com/chirag-ghosh)
+- [Rajiv Harlalka](https://github.com/rajivharlalka)
+- [Arpit Bhardwaj](https://github.com/proffapt)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
