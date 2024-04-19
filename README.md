@@ -34,6 +34,7 @@
 - [About The Project](#about-the-project)
 - [Development](#development)
 - [Deployment](#deployment)
+  - [Environment Variables](#environment-variables)
 - [Maintainer(s)](#maintainers)
 - [Contact](#contact)
 - [Additional documentation](#additional-documentation)
@@ -41,14 +42,37 @@
 </details>
 
 ## About The Project
-IQPS is a platform for searching and uploading past year question papers for IIT Kharagpur students.
+IQPS is a platform for searching and uploading previous year question papers for IIT Kharagpur students. The frontend is deployed at https://qp.metakgp.org and the backend is hosted on a DigitalOcean droplet with 2GB RAM and a single CPU. See [MetaPloy](https://github.com/metakgp/metaploy) for the deployment architecture.
+
 > **NOTE:** Currently in active development. Get involved at our [Slack](https://slack.metakgp.org/).
 
 ## Development
-[WIP: Steps to locally set up crawler, backend and frontend]
+1. Clone this repository.
+2. Start the backend by running `go run .` in the `backend/` directory.
+3. Set up the frontend by running `pnpm install` and then `pnpm start` in the `frontend/` directory.
+4. Profit.
+
+### Crawler
+[WIP: Steps to locally set up crawler]
 
 ## Deployment
-[WIP: Steps to deploy the application and notes for the sysadmin]
+### Backend
+0. Set up [MetaPloy](https://github.com/metakgp/metaploy) **for production**.
+1. Clone this repository at a convenient location such as `/deployments`.
+3. `cd backend/`
+4. Set the appropriate **production** [environment variables](#environment-variables) in the `.env` file.
+5. Run `docker compose up` to start the backend.
+6. Optionally set up a Systemd service to start the wiki on startup or use this [deployment github workflow](./.github/workflows/deploy.yaml).
+
+### Environment Variables
+Environment variables can be set using a `.env` file. Use the `.env.template` files for reference.
+
+#### Backend
+- `DB_PATH`: Path to the database file to use.
+- `STATIC_FILES_URL`: The base URL for the static files (PDFs).
+
+#### Frontend
+- `VITE_BACKEND_URL`: The IQPS backend URL. Use `http://localhost:5000` in development.
 
 ## Maintainer(s)
 - [Chirag Ghosh](https://github.com/chirag-ghosh)
