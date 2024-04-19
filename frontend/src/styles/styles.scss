@@ -257,7 +257,6 @@ select option {
   animation: spin 1s infinite;
 }
 
-
 @media only screen and (max-width: 768px) {
   .search-form {
     padding: 0;
@@ -276,9 +275,15 @@ select option {
     }
 
     .search-results-table {
-      td,th {
+      td,
+      th {
         padding: 10px;
       }
     }
   }
+}
+
+.toast {
+  background-color: rgba($surface-1, 0.4) !important;
+  color: $fg-color !important;
 }

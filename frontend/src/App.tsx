@@ -19,7 +19,7 @@ const App: Component = () => {
         </p>
       </div>
       <CourseSearchForm />
-      <Toaster position="bottom-center" />
+      <Toaster position="bottom-center" toastOptions={{ className: "toast" }} />
     </div>
   );
 };
