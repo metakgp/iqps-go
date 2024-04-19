@@ -19,13 +19,15 @@ import (
 )
 
 type QuestionPaper struct {
-	ID          int    `json:"id"`
-	CourseCode  string `json:"course_code"`
-	CourseName  string `json:"course_name"`
-	Year        int    `json:"year"`
-	Exam        string `json:"exam"`
-	FileLink    string `json:"filelink"`
-	FromLibrary bool   `json:"from_library"`
+	ID              int    `json:"id"`
+	CourseCode      string `json:"course_code"`
+	CourseName      string `json:"course_name"`
+	Year            int    `json:"year"`
+	Exam            string `json:"exam"`
+	FileLink        string `json:"filelink"`
+	FromLibrary     bool   `json:"from_library"`
+	UploadTimestamp string `json:"upload_timestamp"`
+	ApproveStatus   bool   `json:"approve_status"`
 }
 
 var (
@@ -33,17 +35,7 @@ var (
 	staticFilesUrl string
 )
 
-const init_db = `
-CREATE TABLE IF NOT EXISTS qp (
-	id INTEGER PRIMARY KEY,
-	course_code TEXT NOT NULL DEFAULT '',
-	course_name TEXT NOT NULL,
-	year INTEGER NOT NULL,
-	exam TEXT CHECK (exam IN ('midsem', 'endsem') OR exam = '') DEFAULT '',
-	filelink TEXT NOT NULL,
-	from_library BOOLEAN DEFAULT 0
-);
-`
+const init_db = "./sql/init_table.sql"
 
 func health(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Yes, I'm alive!")
@@ -161,7 +153,6 @@ func main() {
 	staticFilesUrl = os.Getenv("STATIC_FILES_URL")
 
 	db, err = sql.Open("sqlite3", dbPath)
-
 	if err != nil {
 		log.Fatal(err)
 	}
