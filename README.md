@@ -1,7 +1,4 @@
 <div id="top"></div>
-
-<!-- PROJECT SHIELDS -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links-->
 <div align="center">
 
 [![Contributors][contributors-shield]][contributors-url]
@@ -11,27 +8,22 @@
 [![MIT License][license-shield]][license-url]
 [![Wiki][wiki-shield]][wiki-url]
 
-![Search Interface](docs/source/_static/search.png?)
-
 </div>
 
-<!-- PROJECT LOGO -->
 <br />
-<!-- UPDATE -->
 <div align="center">
   <a href="https://github.com/metakgp/iqps">
-    <img width="140" alt="image" src="https://user-images.githubusercontent.com/86282911/206632284-cb260f57-c612-4ab5-b92b-2172c341ab23.png">
+    <img width="140" alt="image" src="https://raw.githubusercontent.com/metakgp/design/main/logos/logo.jpg">
   </a>
 
-  <h3 align="center">Intelligent Question Paper Search</h3>
+  <h3 align="center">IQPS</h3>
 
   <p align="center">
-  <!-- UPDATE -->
-    <i>An automated platform for searching and uploading semester question papers.</i>
+    <i>Intelligent Question Paper Search</i>
     <br />
-    <a href="https://github.com/metakgp/PROJECT_NAME/issues">Report Bug</a>
+    <a href="https://qp.metakgp.org">Website</a>
     ·
-    <a href="https://github.com/metakgp/PROJECT_NAME/issues">Request Feature</a>
+    <a href="https://github.com/metakgp/iqps-go/issues">Report Bug / Request Feature</a>
   </p>
 </div>
 
@@ -40,117 +32,59 @@
 <summary>Table of Contents</summary>
 
 - [About The Project](#about-the-project)
-  - [Supports](#supports)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#usage)
+- [Development](#development)
+- [Deployment](#deployment)
+  - [Environment Variables](#environment-variables)
 - [Maintainer(s)](#maintainers)
 - [Contact](#contact)
 - [Additional documentation](#additional-documentation)
 
 </details>
 
-<!-- ABOUT THE PROJECT -->
-
 ## About The Project
+IQPS is a platform for searching and uploading previous year question papers for IIT Kharagpur students. The frontend is deployed at https://qp.metakgp.org and the backend is hosted on a DigitalOcean droplet with 2GB RAM and a single CPU. See [MetaPloy](https://github.com/metakgp/metaploy) for the deployment architecture.
 
-<!-- UPDATE -->
-<div align="center">
-  <a href="https://github.com/metakgp/PROJECT_NAME">
-    <img width="80%" alt="image" src="docs/source/_static/search.png">
-  </a>
-</div>
+> **NOTE:** Currently in active development. Get involved at our [Slack](https://slack.metakgp.org/).
 
-Check out the docs for more info: [iqps-docs.netlify.app](https://iqps-docs.netlify.app/)
+## Development
+1. Clone this repository.
+2. Start the backend by running `go run .` in the `backend/` directory.
+3. Set up the frontend by running `pnpm install` and then `pnpm start` in the `frontend/` directory.
+4. Profit.
 
-Link to Installation Information: [https://iqps-docs.netlify.app/installation#steps](https://iqps-docs.netlify.app/installation#steps)
+### Crawler
+[WIP: Steps to locally set up crawler]
 
-Check the last paragraph of the above document for instructions to set up Development Environment.
+## Deployment
+### Backend
+0. Set up [MetaPloy](https://github.com/metakgp/metaploy) **for production**.
+1. Clone this repository at a convenient location such as `/deployments`.
+3. `cd backend/`
+4. Set the appropriate **production** [environment variables](#environment-variables) in the `.env` file.
+5. Run `docker compose up` to start the backend.
+6. Optionally set up a Systemd service to start the wiki on startup or use this [deployment github workflow](./.github/workflows/deploy.yaml).
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+### Environment Variables
+Environment variables can be set using a `.env` file. Use the `.env.template` files for reference.
 
-<div id="supports"></div>
+#### Backend
+- `DB_PATH`: Path to the database file to use.
+- `STATIC_FILES_URL`: The base URL for the static files (PDFs).
 
-### Supports:
-
-<!-- UPDATE -->
-
-1. Shells
-   - `bash`
-   - `zsh`
-2. OS(s)
-   - any `*nix`[`GNU+Linux` and `Unix`]
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-## Getting Started
-
-To set up a local instance of the application, follow the steps below.
-
-### Prerequisites
-
-The following dependencies are required to be installed for the project to function properly:
-
-<!-- UPDATE -->
-
-- npm
-  ```sh
-  npm install npm@latest -g
-  ```
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-### Installation
-
-_Now that the environment has been set up and configured to properly compile and run the project, the next step is to install and configure the project locally on your system._
-
-<!-- UPDATE -->
-
-1. Clone the repository
-   ```sh
-   git clone https://github.com/metakgp/PROJECT_NAME.git
-   ```
-2. Make the script executable
-   ```sh
-   cd ./PROJECT_NAME
-   chmod +x ./PROJECT_NAME
-   ```
-3. Execute the script
-   ```sh
-   ./PROJECT_NAME
-   ```
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- USAGE EXAMPLES -->
-
-## Usage
-
-<!-- UPDATE -->
-
-Use this space to show useful examples of how this project can be used. Additional screenshots, code examples and demos work well in this space.
-
-<div align="center">
-  <a href="https://github.com/metakgp/PROJECT_NAME">
-    <img width="80%" alt="image" src="https://user-images.githubusercontent.com/86282911/206632640-40dc440e-5ef3-4893-be48-618f2bd85f37.png">
-  </a>
-</div>
-
-<p align="right">(<a href="#top">back to top</a>)</p>
+#### Frontend
+- `VITE_BACKEND_URL`: The IQPS backend URL. Use `http://localhost:5000` in development.
 
 ## Maintainer(s)
-
-<!-- UPDATE -->
-
-- [NAME](https://github.com/GITHUB_USERNAME)
+- [Chirag Ghosh](https://github.com/chirag-ghosh)
+- [Rajiv Harlalka](https://github.com/rajivharlalka)
+- [Arpit Bhardwaj](https://github.com/proffapt)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Contact
 
 <p>
-📫 Metakgp -
+📫 MetaKGP -
 <a href="https://bit.ly/metakgp-slack">
   <img align="center" alt="Metakgp's slack invite" width="22px" src="https://raw.githubusercontent.com/edent/SuperTinyIcons/master/images/svg/slack.svg" />
 </a>
@@ -182,17 +116,15 @@ Use this space to show useful examples of how this project can be used. Addition
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-<!-- MARKDOWN LINKS & IMAGES -->
-
-[contributors-shield]: https://img.shields.io/github/contributors/metakgp/PROJECT_NAME.svg?style=for-the-badge
-[contributors-url]: https://github.com/metakgp/PROJECT_NAME/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/metakgp/PROJECT_NAME.svg?style=for-the-badge
-[forks-url]: https://github.com/metakgp/PROJECT_NAME/network/members
-[stars-shield]: https://img.shields.io/github/stars/metakgp/PROJECT_NAME.svg?style=for-the-badge
-[stars-url]: https://github.com/metakgp/PROJECT_NAME/stargazers
-[issues-shield]: https://img.shields.io/github/issues/metakgp/PROJECT_NAME.svg?style=for-the-badge
-[issues-url]: https://github.com/metakgp/PROJECT_NAME/issues
-[license-shield]: https://img.shields.io/github/license/metakgp/PROJECT_NAME.svg?style=for-the-badge
-[license-url]: https://github.com/metakgp/PROJECT_NAME/blob/master/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/metakgp/iqps-go.svg?style=for-the-badge
+[contributors-url]: https://github.com/metakgp/iqps-go/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/metakgp/iqps-go.svg?style=for-the-badge
+[forks-url]: https://github.com/metakgp/iqps-go/network/members
+[stars-shield]: https://img.shields.io/github/stars/metakgp/iqps-go.svg?style=for-the-badge
+[stars-url]: https://github.com/metakgp/iqps-go/stargazers
+[issues-shield]: https://img.shields.io/github/issues/metakgp/iqps-go.svg?style=for-the-badge
+[issues-url]: https://github.com/metakgp/iqps-go/issues
+[license-shield]: https://img.shields.io/github/license/metakgp/iqps-go.svg?style=for-the-badge
+[license-url]: https://github.com/metakgp/iqps-go/blob/master/LICENSE
 [wiki-shield]: https://custom-icon-badges.demolab.com/badge/metakgp_wiki-grey?logo=metakgp_logo&style=for-the-badge
 [wiki-url]: https://wiki.metakgp.org
