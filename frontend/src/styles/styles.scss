@@ -241,3 +241,29 @@ select option {
   color: rgba($fg-color, 0.8);
   animation: spin 1s infinite;
 }
+
+
+@media only screen and (max-width: 768px) {
+  .search-form {
+    padding: 0;
+  }
+
+  .search-results {
+    padding: 0.5rem 0;
+
+    .results-filter {
+      gap: 0rem;
+      padding: 0 1rem;
+
+      .select-wrapper {
+        width: 100%;
+      }
+    }
+
+    .search-results-table {
+      td,th {
+        padding: 10px;
+      }
+    }
+  }
+}
