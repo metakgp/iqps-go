@@ -1,6 +1,12 @@
 function UploadPage() {
 	return (
-		<h1>Upload Papers</h1>
+		<div class="hero-screen">
+			<div class="title">
+				<h1>IQPS - Question Paper Upload</h1>
+				<p><i>Upload your question papers for future humans to use!</i></p>
+			</div>
+
+		</div>
 	)
 }
 
