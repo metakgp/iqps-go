@@ -164,7 +164,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := r.MultipartForm.File["file"]
+	files := r.MultipartForm.File["files"]
 	for _, fileHeader := range files {
 		file, err := fileHeader.Open()
 		if err != nil {
@@ -193,12 +193,26 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 		// TODO: add file size check
 
-		fmt.Println("Filename:", fileHeader.Filename)
-		fmt.Println("Size", fileHeader.Size)
-
-		filename := strings.ReplaceAll(fileHeader.Filename, ":", "_")
 		qpsPath := os.Getenv("QPS_PATH")
-		filePath := filepath.Join(qpsPath, filename) 
+		filePath := filepath.Join(qpsPath, fileHeader.Filename)
+
+		// Duplicate filename handling
+		if _, err = os.Stat(filePath); err == nil {
+			for i := 1; true; i++ {
+				if _, err := os.Stat(fmt.Sprintf("%s-%d", filePath, i)); err == nil {
+					continue
+				} else if errors.Is(err, os.ErrNotExist) {
+					filePath = fmt.Sprintf("%s-%d", filePath, i)
+					break
+				} else {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+			}
+		} else if !errors.Is(err, os.ErrNotExist) {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		dest, err := os.Create(filePath)
 		if err != nil {
@@ -212,14 +226,18 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		populateDB(fileHeader.Filename)
+		err = populateDB(fileHeader.Filename)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	fmt.Fprintf(w, "File upload successful\n")
 }
 
-func populateDB(filename string) {
-	qpData := strings.Split(filename, ":")
+func populateDB(filename string) error {
+	qpData := strings.Split(filename[:len(filename)-3], "_")
 
 	courseCode := qpData[0]
 	courseName := mapCodeToName(courseCode)
@@ -228,25 +246,28 @@ func populateDB(filename string) {
 	fromLibrary := false
 	fileLink := fmt.Sprintf("%s/%s", staticFilesUrl, strings.Join(qpData, "_"))
 
-	query := fmt.Sprintf("INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library) VALUES (%s, %s, %d, %s, %s, %t)", courseCode, courseName, year, exam, fileLink, fromLibrary)
+	query := fmt.Sprintf("INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library) VALUES (%s, %s, %d, %s, %s, %t);", courseCode, courseName, year, exam, fileLink, fromLibrary)
 
 	_, err := db.Exec(query)
 	if err != nil {
-		fmt.Printf("failed to add qp to database: %v\n", err)
+		return fmt.Errorf("failed to add qp to database: %v", err)
 	}
-
+	return nil
 }
 
 func mapCodeToName(code string) string {
-	fileByte, err := os.ReadFile("courses.json")
+	rows, err := db.Query(fmt.Sprintf("SELECT course_name FROM courses WHERE course_code='%s';", code))
 	if err != nil {
-		fmt.Printf("error reading courses map file: %v\n", err)
+		fmt.Printf("could not fetch course name from db: %v", err)
+		return ""
 	}
+	defer rows.Close()
 
-	courses := make(map[string]string)
-	json.Unmarshal(fileByte, &courses)
+	var courseName string
+	rows.Next()
+	rows.Scan(&courseName)
 
-	return courses[code]
+	return courseName
 }
 
 func CheckError(err error) {
