@@ -15,6 +15,7 @@
 }
 
 body {
+  display: flex;
   color: rgba($fg-color, 0.8);
   background-color: $bg-color;
   font-family: "Hanken Grotesk", sans-serif;
@@ -35,6 +36,20 @@ body {
   }
 
   scrollbar-gutter: stable;
+
+  #root {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    .meta-footer {
+      width: 100%;
+      text-align: center;
+
+      margin-top: auto;
+      margin-bottom: 10px;
+    }
+  }
 }
 
 a {
@@ -117,12 +132,4 @@ select option {
   fill: rgba($accent-color, 0.8);
   color: rgba($fg-color, 0.8);
   animation: spin 1s infinite;
-}
-
-.meta-footer {
-  position: absolute;
-  bottom: 10px;
-  width: 100%;
-
-  text-align: center;
 }
