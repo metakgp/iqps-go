@@ -5,16 +5,6 @@
 @import "./search_form.scss";
 @import "./search_results.scss";
 
-// Light mode. This is only for archival purposes. It should NEVER BE USED.
-// :root {
-//   --accent-color: hsl(217, 80%, 40%);
-//   --accent-color-darker: hsl(217, 80%, 30%);
-//   --bg-color: #e8e5e5;
-//   --surface-1: #fff;
-//   --fg-color: #333;
-//   --fg-inverse: #fff;
-// }
-
 .toast {
   background-color: $surface-1 !important;
   color: $fg-color !important;
