@@ -9,7 +9,6 @@ const App: Component = () => {
       <div class="title">
         <h1>IQPS - Intelligent Question Paper Search</h1>
         <p><i>Search for question papers when the library can't save you.</i></p>
-        <p>Made with ❤️ and {"</>"} by <a href="https://github.com/metakgp/iqps-go" target="_blank">MetaKGP</a></p>
         <h3>Have question papers to upload? <A href="/upload">Click here!</A></h3>
       </div>
       <CourseSearchForm />

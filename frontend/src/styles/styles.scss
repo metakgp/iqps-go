@@ -118,3 +118,11 @@ select option {
   color: rgba($fg-color, 0.8);
   animation: spin 1s infinite;
 }
+
+.meta-footer {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+
+  text-align: center;
+}

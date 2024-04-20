@@ -20,8 +20,11 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 
 
 render(() => (
-  <Router>
-    <Route path="/" component={App} />
-    <Route path="/upload" component={UploadPage} />
-  </Router>
+  <>
+    <Router>
+      <Route path="/" component={App} />
+      <Route path="/upload" component={UploadPage} />
+    </Router>
+    <h3 class="meta-footer">Made with ❤️ and {"</>"} by <a href="https://github.com/metakgp/iqps-go" target="_blank">MetaKGP</a></h3>
+  </>
 ), root!);
