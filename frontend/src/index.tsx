@@ -1,9 +1,13 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
+import { Route, Router } from "@solidjs/router";
 import { inject } from "@vercel/analytics";
 
-import App from "./App";
+import App from "./pages/LandingPage";
 import "./styles/reset.scss";
+import "./styles/styles.scss";
+
+import UploadPage from "./pages/UploadPage";
 
 const root = document.getElementById("root");
 
@@ -15,4 +19,10 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-render(() => <App />, root!);
+
+render(() => (
+  <Router>
+    <Route path="/" component={App} />
+    <Route path="/upload" component={UploadPage} />
+  </Router>
+), root!);

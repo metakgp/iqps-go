@@ -1,7 +1,6 @@
 import type { Component } from "solid-js";
 import { Toaster } from 'solid-toast';
-import CourseSearchForm from "./components/SearchForm";
-import "./styles/styles.scss";
+import CourseSearchForm from "../components/SearchForm";
 
 const App: Component = () => {
   return (
