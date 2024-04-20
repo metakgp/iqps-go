@@ -1,0 +1,17 @@
+.upload-page {
+	display: flex;
+	gap: 5rem;
+	flex-direction: column;
+	align-items: center;
+}
+
+.upload-area {
+	border-radius: 1rem;
+	border: 4px dashed $surface-1;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: fit-content;
+	padding: 8rem;
+}
