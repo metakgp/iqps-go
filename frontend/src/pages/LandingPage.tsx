@@ -1,6 +1,7 @@
 import type { Component } from "solid-js";
 import { Toaster } from 'solid-toast';
 import CourseSearchForm from "../components/SearchForm";
+import { A } from "@solidjs/router";
 
 const App: Component = () => {
   return (
@@ -9,6 +10,7 @@ const App: Component = () => {
         <h1>IQPS - Intelligent Question Paper Search</h1>
         <p><i>Search for question papers when the library can't save you.</i></p>
         <p>Made with ❤️ and {"</>"} by <a href="https://github.com/metakgp/iqps-go" target="_blank">MetaKGP</a></p>
+        <h3>Have question papers to upload? <A href="/upload">Click here!</A></h3>
       </div>
       <CourseSearchForm />
       <Toaster toastOptions={{
