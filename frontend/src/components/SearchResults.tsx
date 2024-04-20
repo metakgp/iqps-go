@@ -127,7 +127,7 @@ const SearchResults: Component<Props> = (props) => {
                             <td style={{display: 'flex', "align-items": 'center'}}>
                               <p>
                               {result.course_name}&nbsp;
-                              <span class="result-card-tag">{examMap(result.exam)}</span>
+                              {result.exam !== "" && <span class="result-card-tag">{examMap(result.exam)}</span>}
                               </p>
                               <div class="result-card-btns">
                                 <a
