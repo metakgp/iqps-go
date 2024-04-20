@@ -1,73 +1,74 @@
-name: Continuous Deployment for backend
+name: Continuous Deployment Pipeline for backend
 
 on:
     push:
-        branches: 
-            - 'main'
+        branches:
+            - "main"
         paths:
-            - 'backend/**'
+            - "backend/**"
+            - ".github/workflows/deploy.yaml"
 
 jobs:
-    pull:
-        name: Pull Stage
+    push:
+        name: Push Stage
         runs-on: ubuntu-latest
 
         steps:
-            - name: Sync with remote repository
+            - name: Sync local repo with remote repo
               uses: appleboy/ssh-action@master
               env:
-                  IQPS_DIR: ${{ secrets.IQPS_DIR }}
+                  PROJECT_DIR: ${{ secrets.PROJECT_DIR }}
               with:
-                  host: ${{ secrets.HOSTNAME }}
-                  username: ${{ secrets.USERNAME }}
+                  host: ${{ secrets.SSH_HOSTNAME }}
+                  username: ${{ secrets.SSH_USERNAME }}
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
-                  passphrase: ${{ secrets.PASSPHRASE }}
-                  envs: IQPS_DIR
+                  passphrase: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
+                  envs: PROJECT_DIR
                   script_stop: true
                   script: |
-                      cd "${IQPS_DIR}/"
+                      cd "${PROJECT_DIR}/"
                       sudo git fetch origin
                       sudo git reset --hard origin/main
 
     build:
         name: Build Stage
-        needs: pull
+        needs: push
         runs-on: ubuntu-latest
 
         steps:
-            - name: Build the latest docker container
+            - name: Build the latest container(s)
               uses: appleboy/ssh-action@master
               env:
-                  IQPS_DIR: ${{ secrets.IQPS_DIR }}
+                  PROJECT_DIR: ${{ secrets.PROJECT_DIR }}
               with:
-                  host: ${{ secrets.HOSTNAME }}
-                  username: ${{ secrets.USERNAME }}
+                  host: ${{ secrets.SSH_HOSTNAME }}
+                  username: ${{ secrets.SSH_USERNAME }}
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
-                  passphrase: ${{ secrets.PASSPHRASE }}
-                  envs: IQPS_DIR
+                  passphrase: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
+                  envs: PROJECT_DIR
                   script_stop: true
                   script: |
-                      cd "${IQPS_DIR}/backend/"
+                      cd "${PROJECT_DIR}/backend/"
                       sudo docker compose build
 
     deploy:
         name: Deploy Stage
-        needs: [pull, build]
+        needs: [push, build]
         runs-on: ubuntu-latest
 
         steps:
-            - name: Deploy the latest build
+            - name: Deploy the latest build(s)
               uses: appleboy/ssh-action@master
               env:
-                  IQPS_DIR: ${{ secrets.IQPS_DIR }}
+                  PROJECT_DIR: ${{ secrets.PROJECT_DIR }}
               with:
-                  host: ${{ secrets.HOSTNAME }}
-                  username: ${{ secrets.USERNAME }}
+                  host: ${{ secrets.SSH_HOSTNAME }}
+                  username: ${{ secrets.SSH_USERNAME }}
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
-                  passphrase: ${{ secrets.PASSPHRASE }}
-                  envs: IQPS_DIR
+                  passphrase: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
+                  envs: PROJECT_DIR
                   script_stop: true
                   script: |
-                      cd "${IQPS_DIR}/backend/"
+                      cd "${PROJECT_DIR}/backend/"
                       sudo docker compose down
                       sudo docker compose up -d
