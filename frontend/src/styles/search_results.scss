@@ -1,0 +1,131 @@
+.search-results {
+	padding: 0.5rem 1rem;
+	background-color: rgba($surface-1, 0.2);
+
+	.spinner {
+		margin: auto;
+	}
+
+	.error-message {
+		padding: 0.5rem 0;
+		margin: 0;
+		text-align: center;
+		font-size: 1.2rem;
+	}
+
+	.results-filter {
+		width: 100%;
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+		justify-content: center;
+
+		margin-top: 1rem;
+		align-items: center;
+
+		select {
+			min-width: 150px;
+			margin-right: 30px;
+		}
+	}
+
+	.search-results-table {
+		width: 100%;
+		border-collapse: collapse;
+
+		tr {
+			width: fit-content;
+		}
+
+		tbody tr {
+			border: 1px solid transparent;
+			border-radius: 8px;
+
+			&:nth-of-type(odd) {
+				background-color: rgba($fg-color, 0.05);
+			}
+		}
+
+		th,
+		td {
+			padding: 0.5rem 1rem 0.5rem 1rem;
+		}
+
+		th {
+			text-align: left;
+		}
+	}
+
+	.result-card {
+		padding: 15px;
+		margin-bottom: 1rem;
+		border-radius: 8px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+		.result-card-btns {
+			margin-left: auto;
+			display: flex;
+			gap: 5px;
+
+			.result-card-btn {
+				background-color: rgba($accent-color, 0.8);
+				color: rgba($fg-color, 0.75);
+				font-weight: bold;
+
+				margin: 0;
+				padding: 8px 8px;
+				border-radius: 5px;
+
+				&:hover {
+					background-color: $accent-color-darker;
+				}
+			}
+		}
+
+		.result-card-tag {
+			border: 1px solid rgba($accent-color, 0.8);
+			font-weight: bold;
+			font-size: 0.85rem;
+
+			border-radius: 5px;
+			padding: 2px 7px;
+
+			margin-left: 5px;
+			margin-right: 5px;
+		}
+
+		h3 {
+			margin-top: 0;
+		}
+
+		p {
+			margin: 5px 0;
+
+			&.course-name,
+			&.course-code {
+				font-weight: bold;
+			}
+		}
+	}
+
+	@media only screen and (max-width: 768px) {
+		padding: 0.5rem 0;
+
+		.results-filter {
+			gap: 0rem;
+			padding: 0 1rem;
+
+			.select-wrapper {
+				width: 100%;
+			}
+		}
+
+		.search-results-table {
+
+			td,
+			th {
+				padding: 10px;
+			}
+		}
+	}
+}
