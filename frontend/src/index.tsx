@@ -4,7 +4,6 @@ import { Route, Router } from "@solidjs/router";
 import { inject } from "@vercel/analytics";
 
 import App from "./pages/LandingPage";
-import "./styles/reset.scss";
 import "./styles/styles.scss";
 
 import UploadPage from "./pages/UploadPage";
