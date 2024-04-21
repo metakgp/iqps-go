@@ -9,3 +9,4 @@ CREATE TABLE IF NOT EXISTS qp (
     upload_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     approve_status BOOLEAN DEFAULT FALSE
 );
+SELECT setval(pg_get_serial_sequence('qp', 'id'), coalesce(max(id),0) + 1, false) FROM qp;
