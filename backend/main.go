@@ -162,7 +162,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 	var response []uploadEndpoint
 	// Max total size of 50MB
-	const MaxBodySize = 100 << 20
+	const MaxBodySize = 50 << 20 // 1<<20  = 1024*1024 = 1MB
 	r.Body = http.MaxBytesReader(w, r.Body, MaxBodySize)
 
 	err := r.ParseMultipartForm(MaxBodySize)
@@ -172,6 +172,11 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files := r.MultipartForm.File["files"]
+	if len(files) > 5 {
+		http.Error(w, "max 5 files allowed", http.StatusBadRequest)
+		return
+	}
+
 	for _, fileHeader := range files {
 		resp := uploadEndpoint{Filename: fileHeader.Filename, Status: "success"}
 
