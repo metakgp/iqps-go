@@ -291,33 +291,38 @@ func populateDB(filename string) error {
 	}
 
 	courseCode := qpData[0]
-	courseName := mapCodeToName(courseCode)
+	courseName, err := mapCodeToName(courseCode)
+	if err != nil {
+		return err
+	}
+
 	year, _ := strconv.Atoi(qpData[1])
 	exam := qpData[2]
 	fromLibrary := false
 	fileLink := fmt.Sprintf("%s/%s", staticFilesUrl, filename)
 	query := "INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6);"
 
-	_, err := db.Exec(query, courseCode, courseName, year, exam, fileLink, fromLibrary)
+	_, err = db.Exec(query, courseCode, courseName, year, exam, fileLink, fromLibrary)
 	if err != nil {
 		return fmt.Errorf("failed to add qp to database: %v", err)
 	}
 	return nil
 }
 
-func mapCodeToName(code string) string {
-	rows, err := db.Query(fmt.Sprintf("SELECT course_name FROM courses WHERE course_code='%s';", code))
-	if err != nil {
-		fmt.Printf("could not fetch course name from db: %v\n", err)
-		return code
-	}
-	defer rows.Close()
+func mapCodeToName(code string) (string, error) {
+	rows := db.QueryRow("SELECT course_name FROM courses WHERE course_code=$1", code)
 
 	var courseName string
-	rows.Next()
-	rows.Scan(&courseName)
 
-	return courseName
+	err := rows.Scan(&courseName)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", fmt.Errorf("course code not found")
+		}
+		return "", fmt.Errorf("failed to fetch course name: %v", err)
+	}
+	fmt.Printf("course name: %s\n", courseName)
+	return courseName, nil
 }
 
 func CheckError(err error) {
