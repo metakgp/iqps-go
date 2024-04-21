@@ -233,50 +233,69 @@ func upload(w http.ResponseWriter, r *http.Request) {
 					filePath = fmt.Sprintf("%s-%d", filePath, i)
 					break
 				} else {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
+					resp.Status = "failed"
+					resp.Description = err.Error()
+					response = append(response, resp)
+					continue
 				}
 			}
 		} else if !errors.Is(err, os.ErrNotExist) {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			resp.Status = "failed"
+			resp.Description = err.Error()
+			response = append(response, resp)
+			continue
 		}
 
 		dest, err := os.Create(filePath)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			resp.Status = "failed"
+			resp.Description = err.Error()
+			response = append(response, resp)
+			continue
 		}
 		defer dest.Close()
 
 		if _, err := io.Copy(dest, file); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			resp.Status = "failed"
+			resp.Description = err.Error()
+			response = append(response, resp)
+			continue
 		}
 
 		err = populateDB(fileHeader.Filename)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
+			resp.Status = "failed"
+			resp.Description = err.Error()
+			response = append(response, resp)
+			continue
 
-	fmt.Fprintf(w, "File upload successful\n")
+		}
+		response = append(response, resp)
+	}
+	// return response to client
+	http.Header.Add(w.Header(), "content-type", "application/json")
+	err = json.NewEncoder(w).Encode(&response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func populateDB(filename string) error {
 	qpData := strings.Split(filename[:len(filename)-3], "_")
+	if len(qpData) != 4 {
+		return fmt.Errorf("invalid filename format")
+	}
 
 	courseCode := qpData[0]
 	courseName := mapCodeToName(courseCode)
 	year, _ := strconv.Atoi(qpData[1])
 	exam := qpData[2]
 	fromLibrary := false
-	fileLink := fmt.Sprintf("%s/%s", staticFilesUrl, strings.Join(qpData, "_"))
+	fileLink := fmt.Sprintf("%s/%s", staticFilesUrl, filename)
+	query := "INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6);"
 
-	query := fmt.Sprintf("INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library) VALUES (%s, %s, %d, %s, %s, %t);", courseCode, courseName, year, exam, fileLink, fromLibrary)
-
-	_, err := db.Exec(query)
+	_, err := db.Exec(query, courseCode, courseName, year, exam, fileLink, fromLibrary)
 	if err != nil {
 		return fmt.Errorf("failed to add qp to database: %v", err)
 	}
