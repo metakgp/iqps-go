@@ -33,6 +33,12 @@ type QuestionPaper struct {
 	ApproveStatus   bool   `json:"approve_status"`
 }
 
+type uploadEndpoint struct {
+	Filename    string `json:"filename"`
+	Status      string `json:"status"`
+	Description string `json:"description"`
+}
+
 var (
 	db             *sql.DB
 	staticFilesUrl string
