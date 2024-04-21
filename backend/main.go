@@ -305,8 +305,8 @@ func populateDB(filename string) error {
 func mapCodeToName(code string) string {
 	rows, err := db.Query(fmt.Sprintf("SELECT course_name FROM courses WHERE course_code='%s';", code))
 	if err != nil {
-		fmt.Printf("could not fetch course name from db: %v", err)
-		return ""
+		fmt.Printf("could not fetch course name from db: %v\n", err)
+		return code
 	}
 	defer rows.Close()
 
