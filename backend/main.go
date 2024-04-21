@@ -266,6 +266,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 		err = populateDB(fileName)
 		if err != nil {
+			_ = os.Remove(filePath)
 			resp.Status = "failed"
 			resp.Description = err.Error()
 			response = append(response, resp)
