@@ -160,6 +160,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+	var response []uploadEndpoint
 	// Max total size of 50MB
 	const MaxBodySize = 100 << 20
 	r.Body = http.MaxBytesReader(w, r.Body, MaxBodySize)
@@ -172,10 +173,21 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 	files := r.MultipartForm.File["files"]
 	for _, fileHeader := range files {
+		resp := uploadEndpoint{Filename: fileHeader.Filename, Status: "success"}
+
+		if fileHeader.Size > 10<<20 {
+			resp.Status = "failed"
+			resp.Description = "file size exceeds 10MB"
+			response = append(response, resp)
+			continue
+		}
+
 		file, err := fileHeader.Open()
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			resp.Status = "failed"
+			resp.Description = err.Error()
+			response = append(response, resp)
+			continue
 		}
 		defer file.Close()
 
@@ -183,21 +195,26 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		buff := make([]byte, 512)
 		_, err = file.Read(buff)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			resp.Status = "failed"
+			resp.Description = err.Error()
+			response = append(response, resp)
+			continue
 		}
 		fileType := http.DetectContentType(buff)
 		if fileType != "application/pdf" {
-			http.Error(w, "invalid file type. Only PDFs are supported", http.StatusBadRequest)
-			return
+			resp.Status = "failed"
+			resp.Description = "invalid file type. Only PDFs are supported"
+			response = append(response, resp)
+			continue
+
 		}
 		_, err = file.Seek(0, io.SeekCurrent)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			resp.Status = "failed"
+			resp.Description = err.Error()
+			response = append(response, resp)
+			continue
 		}
-
-		// TODO: add file size check
 
 		qpsPath := os.Getenv("QPS_PATH")
 		filePath := filepath.Join(qpsPath, fileHeader.Filename)
