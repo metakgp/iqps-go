@@ -16,4 +16,4 @@ CREATE TABLE IF NOT EXISTS courses (
     course_code TEXT NOT NULL,
     course_name TEXT NOT NULL
 );
-COPY courses(course_code, course_name) FROM 'courses.csv' DELIMITER ',' CSV HEADER;
+\copy courses(course_code,course_name) FROM courses.csv WITH DELIMITER ',' HEADER
