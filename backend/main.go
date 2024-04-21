@@ -222,15 +222,17 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		}
 
 		qpsPath := os.Getenv("QPS_PATH")
-		filePath := filepath.Join(qpsPath, fileHeader.Filename)
+		fileName := fileHeader.Filename
+		filePath := filepath.Join(qpsPath, fileName)
 
 		// Duplicate filename handling
 		if _, err = os.Stat(filePath); err == nil {
 			for i := 1; true; i++ {
-				if _, err := os.Stat(fmt.Sprintf("%s-%d", filePath, i)); err == nil {
+				if _, err := os.Stat(fmt.Sprintf("%s-%d.pdf", filePath[:len(filePath)-4], i)); err == nil {
 					continue
 				} else if errors.Is(err, os.ErrNotExist) {
-					filePath = fmt.Sprintf("%s-%d", filePath, i)
+					filePath = fmt.Sprintf("%s-%d.pdf", filePath[:len(filePath)-4], i)
+					fileName = fmt.Sprintf("%s-%d.pdf", fileName[:len(fileName)-4], i)
 					break
 				} else {
 					resp.Status = "failed"
@@ -262,7 +264,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		err = populateDB(fileHeader.Filename)
+		err = populateDB(fileName)
 		if err != nil {
 			resp.Status = "failed"
 			resp.Description = err.Error()
@@ -282,7 +284,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func populateDB(filename string) error {
-	qpData := strings.Split(filename[:len(filename)-3], "_")
+	qpData := strings.Split(filename[:len(filename)-4], "_")
 	if len(qpData) != 4 {
 		return fmt.Errorf("invalid filename format")
 	}
