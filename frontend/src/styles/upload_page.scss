@@ -1,17 +1,90 @@
 .upload-page {
-	display: flex;
-	gap: 5rem;
-	flex-direction: column;
-	align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
 }
 
-.upload-area {
-	border-radius: 1rem;
-	border: 4px dashed $surface-1;
+.upload-section {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    align-items: start;
+    justify-content: center;
 
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	width: fit-content;
-	padding: 8rem;
+    .upload-area {
+        border-radius: 1rem;
+        border: 4px dashed $surface-1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        padding: 8rem 2rem;
+        max-width: 40rem;
+        &:hover {
+            cursor: pointer;
+        }
+        &.active {
+            border: 4px solid $surface-1;
+            background-color: $surface-1;
+        }
+
+        input,
+        h2,
+        .upload-icon {
+            pointer-events: none;
+        }
+        h2 {
+            text-align: center;
+            width: 100%;
+        }
+    }
+
+    .uploaded-files {
+        display: flex;
+        gap: 0.75rem;
+        flex-direction: column;
+        flex-wrap: wrap;
+    }
+
+    .file {
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding: 0.5rem;
+        padding-right: 2.75rem;
+        border-radius: 0.2rem;
+        &:hover {
+            background: #1d1d1d;
+        }
+
+        .file-name {
+            width: fit-content;
+            max-width: 10rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: left;
+            overflow: hidden;
+        }
+        .close-icon {
+            color: crimson;
+            position: absolute;
+            top: 50%;
+            right: 0.5rem;
+            transform: translateY(-50%);
+            &:hover {
+                cursor: pointer;
+            }
+        }
+    }
+
+    @media screen and (max-width: 1000px) {
+        flex-direction: column;
+        align-items: center;
+        justify-content: start;
+        .upload-area {
+            padding: 2rem;
+        }
+    }
 }
