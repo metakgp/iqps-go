@@ -1,7 +1,8 @@
 import { A } from "@solidjs/router";
 import { AiOutlineCloudUpload as UploadIcon } from "solid-icons/ai";
+import { Component } from "solid-js";
 
-function UploadPage() {
+const UploadPage: Component=()=> {
 	return (
 		<div class="upload-page">
 			<div class="title">

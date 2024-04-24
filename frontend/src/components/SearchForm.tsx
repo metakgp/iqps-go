@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { Component, createSignal } from "solid-js";
 import { toast } from 'solid-toast';
 import { IoSearch as SearchIcon, IoLink as ShareIcon } from "solid-icons/io";
 import SearchResults from "./SearchResults";
@@ -6,7 +6,7 @@ import type { SearchResult } from "../types/types";
 import "../styles/styles.scss";
 import { copyLink } from "../utils/copyLink";
 
-function CourseSearchForm() {
+const CourseSearchForm: Component=()=> {
   const currentURL = new URL(window.location.toString());
 
   // Create signals for each form input
