@@ -1,5 +1,4 @@
 import {
-    AiOutlineCloudUpload as UploadIcon,
     AiOutlineFilePdf as PDFIcon,
     AiOutlineDelete as CloseIcon,
 } from "solid-icons/ai";
