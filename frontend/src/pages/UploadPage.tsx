@@ -1,10 +1,7 @@
 import { A } from "@solidjs/router";
-import {
-    AiOutlineCloudUpload as UploadIcon,
-    AiOutlineFilePdf as PDFIcon,
-    AiOutlineDelete as CloseIcon,
-} from "solid-icons/ai";
+import { AiOutlineCloudUpload as UploadIcon } from "solid-icons/ai";
 import { Component, For, createSignal } from "solid-js";
+import { FileCard } from "../components/FileCard";
 
 const UploadPage: Component = () => {
     const [files, setFiles] = createSignal<File[]>([]);
@@ -71,6 +68,13 @@ const UploadPage: Component = () => {
         setIsDragging(false);
     };
 
+    const uploadFiles = (e: Event) => {
+        e.preventDefault();
+        // TODO : Upload API endpoint call
+        console.log(files());
+        setFiles([]);
+    };
+
     return (
         <div class="upload-page">
             <div class="title">
@@ -83,41 +87,71 @@ const UploadPage: Component = () => {
                 </h3>
             </div>
 
-            <div class="upload-section">
-                <div
-                    class={`upload-area ${isDragging() && "active"}`}
-                    onDragOver={onDragEnter}
-                    onDragLeave={onDragExit}
-                    onDrop={onFileDrop}
-                    onClick={openFileDialog}
-                >
-                    <input
-                        ref={(el) => (fileInputRef = el)}
-                        type="file"
-                        accept=".pdf"
-                        hidden
-                        multiple={true}
-                        onChange={onFileInputChange}
-                    />
-                    <UploadIcon class="upload-icon" size="5rem" />
-                    <h2>Click or drop files to upload</h2>
+            <div class="upload-wrapper">
+                <div class="instructions">
+                    {/* TODO: Update Instructions */}
+                    <h2>Instructions</h2>
+                    <ul>
+                        <li>
+                            Lorem ipsum dolor, sit amet consectetur adipisicing
+                            elit. Molestias eligendi perferendis alias odit esse
+                            magnam.
+                        </li>
+                        <li>
+                            Lorem ipsum dolor, sit amet consectetur adipisicing
+                            elit. Molestias eligendi perferendis alias odit esse
+                            magnam.
+                        </li>
+                        <li>
+                            Lorem ipsum dolor, sit amet consectetur adipisicing
+                            elit. Molestias eligendi perferendis alias odit esse
+                            magnam.
+                        </li>
+                        <li>
+                            Lorem ipsum dolor, sit amet consectetur adipisicing
+                            elit. Molestias eligendi perferendis alias odit esse
+                            magnam.
+                        </li>
+                    </ul>
                 </div>
-                <div class="uploaded-files">
-                    <For each={Array.from(files())}>
-                        {(file) => (
-                            <>
-                                <div class="file">
-                                    <PDFIcon size="2.5rem" />
-                                    <div class="file-name">{file.name}</div>
-                                    <CloseIcon
-                                        onClick={() => removeFile(file.name)}
-                                        class="close-icon"
-                                        size="1.25rem"
-                                    />
-                                </div>
-                            </>
-                        )}
-                    </For>
+
+                <div class="upload-section">
+                    {files().length > 0 ? (
+                        <>
+                            <div class="uploaded-files">
+                                <For each={Array.from(files())}>
+                                    {(file) => (
+                                        <FileCard
+                                            file={file}
+                                            removeFile={removeFile}
+                                        />
+                                    )}
+                                </For>
+                            </div>
+                            <button onClick={uploadFiles} class="upload-btn">
+                                Upload
+                            </button>
+                        </>
+                    ) : (
+                        <div
+                            class={`upload-area ${isDragging() && "active"}`}
+                            onDragOver={onDragEnter}
+                            onDragLeave={onDragExit}
+                            onDrop={onFileDrop}
+                            onClick={openFileDialog}
+                        >
+                            <input
+                                ref={(el) => (fileInputRef = el)}
+                                type="file"
+                                accept=".pdf"
+                                hidden
+                                multiple={true}
+                                onChange={onFileInputChange}
+                            />
+                            <UploadIcon class="upload-icon" size="5rem" />
+                            <h2>Click or drop files to upload</h2>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
