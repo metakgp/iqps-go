@@ -1,13 +1,14 @@
 import { A } from "@solidjs/router";
-import { AiOutlineCloudUpload as UploadIcon } from "solid-icons/ai";
 import { Component, For, createSignal } from "solid-js";
 import { FileCard } from "../components/FileCard";
 import { Toaster, toast } from "solid-toast";
 import { validateFilename } from "../utils/validateFilename";
-
+import { AiOutlineCloudUpload as UploadIcon } from "solid-icons/ai";
+import { FaSolidChevronDown as ChevronIcon } from "solid-icons/fa";
 const UploadPage: Component = () => {
     const [files, setFiles] = createSignal<File[]>([]);
     const [isDragging, setIsDragging] = createSignal(false);
+    const [isVisible, setIsVisible] = createSignal(false);
 
     let fileInputRef!: HTMLInputElement;
 
@@ -98,32 +99,48 @@ const UploadPage: Component = () => {
 
             <div class="upload-wrapper">
                 <div class="upload-instructions">
-                    <h2>Upload Instructions</h2>
-                    <div class="instruction-section">
-                        <h3>File Format</h3>
-                        <p>Only PDF files are accepted.</p>
-                    </div>
-                    <div class="instruction-section">
-                        <h3>File Naming</h3>
-                        <p>Use this format:</p>
-                        <p class="file-format-example">
-                            course_code_year_(midsem/endsem)_(spring/autumn).pdf
+                    <h2
+                        class={`accordion-heading ${
+                            isVisible() ? "accordion-open" : ""
+                        }`}
+                        onClick={() => {
+                            setIsVisible((x) => !x);
+                        }}
+                    >
+                        Upload Instructions
+                        <ChevronIcon class="accordion-icon" size="1rem" />
+                    </h2>
+                    <div
+                        class={`accordion-content ${
+                            isVisible() ? "accordion-visible" : ""
+                        }`}
+                    >
+                        <div class="instruction-section">
+                            <h3>File Format</h3>
+                            <p>Only PDF files are accepted.</p>
+                        </div>
+                        <div class="instruction-section">
+                            <h3>File Naming</h3>
+                            <p>Use this format:</p>
+                            <p class="file-format-example">
+                                course_code_year_(midsem/endsem)_(spring/autumn).pdf
+                            </p>
+                            <p>
+                                <strong>Example:</strong>
+                                <br />
+                                <em>CS10001_2023_midsem_spring.pdf</em>
+                            </p>
+                        </div>
+                        <div class="instruction-section">
+                            <h3>How to Upload</h3>
+                            <p>Click "Choose File" to select your PDF.</p>
+                            <p>Click "Upload" to submit.</p>
+                        </div>
+                        <p class="note">
+                            <strong> Note</strong>: Incorrect names or file
+                            types will be rejected.
                         </p>
-                        <p>
-                            <strong>Example:</strong>
-                            <br />
-                            <em>CS10001_2023_midsem_spring.pdf</em>
-                        </p>
                     </div>
-                    <div class="instruction-section">
-                        <h3>How to Upload</h3>
-                        <p>Click "Choose File" to select your PDF.</p>
-                        <p>Click "Upload" to submit.</p>
-                    </div>
-                    <p class="note">
-                        <strong> Note</strong>: Incorrect names or file types
-                        will be rejected.
-                    </p>
                 </div>
 
                 <div class="upload-section">
