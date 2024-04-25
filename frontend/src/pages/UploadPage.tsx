@@ -1,39 +1,58 @@
 import { A } from "@solidjs/router";
 import { Component, For, createSignal } from "solid-js";
 import { FileCard } from "../components/FileCard";
-import { Toaster, toast } from "solid-toast";
-import { validateFilename } from "../utils/validateFilename";
+import toast, { Toaster } from "solid-toast";
 import { AiOutlineCloudUpload as UploadIcon } from "solid-icons/ai";
 import { FaSolidChevronDown as ChevronIcon } from "solid-icons/fa";
+import { autofillData } from "../utils/autofillData";
+import { QuestionPaper } from "../types/types";
+import Modal from "../components/EditModal";
+
 const UploadPage: Component = () => {
-    const [files, setFiles] = createSignal<File[]>([]);
+    const [qPapers, setQPapers] = createSignal<QuestionPaper[]>([]);
     const [isDragging, setIsDragging] = createSignal(false);
     const [isVisible, setIsVisible] = createSignal(false);
+    const [selectedQPaper, setSelectedQPaper] =
+        createSignal<QuestionPaper | null>(null);
 
     let fileInputRef!: HTMLInputElement;
 
+    // state modifying actions
+    const removeQPaper = (filename: string) => {
+        setQPapers((prevQPs) =>
+            prevQPs.filter((qp) => qp.file.name !== filename)
+        );
+    };
+    const addQPapers = (newFiles: File[]) => {
+        const newQPs = newFiles.map((newFile) => {
+            return { file: newFile, ...autofillData(newFile.name) };
+        });
+
+        if (newQPs.length > 0) {
+            setQPapers([...newQPs]);
+        }
+    };
+    const clearQPapers = () => setQPapers([]);
+    const updateQPaper = (updated: QuestionPaper) => {
+        let updateData = qPapers().map((qp) => {
+            if (qp.file.name == updated.file.name) return updated;
+            else return qp;
+        });
+        setQPapers(updateData);
+    };
+
+    const openModal = (qp: QuestionPaper) => {
+        setSelectedQPaper(qp);
+    };
+    const closeModal = () => {
+        setSelectedQPaper(null);
+    };
+
+    // event handlers
     const openFileDialog = (e: Event) => {
         e.stopPropagation();
         fileInputRef.click();
     };
-
-    const addFiles = (newFiles: File[]) => {
-        const validatedFiles = newFiles.filter((newFile) => {
-            const courseDetails = validateFilename(newFile.name);
-            if (courseDetails) {
-                return true;
-            } else {
-                console.error(`Invalid filename format: ${newFile.name}`);
-                toast.error(`Invalid filename format: ${newFile.name}`);
-                return false;
-            }
-        });
-
-        if (validatedFiles.length > 0) {
-            setFiles((prevFiles) => [...prevFiles, ...validatedFiles]);
-        }
-    };
-
     const onFileInputChange = (e: Event) => {
         e.preventDefault();
         if (e.target) {
@@ -41,17 +60,10 @@ const UploadPage: Component = () => {
                 (e.target as HTMLInputElement).files || []
             );
             if (newFiles) {
-                addFiles(newFiles);
+                addQPapers(newFiles);
             }
         }
     };
-
-    const removeFile = (filename: string) => {
-        setFiles((prevFiles) =>
-            prevFiles.filter((file) => file.name !== filename)
-        );
-    };
-
     const onFileDrop = (e: DragEvent) => {
         e.preventDefault();
         if (e.dataTransfer) {
@@ -59,30 +71,30 @@ const UploadPage: Component = () => {
                 (file) => file.type === "application/pdf"
             );
             if (pdfFiles) {
-                addFiles(pdfFiles);
+                addQPapers(pdfFiles);
             }
             e.dataTransfer.clearData();
         }
         setIsDragging(false);
     };
-
     const onDragEnter = (e: Event) => {
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(true);
     };
-
     const onDragExit = (e: Event) => {
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(false);
     };
-
     const uploadFiles = (e: Event) => {
         e.preventDefault();
         // TODO : Upload API endpoint call
-        console.log(files());
-        setFiles([]);
+        console.log(qPapers());
+        toast.success(
+            `${qPapers().length} question papers uploaded successfully.`
+        );
+        clearQPapers();
     };
 
     return (
@@ -122,13 +134,11 @@ const UploadPage: Component = () => {
                         <div class="instruction-section">
                             <h3>File Naming</h3>
                             <p>Use this format:</p>
-                            <p class="file-format-example">
-                                course_code_year_(midsem/endsem)_(spring/autumn).pdf
-                            </p>
+                            <p class="file-format-example">course_code.pdf</p>
                             <p>
                                 <strong>Example:</strong>
                                 <br />
-                                <em>CS10001_2023_midsem_spring.pdf</em>
+                                <em>CS10001.pdf</em>
                             </p>
                         </div>
                         <div class="instruction-section">
@@ -144,14 +154,15 @@ const UploadPage: Component = () => {
                 </div>
 
                 <div class="upload-section">
-                    {files().length > 0 ? (
+                    {qPapers().length > 0 ? (
                         <>
                             <div class="uploaded-files">
-                                <For each={Array.from(files())}>
-                                    {(file) => (
+                                <For each={Array.from(qPapers())}>
+                                    {(qp) => (
                                         <FileCard
-                                            file={file}
-                                            removeFile={removeFile}
+                                            qPaper={qp}
+                                            removeQPaper={removeQPaper}
+                                            edit={openModal}
                                         />
                                     )}
                                 </For>
@@ -188,6 +199,13 @@ const UploadPage: Component = () => {
                     className: "toast",
                 }}
             />
+            {selectedQPaper() && (
+                <Modal
+                    close={closeModal}
+                    qPaper={selectedQPaper()!}
+                    update={updateQPaper}
+                />
+            )}
         </div>
     );
 };

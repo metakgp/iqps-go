@@ -7,3 +7,12 @@ export type SearchResult = {
   filelink: string;
   from_library: boolean;
 };
+
+export type QuestionPaper = {
+  file: File;
+  course_code: string;
+  course_name: string;
+  year: string;
+  semester: "spring" | "autumn";
+  exam: "midsem" | "endsem";
+};

@@ -3,40 +3,41 @@ import {
     AiOutlineDelete as CloseIcon,
 } from "solid-icons/ai";
 import { Component } from "solid-js";
-import { validateFilename } from "../utils/validateFilename";
+import { QuestionPaper } from "../types/types";
+import { FaRegularPenToSquare as EditIcon } from "solid-icons/fa";
 
 type Props = {
-    file: File;
-    removeFile: (filename: string) => void;
+    qPaper: QuestionPaper;
+    removeQPaper: (filename: string) => void;
+    edit: (qp: QuestionPaper) => void;
 };
 
-export const FileCard: Component<Props> = ({ file, removeFile }) => {
-    const courseDetails = validateFilename(file.name);
-    if (courseDetails)
-        return (
-            <div class="file-card">
-                <PDFIcon size="4.5rem" />
-                <div class="file-data">
-                    <h4 class="file-name">{file.name}</h4>
-                    <div class="course-name">
-                        {`${courseDetails.course_code} - ${courseDetails.course_name}`}
-                    </div>
-                    <div class="pills">
-                        {courseDetails.year && (
-                            <div class="pill">{courseDetails.year}</div>
-                        )}
-                        {courseDetails.exam && (
-                            <div class="pill">{courseDetails.exam}</div>
-                        )}
-                        {courseDetails.semester && (
-                            <div class="pill">{courseDetails.semester}</div>
-                        )}
-                    </div>
+export const FileCard: Component<Props> = ({ qPaper, removeQPaper, edit }) => {
+    return (
+        <div class="file-card">
+            <PDFIcon size="4.5rem" />
+            <div class="file-data">
+                <h4 class="file-name">{qPaper.file.name}</h4>
+                <div class="course-name">
+                    {`${qPaper.course_code} - ${qPaper.course_name}`}
                 </div>
-                <button onClick={() => removeFile(file.name)} class="close-btn">
+                <div class="pills">
+                    <div class="pill">{qPaper.year}</div>
+                    <div class="pill">{qPaper.exam}</div>
+                    <div class="pill">{qPaper.semester}</div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button
+                    onClick={() => removeQPaper(qPaper.file.name)}
+                    class="close-btn"
+                >
                     <CloseIcon size="2rem" />
                 </button>
+                <button onClick={() => edit(qPaper)} class="edit-btn">
+                    <EditIcon size="1.5rem" />
+                </button>
             </div>
-        );
-    else return <></>;
+        </div>
+    );
 };

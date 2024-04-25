@@ -122,8 +122,25 @@
                     font-size: 1rem;
                 }
             }
+            .btn-group {
+                display: flex;
+                gap: 0.5rem;
+                align-items: center;
+                justify-content: center;
+            }
             .close-btn {
                 color: crimson;
+                padding: 0.5rem;
+                border: none;
+                background: none;
+                box-shadow: none;
+                height: fit-content;
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+            .edit-btn {
+                color: #fff8;
                 padding: 0.5rem;
                 border: none;
                 background: none;
