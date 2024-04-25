@@ -4,6 +4,11 @@ type Courses = {
     [key: string]: string;
 };
 
+export const getCourseFromCode = (code: string) => {
+    const coursesData: Courses = courses;
+    return coursesData[code];
+};
+
 export const autofillData = (
     filename: string
 ): {
@@ -38,6 +43,6 @@ export const autofillData = (
         year,
         exam: exam as "midsem" | "endsem",
         semester: semester as "spring" | "autumn",
-        course_name: coursesData[course_code],
+        course_name: getCourseFromCode(course_code),
     };
 };

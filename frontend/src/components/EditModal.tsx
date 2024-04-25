@@ -1,5 +1,6 @@
 import { Component, For, createSignal } from "solid-js";
 import { QuestionPaper } from "../types/types";
+import { getCourseFromCode } from "../utils/autofillData";
 
 type Props = {
     close: () => void;
@@ -35,10 +36,18 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                 required
                                 value={data().course_code}
                                 onChange={(e) => {
-                                    setData((prev) => ({
-                                        ...prev,
-                                        course_code: e.target.value,
-                                    }));
+                                    setData((prev) => {
+                                        let course_name = prev.course_name;
+                                        if (e.target.value.length == 7)
+                                            course_name = getCourseFromCode(
+                                                e.target.value
+                                            );
+                                        return {
+                                            ...prev,
+                                            course_code: e.target.value,
+                                            course_name: course_name,
+                                        };
+                                    });
                                 }}
                             />
                         </div>
