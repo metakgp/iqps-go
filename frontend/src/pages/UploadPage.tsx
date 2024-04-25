@@ -132,7 +132,7 @@ const UploadPage: Component = () => {
                             <p>Only PDF files are accepted.</p>
                         </div>
                         <div class="instruction-section">
-                            <h3>File Naming</h3>
+                            <h3>File Naming (optional)</h3>
                             <p>Use this format:</p>
                             <p class="file-format-example">course_code.pdf</p>
                             <p>
@@ -146,10 +146,6 @@ const UploadPage: Component = () => {
                             <p>Click "Choose File" to select your PDF.</p>
                             <p>Click "Upload" to submit.</p>
                         </div>
-                        <p class="note">
-                            <strong> Note</strong>: Incorrect names or file
-                            types will be rejected.
-                        </p>
                     </div>
                 </div>
 
