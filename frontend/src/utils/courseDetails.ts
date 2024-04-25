@@ -17,7 +17,7 @@ export const getCourseDetails = (filename: string) => {
         course_code: course_code || null,
         year: year || null,
         exam: exam || null,
-        semester: semester.split(".")[0] || null,
+        semester: semester || null,
         course_name: coursesData[course_code] || null,
     };
 

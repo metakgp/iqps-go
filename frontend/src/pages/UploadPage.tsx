@@ -2,6 +2,7 @@ import { A } from "@solidjs/router";
 import { AiOutlineCloudUpload as UploadIcon } from "solid-icons/ai";
 import { Component, For, createSignal } from "solid-js";
 import { FileCard } from "../components/FileCard";
+import { Toaster, toast } from "solid-toast";
 
 const UploadPage: Component = () => {
     const [files, setFiles] = createSignal<File[]>([]);
@@ -15,12 +16,19 @@ const UploadPage: Component = () => {
     };
 
     const addFiles = (newFiles: File[]) => {
-        const filteredFiles = newFiles.filter(
-            (newFile) => !files().some((file) => file.name === newFile.name)
-        );
+        const validatedFiles = newFiles.filter((newFile) => {
+            const filenameParts = newFile.name.split("_");
+            if (filenameParts.length !== 4) {
+                console.error(`Invalid filename format: ${newFile.name}`);
+                toast.error(`Invalid filename format: ${newFile.name}`);
+                return false;
+            }
 
-        if (filteredFiles.length > 0) {
-            setFiles((prevFiles) => [...prevFiles, ...filteredFiles]);
+            return true;
+        });
+
+        if (validatedFiles.length > 0) {
+            setFiles((prevFiles) => [...prevFiles, ...validatedFiles]);
         }
     };
 
@@ -45,13 +53,13 @@ const UploadPage: Component = () => {
     const onFileDrop = (e: DragEvent) => {
         e.preventDefault();
         if (e.dataTransfer) {
-            const droppedFiles = [...e.dataTransfer.files];
-            const pdfFiles = droppedFiles.filter(
+            const pdfFiles = [...e.dataTransfer.files].filter(
                 (file) => file.type === "application/pdf"
             );
             if (pdfFiles) {
                 addFiles(pdfFiles);
             }
+            e.dataTransfer.clearData();
         }
         setIsDragging(false);
     };
@@ -154,6 +162,12 @@ const UploadPage: Component = () => {
                     )}
                 </div>
             </div>
+            <Toaster
+                toastOptions={{
+                    position: "bottom-center",
+                    className: "toast",
+                }}
+            />
         </div>
     );
 };

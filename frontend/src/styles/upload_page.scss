@@ -100,7 +100,7 @@
             .pills {
                 margin-top: 0.2rem;
                 display: flex;
-                gap: 0.2rem;
+                gap: 0.5rem;
                 .pill {
                     padding: 0.25rem 0.5rem;
                     border-radius: 1rem;
@@ -111,7 +111,7 @@
                 }
             }
         }
-        
+
         .upload-btn {
             width: fit-content;
             border: none;
