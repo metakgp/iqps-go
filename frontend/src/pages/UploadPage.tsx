@@ -7,6 +7,7 @@ import { FaSolidChevronDown as ChevronIcon } from "solid-icons/fa";
 import { autofillData } from "../utils/autofillData";
 import { QuestionPaper } from "../types/types";
 import Modal from "../components/EditModal";
+import { Spinner } from "../components/Spinner";
 
 const UploadPage: Component = () => {
     const [qPapers, setQPapers] = createSignal<QuestionPaper[]>([]);
@@ -128,6 +129,7 @@ const UploadPage: Component = () => {
                 setAwaitingResponse(false);
             } catch (error) {
                 console.error("Error during upload:", error);
+                setAwaitingResponse(false);
             }
         }
     };
@@ -199,7 +201,16 @@ const UploadPage: Component = () => {
                                 </For>
                             </div>
                             <button onClick={handleUpload} class="upload-btn">
-                                Upload
+                                {awaitingResponse() ? (
+                                    <>
+                                        Uploading
+                                        <div class="spinner">
+                                            <Spinner />
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>Upload</>
+                                )}
                             </button>
                         </>
                     ) : (
