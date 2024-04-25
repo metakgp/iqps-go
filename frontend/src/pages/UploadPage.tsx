@@ -14,6 +14,8 @@ const UploadPage: Component = () => {
     const [isVisible, setIsVisible] = createSignal(false);
     const [selectedQPaper, setSelectedQPaper] =
         createSignal<QuestionPaper | null>(null);
+    const [awaitingResponse, setAwaitingResponse] =
+        createSignal<boolean>(false);
 
     let fileInputRef!: HTMLInputElement;
 
@@ -87,14 +89,47 @@ const UploadPage: Component = () => {
         e.stopPropagation();
         setIsDragging(false);
     };
-    const uploadFiles = (e: Event) => {
+    const handleUpload = async (e: Event) => {
         e.preventDefault();
-        // TODO : Upload API endpoint call
         console.log(qPapers());
-        toast.success(
-            `${qPapers().length} question papers uploaded successfully.`
-        );
-        clearQPapers();
+        if (!awaitingResponse()) {
+            try {
+                const formData = new FormData();
+                qPapers().forEach((qp, index) => {
+                    formData.append(`file_${index}`, qp.file);
+                    formData.append(`course_code_${index}`, qp.course_code);
+                    formData.append(`course_name_${index}`, qp.course_name);
+                    formData.append(`year_${index}`, qp.year);
+                    formData.append(`semester_${index}`, qp.semester);
+                    formData.append(`exam_${index}`, qp.exam);
+                });
+
+                setAwaitingResponse(true);
+                const response = await fetch(
+                    `${import.meta.env.VITE_BACKEND_URL}/upload`,
+                    {
+                        method: "POST",
+                        body: formData,
+                    }
+                );
+                const data = await response.json();
+
+                if (data.status == "success")
+                    toast.success(
+                        `${
+                            qPapers().length
+                        } question papers uploaded successfully.`
+                    );
+                else {
+                    toast.error(`Some Error Occured`);
+                }
+
+                clearQPapers();
+                setAwaitingResponse(false);
+            } catch (error) {
+                console.error("Error during upload:", error);
+            }
+        }
     };
 
     return (
@@ -163,7 +198,7 @@ const UploadPage: Component = () => {
                                     )}
                                 </For>
                             </div>
-                            <button onClick={uploadFiles} class="upload-btn">
+                            <button onClick={handleUpload} class="upload-btn">
                                 Upload
                             </button>
                         </>
