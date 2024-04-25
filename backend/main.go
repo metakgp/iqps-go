@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -33,7 +34,7 @@ type QuestionPaper struct {
 	ApproveStatus   bool   `json:"approve_status"`
 }
 
-type uploadEndpoint struct {
+type uploadEndpointRes struct {
 	Filename    string `json:"filename"`
 	Status      string `json:"status"`
 	Description string `json:"description"`
@@ -42,6 +43,7 @@ type uploadEndpoint struct {
 var (
 	db             *sql.DB
 	staticFilesUrl string
+	courses        map[string]string
 )
 
 const init_db = `CREATE TABLE IF NOT EXISTS qp (
@@ -160,7 +162,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	var response []uploadEndpoint
+	var response []uploadEndpointRes
 	// Max total size of 50MB
 	const MaxBodySize = 50 << 20 // 1<<20  = 1024*1024 = 1MB
 	r.Body = http.MaxBytesReader(w, r.Body, MaxBodySize)
@@ -172,13 +174,13 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files := r.MultipartForm.File["files"]
-	if len(files) > 5 {
-		http.Error(w, "max 5 files allowed", http.StatusBadRequest)
+	if len(files) > 7 {
+		http.Error(w, "max 7 files allowed", http.StatusBadRequest)
 		return
 	}
 
 	for _, fileHeader := range files {
-		resp := uploadEndpoint{Filename: fileHeader.Filename, Status: "success"}
+		resp := uploadEndpointRes{Filename: fileHeader.Filename, Status: "success"}
 
 		if fileHeader.Size > 10<<20 {
 			resp.Status = "failed"
@@ -291,9 +293,9 @@ func populateDB(filename string) error {
 	}
 
 	courseCode := qpData[0]
-	courseName, err := mapCodeToName(courseCode)
-	if err != nil {
-		return err
+	courseName := courses[courseCode]
+	if len(courseName) == 0 {
+		return fmt.Errorf("invalid course code")
 	}
 
 	year, _ := strconv.Atoi(qpData[1])
@@ -302,27 +304,11 @@ func populateDB(filename string) error {
 	fileLink := fmt.Sprintf("%s/%s", staticFilesUrl, filename)
 	query := "INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6);"
 
-	_, err = db.Exec(query, courseCode, courseName, year, exam, fileLink, fromLibrary)
+	_, err := db.Exec(query, courseCode, courseName, year, exam, fileLink, fromLibrary)
 	if err != nil {
 		return fmt.Errorf("failed to add qp to database: %v", err)
 	}
 	return nil
-}
-
-func mapCodeToName(code string) (string, error) {
-	rows := db.QueryRow("SELECT course_name FROM courses WHERE course_code=$1", code)
-
-	var courseName string
-
-	err := rows.Scan(&courseName)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return "", fmt.Errorf("course code not found")
-		}
-		return "", fmt.Errorf("failed to fetch course name: %v", err)
-	}
-	fmt.Printf("course name: %s\n", courseName)
-	return courseName, nil
 }
 
 func CheckError(err error) {
@@ -358,6 +344,24 @@ func main() {
 	_, err = db.Exec(init_db)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// Parse courses.csv to map
+	courses = make(map[string]string)
+	file, err := os.Open("courses.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	r := csv.NewReader(file)
+	r.Read()
+	for {
+		row, err := r.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			log.Fatal(err)
+		}
+		courses[row[0]] = row[1]
 	}
 
 	http.HandleFunc("/health", health)
