@@ -1,8 +1,8 @@
 import { Component, For, createEffect, createSignal } from "solid-js";
 import type { SearchResult } from "../types/types";
 import { Spinner } from "./Spinner";
-import { FiDownload as DownloadIcon } from "solid-icons/fi";
-import { BiSolidCopy as ShareIcon } from "solid-icons/bi";
+import { IoLink as ShareIcon } from "solid-icons/io";
+import { FaSolidFilePdf as DownloadIcon } from "solid-icons/fa";
 import { copyLink } from "../utils/copyLink";
 
 type Props = {
@@ -127,22 +127,24 @@ const SearchResults: Component<Props> = (props) => {
                             <td style={{display: 'flex', "align-items": 'center'}}>
                               <p>
                               {result.course_name}&nbsp;
-                              <span class="result-card-tag">{examMap(result.exam)}</span>
+                              {result.exam !== "" && <span class="result-card-tag">{examMap(result.exam)}</span>}
                               </p>
                               <div class="result-card-btns">
                                 <a
                                   class="result-card-btn icon-btn"
                                   href={result.filelink}
+                                  title="Open PDF"
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
-                                  <DownloadIcon />
+                                  <DownloadIcon size="1.2rem" />
                                 </a>
                                 <button
                                   class="result-card-btn icon-btn"
+                                  title="Share PDF"
                                   onClick={(e) => copyLink(e, result.filelink)}
                                 >
-                                  <ShareIcon />
+                                  <ShareIcon size="1.2rem" />
                                 </button>
                               </div>
                             </td>
