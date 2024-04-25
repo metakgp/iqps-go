@@ -96,31 +96,33 @@ const UploadPage: Component = () => {
             </div>
 
             <div class="upload-wrapper">
-                <div class="instructions">
-                    {/* TODO: Update Instructions */}
-                    <h2>Instructions</h2>
-                    <ul>
-                        <li>
-                            Lorem ipsum dolor, sit amet consectetur adipisicing
-                            elit. Molestias eligendi perferendis alias odit esse
-                            magnam.
-                        </li>
-                        <li>
-                            Lorem ipsum dolor, sit amet consectetur adipisicing
-                            elit. Molestias eligendi perferendis alias odit esse
-                            magnam.
-                        </li>
-                        <li>
-                            Lorem ipsum dolor, sit amet consectetur adipisicing
-                            elit. Molestias eligendi perferendis alias odit esse
-                            magnam.
-                        </li>
-                        <li>
-                            Lorem ipsum dolor, sit amet consectetur adipisicing
-                            elit. Molestias eligendi perferendis alias odit esse
-                            magnam.
-                        </li>
-                    </ul>
+                <div class="upload-instructions">
+                    <h2>Upload Instructions</h2>
+                    <div class="instruction-section">
+                        <h3>File Format</h3>
+                        <p>Only PDF files are accepted.</p>
+                    </div>
+                    <div class="instruction-section">
+                        <h3>File Naming</h3>
+                        <p>Use this format:</p>
+                        <p class="file-format-example">
+                            course_code_year_(midsem/endsem)_(spring/autumn).pdf
+                        </p>
+                        <p>
+                            <strong>Example:</strong>
+                            <br />
+                            <em>CS10001_2023_midsem_spring.pdf</em>
+                        </p>
+                    </div>
+                    <div class="instruction-section">
+                        <h3>How to Upload</h3>
+                        <p>Click "Choose File" to select your PDF.</p>
+                        <p>Click "Upload" to submit.</p>
+                    </div>
+                    <p class="note">
+                        <strong> Note</strong>: Incorrect names or file types
+                        will be rejected.
+                    </p>
                 </div>
 
                 <div class="upload-section">
