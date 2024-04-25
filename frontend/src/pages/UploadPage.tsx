@@ -3,6 +3,7 @@ import { AiOutlineCloudUpload as UploadIcon } from "solid-icons/ai";
 import { Component, For, createSignal } from "solid-js";
 import { FileCard } from "../components/FileCard";
 import { Toaster, toast } from "solid-toast";
+import { validateFilename } from "../utils/validateFilename";
 
 const UploadPage: Component = () => {
     const [files, setFiles] = createSignal<File[]>([]);
@@ -17,14 +18,14 @@ const UploadPage: Component = () => {
 
     const addFiles = (newFiles: File[]) => {
         const validatedFiles = newFiles.filter((newFile) => {
-            const filenameParts = newFile.name.split("_");
-            if (filenameParts.length !== 4) {
+            const courseDetails = validateFilename(newFile.name);
+            if (courseDetails) {
+                return true;
+            } else {
                 console.error(`Invalid filename format: ${newFile.name}`);
                 toast.error(`Invalid filename format: ${newFile.name}`);
                 return false;
             }
-
-            return true;
         });
 
         if (validatedFiles.length > 0) {
