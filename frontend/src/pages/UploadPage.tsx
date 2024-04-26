@@ -73,8 +73,10 @@ const UploadPage: Component = () => {
             const pdfFiles = [...e.dataTransfer.files].filter(
                 (file) => file.type === "application/pdf"
             );
-            if (pdfFiles) {
+            if (pdfFiles && pdfFiles.length > 0) {
                 addQPapers(pdfFiles);
+            } else {
+                toast.error("Could not catch files. Please try again");
             }
             e.dataTransfer.clearData();
         }
