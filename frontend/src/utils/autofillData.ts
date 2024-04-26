@@ -6,7 +6,7 @@ type Courses = {
 
 export const getCourseFromCode = (code: string) => {
     const coursesData: Courses = courses;
-    return coursesData[code];
+    return coursesData[code] || "unknown_course";
 };
 
 export const autofillData = (
