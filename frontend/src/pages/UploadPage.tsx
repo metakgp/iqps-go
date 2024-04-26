@@ -98,13 +98,12 @@ const UploadPage: Component = () => {
         if (!awaitingResponse()) {
             try {
                 const formData = new FormData();
-                qPapers().forEach((qp, index) => {
-                    formData.append(`file_${index}`, qp.file);
-                    formData.append(`course_code_${index}`, qp.course_code);
-                    formData.append(`course_name_${index}`, qp.course_name);
-                    formData.append(`year_${index}`, qp.year);
-                    formData.append(`semester_${index}`, qp.semester);
-                    formData.append(`exam_${index}`, qp.exam);
+                qPapers().forEach((qp) => {
+                    formData.append("files", qp.file);
+                    formData.append(
+                        qp.file.name,
+                        `${qp.course_code}_${qp.course_name}_${qp.year}_${qp.exam}_${qp.semester}`
+                    );
                 });
 
                 setAwaitingResponse(true);
