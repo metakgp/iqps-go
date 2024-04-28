@@ -1,6 +1,9 @@
-import { Component, For, createSignal } from "solid-js";
-import { QuestionPaper } from "../types/types";
+import { Component, createEffect } from "solid-js";
+import { ErrorMessage, QuestionPaper } from "../types/types";
 import { getCourseFromCode } from "../utils/autofillData";
+import toast from "solid-toast";
+import { validate } from "../utils/validateInput";
+import { createStore } from "solid-js/store";
 
 type Props = {
     close: () => void;
@@ -9,7 +12,30 @@ type Props = {
 };
 
 const Modal: Component<Props> = ({ close, qPaper, update }) => {
-    const [data, setData] = createSignal(qPaper);
+    const [data, setData] = createStore(qPaper);
+    const [validationErrors, setValidationErrors] = createStore({
+        course_code: "",
+        course_name: "",
+        year: "",
+        exam: "",
+        semester: "",
+    });
+
+    createEffect(() => {
+        setValidationErrors(validate(data));
+    });
+
+    createEffect(() => {
+        if (data.course_code.length == 7) {
+            let course_name = getCourseFromCode(data.course_code);
+            setData((prev) => ({ ...prev, course_name }));
+        }
+    });
+
+    const isValid = (data: ErrorMessage) => {
+        return !Object.values(data).some(Boolean);
+    };
+
     return (
         <div class="modal-overlay">
             <div class="modal">
@@ -22,7 +48,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                             id="filename"
                             name="filename"
                             required
-                            value={data().file.name}
+                            value={data.file.name}
                             disabled
                         />
                     </div>
@@ -34,22 +60,21 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                 id="course_code"
                                 name="course_code"
                                 required
-                                value={data().course_code}
+                                value={data.course_code}
                                 onChange={(e) => {
                                     setData((prev) => {
-                                        let course_name = prev.course_name;
-                                        if (e.target.value.length == 7)
-                                            course_name = getCourseFromCode(
-                                                e.target.value
-                                            );
                                         return {
                                             ...prev,
                                             course_code: e.target.value,
-                                            course_name: course_name,
                                         };
                                     });
                                 }}
                             />
+                            {validationErrors.course_code && (
+                                <p class="error-msg">
+                                    {validationErrors.course_code}
+                                </p>
+                            )}
                         </div>
                         <div class="form-group">
                             <label for="year">Year:</label>
@@ -57,7 +82,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                 id="year"
                                 name="year"
                                 required
-                                value={data().year}
+                                value={data.year}
                                 onChange={(e) => {
                                     setData((prev) => ({
                                         ...prev,
@@ -73,23 +98,33 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                 <option value="2020">2020</option>
                                 <option value="2019">2019</option>
                             </select>
+                            {validationErrors.year && (
+                                <p class="error-msg">{validationErrors.year}</p>
+                            )}
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="course_name">Course Name:</label>
-                        <input
-                            type="text"
-                            id="course_name"
-                            name="course_name"
-                            required
-                            value={data().course_name}
-                            onChange={(e) => {
-                                setData((prev) => ({
-                                    ...prev,
-                                    course_name: e.target.value,
-                                }));
-                            }}
-                        />
+                        <div>
+                            <input
+                                type="text"
+                                id="course_name"
+                                name="course_name"
+                                required
+                                value={data.course_name}
+                                onChange={(e) => {
+                                    setData((prev) => ({
+                                        ...prev,
+                                        course_name: e.target.value,
+                                    }));
+                                }}
+                            />
+                            {!validationErrors.course_name && (
+                                <p class="error-msg">
+                                    {validationErrors.course_name}
+                                </p>
+                            )}
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="exam">Exam:</label>
@@ -101,7 +136,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     name="exam"
                                     value="midsem"
                                     required
-                                    checked={data().exam == "midsem"}
+                                    checked={data.exam == "midsem"}
                                     onChange={(e) =>
                                         setData((prev) => ({
                                             ...prev,
@@ -118,7 +153,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     name="exam"
                                     value="endsem"
                                     required
-                                    checked={data().exam == "endsem"}
+                                    checked={data.exam == "endsem"}
                                     onChange={(e) =>
                                         setData((prev) => ({
                                             ...prev,
@@ -129,6 +164,9 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                 End Semester
                             </label>
                         </div>
+                        {validationErrors.exam && (
+                            <p class="error-msg">{validationErrors.exam}</p>
+                        )}
                     </div>
                     <div class="form-group">
                         <label for="semester">Semester:</label>
@@ -140,7 +178,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     name="semester"
                                     value="autumn"
                                     required
-                                    checked={data().semester == "autumn"}
+                                    checked={data.semester == "autumn"}
                                     onChange={(e) =>
                                         setData((prev) => ({
                                             ...prev,
@@ -157,7 +195,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     name="semester"
                                     value="spring"
                                     required
-                                    checked={data().semester == "spring"}
+                                    checked={data.semester == "spring"}
                                     onChange={(e) =>
                                         setData((prev) => ({
                                             ...prev,
@@ -168,17 +206,38 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                 Spring Semester
                             </label>
                         </div>
+                        {validationErrors.semester && (
+                            <p class="error-msg">{validationErrors.semester}</p>
+                        )}
                     </div>
                     <div class="control-group">
-                        <button onClick={close} type="submit">
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                close();
+                            }}
+                            class="cancel-btn"
+                        >
                             Cancel
                         </button>
                         <button
-                            onClick={() => {
-                                update(data());
-                                close();
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (isValid(data)) {
+                                    toast.success(
+                                        "File details updated successfully"
+                                    );
+                                    update(data);
+                                    close();
+                                } else {
+                                    toast.error(
+                                        "Please provide valid subject details"
+                                    );
+                                }
                             }}
-                            type="submit"
+                            class={
+                                isValid(data) ? "save-btn" : "save-btn disabled"
+                            }
                         >
                             Save
                         </button>

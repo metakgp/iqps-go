@@ -1,7 +1,23 @@
 import courses from "../data/courses.json";
+import { QuestionPaper } from "../types/types";
 
 type Courses = {
     [key: string]: string;
+};
+
+export const sanitizeQP = (qp: QuestionPaper) => {
+    const sanitizedFilename = qp.file.name
+        .replace(/[^\w\d\_]/g, "$")
+        .replace(/\$+/g, "$");
+
+    const sanitizedCourseName = qp.course_name
+        .replace(/[^\w\d\_]/g, "$")
+        .replace(/\$+/g, "$");
+    return {
+        ...qp,
+        course_name: sanitizedCourseName,
+        file: { ...qp.file, name: sanitizedFilename },
+    };
 };
 
 export const getCourseFromCode = (code: string) => {
@@ -18,8 +34,6 @@ export const autofillData = (
     semester: "spring" | "autumn";
     exam: "midsem" | "endsem";
 } => {
-    const coursesData: Courses = courses;
-
     const dotIndex = filename.lastIndexOf(".");
     const filenameparts = filename.substring(0, dotIndex).split("_");
 

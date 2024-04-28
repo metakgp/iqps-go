@@ -4,10 +4,11 @@ import { FileCard } from "../components/FileCard";
 import toast, { Toaster } from "solid-toast";
 import { AiOutlineCloudUpload as UploadIcon } from "solid-icons/ai";
 import { FaSolidChevronDown as ChevronIcon } from "solid-icons/fa";
-import { autofillData } from "../utils/autofillData";
-import { QuestionPaper } from "../types/types";
+import { autofillData, sanitizeQP } from "../utils/autofillData";
+import { ErrorMessage, QuestionPaper } from "../types/types";
 import Modal from "../components/EditModal";
 import { Spinner } from "../components/Spinner";
+import { validate } from "../utils/validateInput";
 
 const UploadPage: Component = () => {
     const [qPapers, setQPapers] = createSignal<QuestionPaper[]>([]);
@@ -94,15 +95,28 @@ const UploadPage: Component = () => {
     };
     const handleUpload = async (e: Event) => {
         e.preventDefault();
-        console.log(qPapers());
+        const allValid = qPapers().every((qp) => isValid(qp));
+        if (!allValid) {
+            toast.error("Please provide correct course details");
+            return;
+        }
+
         if (!awaitingResponse()) {
             try {
                 const formData = new FormData();
                 qPapers().forEach((qp) => {
-                    formData.append("files", qp.file);
+                    const {
+                        file,
+                        course_code,
+                        course_name,
+                        year,
+                        exam,
+                        semester,
+                    } = sanitizeQP(qp);
+                    formData.append("files", file);
                     formData.append(
-                        qp.file.name,
-                        `${qp.course_code}_${qp.course_name}_${qp.year}_${qp.exam}_${qp.semester}`
+                        file.name,
+                        `${course_code}_${course_name}_${year}_${exam}_${semester}`
                     );
                 });
 
@@ -133,6 +147,10 @@ const UploadPage: Component = () => {
                 setAwaitingResponse(false);
             }
         }
+    };
+
+    const isValid = (data: QuestionPaper) => {
+        return !Object.values(validate(data)).some(Boolean);
     };
 
     return (
@@ -193,11 +211,18 @@ const UploadPage: Component = () => {
                             <div class="uploaded-files">
                                 <For each={Array.from(qPapers())}>
                                     {(qp) => (
-                                        <FileCard
-                                            qPaper={qp}
-                                            removeQPaper={removeQPaper}
-                                            edit={openModal}
-                                        />
+                                        <div>
+                                            <FileCard
+                                                qPaper={qp}
+                                                removeQPaper={removeQPaper}
+                                                edit={openModal}
+                                            />
+                                            {!isValid(qp) && (
+                                                <p class="error-msg">
+                                                    Invalid course details
+                                                </p>
+                                            )}
+                                        </div>
                                     )}
                                 </For>
                             </div>
