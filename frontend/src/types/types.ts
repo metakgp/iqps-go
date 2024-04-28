@@ -24,3 +24,11 @@ export type ErrorMessage = {
     exam: string;
     semester: string;
 };
+
+type UploadResult = {
+    filename: string;
+    status: string;
+    description: string;
+};
+
+export type UploadResults = UploadResult[];

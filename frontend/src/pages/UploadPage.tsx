@@ -5,7 +5,7 @@ import toast, { Toaster } from "solid-toast";
 import { AiOutlineCloudUpload as UploadIcon } from "solid-icons/ai";
 import { FaSolidChevronDown as ChevronIcon } from "solid-icons/fa";
 import { autofillData, sanitizeQP } from "../utils/autofillData";
-import { ErrorMessage, QuestionPaper } from "../types/types";
+import { ErrorMessage, QuestionPaper, UploadResults } from "../types/types";
 import Modal from "../components/EditModal";
 import { Spinner } from "../components/Spinner";
 import { validate } from "../utils/validateInput";
@@ -128,17 +128,19 @@ const UploadPage: Component = () => {
                         body: formData,
                     }
                 );
-                const data = await response.json();
+                const data: UploadResults = await response.json();
 
-                if (data.status == "success")
-                    toast.success(
-                        `${
-                            qPapers().length
-                        } question papers uploaded successfully.`
-                    );
-                else {
-                    toast.error(`Some Error Occured`);
-                }
+                data.forEach((result) => {
+                    if (result.status === "success") {
+                        toast.success(
+                            `File ${result.filename} uploaded successfully`
+                        );
+                    } else {
+                        toast.error(
+                            `Failed to upload file ${result.filename}: ${result.description}`
+                        );
+                    }
+                });
 
                 clearQPapers();
                 setAwaitingResponse(false);
