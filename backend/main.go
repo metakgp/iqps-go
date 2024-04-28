@@ -198,34 +198,29 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		}
 		defer file.Close()
 
-		// Validating file type
-		buff := make([]byte, 512)
-		_, err = file.Read(buff)
-		if err != nil {
-			resp.Status = "failed"
-			resp.Description = err.Error()
-			response = append(response, resp)
-			continue
-		}
-		fileType := http.DetectContentType(buff)
+		fileType := fileHeader.Header.Get("Content-Type")
 		if fileType != "application/pdf" {
 			resp.Status = "failed"
 			resp.Description = "invalid file type. Only PDFs are supported"
-			response = append(response, resp)
-			continue
-
-		}
-		_, err = file.Seek(0, io.SeekCurrent)
-		if err != nil {
-			resp.Status = "failed"
-			resp.Description = err.Error()
 			response = append(response, resp)
 			continue
 		}
 
 		qpsPath := os.Getenv("QPS_PATH")
 		fileName := fileHeader.Filename
-		filePath := filepath.Join(qpsPath, fileName)
+
+		FileNameList := r.MultipartForm.Value[fileName]
+		if len(FileNameList) == 0 {
+			resp.Status = "failed"
+			resp.Description = "filename not provided"
+			response = append(response, resp)
+			continue
+		}
+
+		newFileName := FileNameList[0]
+		filePath := filepath.Join(qpsPath, newFileName)
+		filePath = filePath + ".pdf"
+		filePath = filepath.Clean(filePath)
 
 		// Duplicate filename handling
 		if _, err = os.Stat(filePath); err == nil {
@@ -234,7 +229,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 					continue
 				} else if errors.Is(err, os.ErrNotExist) {
 					filePath = fmt.Sprintf("%s-%d.pdf", filePath[:len(filePath)-4], i)
-					fileName = fmt.Sprintf("%s-%d.pdf", fileName[:len(fileName)-4], i)
+					fileName = fmt.Sprintf("%s-%d.pdf", newFileName, i)
 					break
 				} else {
 					resp.Status = "failed"
@@ -266,7 +261,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		err = populateDB(fileName)
+		err = populateDB(newFileName, fileName)
 		if err != nil {
 			_ = os.Remove(filePath)
 			resp.Status = "failed"
@@ -286,22 +281,19 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func populateDB(filename string) error {
-	qpData := strings.Split(filename[:len(filename)-4], "_")
-	if len(qpData) != 4 {
+func populateDB(filename string, fileNameLink string) error {
+	qpData := strings.Split(filename, "_")
+	if len(qpData) != 5 {
 		return fmt.Errorf("invalid filename format")
 	}
 
 	courseCode := qpData[0]
-	courseName := courses[courseCode]
-	if len(courseName) == 0 {
-		return fmt.Errorf("invalid course code")
-	}
+	courseName := strings.Join(strings.Split(filename, "_"), " ")
 
-	year, _ := strconv.Atoi(qpData[1])
-	exam := qpData[2]
+	year, _ := strconv.Atoi(qpData[2])
+	exam := qpData[3]
 	fromLibrary := false
-	fileLink := fmt.Sprintf("%s/%s", staticFilesUrl, filename)
+	fileLink := fmt.Sprintf("%s/%s", staticFilesUrl, fileNameLink)
 	query := "INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6);"
 
 	_, err := db.Exec(query, courseCode, courseName, year, exam, fileLink, fromLibrary)
