@@ -3,13 +3,13 @@ import {
     AiOutlineDelete as CloseIcon,
 } from "solid-icons/ai";
 import { Component } from "solid-js";
-import { QuestionPaper } from "../types/types";
+import { IQuestionPaperFile } from "../types/types";
 import { FaRegularPenToSquare as EditIcon } from "solid-icons/fa";
 
 type Props = {
-    qPaper: QuestionPaper;
+    qPaper: IQuestionPaperFile;
     removeQPaper: (filename: string) => void;
-    edit: (qp: QuestionPaper) => void;
+    edit: (qp: IQuestionPaperFile) => void;
 };
 
 export const FileCard: Component<Props> = ({ qPaper, removeQPaper, edit }) => {

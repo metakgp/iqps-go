@@ -1,5 +1,5 @@
 import { Component, createEffect } from "solid-js";
-import { ErrorMessage, QuestionPaper } from "../types/types";
+import { IErrorMessage, IQuestionPaperFile } from "../types/types";
 import { getCourseFromCode } from "../utils/autofillData";
 import toast from "solid-toast";
 import { validate } from "../utils/validateInput";
@@ -7,19 +7,13 @@ import { createStore } from "solid-js/store";
 
 type Props = {
     close: () => void;
-    qPaper: QuestionPaper;
-    update: (qp: QuestionPaper) => void;
+    qPaper: IQuestionPaperFile;
+    update: (qp: IQuestionPaperFile) => void;
 };
 
 const Modal: Component<Props> = ({ close, qPaper, update }) => {
     const [data, setData] = createStore(qPaper);
-    const [validationErrors, setValidationErrors] = createStore({
-        course_code: "",
-        course_name: "",
-        year: "",
-        exam: "",
-        semester: "",
-    });
+    const [validationErrors, setValidationErrors] = createStore<IErrorMessage>(validate(qPaper));
 
     createEffect(() => {
         setValidationErrors(validate(data));
@@ -31,10 +25,6 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
             setData((prev) => ({ ...prev, course_name }));
         }
     });
-
-    const isValid = (data: ErrorMessage) => {
-        return !Object.values(data).some(Boolean);
-    };
 
     return (
         <div class="modal-overlay">
@@ -70,9 +60,9 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     });
                                 }}
                             />
-                            {validationErrors.course_code && (
+                            {validationErrors.courseCodeErr !== null && (
                                 <p class="error-msg">
-                                    {validationErrors.course_code}
+                                    {validationErrors.courseCodeErr}
                                 </p>
                             )}
                         </div>
@@ -86,7 +76,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                 onChange={(e) => {
                                     setData((prev) => ({
                                         ...prev,
-                                        year: e.target.value,
+                                        year: parseInt(e.target.value),
                                     }));
                                 }}
                             >
@@ -98,8 +88,8 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                 <option value="2020">2020</option>
                                 <option value="2019">2019</option>
                             </select>
-                            {validationErrors.year && (
-                                <p class="error-msg">{validationErrors.year}</p>
+                            {validationErrors.yearErr && (
+                                <p class="error-msg">{validationErrors.yearErr}</p>
                             )}
                         </div>
                     </div>
@@ -119,9 +109,9 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     }));
                                 }}
                             />
-                            {!validationErrors.course_name && (
+                            {validationErrors.courseNameErr !== null && (
                                 <p class="error-msg">
-                                    {validationErrors.course_name}
+                                    {validationErrors.courseNameErr}
                                 </p>
                             )}
                         </div>
@@ -137,12 +127,14 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     value="midsem"
                                     required
                                     checked={data.exam == "midsem"}
-                                    onChange={(e) =>
-                                        setData((prev) => ({
-                                            ...prev,
-                                            exam: "midsem",
-                                        }))
-                                    }
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setData((prev) => ({
+                                                ...prev,
+                                                exam: "midsem",
+                                            }))
+                                        }
+                                    }}
                                 />
                                 Mid Semester
                             </label>
@@ -154,18 +146,20 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     value="endsem"
                                     required
                                     checked={data.exam == "endsem"}
-                                    onChange={(e) =>
-                                        setData((prev) => ({
-                                            ...prev,
-                                            exam: "endsem",
-                                        }))
-                                    }
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setData((prev) => ({
+                                                ...prev,
+                                                exam: "endsem",
+                                            }))
+                                        }
+                                    }}
                                 />
                                 End Semester
                             </label>
                         </div>
-                        {validationErrors.exam && (
-                            <p class="error-msg">{validationErrors.exam}</p>
+                        {validationErrors.examErr !== null && (
+                            <p class="error-msg">{validationErrors.examErr}</p>
                         )}
                     </div>
                     <div class="form-group">
@@ -179,12 +173,14 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     value="autumn"
                                     required
                                     checked={data.semester == "autumn"}
-                                    onChange={(e) =>
-                                        setData((prev) => ({
-                                            ...prev,
-                                            semester: "autumn",
-                                        }))
-                                    }
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setData((prev) => ({
+                                                ...prev,
+                                                semester: "autumn"
+                                            }))
+                                        }
+                                    }}
                                 />
                                 Autumn Semester
                             </label>
@@ -196,18 +192,20 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     value="spring"
                                     required
                                     checked={data.semester == "spring"}
-                                    onChange={(e) =>
-                                        setData((prev) => ({
-                                            ...prev,
-                                            semester: "spring",
-                                        }))
-                                    }
+                                    onChange={(e) => {
+                                        if (e.target.value) {
+                                            setData((prev) => ({
+                                                ...prev,
+                                                semester: "spring",
+                                            }))
+                                        }
+                                    }}
                                 />
                                 Spring Semester
                             </label>
                         </div>
-                        {validationErrors.semester && (
-                            <p class="error-msg">{validationErrors.semester}</p>
+                        {validationErrors.semesterErr !== null && (
+                            <p class="error-msg">{validationErrors.semesterErr}</p>
                         )}
                     </div>
                     <div class="control-group">
@@ -223,20 +221,14 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                         <button
                             onClick={(e) => {
                                 e.preventDefault();
-                                if (isValid(data)) {
-                                    toast.success(
-                                        "File details updated successfully"
-                                    );
-                                    update(data);
-                                    close();
-                                } else {
-                                    toast.error(
-                                        "Please provide valid subject details"
-                                    );
-                                }
+                                toast.success(
+                                    "File details updated successfully"
+                                );
+                                update(data);
+                                close();
                             }}
                             class={
-                                isValid(data) ? "save-btn" : "save-btn disabled"
+                                "save-btn"
                             }
                         >
                             Save

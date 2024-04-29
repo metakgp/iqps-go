@@ -1,34 +1,36 @@
-export type SearchResult = {
-    id: number;
-    course_name: string;
+export type Exam = "midsem" | "endsem";
+
+export interface IQuestionPaper {
     course_code: string;
+    course_name: string;
     year: number;
-    exam: string;
+    semester: "spring" | "autumn";
+    exam: Exam | "unknown";
+};
+
+export interface ISearchResult extends IQuestionPaper {
+    id: number;
     filelink: string;
     from_library: boolean;
 };
 
-export type QuestionPaper = {
+export interface IQuestionPaperFile extends IQuestionPaper {
     file: File;
-    course_code: string;
-    course_name: string;
-    year: string;
-    semester: "spring" | "autumn";
-    exam: "midsem" | "endsem";
+    exam: Exam;
 };
 
-export type ErrorMessage = {
-    course_code: string;
-    course_name: string;
-    year: string;
-    exam: string;
-    semester: string;
+export interface IErrorMessage {
+    courseCodeErr: string | null;
+    courseNameErr: string | null;
+    yearErr: string | null;
+    examErr: string | null;
+    semesterErr: string | null;
 };
 
-type UploadResult = {
+interface IUploadResult {
     filename: string;
     status: string;
     description: string;
 };
 
-export type UploadResults = UploadResult[];
+export type UploadResults = IUploadResult[];

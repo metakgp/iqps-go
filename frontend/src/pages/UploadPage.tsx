@@ -5,17 +5,17 @@ import toast, { Toaster } from "solid-toast";
 import { AiOutlineCloudUpload as UploadIcon } from "solid-icons/ai";
 import { FaSolidChevronDown as ChevronIcon } from "solid-icons/fa";
 import { autofillData, sanitizeQP } from "../utils/autofillData";
-import { ErrorMessage, QuestionPaper, UploadResults } from "../types/types";
+import { IErrorMessage, IQuestionPaperFile, UploadResults } from "../types/types";
 import Modal from "../components/EditModal";
 import { Spinner } from "../components/Spinner";
 import { validate } from "../utils/validateInput";
 
 const UploadPage: Component = () => {
-    const [qPapers, setQPapers] = createSignal<QuestionPaper[]>([]);
+    const [qPapers, setQPapers] = createSignal<IQuestionPaperFile[]>([]);
     const [isDragging, setIsDragging] = createSignal(false);
     const [isVisible, setIsVisible] = createSignal(false);
     const [selectedQPaper, setSelectedQPaper] =
-        createSignal<QuestionPaper | null>(null);
+        createSignal<IQuestionPaperFile | null>(null);
     const [awaitingResponse, setAwaitingResponse] =
         createSignal<boolean>(false);
 
@@ -37,7 +37,7 @@ const UploadPage: Component = () => {
         }
     };
     const clearQPapers = () => setQPapers([]);
-    const updateQPaper = (updated: QuestionPaper) => {
+    const updateQPaper = (updated: IQuestionPaperFile) => {
         let updateData = qPapers().map((qp) => {
             if (qp.file.name == updated.file.name) return updated;
             else return qp;
@@ -45,7 +45,7 @@ const UploadPage: Component = () => {
         setQPapers(updateData);
     };
 
-    const openModal = (qp: QuestionPaper) => {
+    const openModal = (qp: IQuestionPaperFile) => {
         setSelectedQPaper(qp);
     };
     const closeModal = () => {
@@ -151,7 +151,7 @@ const UploadPage: Component = () => {
         }
     };
 
-    const isValid = (data: QuestionPaper) => {
+    const isValid = (data: IQuestionPaperFile) => {
         return !Object.values(validate(data)).some(Boolean);
     };
 
