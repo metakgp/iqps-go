@@ -1,10 +1,11 @@
 export type Exam = "midsem" | "endsem";
+export type Semester = "spring" | "autumn";
 
 export interface IQuestionPaper {
     course_code: string;
     course_name: string;
     year: number;
-    semester: "spring" | "autumn";
+    semester: Semester;
     exam: Exam | "unknown";
 };
 
@@ -16,7 +17,6 @@ export interface ISearchResult extends IQuestionPaper {
 
 export interface IQuestionPaperFile extends IQuestionPaper {
     file: File;
-    exam: Exam;
 };
 
 export interface IErrorMessage {
