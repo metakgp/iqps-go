@@ -21,8 +21,8 @@ export const sanitizeQP = (qp: IQuestionPaperFile) => {
 };
 
 export function getCourseFromCode<K extends keyof typeof COURSE_CODE_MAP>(code: string): typeof COURSE_CODE_MAP[K] | null {
-    if (code in COURSE_CODE_MAP) {
-        return COURSE_CODE_MAP[code as keyof typeof COURSE_CODE_MAP];
+    if (code.toUpperCase() in COURSE_CODE_MAP) {
+        return COURSE_CODE_MAP[code.toUpperCase() as keyof typeof COURSE_CODE_MAP];
     } else {
         return null;
     }
