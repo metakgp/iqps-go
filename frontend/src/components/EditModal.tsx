@@ -1,4 +1,4 @@
-import { Component, createEffect } from "solid-js";
+import { Component, createEffect, createSignal } from "solid-js";
 import { IErrorMessage, IQuestionPaperFile } from "../types/types";
 import { getCourseFromCode } from "../utils/autofillData";
 import toast from "solid-toast";
@@ -14,9 +14,11 @@ type Props = {
 const Modal: Component<Props> = ({ close, qPaper, update }) => {
     const [data, setData] = createStore(qPaper);
     const [validationErrors, setValidationErrors] = createStore<IErrorMessage>(validate(qPaper));
+    const [isDataValid, setIsDataValid] = createSignal<boolean>(false);
 
     createEffect(() => {
         setValidationErrors(validate(data));
+        setIsDataValid(Object.values(validationErrors).every((err) => err === null));
     });
 
     createEffect(() => {
@@ -51,7 +53,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                 name="course_code"
                                 required
                                 value={data.course_code}
-                                onChange={(e) => {
+                                onInput={(e) => {
                                     setData((prev) => {
                                         return {
                                             ...prev,
@@ -102,7 +104,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                 name="course_name"
                                 required
                                 value={data.course_name}
-                                onChange={(e) => {
+                                onInput={(e) => {
                                     setData((prev) => ({
                                         ...prev,
                                         course_name: e.target.value,
@@ -127,7 +129,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     value="midsem"
                                     required
                                     checked={data.exam == "midsem"}
-                                    onChange={(e) => {
+                                    onInput={(e) => {
                                         if (e.target.checked) {
                                             setData((prev) => ({
                                                 ...prev,
@@ -146,7 +148,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     value="endsem"
                                     required
                                     checked={data.exam == "endsem"}
-                                    onChange={(e) => {
+                                    onInput={(e) => {
                                         if (e.target.checked) {
                                             setData((prev) => ({
                                                 ...prev,
@@ -173,7 +175,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     value="autumn"
                                     required
                                     checked={data.semester == "autumn"}
-                                    onChange={(e) => {
+                                    onInput={(e) => {
                                         if (e.target.checked) {
                                             setData((prev) => ({
                                                 ...prev,
@@ -192,7 +194,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                     value="spring"
                                     required
                                     checked={data.semester == "spring"}
-                                    onChange={(e) => {
+                                    onInput={(e) => {
                                         if (e.target.value) {
                                             setData((prev) => ({
                                                 ...prev,
@@ -227,9 +229,11 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
                                 update(data);
                                 close();
                             }}
-                            class={
-                                "save-btn"
-                            }
+                            disabled={!isDataValid()}
+                            classList={{
+                                'save-btn': true,
+                                'disabled': !isDataValid()
+                            }}
                         >
                             Save
                         </button>
