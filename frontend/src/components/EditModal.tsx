@@ -24,7 +24,7 @@ const Modal: Component<Props> = ({ close, qPaper, update }) => {
     createEffect(() => {
         if (data.course_code.length == 7) {
             let course_name = getCourseFromCode(data.course_code);
-            setData((prev) => ({ ...prev, course_name }));
+            if (course_name !== null) setData((prev) => ({ ...prev, course_name }));
         }
     });
 

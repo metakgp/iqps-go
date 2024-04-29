@@ -1,4 +1,4 @@
-import courses from "../data/courses.json";
+import COURSE_CODE_MAP from "../data/courses.json";
 import { Exam, IQuestionPaperFile } from "../types/types";
 
 type Courses = {
@@ -20,9 +20,12 @@ export const sanitizeQP = (qp: IQuestionPaperFile) => {
     };
 };
 
-export const getCourseFromCode = (code: string) => {
-    const coursesData: Courses = courses;
-    return coursesData[code] || "unknown_course";
+export function getCourseFromCode<K extends keyof typeof COURSE_CODE_MAP>(code: string): typeof COURSE_CODE_MAP[K] | null {
+    if (code in COURSE_CODE_MAP) {
+        return COURSE_CODE_MAP[code as keyof typeof COURSE_CODE_MAP];
+    } else {
+        return null;
+    }
 };
 
 export const autofillData = (
@@ -57,6 +60,6 @@ export const autofillData = (
         year,
         exam: exam as Exam,
         semester: semester as "spring" | "autumn",
-        course_name: getCourseFromCode(course_code),
+        course_name: getCourseFromCode(course_code) ?? "Unknown Course",
     };
 };
