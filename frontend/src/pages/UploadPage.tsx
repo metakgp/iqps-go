@@ -112,20 +112,23 @@ const UploadPage: Component = () => {
                         year,
                         exam,
                         semester,
+                        file_name
                     } = sanitizeQP(qp);
-                    formData.append("files", file);
+
+                    formData.append("files", file, file_name);
                     formData.append(
-                        file.name,
+                        file_name,
                         `${course_code}_${course_name}_${year}_${exam}_${semester}`
                     );
                 });
 
                 setAwaitingResponse(true);
+                console.log(formData);
                 const response = await fetch(
                     `${import.meta.env.VITE_BACKEND_URL}/upload`,
                     {
                         method: "POST",
-                        body: formData,
+                        body: formData
                     }
                 );
                 const data: UploadResults = await response.json();

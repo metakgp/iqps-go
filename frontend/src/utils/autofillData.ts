@@ -13,10 +13,12 @@ export const sanitizeQP = (qp: IQuestionPaperFile) => {
     const sanitizedCourseName = qp.course_name
         .replace(/[^\w\d\_]/g, "$")
         .replace(/\$+/g, "$");
+
     return {
         ...qp,
         course_name: sanitizedCourseName,
-        file: { ...qp.file, name: sanitizedFilename },
+        file_name: sanitizedFilename,
+        file: qp.file,
     };
 };
 
@@ -40,7 +42,7 @@ export const autofillData = (
     const qpDetails: IQuestionPaper = {
         course_code,
         year: new Date().getFullYear(),
-        exam: "unknown",
+        exam: "midsem",
         semester: new Date().getMonth() > 7 ? "autumn" : "spring",
         course_name: getCourseFromCode(course_code) ?? "Unknown Course",
     }
