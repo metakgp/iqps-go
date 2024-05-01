@@ -32,6 +32,7 @@ type QuestionPaper struct {
 	FromLibrary     bool   `json:"from_library"`
 	UploadTimestamp string `json:"upload_timestamp"`
 	ApproveStatus   bool   `json:"approve_status"`
+	CourseDetails   string `json:"course_details"`
 }
 
 type uploadEndpointRes struct {
@@ -55,7 +56,8 @@ const init_db = `CREATE TABLE IF NOT EXISTS qp (
     filelink TEXT NOT NULL,
     from_library BOOLEAN DEFAULT FALSE,
     upload_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    approve_status BOOLEAN DEFAULT FALSE
+    approve_status BOOLEAN DEFAULT FALSE,
+		course_details TEXT NOT NULL DEFAULT ''
 );
 `
 
@@ -119,7 +121,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// query := `SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status FROM qp WHERE course_code_tsvector @@ websearch_to_tsquery('english', $1)`
-	query := `SELECT * FROM (SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status FROM qp WHERE course_code_tsvector @@ websearch_to_tsquery('simple', $1)  AND approve_status=true UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_code %>> $1  AND approve_status=true UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_code_tsvector @@ to_tsquery('simple', websearch_to_tsquery('simple', $1)::text || ':*') AND approve_status=true)`
+	query := `SELECT * FROM (SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status FROM qp WHERE course_details_tsvector @@ websearch_to_tsquery('simple', $1)  AND approve_status=true UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_details %>> $1  AND approve_status=true UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_details_tsvector @@ to_tsquery('simple', websearch_to_tsquery('simple', $1)::text || ':*') AND approve_status=true)`
 
 	var params []interface{}
 	params = append(params, course)
@@ -145,7 +147,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		qp.FileLink = fmt.Sprintf("%s/%s", staticFilesUrl, url.PathEscape(qp.FileLink))
+		qp.FileLink = url.PathEscape(qp.FileLink)
 		qps = append(qps, qp)
 	}
 
@@ -244,7 +246,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			response = append(response, resp)
 			continue
 		}
-
+		fmt.Println(filePath, fileName)
 		dest, err := os.Create(filePath)
 		if err != nil {
 			resp.Status = "failed"
@@ -288,15 +290,16 @@ func populateDB(filename string, fileNameLink string) error {
 	}
 
 	courseCode := qpData[0]
-	courseName := strings.Join(strings.Split(filename, "_"), " ")
+	courseName := qpData[1]
+	courseDetails := strings.Join(strings.Split(filename, "_"), " ")
 
 	year, _ := strconv.Atoi(qpData[2])
 	exam := qpData[3]
 	fromLibrary := false
 	fileLink := fmt.Sprintf("%s/%s", staticFilesUrl, fileNameLink)
-	query := "INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6);"
+	query := "INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library,course_details) VALUES ($1, $2, $3, $4, $5, $6,$7);"
 
-	_, err := db.Exec(query, courseCode, courseName, year, exam, fileLink, fromLibrary)
+	_, err := db.Exec(query, courseCode, courseName, year, exam, fileLink, fromLibrary, courseDetails)
 	if err != nil {
 		return fmt.Errorf("failed to add qp to database: %v", err)
 	}
