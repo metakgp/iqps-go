@@ -315,7 +315,7 @@ func CheckError(err error) {
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	host := os.Getenv("DB_HOST")
