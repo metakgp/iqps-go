@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -44,7 +43,6 @@ type uploadEndpointRes struct {
 var (
 	db             *sql.DB
 	staticFilesUrl string
-	courses        map[string]string
 )
 
 const init_db = `CREATE TABLE IF NOT EXISTS qp (
@@ -339,24 +337,6 @@ func main() {
 	_, err = db.Exec(init_db)
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	// Parse courses.csv to map
-	courses = make(map[string]string)
-	file, err := os.Open("courses.csv")
-	if err != nil {
-		log.Fatal(err)
-	}
-	r := csv.NewReader(file)
-	r.Read()
-	for {
-		row, err := r.Read()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			log.Fatal(err)
-		}
-		courses[row[0]] = row[1]
 	}
 
 	http.HandleFunc("/health", health)
