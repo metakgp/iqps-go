@@ -147,7 +147,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		qp.FileLink = url.PathEscape(filepath.Join(staticFilesUrl, qp.FileLink))
+		qp.FileLink = filepath.Join(staticFilesUrl, url.PathEscape(qp.FileLink))
 		qps = append(qps, qp)
 	}
 
@@ -245,7 +245,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			response = append(response, resp)
 			continue
 		}
-		fmt.Println(filePath, fileName)
+
 		dest, err := os.Create(filePath)
 		if err != nil {
 			resp.Status = "failed"
@@ -262,7 +262,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		err = populateDB(newFileName, fileName)
+		err = populateDB(newFileName)
 		if err != nil {
 			_ = os.Remove(filePath)
 			resp.Status = "failed"
@@ -282,7 +282,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func populateDB(filename string, fileNameLink string) error {
+func populateDB(filename string) error {
 	qpData := strings.Split(filename, "_")
 	if len(qpData) != 5 {
 		return fmt.Errorf("invalid filename format")
@@ -295,7 +295,7 @@ func populateDB(filename string, fileNameLink string) error {
 	year, _ := strconv.Atoi(qpData[2])
 	exam := qpData[3]
 	fromLibrary := false
-	fileLink := filepath.Join(uploadedQpsPath, fileNameLink)
+	fileLink := filepath.Join(uploadedQpsPath, filename+".pdf")
 	query := "INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library,course_details) VALUES ($1, $2, $3, $4, $5, $6,$7);"
 
 	_, err := db.Exec(query, courseCode, courseName, year, exam, fileLink, fromLibrary, courseDetails)
