@@ -147,7 +147,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		qp.FileLink = fmt.Sprintf("%s/%s", staticFilesUrl, url.PathEscape(qp.FileLink))
+		qp.FileLink = fmt.Sprintf("%s/%s", staticFilesUrl, qp.FileLink)
 		qps = append(qps, qp)
 	}
 
@@ -230,7 +230,6 @@ func upload(w http.ResponseWriter, r *http.Request) {
 					continue
 				} else if errors.Is(err, os.ErrNotExist) {
 					filePath = fmt.Sprintf("%s-%d.pdf", filePath[:len(filePath)-4], i)
-					fileName = fmt.Sprintf("%s-%d.pdf", newFileName, i)
 					break
 				} else {
 					resp.Status = "failed"
