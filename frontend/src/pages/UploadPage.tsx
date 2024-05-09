@@ -204,6 +204,7 @@ const UploadPage: Component = () => {
                             <p>Click "Choose File" to select your PDF.</p>
                             <p>Click "Upload" to submit.</p>
                         </div>
+                        <h3>NOTE: The uploaded paper will be searchable only after manual review process first. Please wait for a few days and do not re-upload.</h3>
                     </div>
                 </div>
 
