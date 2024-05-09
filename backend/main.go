@@ -245,7 +245,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			response = append(response, resp)
 			continue
 		}
-		fmt.Println(filePath, fileName)
+
 		dest, err := os.Create(filePath)
 		if err != nil {
 			resp.Status = "failed"
@@ -262,7 +262,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		err = populateDB(newFileName, fileName)
+		err = populateDB(newFileName, newFileName+".pdf")
 		if err != nil {
 			_ = os.Remove(filePath)
 			resp.Status = "failed"
