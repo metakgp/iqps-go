@@ -7,11 +7,11 @@ type Courses = {
 
 export const sanitizeQP = (qp: IQuestionPaperFile) => {
     const sanitizedFilename = qp.file.name
-        .replace(/[^\w\d\_]/g, "$")
+        .replace(/[^\w\d\_]/g, "-")
         .replace(/\$+/g, "$");
 
     const sanitizedCourseName = qp.course_name
-        .replace(/[^\w\d\_]/g, "$")
+        .replace(/[^\w\d\_]/g, "-")
         .replace(/\$+/g, "$");
 
     return {
