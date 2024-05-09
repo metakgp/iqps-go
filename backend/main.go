@@ -294,7 +294,7 @@ func populateDB(filename string, fileNameLink string) error {
 	year, _ := strconv.Atoi(qpData[2])
 	exam := qpData[3]
 	fromLibrary := false
-	fileLink := fmt.Sprintf("%s/%s", staticFilesUrl, fileNameLink)
+	fileLink := fmt.Sprintf("%s/iqps/uploaded/%s", staticFilesUrl, fileNameLink)
 	query := "INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library,course_details) VALUES ($1, $2, $3, $4, $5, $6,$7);"
 
 	_, err := db.Exec(query, courseCode, courseName, year, exam, fileLink, fromLibrary, courseDetails)
