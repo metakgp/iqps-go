@@ -148,6 +148,7 @@ const UploadPage: Component = () => {
                 clearQPapers();
                 setAwaitingResponse(false);
             } catch (error) {
+                toast.error("Failed to upload file due to an unknown error. Please try again later.");
                 console.error("Error during upload:", error);
                 setAwaitingResponse(false);
             }
