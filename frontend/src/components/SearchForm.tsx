@@ -1,5 +1,4 @@
 import { Component, createSignal } from "solid-js";
-import { toast } from 'solid-toast';
 import { IoSearch as SearchIcon, IoLink as ShareIcon } from "solid-icons/io";
 import SearchResults from "./SearchResults";
 import type { ISearchResult } from "../types/types";

@@ -3,7 +3,7 @@ import { Component, For, createSignal } from "solid-js";
 import { FileCard } from "../components/FileCard";
 import toast, { Toaster } from "solid-toast";
 import { AiOutlineCloudUpload as UploadIcon, AiOutlineFileAdd as FileAddIcon } from "solid-icons/ai";
-import { FaSolidChevronDown as ChevronIcon } from "solid-icons/fa";
+import { IoSearch as SearchIcon } from "solid-icons/io";
 import { autofillData, sanitizeQP } from "../utils/autofillData";
 import { IQuestionPaperFile, UploadResults } from "../types/types";
 import Modal from "../components/EditModal";
@@ -165,8 +165,8 @@ const UploadPage: Component = () => {
                 <p>
                     <i>Upload your question papers for future humans to use!</i>
                 </p>
-                <h3>
-                    <A href="/">Question paper search</A>
+                <h3 class="header-search-encourager">
+                    Want to find a question paper? <A href="/" class="header-search-sender"><SearchIcon size="1.5rem" />Search!</A>
                 </h3>
             </div>
 

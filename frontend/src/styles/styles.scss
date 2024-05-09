@@ -73,6 +73,24 @@ a {
   align-items: center;
 }
 
+.header-upload-encourager, .header-search-encourager {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  align-items: center;
+
+  .header-upload-sender, .header-search-sender {
+    gap: 0.3rem;
+    display: inline-flex;
+    align-items: center;
+
+    background-color: rgba($accent-color, 0.8);
+    color: $fg-color;
+    padding: 0.35rem 0.5rem;
+    border-radius: 5px;
+  }
+}
+
 input,
 select {
   width: 100%;
