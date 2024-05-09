@@ -41,8 +41,10 @@ type uploadEndpointRes struct {
 }
 
 var (
-	db             *sql.DB
-	staticFilesUrl string
+	db                         *sql.DB
+	staticFilesUrl             string
+	staticFilesStorageLocation string
+	uploadedQpsPath            string
 )
 
 const init_db = `CREATE TABLE IF NOT EXISTS qp (
@@ -145,7 +147,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		qp.FileLink = url.PathEscape(qp.FileLink)
+		qp.FileLink = url.PathEscape(filepath.Join(staticFilesUrl, qp.FileLink))
 		qps = append(qps, qp)
 	}
 
@@ -206,7 +208,6 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		qpsPath := os.Getenv("QPS_PATH")
 		fileName := fileHeader.Filename
 
 		FileNameList := r.MultipartForm.Value[fileName]
@@ -218,7 +219,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		}
 
 		newFileName := FileNameList[0]
-		filePath := filepath.Join(qpsPath, newFileName)
+		filePath := filepath.Join(staticFilesStorageLocation, uploadedQpsPath, newFileName)
 		filePath = filePath + ".pdf"
 		filePath = filepath.Clean(filePath)
 
@@ -294,7 +295,7 @@ func populateDB(filename string, fileNameLink string) error {
 	year, _ := strconv.Atoi(qpData[2])
 	exam := qpData[3]
 	fromLibrary := false
-	fileLink := fmt.Sprintf("%s/iqps/uploaded/%s", staticFilesUrl, fileNameLink)
+	fileLink := filepath.Join(uploadedQpsPath, fileNameLink)
 	query := "INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library,course_details) VALUES ($1, $2, $3, $4, $5, $6,$7);"
 
 	_, err := db.Exec(query, courseCode, courseName, year, exam, fileLink, fromLibrary, courseDetails)
@@ -324,6 +325,8 @@ func main() {
 	dbname := os.Getenv("DB_NAME")
 
 	staticFilesUrl = os.Getenv("STATIC_FILES_URL")
+	staticFilesStorageLocation = os.Getenv("STATIC_FILES_STORAGE_LOCATION")
+	uploadedQpsPath = os.Getenv("UPLOADED_QPS_PATH")
 
 	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
