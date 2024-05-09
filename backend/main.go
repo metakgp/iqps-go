@@ -2,14 +2,18 @@ package main
 
 import (
 	"database/sql"
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -28,11 +32,19 @@ type QuestionPaper struct {
 	FromLibrary     bool   `json:"from_library"`
 	UploadTimestamp string `json:"upload_timestamp"`
 	ApproveStatus   bool   `json:"approve_status"`
+	CourseDetails   string `json:"course_details"`
+}
+
+type uploadEndpointRes struct {
+	Filename    string `json:"filename"`
+	Status      string `json:"status"`
+	Description string `json:"description"`
 }
 
 var (
 	db             *sql.DB
 	staticFilesUrl string
+	courses        map[string]string
 )
 
 const init_db = `CREATE TABLE IF NOT EXISTS qp (
@@ -44,7 +56,8 @@ const init_db = `CREATE TABLE IF NOT EXISTS qp (
     filelink TEXT NOT NULL,
     from_library BOOLEAN DEFAULT FALSE,
     upload_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    approve_status BOOLEAN DEFAULT FALSE
+    approve_status BOOLEAN DEFAULT FALSE,
+		course_details TEXT NOT NULL DEFAULT ''
 );
 `
 
@@ -108,7 +121,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// query := `SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status FROM qp WHERE course_code_tsvector @@ websearch_to_tsquery('english', $1)`
-	query := `SELECT * FROM (SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status FROM qp WHERE course_code_tsvector @@ websearch_to_tsquery('simple', $1) UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_code %>> $1 UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_code_tsvector @@ to_tsquery('simple', websearch_to_tsquery('simple', $1)::text || ':*'))`
+	query := `SELECT * FROM (SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status FROM qp WHERE course_details_tsvector @@ websearch_to_tsquery('simple', $1)  AND approve_status=true UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_details %>> $1  AND approve_status=true UNION SELECT id,course_code,course_name,year,exam,filelink,from_library,upload_timestamp,approve_status from qp where course_details_tsvector @@ to_tsquery('simple', websearch_to_tsquery('simple', $1)::text || ':*') AND approve_status=true)`
 
 	var params []interface{}
 	params = append(params, course)
@@ -134,7 +147,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		qp.FileLink = fmt.Sprintf("%s/%s", staticFilesUrl, url.PathEscape(qp.FileLink))
+		qp.FileLink = url.PathEscape(qp.FileLink)
 		qps = append(qps, qp)
 	}
 
@@ -144,6 +157,153 @@ func search(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func upload(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var response []uploadEndpointRes
+	// Max total size of 50MB
+	const MaxBodySize = 50 << 20 // 1<<20  = 1024*1024 = 1MB
+	r.Body = http.MaxBytesReader(w, r.Body, MaxBodySize)
+
+	err := r.ParseMultipartForm(MaxBodySize)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	files := r.MultipartForm.File["files"]
+	if len(files) > 7 {
+		http.Error(w, "max 7 files allowed", http.StatusBadRequest)
+		return
+	}
+
+	for _, fileHeader := range files {
+		resp := uploadEndpointRes{Filename: fileHeader.Filename, Status: "success"}
+
+		if fileHeader.Size > 10<<20 {
+			resp.Status = "failed"
+			resp.Description = "file size exceeds 10MB"
+			response = append(response, resp)
+			continue
+		}
+
+		file, err := fileHeader.Open()
+		if err != nil {
+			resp.Status = "failed"
+			resp.Description = err.Error()
+			response = append(response, resp)
+			continue
+		}
+		defer file.Close()
+
+		fileType := fileHeader.Header.Get("Content-Type")
+		if fileType != "application/pdf" {
+			resp.Status = "failed"
+			resp.Description = "invalid file type. Only PDFs are supported"
+			response = append(response, resp)
+			continue
+		}
+
+		qpsPath := os.Getenv("QPS_PATH")
+		fileName := fileHeader.Filename
+
+		FileNameList := r.MultipartForm.Value[fileName]
+		if len(FileNameList) == 0 {
+			resp.Status = "failed"
+			resp.Description = "filename not provided"
+			response = append(response, resp)
+			continue
+		}
+
+		newFileName := FileNameList[0]
+		filePath := filepath.Join(qpsPath, newFileName)
+		filePath = filePath + ".pdf"
+		filePath = filepath.Clean(filePath)
+
+		// Duplicate filename handling
+		if _, err = os.Stat(filePath); err == nil {
+			for i := 1; true; i++ {
+				if _, err := os.Stat(fmt.Sprintf("%s-%d.pdf", filePath[:len(filePath)-4], i)); err == nil {
+					continue
+				} else if errors.Is(err, os.ErrNotExist) {
+					filePath = fmt.Sprintf("%s-%d.pdf", filePath[:len(filePath)-4], i)
+					fileName = fmt.Sprintf("%s-%d.pdf", newFileName, i)
+					break
+				} else {
+					resp.Status = "failed"
+					resp.Description = err.Error()
+					response = append(response, resp)
+					continue
+				}
+			}
+		} else if !errors.Is(err, os.ErrNotExist) {
+			resp.Status = "failed"
+			resp.Description = err.Error()
+			response = append(response, resp)
+			continue
+		}
+		fmt.Println(filePath, fileName)
+		dest, err := os.Create(filePath)
+		if err != nil {
+			resp.Status = "failed"
+			resp.Description = err.Error()
+			response = append(response, resp)
+			continue
+		}
+		defer dest.Close()
+
+		if _, err := io.Copy(dest, file); err != nil {
+			resp.Status = "failed"
+			resp.Description = err.Error()
+			response = append(response, resp)
+			continue
+		}
+
+		err = populateDB(newFileName, fileName)
+		if err != nil {
+			_ = os.Remove(filePath)
+			resp.Status = "failed"
+			resp.Description = err.Error()
+			response = append(response, resp)
+			continue
+
+		}
+		response = append(response, resp)
+	}
+	// return response to client
+	http.Header.Add(w.Header(), "content-type", "application/json")
+	err = json.NewEncoder(w).Encode(&response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func populateDB(filename string, fileNameLink string) error {
+	qpData := strings.Split(filename, "_")
+	if len(qpData) != 5 {
+		return fmt.Errorf("invalid filename format")
+	}
+
+	courseCode := qpData[0]
+	courseName := qpData[1]
+	courseDetails := strings.Join(strings.Split(filename, "_"), " ")
+
+	year, _ := strconv.Atoi(qpData[2])
+	exam := qpData[3]
+	fromLibrary := false
+	fileLink := fmt.Sprintf("%s/%s", staticFilesUrl, fileNameLink)
+	query := "INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library,course_details) VALUES ($1, $2, $3, $4, $5, $6,$7);"
+
+	_, err := db.Exec(query, courseCode, courseName, year, exam, fileLink, fromLibrary, courseDetails)
+	if err != nil {
+		return fmt.Errorf("failed to add qp to database: %v", err)
+	}
+	return nil
 }
 
 func CheckError(err error) {
@@ -181,10 +341,29 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Parse courses.csv to map
+	courses = make(map[string]string)
+	file, err := os.Open("courses.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	r := csv.NewReader(file)
+	r.Read()
+	for {
+		row, err := r.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			log.Fatal(err)
+		}
+		courses[row[0]] = row[1]
+	}
+
 	http.HandleFunc("/health", health)
 	http.HandleFunc("/search", search)
 	http.HandleFunc("/year", year)
 	http.HandleFunc("/library", library)
+	http.HandleFunc("/upload", upload)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"https://qp.metakgp.org", "http://localhost:3000"},

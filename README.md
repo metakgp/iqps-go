@@ -73,6 +73,7 @@ Environment variables can be set using a `.env` file. Use the `.env.template` fi
 #### Backend
 - `DB_PATH`: Path to the database file to use.
 - `STATIC_FILES_URL`: The base URL for the static files (PDFs).
+- `QPS_PATH`: The local path on the server to store question paper PDFs.
 
 #### Frontend
 - `VITE_BACKEND_URL`: The IQPS backend URL. Use `http://localhost:5000` in development.
