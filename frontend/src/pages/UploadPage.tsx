@@ -33,7 +33,7 @@ const UploadPage: Component = () => {
         });
 
         if (newQPs.length > 0) {
-            setQPapers([...newQPs]);
+            setQPapers([...qPapers(), ...newQPs]);
         }
     };
     const clearQPapers = () => setQPapers([]);
