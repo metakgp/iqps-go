@@ -147,7 +147,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		qp.FileLink = url.PathEscape(filepath.Join(staticFilesUrl, qp.FileLink))
+		qp.FileLink = filepath.Join(staticFilesUrl, url.PathEscape(qp.FileLink))
 		qps = append(qps, qp)
 	}
 
