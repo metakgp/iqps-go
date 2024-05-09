@@ -13,7 +13,7 @@ import { validate } from "../utils/validateInput";
 const UploadPage: Component = () => {
     const [qPapers, setQPapers] = createSignal<IQuestionPaperFile[]>([]);
     const [isDragging, setIsDragging] = createSignal(false);
-    const [isVisible, setIsVisible] = createSignal(false);
+    const [isVisible, setIsVisible] = createSignal(true);
     const [selectedQPaper, setSelectedQPaper] =
         createSignal<IQuestionPaperFile | null>(null);
     const [awaitingResponse, setAwaitingResponse] =
@@ -176,12 +176,9 @@ const UploadPage: Component = () => {
                         class={`accordion-heading ${
                             isVisible() ? "accordion-open" : ""
                         }`}
-                        onClick={() => {
-                            setIsVisible((x) => !x);
-                        }}
+
                     >
                         Upload Instructions
-                        <ChevronIcon class="accordion-icon" size="1rem" />
                     </h2>
                     <div
                         class={`accordion-content ${

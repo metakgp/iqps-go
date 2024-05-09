@@ -211,9 +211,11 @@
     }
 
     @media screen and (max-width: 1000px) {
+        padding: 0 10rem;
         flex-direction: column;
         align-items: center;
         justify-content: start;
+
         .upload-instructions {
             width: 100%;
         }
@@ -226,6 +228,7 @@
                 display: block;
             }
         }
+
         .accordion-content {
             max-height: 0;
             overflow: hidden;
