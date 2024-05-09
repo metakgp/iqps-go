@@ -12,6 +12,13 @@ services:
       - ./db:/db
       - nginx-config-volume:/etc/nginx/sites-enabled
       - odins-vault:/srv/static
+    environment:
+      - STATIC_FILES_URL=${STATIC_FILES_URL}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_PASSWORD}
+      - QPS_PATH=${QPS_PATH}
 
 networks:
   metaploy-network:
