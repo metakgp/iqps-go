@@ -1,7 +1,8 @@
 import type { Component } from "solid-js";
 import { Toaster } from 'solid-toast';
-import CourseSearchForm from "./components/SearchForm";
-import "./styles/styles.scss";
+import { AiOutlineCloudUpload as UploadIcon } from "solid-icons/ai";
+import CourseSearchForm from "../components/SearchForm";
+import { A } from "@solidjs/router";
 
 const App: Component = () => {
   return (
@@ -9,7 +10,7 @@ const App: Component = () => {
       <div class="title">
         <h1>IQPS - Intelligent Question Paper Search</h1>
         <p><i>Search for question papers when the library can't save you.</i></p>
-        <p>Made with ❤️ and {"</>"} by <a href="https://github.com/metakgp/iqps-go" target="_blank">MetaKGP</a></p>
+        <h3 class="header-upload-encourager">Have old question papers? <A class="header-upload-sender" href="/upload"><UploadIcon size="1.5rem" />Upload!</A></h3>
       </div>
       <CourseSearchForm />
       <Toaster toastOptions={{

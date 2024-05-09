@@ -1,9 +1,12 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
+import { Route, Router } from "@solidjs/router";
 import { inject } from "@vercel/analytics";
 
-import App from "./App";
-import "./styles/reset.scss";
+import App from "./pages/LandingPage";
+import "./styles/styles.scss";
+
+import UploadPage from "./pages/UploadPage";
 
 const root = document.getElementById("root");
 
@@ -15,4 +18,13 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-render(() => <App />, root!);
+
+render(() => (
+  <>
+    <Router>
+      <Route path="/" component={App} />
+      <Route path="/upload" component={UploadPage} />
+    </Router>
+    <h3 class="meta-footer">Made with ❤️ and {"</>"} by <a href="https://github.com/metakgp/iqps-go" target="_blank">MetaKGP</a></h3>
+  </>
+), root!);

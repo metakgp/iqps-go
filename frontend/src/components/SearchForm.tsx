@@ -1,18 +1,17 @@
-import { createSignal } from "solid-js";
-import { toast } from 'solid-toast';
+import { Component, createSignal } from "solid-js";
 import { IoSearch as SearchIcon, IoLink as ShareIcon } from "solid-icons/io";
 import SearchResults from "./SearchResults";
-import type { SearchResult } from "../types/types";
+import type { ISearchResult } from "../types/types";
 import "../styles/styles.scss";
 import { copyLink } from "../utils/copyLink";
 
-function CourseSearchForm() {
+const CourseSearchForm: Component=()=> {
   const currentURL = new URL(window.location.toString());
 
   // Create signals for each form input
   const [courseName, setCourseName] = createSignal(currentURL.searchParams.get('query') ?? "");
   const [exam, setExam] = createSignal(currentURL.searchParams.get('exam') ?? "");
-  const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
+  const [searchResults, setSearchResults] = createSignal<ISearchResult[]>([]);
   const [success, setSuccess] = createSignal<boolean>(false);
   const [awaitingResponse, setAwaitingResponse] = createSignal<boolean>(false);
   const [errMsg, setErrMsg] = createSignal<string>("Search for something.");
@@ -29,7 +28,7 @@ function CourseSearchForm() {
           method: "GET", // GET request
         });
 
-        const data: SearchResult[] = await response.json();
+        const data: ISearchResult[] = await response.json();
 
         setSearchResults(data); // Handle the response data
 

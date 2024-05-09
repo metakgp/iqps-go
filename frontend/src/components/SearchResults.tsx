@@ -1,12 +1,12 @@
 import { Component, For, createEffect, createSignal } from "solid-js";
-import type { SearchResult } from "../types/types";
+import type { ISearchResult } from "../types/types";
 import { Spinner } from "./Spinner";
 import { IoLink as ShareIcon } from "solid-icons/io";
 import { FaSolidFilePdf as DownloadIcon } from "solid-icons/fa";
 import { copyLink } from "../utils/copyLink";
 
 type Props = {
-  results: SearchResult[];
+  results: ISearchResult[];
   awaitingResults: boolean;
   success: boolean;
   errMsg: string;
@@ -20,7 +20,7 @@ type SortBy = 'course_name' | 'year';
 type SortOrder = 'ascending' | 'descending';
 
 const SearchResults: Component<Props> = (props) => {
-  const [displayedResults, setDisplayedResults] = createSignal<SearchResult[]>(props.results);
+  const [displayedResults, setDisplayedResults] = createSignal<ISearchResult[]>(props.results);
   const [filterByYear, setFilterByYear] = createSignal<number | null>(null);
   const [sortBy, setSortBy] = createSignal<SortBy>("year");
   const [sortOrder, setSortOrder] = createSignal<SortOrder>("descending");

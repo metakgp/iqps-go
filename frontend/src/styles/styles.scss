@@ -1,24 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
-// Light mode. This is only for archival purposes. It should NEVER BE USED.
-// :root {
-//   --accent-color: hsl(217, 80%, 40%);
-//   --accent-color-darker: hsl(217, 80%, 30%);
-//   --bg-color: #e8e5e5;
-//   --surface-1: #fff;
-//   --fg-color: #333;
-//   --fg-inverse: #fff;
-// }
-
-$accent-color: hsl(217, 80%, 40%);
-$accent-color-lighter: hsl(217, 80%, 60%);
-$accent-color-darker: hsl(217, 80%, 30%);
-$accent-color-disabled: hsl(217, 40%, 40%);
-$bg-color: #0d0d0d;
-$surface-1: #413e3f;
-$surface-2: #4b4b4b;
-$fg-color: #f7f7f7;
-$fg-inverse: #3d3d3d;
+@import "./variables.scss";
+@import "./reset.scss";
+@import "./search_form.scss";
+@import "./search_results.scss";
+@import "./upload_page.scss";
+@import "./modal.scss";
 
 .toast {
   background-color: $surface-1 !important;
@@ -29,6 +16,7 @@ $fg-inverse: #3d3d3d;
 }
 
 body {
+  display: flex;
   color: rgba($fg-color, 0.8);
   background-color: $bg-color;
   font-family: "Hanken Grotesk", sans-serif;
@@ -49,6 +37,20 @@ body {
   }
 
   scrollbar-gutter: stable;
+
+  #root {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    .meta-footer {
+      width: 100%;
+      text-align: center;
+
+      margin-top: auto;
+      margin-bottom: 10px;
+    }
+  }
 }
 
 a {
@@ -69,6 +71,24 @@ a {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.header-upload-encourager, .header-search-encourager {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  align-items: center;
+
+  .header-upload-sender, .header-search-sender {
+    gap: 0.3rem;
+    display: inline-flex;
+    align-items: center;
+
+    background-color: rgba($accent-color, 0.8);
+    color: $fg-color;
+    padding: 0.35rem 0.5rem;
+    border-radius: 5px;
+  }
 }
 
 input,
@@ -113,161 +133,6 @@ select option {
   }
 }
 
-.search-form {
-  padding: 20px 15%;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-
-  .search-form-btns {
-    display: flex;
-    gap: 1rem;
-  }
-
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: rgba($fg-color, 0.7);
-    font-size: 0.9rem;
-  }
-
-  button {
-    background-color: rgba($accent-color, 0.8);
-    color: rgba($fg-color, 0.75);
-    padding: 10px 15px;
-    margin-bottom: 1rem;
-    border: none;
-    border-radius: 5px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-
-    &:hover {
-      background-color: $accent-color-darker;
-    }
-
-    &:disabled {
-      background-color: $accent-color-disabled;
-
-      &:hover {
-        cursor: default;
-      }
-    }
-  }
-}
-
-.search-results {
-  padding: 0.5rem 1rem;
-  background-color: rgba($surface-1, 0.2);
-
-  .spinner {
-    margin: auto;
-  }
-
-  .error-message {
-    padding: 0.5rem 0;
-    margin: 0;
-    text-align: center;
-    font-size: 1.2rem;
-  }
-
-  .results-filter {
-    width: 100%;
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    margin-top: 1rem;
-    align-items: center;
-
-    select {
-      min-width: 150px;
-      margin-right: 30px;
-    }
-  }
-
-  .search-results-table {
-    width: 100%;
-    border-collapse: collapse;
-
-    tr {
-      width: fit-content;
-    }
-
-    tbody tr {
-      border: 1px solid transparent;
-      border-radius: 8px;
-
-      &:nth-of-type(odd) {
-        background-color: rgba($fg-color, 0.05);
-      }
-    }
-
-    th,
-    td {
-      padding: 0.5rem 1rem 0.5rem 1rem;
-    }
-
-    th {
-      text-align: left;
-    }
-  }
-
-  .result-card {
-    padding: 15px;
-    margin-bottom: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-    .result-card-btns {
-      padding-left: 5px;
-      margin-left: auto;
-      display: flex;
-      gap: 5px;
-
-      .result-card-btn {
-        background-color: rgba($accent-color, 0.8);
-        color: rgba($fg-color, 0.75);
-        font-weight: bold;
-
-        margin: 0;
-        padding: 8px 8px;
-        border-radius: 5px;
-
-        &:hover {
-          background-color: $accent-color-darker;
-        }
-      }
-    }
-
-    .result-card-tag {
-      border: 1px solid rgba($accent-color, 0.8);
-      font-weight: bold;
-      font-size: 0.85rem;
-
-      border-radius: 5px;
-      padding: 2px 7px;
-
-      margin-left: 5px;
-      margin-right: 5px;
-    }
-
-    h3 {
-      margin-top: 0;
-    }
-
-    p {
-      margin: 5px 0;
-
-      &.course-name,
-      &.course-code {
-        font-weight: bold;
-      }
-    }
-  }
-}
-
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -279,37 +144,11 @@ select option {
 }
 
 .spinner {
-  margin: 1rem 0;
+  margin: none;
   width: 2rem;
   height: 2rem;
 
   fill: rgba($accent-color, 0.8);
   color: rgba($fg-color, 0.8);
   animation: spin 1s infinite;
-}
-
-
-@media only screen and (max-width: 768px) {
-  .search-form {
-    padding: 0;
-  }
-
-  .search-results {
-    padding: 0.5rem 0;
-
-    .results-filter {
-      gap: 0rem;
-      padding: 0 1rem;
-
-      .select-wrapper {
-        width: 100%;
-      }
-    }
-
-    .search-results-table {
-      td,th {
-        padding: 10px;
-      }
-    }
-  }
 }
