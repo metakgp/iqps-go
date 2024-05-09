@@ -2,10 +2,10 @@ import { A } from "@solidjs/router";
 import { Component, For, createSignal } from "solid-js";
 import { FileCard } from "../components/FileCard";
 import toast, { Toaster } from "solid-toast";
-import { AiOutlineCloudUpload as UploadIcon } from "solid-icons/ai";
+import { AiOutlineCloudUpload as UploadIcon, AiOutlineFileAdd as FileAddIcon } from "solid-icons/ai";
 import { FaSolidChevronDown as ChevronIcon } from "solid-icons/fa";
 import { autofillData, sanitizeQP } from "../utils/autofillData";
-import { IErrorMessage, IQuestionPaperFile, UploadResults } from "../types/types";
+import { IQuestionPaperFile, UploadResults } from "../types/types";
 import Modal from "../components/EditModal";
 import { Spinner } from "../components/Spinner";
 import { validate } from "../utils/validateInput";
@@ -231,18 +231,23 @@ const UploadPage: Component = () => {
                                     )}
                                 </For>
                             </div>
-                            <button onClick={handleUpload} class="upload-btn">
-                                {awaitingResponse() ? (
-                                    <>
-                                        Uploading
-                                        <div class="spinner">
-                                            <Spinner />
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>Upload</>
-                                )}
-                            </button>
+                            <div class="upload-section-btns">
+                                <button onClick={handleUpload} class="upload-btn">
+                                    {awaitingResponse() ? (
+                                        <>
+                                            Uploading
+                                            <div class="spinner">
+                                                <Spinner />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <><UploadIcon size="1.5rem" />Upload</>
+                                    )}
+                                </button>
+                                <button onClick={openFileDialog}>
+                                    <FileAddIcon size="1.5rem" />Add More Files
+                                </button>
+                            </div>
                         </>
                     ) : (
                         <div
