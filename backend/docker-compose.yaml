@@ -14,12 +14,13 @@ services:
       - odins-vault:/srv/static
     environment:
       - STATIC_FILES_URL=${STATIC_FILES_URL}
+      - STATIC_FILES_STORAGE_LOCATION=${STATIC_FILES_STORAGE_LOCATION}
       - DB_NAME=${DB_NAME}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - QPS_PATH=${QPS_PATH}
+      - UPLOADED_QPS_PATH=${UPLOADED_QPS_PATH}
 
 networks:
   metaploy-network:
