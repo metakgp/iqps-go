@@ -13,7 +13,6 @@ import { validate } from "../utils/validateInput";
 const UploadPage: Component = () => {
     const [qPapers, setQPapers] = createSignal<IQuestionPaperFile[]>([]);
     const [isDragging, setIsDragging] = createSignal(false);
-    const [isVisible, setIsVisible] = createSignal(true);
     const [selectedQPaper, setSelectedQPaper] =
         createSignal<IQuestionPaperFile | null>(null);
     const [awaitingResponse, setAwaitingResponse] =
@@ -174,17 +173,13 @@ const UploadPage: Component = () => {
             <div class="upload-wrapper">
                 <div class="upload-instructions">
                     <h2
-                        class={`accordion-heading ${
-                            isVisible() ? "accordion-open" : ""
-                        }`}
+                        class={`instruction-heading}`}
 
                     >
                         Upload Instructions
                     </h2>
                     <div
-                        class={`accordion-content ${
-                            isVisible() ? "accordion-visible" : ""
-                        }`}
+                        class={`instructions`}
                     >
                         <div class="instruction-section">
                             <h3>File Format</h3>
@@ -192,12 +187,9 @@ const UploadPage: Component = () => {
                         </div>
                         <div class="instruction-section">
                             <h3>File Naming (optional)</h3>
-                            <p>Use this format:</p>
-                            <p class="file-format-example">course_code.pdf</p>
+                            <p>Use this format: <span class="file-format-example">course_code.pdf</span></p>
                             <p>
-                                <strong>Example:</strong>
-                                <br />
-                                <em>CS10001.pdf</em>
+                                <strong>Example: </strong> <em>CS10001.pdf</em>
                             </p>
                         </div>
                         <div class="instruction-section">

@@ -5,16 +5,12 @@
     padding-bottom: 5rem;
 }
 
-.accordion-heading {
-    text-align: center;
+.instruction-heading {
+    text-align: left;
     margin-top: 0;
     margin-bottom: 1rem;
     font-size: 1.5rem;
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    align-items: center;
-
+    
     .accordion-icon {
         display: none;
         transition: all 0.4s ease;
@@ -42,10 +38,11 @@
         .instruction-section {
             margin-bottom: 1rem;
             h3 {
-                margin-bottom: 0.25rem;
+                margin-bottom: 0.5rem;
             }
             p {
                 margin: 0;
+                margin-bottom: 0.25rem;
             }
             .file-format-example {
                 background-color: $accent-color;
@@ -211,7 +208,6 @@
     }
 
     @media screen and (max-width: 1000px) {
-        padding: 0 1rem;
         flex-direction: column;
         align-items: center;
         justify-content: start;
@@ -221,22 +217,6 @@
         }
         .upload-section .upload-area {
             padding: 2rem;
-        }
-
-        .accordion-heading {
-            .accordion-icon {
-                display: block;
-            }
-        }
-
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.4s ease-in-out;
-            &.accordion-visible {
-                transition: all 0.4s ease-in-out;
-                max-height: 500px;
-            }
         }
     }
 }
