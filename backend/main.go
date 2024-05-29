@@ -174,9 +174,14 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	maxLimit, err := strconv.Atoi(os.Getenv("MAX_UPLOAD_LIMIT"))
+	if err != nil || maxLimit < 1 {
+		maxLimit = 10
+	}
+
 	files := r.MultipartForm.File["files"]
-	if len(files) > 7 {
-		http.Error(w, "max 7 files allowed", http.StatusBadRequest)
+	if len(files) > maxLimit {
+		http.Error(w, fmt.Sprintf("maximum %d files allowed", maxLimit), http.StatusBadRequest)
 		return
 	}
 
@@ -318,6 +323,7 @@ func main() {
 	host := os.Getenv("DB_HOST")
 	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	CheckError(err)
+
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
 	dbname := os.Getenv("DB_NAME")

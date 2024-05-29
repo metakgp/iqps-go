@@ -11,6 +11,10 @@ import { Spinner } from "../components/Spinner";
 import { validate } from "../utils/validateInput";
 
 const UploadPage: Component = () => {
+    let MAX_UPLOAD_LIMIT = parseInt(import.meta.env.VITE_MAX_UPLOAD_LIMIT)
+    if (isNaN(MAX_UPLOAD_LIMIT) || MAX_UPLOAD_LIMIT < 1) {
+        MAX_UPLOAD_LIMIT = 10
+    }
     const [qPapers, setQPapers] = createSignal<IQuestionPaperFile[]>([]);
     const [isDragging, setIsDragging] = createSignal(false);
     const [selectedQPaper, setSelectedQPaper] =
@@ -74,6 +78,10 @@ const UploadPage: Component = () => {
                 (file) => file.type === "application/pdf"
             );
             if (pdfFiles && pdfFiles.length > 0) {
+                if (pdfFiles.length > MAX_UPLOAD_LIMIT) {
+                    toast.error(`max ${MAX_UPLOAD_LIMIT} files allowed`);
+                    return
+                }
                 addQPapers(pdfFiles);
             } else {
                 toast.error("Could not catch files. Please try again");
@@ -92,9 +100,16 @@ const UploadPage: Component = () => {
         e.stopPropagation();
         setIsDragging(false);
     };
+
     const handleUpload = async (e: Event) => {
         e.preventDefault();
+        if (qPapers().length > MAX_UPLOAD_LIMIT) {
+            toast.error(`max ${MAX_UPLOAD_LIMIT} files allowed`);
+            return;
+        }
+
         const allValid = qPapers().every((qp) => isValid(qp));
+
         if (!allValid) {
             toast.error("Please provide correct course details");
             return;
@@ -235,9 +250,9 @@ const UploadPage: Component = () => {
                                         <><UploadIcon size="1.5rem" />Upload</>
                                     )}
                                 </button>
-                                <button onClick={openFileDialog}>
+                                {qPapers().length <= MAX_UPLOAD_LIMIT && <button onClick={openFileDialog}>
                                     <FileAddIcon size="1.5rem" />Add More Files
-                                </button>
+                                </button>}
                             </div>
                         </>
                     ) : (
