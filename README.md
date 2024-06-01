@@ -52,9 +52,9 @@ IQPS was originally created by [Shubham Mishra](https://github.com/grapheo12) in
 ## Development
 1. Clone this repository.
 2. Start the Database for backend by running `sudo docker compose -f docker-compose.dev.yaml up -d` in the `backend/` directory.
-2. Start the backend by running `go run .` in the `backend/` directory.
-3. Set up the frontend by running `pnpm install` and then `pnpm start` in the `frontend/` directory.
-4. Profit.
+3. Start the backend by running `go run .` in the `backend/` directory.
+4. Set up the frontend by running `pnpm install` and then `pnpm start` in the `frontend/` directory.
+5. Profit.
 
 ### Crawler
 [WIP: Steps to locally set up crawler]
