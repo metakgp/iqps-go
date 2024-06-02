@@ -54,7 +54,7 @@ IQPS was originally created by [Shubham Mishra](https://github.com/grapheo12) in
 2. For starting the backend:
     - Change directory to backend `cd backend`
     - Make the env file by copying the template: `cp .env.template .env`
-    - Fill the env variable and set `DB_HOST=localhost` for running locally for development
+    - Fill the env variable and set `DB_HOST=localhost` and `DB_PORT=5432` for running locally for development
     - Start the DB by running `sudo docker compose -f docker-compose.dev.yaml up -d`
     - Start the Go backend by running `go run .`
 3. Set up the frontend by running `pnpm install` and then `pnpm start` in the `frontend/` directory.
