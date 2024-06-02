@@ -79,6 +79,11 @@ Environment variables can be set using a `.env` file. Use the `.env.template` fi
 - `DB_PATH`: Path to the database file to use.
 - `STATIC_FILES_URL`: The base URL for the static files (PDFs).
 - `QPS_PATH`: The local path on the server to store question paper PDFs.
+- `DB_NAME`: The name for your database.
+- `DB_HOST`: `localhost` if using local postgres server or set your **own** database host address.
+- `DB_PORT`: `5432` if using local postgres server, or set to your **own** database port.
+- `DB_USER`: The access username for database.
+- `DB_PASSWORD`: The access password corressponding to the user.
 
 #### Frontend
 - `VITE_BACKEND_URL`: The IQPS backend URL. Use `http://localhost:5000` in development.
