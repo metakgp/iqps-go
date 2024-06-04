@@ -8,7 +8,7 @@ import "./styles/styles.scss";
 
 import UploadPage from "./pages/UploadPage";
 import { OAuthPage } from "./pages/OAuth";
-import { AdminDash } from "./pages/AdminDashboard";
+import { AdminPage } from "./pages/AdminDashboard";
 
 const root = document.getElementById("root");
 
@@ -27,7 +27,7 @@ render(() => (
       <Route path="/" component={App} />
       <Route path="/upload" component={UploadPage} />
       <Route path="/oauth" component={OAuthPage} />
-      <Route path="/admin" component={AdminDash} />
+      <Route path="/admin" component={AdminPage}/>
     </Router>
     <h3 class="meta-footer">Made with ❤️ and {"</>"} by <a href="https://github.com/metakgp/iqps-go" target="_blank">MetaKGP</a></h3>
   </>

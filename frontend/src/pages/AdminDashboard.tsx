@@ -1,21 +1,17 @@
-import { Component } from "solid-js";
-import { FileCard } from "../components/FileCard";
-import {
-    AiOutlineFilePdf as PDFIcon,
-    AiOutlineDelete as CloseIcon,
-} from "solid-icons/ai";
-import { IQuestionPaperFile } from "../types/types";
+import { Component, createSignal } from "solid-js";
+import { PDFLister } from "../components/PDFTable";
+import { arr } from "../data/dummyQPs";
 
-
-export const AdminDash: Component = () => {
-	return (
-		<div class="admin-dash">
-            <div class="title">
+export const AdminPage: Component = () => {
+  console.log(arr);
+  return (
+    <div class="admin-page">
+      <div class="title">
                 <h1>IQPS - Admin Dashboard</h1>
-                <p>
-                    <i># list of pdfs #</i>
-                </p>
             </div>
-		</div>
-	)
+      <div class="qp-table">
+        <PDFLister QuestionPapers={arr}/>
+      </div>
+     </div>
+  )
 }
