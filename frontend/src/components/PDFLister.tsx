@@ -1,21 +1,26 @@
 import { AiOutlineFilePdf as PDFIcon } from "solid-icons/ai";
-import { Component } from "solid-js";
-import { IAdminQuestionPaperResult } from "../types/types";
+import { Component, createSignal } from "solid-js";
+import { createStore } from "solid-js/store";
+import { Exam, IAdminQuestionPaperResult, Semester, approvalStatus } from "../types/types";
 
-type qp = {
+type props = {
     questionPaper: IAdminQuestionPaperResult;
+    isEditMode: boolean;
 }
 
-export const ListElement: Component<qp> = (qp) => {
+export const ListElement: Component<props> = (props) => {
+    const [questionPaperDetails, setQuestionPaperDetails] = createStore<IAdminQuestionPaperResult>(props.questionPaper);
+
+
     return (
         <tr>
-            <td>{qp.questionPaper.year}</td>
-            <td>{qp.questionPaper.course_code}</td>
-            <td>{qp.questionPaper.course_name}</td>
-            <td>{qp.questionPaper.exam}</td>
-            <td>{qp.questionPaper.semester}</td>
-            <td>{qp.questionPaper.approval}</td>
-            <td><PDFIcon/><a href={qp.questionPaper.filelink} target="_blank">{qp.questionPaper.course_code}.pdf</a></td>
+            <td><input type="number" value={questionPaperDetails.year} onInput={(e) => setQuestionPaperDetails("year", parseInt(e.target.value))} readonly={!props.isEditMode}/></td>
+            <td><input type="string" value={questionPaperDetails.course_code} onInput={(e) => setQuestionPaperDetails("course_code", e.target.value)} readonly={!props.isEditMode}/></td>
+            <td><input type="string" value={questionPaperDetails.course_name} onInput={(e) => setQuestionPaperDetails("course_name", e.target.value)} readonly={!props.isEditMode}/></td>
+            <td><input type="string" value={questionPaperDetails.exam} onInput={(e) => setQuestionPaperDetails("exam", e.target.value)} readonly={!props.isEditMode}/></td>
+            <td><input type="string" value={questionPaperDetails.semester} onInput={(e) => setQuestionPaperDetails("semester", e.target.value)} readonly={!props.isEditMode}/></td>
+            <td><input type="string" value={questionPaperDetails.approval} onInput={(e) => setQuestionPaperDetails("approval", e.target.value)} readonly={!props.isEditMode}/></td>
+            <td><PDFIcon/><a href={props.questionPaper.filelink} target="_blank">{questionPaperDetails.course_code}.pdf</a></td>
         </tr>
     )
 }

@@ -17,6 +17,7 @@
     "vite-plugin-solid": "^2.8.2"
   },
   "dependencies": {
+    "@solid-primitives/keyboard": "^1.2.8",
     "@solidjs/router": "^0.13.2",
     "@vercel/analytics": "^1.2.0",
     "solid-icons": "^1.1.0",

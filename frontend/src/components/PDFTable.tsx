@@ -1,20 +1,33 @@
 import { Component, createSignal, For } from "solid-js";
 import { IAdminQuestionPaperResult } from "../types/types";
 import { ListElement } from "./PDFLister";
+import { IoPencil } from "solid-icons/io";
+import { createShortcut } from "@solid-primitives/keyboard";
+import { createStore } from "solid-js/store";
 
 type props =  {
     QuestionPapers: IAdminQuestionPaperResult[];
 }
 
-
-
 export const PDFLister: Component<props> = (props) => {
-    let [reviewList, setReviewList] = createSignal<IAdminQuestionPaperResult[]>(props.QuestionPapers);
+    const [reviewList, setReviewList] = createStore<IAdminQuestionPaperResult[]>(props.QuestionPapers);
+    const [isEditMode, setIsEditMode] = createSignal<boolean>(true)
 
-    setReviewList(props.QuestionPapers)
+    function toggleEditMode(){
+        setIsEditMode(!isEditMode());
+    }
+    
+    createShortcut(
+        ["Alt", "Z"],
+        () => {
+            toggleEditMode();
+        },
+        { preventDefault: true},
+    );
 
     return (
         <div>
+            <span><button onclick={toggleEditMode}><IoPencil/></button> is editable = {isEditMode().toString()}</span>
             <table>
                 <thead>
                     <tr>
@@ -28,8 +41,8 @@ export const PDFLister: Component<props> = (props) => {
                     </tr>
                 </thead>
                 
-                <For each={reviewList()}>{(item) => (
-                    <ListElement questionPaper={item} />
+                <For each={reviewList}>{(item) => (
+                    <ListElement questionPaper={item} isEditMode={isEditMode()}/>
                 )}
                 </For>
             </table>

@@ -1,6 +1,7 @@
 import { IAdminQuestionPaperResult } from "../types/types";
 import { getCourseFromCode } from "../utils/autofillData";
 
+const dataElements = 100;
 
 let files = ["./dummyPDFs/sample1.pdf", "./dummyPDFs/sample2.pdf", "./dummyPDFs/sample3.pdf", "./dummyPDFs/sample4.pdf", "./dummyPDFs/sample5.pdf"]
 
@@ -39,7 +40,7 @@ const courses = ["AR52001",
 
 export let arr: IAdminQuestionPaperResult[] = [];
 
-for ( let i: number = 0; i < 100; i++){
+for ( let i: number = 0; i < dataElements; i++){
     let courseIndex = Math.floor(Math.random() * courses.length);
     let qp: IAdminQuestionPaperResult = {
         course_code: courses[courseIndex],
