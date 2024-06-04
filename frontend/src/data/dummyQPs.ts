@@ -49,7 +49,7 @@ for ( let i: number = 0; i < dataElements; i++){
         year: new Date().getFullYear() - (1 + Math.floor(Math.random() * 4)),
         semester: Math.floor(Math.random() * 2) ? "spring" : "autumn",
         exam: Math.floor(Math.random() * 2) ? "midsem" : "endsem",
-        approval: "pending",
+        approval: null,
         reviewedBy: null,
         filelink: files[Math.floor(Math.random() * 5)],
     };

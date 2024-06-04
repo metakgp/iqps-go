@@ -36,8 +36,8 @@ export const PDFLister: Component<props> = (props) => {
                         <th>Course Name</th>
                         <th>Exam</th>
                         <th>Semester</th>
-                        <th>Approval</th>
                         <th>File</th>
+                        <th>Approval</th>
                     </tr>
                 </thead>
                 

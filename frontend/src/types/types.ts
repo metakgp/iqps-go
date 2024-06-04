@@ -1,6 +1,6 @@
 export type Exam = "midsem" | "endsem";
 export type Semester = "spring" | "autumn";
-export type approvalStatus = "approved" | "pending" | "rejected";
+export type approvalStatus = boolean | null;
 
 export interface IQuestionPaper {
     course_code: string;
