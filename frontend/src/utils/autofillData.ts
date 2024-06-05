@@ -18,9 +18,9 @@ export const sanitizeQP = async (qp: IQuestionPaperFile) => {
 
         console.log('First 10 Lines are : ', lines)
 
-        const { courseName, year, examType } = extractDetailsFromText(text);
+        const { courseCode, year, examType } = extractDetailsFromText(text);
 
-        console.log(courseName, year, examType);
+        console.log(courseCode, year, examType);
 
     } catch (error) {
         console.error('Error extracting text:', error);
@@ -55,8 +55,8 @@ function extractDetailsFromText(text: string) {
     // Extract the first 10 lines
     const lines = text.split('\n').slice(0, 10).join('\n');
 
-    const courseNameMatch = lines.match(/[^\w]*([A-Z]{2}\d{5})[^\w]*/);
-    const courseName = courseNameMatch ? courseNameMatch[1] : 'Unknown Course';
+    const courseCodeMatch = lines.match(/[^\w]*([A-Z]{2}\d{5})[^\w]*/);
+    const courseCode = courseCodeMatch ? courseCodeMatch[1] : 'Unknown Course';
 
     const yearMatch = lines.match(/[^\d]*(\d{4})[^\d]*/);
     const year = yearMatch ? yearMatch[1] : 'Unknown Year';
@@ -65,7 +65,7 @@ function extractDetailsFromText(text: string) {
     const examType = examTypeMatch ? examTypeMatch[1] : 'Unknown Exam';
 
     return {
-        courseName,
+        courseCode,
         year,
         examType
     };
