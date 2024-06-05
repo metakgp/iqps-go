@@ -1,18 +1,39 @@
 import COURSE_CODE_MAP from "../data/courses.json";
 import { Exam, IQuestionPaper, IQuestionPaperFile, Semester } from "../types/types";
+import * as pdfjsLib from 'pdfjs-dist';
+import Tesseract from 'tesseract.js';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'src/utils/pdf.worker.min.mjs';
 
 type Courses = {
     [key: string]: string;
 };
 
-export const sanitizeQP = (qp: IQuestionPaperFile) => {
-    const sanitizedFilename = qp.file.name
-        .replace(/[^\w\d\_]/g, "-")
-        .replace(/\$+/g, "$");
+export const sanitizeQP = async (qp: IQuestionPaperFile) => {
+    
+    // from PDF file extract course name, year, exam type, semester
+    try {
+        const text = await extractTextFromPDF(qp.file);
+        const lines = text.split('\n').slice(0, 10);
+
+        console.log('First 10 Lines are : ', lines)
+
+        const { courseName, year, examType } = extractDetailsFromText(text);
+
+        console.log(courseName, year, examType);
+
+    } catch (error) {
+        console.error('Error extracting text:', error);
+    }
 
     const sanitizedCourseName = qp.course_name
         .replace(/[^\w\d\_]/g, "-")
         .replace(/\$+/g, "$");
+
+    const sanitizedFilename = qp.file.name
+        .replace(/[^\w\d\_]/g, "-")
+        .replace(/\$+/g, "$");
+
 
     return {
         ...qp,
@@ -30,9 +51,55 @@ export function getCourseFromCode<K extends keyof typeof COURSE_CODE_MAP>(code: 
     }
 };
 
+function extractDetailsFromText(text: string) {
+    // Extract the first 10 lines
+    const lines = text.split('\n').slice(0, 10).join('\n');
+
+    const courseNameMatch = lines.match(/[^\w]*([A-Z]{2}\d{5})[^\w]*/);
+    const courseName = courseNameMatch ? courseNameMatch[1] : 'Unknown Course';
+
+    const yearMatch = lines.match(/[^\d]*(\d{4})[^\d]*/);
+    const year = yearMatch ? yearMatch[1] : 'Unknown Year';
+
+    const examTypeMatch = lines.match(/[^\w]*(Mid|End)[^\w]*/i);
+    const examType = examTypeMatch ? examTypeMatch[1] : 'Unknown Exam';
+
+    return {
+        courseName,
+        year,
+        examType
+    };
+}
+
+
+async function extractTextFromPDF(pdfFile: File): Promise<string> {
+    const pdfData = await pdfFile.arrayBuffer();
+    
+    const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+    const page = await pdf.getPage(1);
+    
+    const viewport = page.getViewport({ scale: 1.5 });
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d')!;
+    
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    
+    await page.render({ canvasContext: context, viewport: viewport }).promise;
+    
+    const imageData = canvas.toDataURL('image/png');
+    
+    const { data: { text } } = await Tesseract.recognize(imageData, 'eng');
+    
+    return text;
+}
+
+
+
 export const autofillData = (
     filename: string
 ): IQuestionPaper => {
+
     // Split filename at underscores
     const dotIndex = filename.lastIndexOf(".");
     const filenameparts = filename.substring(0, dotIndex).split("_");
