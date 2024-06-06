@@ -14,4 +14,4 @@ services:
       timeout: 3s
       retries: 20
     ports:
-      - "${DB_PORT}:${DB_PORT}"
+      - ${DB_PORT}:${DB_PORT}
