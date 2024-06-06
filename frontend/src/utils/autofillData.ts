@@ -11,20 +11,6 @@ type Courses = {
 
 export const sanitizeQP = async (qp: IQuestionPaperFile) => {
     
-    // from PDF file extract course name, year, exam type, semester
-    try {
-        const text = await extractTextFromPDF(qp.file);
-        const lines = text.split('\n').slice(0, 10);
-
-        console.log('First 10 Lines are : ', lines)
-
-        const { courseCode, year, examType } = extractDetailsFromText(text);
-
-        console.log(courseCode, year, examType);
-
-    } catch (error) {
-        console.error('Error extracting text:', error);
-    }
 
     const sanitizedCourseName = qp.course_name
         .replace(/[^\w\d\_]/g, "-")
@@ -94,25 +80,53 @@ async function extractTextFromPDF(pdfFile: File): Promise<string> {
     return text;
 }
 
+async function getAutofillDataFromPDF(file: File): Promise<{ courseCode: string, year: string, examType: string }> {
+    const text = await extractTextFromPDF(file);
+    const lines = text.split('\n').slice(0, 10);
+    console.log('First 10 Lines are : ', lines);
+
+    const { courseCode, year, examType } = extractDetailsFromText(text);
+    console.log(courseCode, year, examType);
+
+    return { courseCode, year, examType };
+}
 
 
-export const autofillData = (
-    filename: string
-): IQuestionPaper => {
+export const autofillData = async (
+    filename: string, file: File,
+): Promise<IQuestionPaper> => {
+    
+    try {
+    
+        const { courseCode, year, examType } = await getAutofillDataFromPDF(file);
 
-    // Split filename at underscores
-    const dotIndex = filename.lastIndexOf(".");
-    const filenameparts = filename.substring(0, dotIndex).split("_");
+        const qpDetails: IQuestionPaper = {
+            course_code: courseCode,
+            year: Number(year),
+            exam: (examType.toLowerCase() + "sem") as Exam | "unknown",
+            semester: new Date().getMonth() > 7 ? "autumn" : "spring",
+            course_name: getCourseFromCode(courseCode) ?? "Unknown Course",
+        };
+    
+        console.log("QP details extracted from PDF: ", qpDetails);
+    
+        return qpDetails;
+        
+    } catch (error) {
+        console.error('Error autofilling data:', error);
+        // Split filename at underscores
+        const dotIndex = filename.lastIndexOf(".");
+        const filenameparts = filename.substring(0, dotIndex).split("_");
 
-    const [course_code, year, exam, semester] = filenameparts;
+        const [course_code, year, exam, semester] = filenameparts;
 
-    const qpDetails: IQuestionPaper = {
-        course_code,
-        year: new Date().getFullYear(),
-        exam: "midsem",
-        semester: new Date().getMonth() > 7 ? "autumn" : "spring",
-        course_name: getCourseFromCode(course_code) ?? "Unknown Course",
-    }
+        const qpDetails: IQuestionPaper = {
+            course_code,
+            year: new Date().getFullYear(),
+            exam: "midsem",
+            semester: new Date().getMonth() > 7 ? "autumn" : "spring",
+            course_name: getCourseFromCode(course_code) ?? "Unknown Course",
+        }
 
     if (
         year &&
@@ -126,4 +140,7 @@ export const autofillData = (
     if (semester && (semester.toLowerCase() === "spring" || semester.toLowerCase() === "autumn")) qpDetails.semester = semester.toLowerCase() as Semester;
 
     return qpDetails;
+    }
+
+    
 };

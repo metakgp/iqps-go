@@ -30,15 +30,23 @@ const UploadPage: Component = () => {
             prevQPs.filter((qp) => qp.file.name !== filename)
         );
     };
-    const addQPapers = (newFiles: File[]) => {
-        const newQPs = newFiles.map((newFile) => {
-            return { file: newFile, ...autofillData(newFile.name) };
-        });
-
-        if (newQPs.length > 0) {
-            setQPapers([...qPapers(), ...newQPs]);
+    const addQPapers = async (newFiles: File[]) => {
+        try {
+            const newQPsPromises = newFiles.map(async (newFile) => {
+                const qpDetails = await autofillData(newFile.name, newFile);
+                return { file: newFile, ...qpDetails };
+            });
+    
+            const newQPs = await Promise.all(newQPsPromises);
+    
+            if (newQPs.length > 0) {
+                setQPapers(prevQPs => [...prevQPs, ...newQPs]);
+            }
+        } catch (error) {
+            console.error('Error adding question papers:', error);
         }
     };
+    
     const clearQPapers = () => setQPapers([]);
     const updateQPaper = (updated: IQuestionPaperFile) => {
         let updateData = qPapers().map((qp) => {
