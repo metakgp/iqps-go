@@ -3,7 +3,15 @@ import { Exam, IQuestionPaper, IQuestionPaperFile, Semester } from "../types/typ
 import * as pdfjsLib from 'pdfjs-dist';
 import Tesseract from 'tesseract.js';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'src/utils/pdf.worker.min.mjs';
+// Access the worker source path from environment variables
+const pdfWorkerSrc = import.meta.env.VITE_PDF_WORKER_SRC;
+
+if (typeof pdfWorkerSrc === 'string') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
+  console.log(pdfWorkerSrc)
+} else {
+  console.error('PDF WORKER Error: Invalid workerSrc type:', pdfWorkerSrc);
+}
 
 type Courses = {
     [key: string]: string;
@@ -144,3 +152,4 @@ export const autofillData = async (
 
     
 };
+
