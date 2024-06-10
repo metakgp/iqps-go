@@ -55,7 +55,7 @@ function extractDetailsFromText(text: string) {
     const year = yearMatch ? yearMatch[1] : 'Unknown Year';
 
     const examTypeMatch = lines.match(/[^\w]*(Mid|End)[^\w]*/i);
-    const examType = examTypeMatch ? examTypeMatch[1] : 'Unknown Exam';
+    const examType = examTypeMatch ? examTypeMatch[1] : 'Unknown';
 
     return {
         courseCode,
@@ -106,7 +106,7 @@ export const autofillData = async (
         const qpDetails: IQuestionPaper = {
             course_code: courseCode,
             year: Number(year),
-            exam: (examType.toLowerCase() + "sem") as Exam | "unknown",
+            exam: (examType.toLowerCase() + "sem") as Exam,
             semester: new Date().getMonth() > 7 ? "autumn" : "spring",
             course_name: getCourseFromCode(courseCode) ?? "Unknown Course",
         };
