@@ -8,7 +8,6 @@ const pdfWorkerSrc = import.meta.env.VITE_PDF_WORKER_SRC;
 
 if (typeof pdfWorkerSrc === 'string') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
-  console.log(pdfWorkerSrc)
 } else {
   console.error('PDF WORKER Error: Invalid workerSrc type:', pdfWorkerSrc);
 }
@@ -90,12 +89,8 @@ async function extractTextFromPDF(pdfFile: File): Promise<string> {
 
 async function getAutofillDataFromPDF(file: File): Promise<{ courseCode: string, year: string, examType: string }> {
     const text = await extractTextFromPDF(file);
-    const lines = text.split('\n').slice(0, 10);
-    console.log('First 10 Lines are : ', lines);
 
     const { courseCode, year, examType } = extractDetailsFromText(text);
-    console.log(courseCode, year, examType);
-
     return { courseCode, year, examType };
 }
 
@@ -115,8 +110,6 @@ export const autofillData = async (
             semester: new Date().getMonth() > 7 ? "autumn" : "spring",
             course_name: getCourseFromCode(courseCode) ?? "Unknown Course",
         };
-    
-        console.log("QP details extracted from PDF: ", qpDetails);
     
         return qpDetails;
         
