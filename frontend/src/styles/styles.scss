@@ -152,3 +152,14 @@ select option {
   color: rgba($fg-color, 0.8);
   animation: spin 1s infinite;
 }
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px;
+  border: 2px dashed #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}

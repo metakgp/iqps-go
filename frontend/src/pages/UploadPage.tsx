@@ -227,18 +227,7 @@ const UploadPage: Component = () => {
 
                 <div class="upload-section">
                     {awaitingResponse() && (
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexDirection: 'column',
-                                padding: '20px',
-                                border: '2px dashed #ccc',
-                                borderRadius: '5px',
-                                backgroundColor: '#f9f9f9',
-                            }}
-                        >
+                        <div class="loading">
                             <div class="spinner" style={{ margin: '10px 0' }}>
                                 <Spinner />
                             </div>
