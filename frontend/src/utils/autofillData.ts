@@ -46,7 +46,7 @@ function extractDetailsFromText(text: string) {
     const courseCodeMatch = lines.match(/[^\w]*([A-Z]{2}\d{5})[^\w]*/);
     const courseCode = courseCodeMatch ? courseCodeMatch[1] : 'Unknown Course';
 
-    const yearMatch = lines.match(/[^\d]*(\d{4})[^\d]*/);
+    const yearMatch = lines.match(/[^\d]*(2\d{3})[^\d]*/); // Someone change this in the year 3000
     const year = yearMatch ? yearMatch[1] : 'Unknown Year';
 
     const examTypeMatch = lines.match(/[^\w]*(Mid|End)[^\w]*/i);
@@ -97,7 +97,7 @@ function extractDetailsFromFilename(filename: string): { course_code: string, ye
     const courseCodeMatch = filename.match(/[a-z]{2}\d{5}/i);
     const course_code = courseCodeMatch ? courseCodeMatch[0] : 'Unknown Course';
 
-    const yearMatch = filename.match(/\d{4}/);
+    const yearMatch = filename.match(/2\d{3}/); // Someone change this in the year 3000
     const year = yearMatch ? yearMatch[0] : 'Unknown Year';
 
     const examMatch = filename.match(/(mid|end)/i);
