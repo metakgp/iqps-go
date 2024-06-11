@@ -52,10 +52,14 @@ function extractDetailsFromText(text: string) {
     const examTypeMatch = lines.match(/[^\w]*(Mid|End)[^\w]*/i);
     const examType = examTypeMatch ? examTypeMatch[1] : 'Unknown';
 
+    const semesterMatch = lines.match(/[^\w]*(Spring|Autumn)[^\w]*/i);
+    const semester = semesterMatch ? semesterMatch[1] : 'Unknown';
+
     return {
         courseCode,
         year,
-        examType
+        examType,
+        semester
     };
 }
 
@@ -82,18 +86,18 @@ async function extractTextFromPDF(pdfFile: File): Promise<string> {
     return text;
 }
 
-async function getAutofillDataFromPDF(file: File): Promise<{ courseCode: string, year: string, examType: string }> {
+async function getAutofillDataFromPDF(file: File): Promise<{ courseCode: string, year: string, examType: string, semester: string }> {
     const text = await extractTextFromPDF(file);
 
-    const { courseCode, year, examType } = extractDetailsFromText(text);
-    return { courseCode, year, examType };
+    const { courseCode, year, examType, semester } = extractDetailsFromText(text);
+    return { courseCode, year, examType, semester };
 }
 
 export const autofillData = async (
     filename: string, file: File,
 ): Promise<IQuestionPaper> => {
     try {
-        const { courseCode, year, examType } = await getAutofillDataFromPDF(file);
+        const { courseCode, year, examType, semester } = await getAutofillDataFromPDF(file);
         const parsedYear = Number(year);
         const parsedExam = examType.toLowerCase() + "sem";
 
@@ -101,7 +105,8 @@ export const autofillData = async (
             throw {
                 msg: 'Invalid course code detected. Trying from filename.',
                 exam: validateExam(parsedExam) ? parsedExam : null,
-                year: validateYear(parsedYear) ? parsedYear : null
+                year: validateYear(parsedYear) ? parsedYear : null,
+                semester: validateSemester(semester) ? semester : null
             }
         }
 
@@ -109,7 +114,7 @@ export const autofillData = async (
             course_code: courseCode,
             year: Number(year),
             exam: parsedExam as Exam,
-            semester: new Date().getMonth() > 7 ? "autumn" : "spring",
+            semester: validateSemester(semester) ? semester as Semester : (new Date().getMonth() > 7 ? "autumn" : "spring"),
             course_name: getCourseFromCode(courseCode) ?? "Unknown Course",
         };
 
@@ -125,12 +130,13 @@ export const autofillData = async (
         // Get the PDF-parsed exam and year details (if they exist)
         const pdfExam: Exam | null = 'exam' in error ? error.exam : null;
         const pdfYear: number | null = 'year' in error ? error.year : null;
+        const pdfSemester: Semester | null = 'semester' in error ? error.semester : null;
 
         const qpDetails: IQuestionPaper = {
             course_code,
             year: validateYear(Number(year)) ? Number(year) : (pdfYear ?? new Date().getFullYear()),
             exam: validateExam(exam) ? exam as Exam : (pdfExam ?? "unknown"),
-            semester: validateSemester(semester) ? semester as Semester : (new Date().getMonth() > 7 ? "autumn" : "spring"),
+            semester: validateSemester(semester) ? semester as Semester : (pdfSemester ?? (new Date().getMonth() > 7 ? "autumn" : "spring")),
             course_name: getCourseFromCode(course_code) ?? "Unknown Course",
         }
 
