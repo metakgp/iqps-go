@@ -30,15 +30,27 @@ const UploadPage: Component = () => {
             prevQPs.filter((qp) => qp.file.name !== filename)
         );
     };
-    const addQPapers = (newFiles: File[]) => {
-        const newQPs = newFiles.map((newFile) => {
-            return { file: newFile, ...autofillData(newFile.name) };
-        });
 
-        if (newQPs.length > 0) {
-            setQPapers([...qPapers(), ...newQPs]);
+    const addQPapers = async (newFiles: File[]) => {
+        try {
+            setAwaitingResponse(true); // Set loading state to true
+            const newQPsPromises = newFiles.map(async (newFile) => {
+                const qpDetails = await autofillData(newFile.name, newFile);
+                return { file: newFile, ...qpDetails };
+            });
+
+            const newQPs = await Promise.all(newQPsPromises);
+
+            if (newQPs.length > 0) {
+                setQPapers((prevQPs) => [...prevQPs, ...newQPs]);
+            }
+        } catch (error) {
+            console.error('Error adding question papers:', error);
+        } finally {
+            setAwaitingResponse(false); // Set loading state to false
         }
     };
+
     const clearQPapers = () => setQPapers([]);
     const updateQPaper = (updated: IQuestionPaperFile) => {
         let updateData = qPapers().map((qp) => {
@@ -60,18 +72,20 @@ const UploadPage: Component = () => {
         e.stopPropagation();
         fileInputRef.click();
     };
-    const onFileInputChange = (e: Event) => {
+
+    const onFileInputChange = async (e: Event) => {
         e.preventDefault();
         if (e.target) {
             const newFiles = Array.from(
                 (e.target as HTMLInputElement).files || []
             );
             if (newFiles) {
-                addQPapers(newFiles);
+                await addQPapers(newFiles);
             }
         }
     };
-    const onFileDrop = (e: DragEvent) => {
+
+    const onFileDrop = async (e: DragEvent) => {
         e.preventDefault();
         if (e.dataTransfer) {
             const pdfFiles = [...e.dataTransfer.files].filter(
@@ -80,9 +94,9 @@ const UploadPage: Component = () => {
             if (pdfFiles && pdfFiles.length > 0) {
                 if (pdfFiles.length > MAX_UPLOAD_LIMIT) {
                     toast.error(`max ${MAX_UPLOAD_LIMIT} files allowed`);
-                    return
+                    return;
                 }
-                addQPapers(pdfFiles);
+                await addQPapers(pdfFiles);
             } else {
                 toast.error("Could not catch files. Please try again");
             }
@@ -90,11 +104,13 @@ const UploadPage: Component = () => {
         }
         setIsDragging(false);
     };
+
     const onDragEnter = (e: Event) => {
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(true);
     };
+
     const onDragExit = (e: Event) => {
         e.preventDefault();
         e.stopPropagation();
@@ -118,7 +134,7 @@ const UploadPage: Component = () => {
         if (!awaitingResponse()) {
             try {
                 const formData = new FormData();
-                qPapers().forEach((qp) => {
+                qPapers().forEach(async (qp) => {
                     const {
                         file,
                         course_code,
@@ -127,7 +143,7 @@ const UploadPage: Component = () => {
                         exam,
                         semester,
                         file_name
-                    } = sanitizeQP(qp);
+                    } = await sanitizeQP(qp);
 
                     formData.append("files", file, file_name);
                     formData.append(
@@ -137,7 +153,6 @@ const UploadPage: Component = () => {
                 });
 
                 setAwaitingResponse(true);
-                console.log(formData);
                 const response = await fetch(
                     `${import.meta.env.VITE_BACKEND_URL}/upload`,
                     {
@@ -187,15 +202,8 @@ const UploadPage: Component = () => {
 
             <div class="upload-wrapper">
                 <div class="upload-instructions">
-                    <h2
-                        class={`instruction-heading}`}
-
-                    >
-                        Upload Instructions
-                    </h2>
-                    <div
-                        class={`instructions`}
-                    >
+                    <h2 class="instruction-heading">Upload Instructions</h2>
+                    <div class="instructions">
                         <div class="instruction-section">
                             <h3>File Format</h3>
                             <p>Only PDF files are accepted.</p>
@@ -217,7 +225,18 @@ const UploadPage: Component = () => {
                 </div>
 
                 <div class="upload-section">
-                    {qPapers().length > 0 ? (
+                    {awaitingResponse() && (
+                        <div class="loading">
+                            <div class="spinner">
+                                <Spinner />
+                            </div>
+                            <p class="message">
+                                Loading files, please wait...
+                            </p>
+                        </div>
+                    )}
+
+                    {qPapers().length > 0 && !awaitingResponse() ? (
                         <>
                             <div class="uploaded-files">
                                 <For each={Array.from(qPapers())}>
@@ -256,24 +275,26 @@ const UploadPage: Component = () => {
                             </div>
                         </>
                     ) : (
-                        <div
-                            class={`upload-area ${isDragging() && "active"}`}
-                            onDragOver={onDragEnter}
-                            onDragLeave={onDragExit}
-                            onDrop={onFileDrop}
-                            onClick={openFileDialog}
-                        >
-                            <input
-                                ref={(el) => (fileInputRef = el)}
-                                type="file"
-                                accept=".pdf"
-                                hidden
-                                multiple={true}
-                                onChange={onFileInputChange}
-                            />
-                            <UploadIcon class="upload-icon" size="5rem" />
-                            <h2>Click or drop files to upload</h2>
-                        </div>
+                        !awaitingResponse() && (
+                            <div
+                                class={`upload-area ${isDragging() && "active"}`}
+                                onDragOver={onDragEnter}
+                                onDragLeave={onDragExit}
+                                onDrop={onFileDrop}
+                                onClick={openFileDialog}
+                            >
+                                <input
+                                    ref={(el) => (fileInputRef = el)}
+                                    type="file"
+                                    accept=".pdf"
+                                    hidden
+                                    multiple={true}
+                                    onChange={onFileInputChange}
+                                />
+                                <UploadIcon class="upload-icon" size="5rem" />
+                                <h2>Click or drop files to upload</h2>
+                            </div>
+                        )
                     )}
                 </div>
             </div>

@@ -19,8 +19,13 @@
   "dependencies": {
     "@solidjs/router": "^0.13.2",
     "@vercel/analytics": "^1.2.0",
+    "canvas": "^2.11.2",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.3.136",
+    "rollup-plugin-copy": "^3.5.0",
     "solid-icons": "^1.1.0",
     "solid-js": "^1.8.11",
-    "solid-toast": "^0.5.0"
+    "solid-toast": "^0.5.0",
+    "tesseract.js": "^5.1.0"
   }
 }

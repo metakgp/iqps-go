@@ -10,7 +10,7 @@
     margin-top: 0;
     margin-bottom: 1rem;
     font-size: 1.5rem;
-    
+
     .accordion-icon {
         display: none;
         transition: all 0.4s ease;
@@ -240,5 +240,19 @@
     gap: 1rem;
     .error-msg {
         margin-bottom: 0rem;
+    }
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+    border: 2px dashed #ccc;
+    border-radius: 5px;
+
+    .message {
+        font-size: 1.2rem;
     }
 }
