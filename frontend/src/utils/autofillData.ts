@@ -52,8 +52,6 @@ function extractDetailsFromText(text: string) {
     const examTypeMatch = lines.match(/[^\w]*(Mid|End)[^\w]*/i);
     const examType = examTypeMatch ? examTypeMatch[1].toLowerCase() + "sem" : 'Unknown';
 
-    console.log(text)
-
     const semesterMatch = lines.match(/[^\w]*(spring|autumn)[^\w]*/i);
     const semester = semesterMatch ? semesterMatch[1].toLowerCase() : 'Unknown';
 
@@ -95,6 +93,27 @@ async function getAutofillDataFromPDF(file: File): Promise<{ courseCode: string,
     return { courseCode, year, examType, semester };
 }
 
+function extractDetailsFromFilename(filename: string): { course_code: string, year: string, exam: string, semester: string } {
+    const courseCodeMatch = filename.match(/[A-Z]{2}\d{5}/i);
+    const course_code = courseCodeMatch ? courseCodeMatch[1] : 'Unknown Course';
+
+    const yearMatch = filename.match(/\d{4}/);
+    const year = yearMatch ? yearMatch[1] : 'Unknown Year';
+
+    const examMatch = filename.match(/(Mid|End)/i);
+    const exam = examMatch ? examMatch[1].toLowerCase() + "sem" : 'Unknown';
+
+    const semesterMatch = filename.match(/(spring|autumn)/i);
+    const semester = semesterMatch ? semesterMatch[1].toLowerCase() : 'Unknown';
+
+    return {
+        course_code,
+        year,
+        exam,
+        semester
+    };
+}
+
 export const autofillData = async (
     filename: string, file: File,
 ): Promise<IQuestionPaper> => {
@@ -123,10 +142,9 @@ export const autofillData = async (
 
     } catch (error: any) {
         console.error('Error autofilling data:', error);
-        // Split filename at underscores
-        const dotIndex = filename.lastIndexOf(".");
-        const filenameparts = filename.substring(0, dotIndex).split("_");
-        const [course_code, year, exam, semester] = filenameparts;
+        // Try to extract course details from filename
+        const dotIndex = filename.lastIndexOf("."); // Split the filename at the last `.`, ie, remove the extension
+        const {course_code, year, exam, semester} = extractDetailsFromFilename(filename.substring(0, dotIndex));
 
         // Get the PDF-parsed exam and year details (if they exist)
         const pdfExam: Exam | null = 'exam' in error ? error.exam : null;
