@@ -50,7 +50,7 @@ function extractDetailsFromText(text: string) {
     const year = yearMatch ? yearMatch[1] : 'Unknown Year';
 
     const examTypeMatch = lines.match(/[^\w]*(Mid|End)[^\w]*/i);
-    const examType = examTypeMatch ? examTypeMatch[1] : 'Unknown';
+    const examType = examTypeMatch ? examTypeMatch[1].toLowerCase() + "sem" : 'Unknown';
 
     console.log(text)
 
@@ -101,12 +101,11 @@ export const autofillData = async (
     try {
         const { courseCode, year, examType, semester } = await getAutofillDataFromPDF(file);
         const parsedYear = Number(year);
-        const parsedExam = examType.toLowerCase() + "sem";
 
         if (!validateCourseCode(courseCode)) {
             throw {
                 msg: 'Invalid course code detected. Trying from filename.',
-                exam: validateExam(parsedExam) ? parsedExam : null,
+                exam: validateExam(examType) ? examType : null,
                 year: validateYear(parsedYear) ? parsedYear : null,
                 semester: validateSemester(semester) ? semester : null
             }
@@ -115,7 +114,7 @@ export const autofillData = async (
         const qpDetails: IQuestionPaper = {
             course_code: courseCode,
             year: Number(year),
-            exam: parsedExam as Exam,
+            exam: examType as Exam,
             semester: validateSemester(semester) ? semester as Semester : (new Date().getMonth() > 7 ? "autumn" : "spring"),
             course_name: getCourseFromCode(courseCode) ?? "Unknown Course",
         };
