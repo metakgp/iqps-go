@@ -4,6 +4,18 @@ export const validateCourseCode = (course_code: string): boolean => {
     return course_code.length === 7 && course_code.match(/[a-z][a-z]\d\d\d\d\d/i) !== null;
 }
 
+export const validateYear = (year: number): boolean => {
+    return !isNaN(year) && year <= new Date().getFullYear();
+}
+
+export const validateExam = (exam: string): boolean => {
+    return exam === "midsem" || exam === "endsem";
+}
+
+export const validateSemester = (semester: string): boolean => {
+    return semester === "autumn" || semester === "spring";
+}
+
 export const validate = (data: IQuestionPaperFile): IErrorMessage => {
     const error_message: IErrorMessage = {
         courseCodeErr: null,
@@ -20,19 +32,18 @@ export const validate = (data: IQuestionPaperFile): IErrorMessage => {
 
     if (
         !data.year ||
-        isNaN(data.year) ||
-        data.year > new Date().getFullYear()
+        !validateYear(data.year)
     ) {
         error_message.yearErr = "Invalid Year";
     }
 
-    if (!data.exam || (data.exam !== "midsem" && data.exam !== "endsem")) {
+    if (!data.exam || !validateExam(data.exam)) {
         error_message.examErr = "Invalid exam";
     }
 
     if (
         !data.semester ||
-        (data.semester !== "autumn" && data.semester !== "spring")
+        !validateSemester(data.semester)
     ) {
         error_message.examErr = "Invalid semester";
     }

@@ -2,7 +2,7 @@ import COURSE_CODE_MAP from "../data/courses.json";
 import { Exam, IQuestionPaper, IQuestionPaperFile, Semester } from "../types/types";
 import * as pdfjsLib from 'pdfjs-dist';
 import Tesseract from 'tesseract.js';
-import { validate, validateCourseCode } from "./validateInput";
+import { validate, validateCourseCode, validateExam, validateSemester, validateYear } from "./validateInput";
 
 // Access the worker source path from environment variables
 const pdfWorkerSrc = import.meta.env.VITE_PDF_WORKER_SRC;
@@ -94,34 +94,43 @@ export const autofillData = async (
 ): Promise<IQuestionPaper> => {
     try {
         const { courseCode, year, examType } = await getAutofillDataFromPDF(file);
+        const parsedYear = Number(year);
+        const parsedExam = examType.toLowerCase() + "sem";
 
         if (!validateCourseCode(courseCode)) {
-            throw 'Invalid course code detected. Trying from filename.'
+            throw {
+                msg: 'Invalid course code detected. Trying from filename.',
+                exam: validateExam(parsedExam) ? parsedExam : null,
+                year: validateYear(parsedYear) ? parsedYear : null
+            }
         }
 
         const qpDetails: IQuestionPaper = {
             course_code: courseCode,
             year: Number(year),
-            exam: (examType.toLowerCase() + "sem") as Exam,
+            exam: parsedExam as Exam,
             semester: new Date().getMonth() > 7 ? "autumn" : "spring",
             course_name: getCourseFromCode(courseCode) ?? "Unknown Course",
         };
 
         return qpDetails;
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error autofilling data:', error);
         // Split filename at underscores
         const dotIndex = filename.lastIndexOf(".");
         const filenameparts = filename.substring(0, dotIndex).split("_");
-
         const [course_code, year, exam, semester] = filenameparts;
+
+        // Get the PDF-parsed exam and year details (if they exist)
+        const pdfExam: Exam | null = 'exam' in error ? error.exam : null;
+        const pdfYear: number | null = 'year' in error ? error.year : null;
 
         const qpDetails: IQuestionPaper = {
             course_code,
-            year: new Date().getFullYear(),
-            exam: "midsem",
-            semester: new Date().getMonth() > 7 ? "autumn" : "spring",
+            year: validateYear(Number(year)) ? Number(year) : (pdfYear ?? new Date().getFullYear()),
+            exam: validateExam(exam) ? exam as Exam : (pdfExam ?? "unknown"),
+            semester: validateSemester(semester) ? semester as Semester : (new Date().getMonth() > 7 ? "autumn" : "spring"),
             course_name: getCourseFromCode(course_code) ?? "Unknown Course",
         }
 
