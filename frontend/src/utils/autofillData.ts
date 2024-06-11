@@ -39,30 +39,36 @@ export function getCourseFromCode<K extends keyof typeof COURSE_CODE_MAP>(code: 
     }
 };
 
-function extractDetailsFromText(text: string) {
+interface IExtractedDetails {
+    course_code: string | null,
+    year: number | null,
+    exam: Exam | null,
+    semester: Semester | null
+}
+
+function extractDetailsFromText(text: string): IExtractedDetails {
     // Extract the first 10 lines
     const lines = text.split('\n').slice(0, 10).join('\n');
 
     const courseCodeMatch = lines.match(/[^\w]*([A-Z]{2}\d{5})[^\w]*/);
-    const courseCode = courseCodeMatch ? courseCodeMatch[1] : 'Unknown Course';
+    const courseCode = courseCodeMatch ? courseCodeMatch[1] : null;
 
     const yearMatch = lines.match(/[^\d]*(2\d{3})[^\d]*/); // Someone change this in the year 3000
-    const year = yearMatch ? yearMatch[1] : 'Unknown Year';
+    const year = yearMatch ? Number(yearMatch[1]) : null;
 
     const examTypeMatch = lines.match(/[^\w]*(Mid|End)[^\w]*/i);
-    const examType = examTypeMatch ? examTypeMatch[1].toLowerCase() + "sem" : 'Unknown';
+    const examType = examTypeMatch ? examTypeMatch[1].toLowerCase() + "sem" as Exam : null;
 
     const semesterMatch = lines.match(/[^\w]*(spring|autumn)[^\w]*/i);
-    const semester = semesterMatch ? semesterMatch[1].toLowerCase() : 'Unknown';
+    const semester = semesterMatch ? semesterMatch[1].toLowerCase() as Semester : null;
 
     return {
-        courseCode,
+        course_code: courseCode,
         year,
-        examType,
+        exam: examType,
         semester
     };
 }
-
 
 async function extractTextFromPDF(pdfFile: File): Promise<string> {
     const pdfData = await pdfFile.arrayBuffer();
@@ -86,93 +92,58 @@ async function extractTextFromPDF(pdfFile: File): Promise<string> {
     return text;
 }
 
-async function getAutofillDataFromPDF(file: File): Promise<{ courseCode: string, year: string, examType: string, semester: string }> {
-    const text = await extractTextFromPDF(file);
+async function getAutofillDataFromPDF(file: File): Promise<IExtractedDetails> {
+    try {
+        const text = await extractTextFromPDF(file);
 
-    const { courseCode, year, examType, semester } = extractDetailsFromText(text);
-    return { courseCode, year, examType, semester };
-}
+        const { course_code, year, exam, semester } = extractDetailsFromText(text);
+        return { course_code, year, exam, semester };
+    } catch (e) {
+        console.log("Error extracting details from PDF: ", e);
 
-function extractDetailsFromFilename(filename: string): { course_code: string, year: string, exam: string, semester: string } {
-    const courseCodeMatch = filename.match(/[a-z]{2}\d{5}/i);
-    const course_code = courseCodeMatch ? courseCodeMatch[0] : 'Unknown Course';
-
-    const yearMatch = filename.match(/2\d{3}/); // Someone change this in the year 3000
-    const year = yearMatch ? yearMatch[0] : 'Unknown Year';
-
-    const examMatch = filename.match(/(mid|end)/i);
-    const exam = examMatch ? examMatch[0].toLowerCase() + "sem" : 'Unknown';
-
-    const semesterMatch = filename.match(/(spring|autumn)/i);
-    const semester = semesterMatch ? semesterMatch[0].toLowerCase() : 'Unknown';
-
-    return {
-        course_code,
-        year,
-        exam,
-        semester
-    };
+        return {
+            course_code: null,
+            year: null,
+            exam: null,
+            semester: null
+        }
+    }
 }
 
 export const autofillData = async (
     filename: string, file: File,
 ): Promise<IQuestionPaper> => {
-    try {
-        const { courseCode, year, examType, semester } = await getAutofillDataFromPDF(file);
-        const parsedYear = Number(year);
+    // Try to extract details from the PDF
+    const { course_code: pdfCourseCode, year: pdfYear, exam: pdfExam, semester: pdfSemester } = await getAutofillDataFromPDF(file);
+    // Try to extract details from the filename
+    const dotIndex = filename.lastIndexOf("."); // Split the filename at the last `.`, ie, remove the extension
+    const { course_code: filenameCourseCode, year: filenameYear, exam: filenameExam, semester: filenameSemester } = extractDetailsFromText(filename.substring(0, dotIndex));
 
-        if (!validateCourseCode(courseCode)) {
-            throw {
-                msg: 'Invalid course code detected. Trying from filename.',
-                exam: validateExam(examType) ? examType : null,
-                year: validateYear(parsedYear) ? parsedYear : null,
-                semester: validateSemester(semester) ? semester : null
-            }
-        }
-
-        const qpDetails: IQuestionPaper = {
-            course_code: courseCode,
-            year: Number(year),
-            exam: examType as Exam,
-            semester: validateSemester(semester) ? semester as Semester : (new Date().getMonth() > 7 ? "autumn" : "spring"),
-            course_name: getCourseFromCode(courseCode) ?? "Unknown Course",
-        };
-
-        return qpDetails;
-
-    } catch (error: any) {
-        console.error('Error autofilling data:', error);
-        // Try to extract course details from filename
-        const dotIndex = filename.lastIndexOf("."); // Split the filename at the last `.`, ie, remove the extension
-        const {course_code, year, exam, semester} = extractDetailsFromFilename(filename.substring(0, dotIndex));
-
-        // Get the PDF-parsed exam and year details (if they exist)
-        const pdfExam: Exam | null = 'exam' in error ? error.exam : null;
-        const pdfYear: number | null = 'year' in error ? error.year : null;
-        const pdfSemester: Semester | null = 'semester' in error ? error.semester : null;
-
-        const qpDetails: IQuestionPaper = {
-            course_code,
-            year: validateYear(Number(year)) ? Number(year) : (pdfYear ?? new Date().getFullYear()),
-            exam: validateExam(exam) ? exam as Exam : (pdfExam ?? "unknown"),
-            semester: validateSemester(semester) ? semester as Semester : (pdfSemester ?? (new Date().getMonth() > 7 ? "autumn" : "spring")),
-            course_name: getCourseFromCode(course_code) ?? "Unknown Course",
-        }
-
-        if (
-            year &&
-            year.length === 4 && // Someome will fix this in year 10000 if metaKGP and KGP still exist then. Until then, it will at least prevent lazy asses from writing 21 instead of 2021
-            !isNaN(parseInt(year)) &&
-            parseInt(year) <= new Date().getFullYear() // Imagine sending a question paper from the future, should we support this just in case? I mean metaKGP are pioneers in technology, shouldn't we support other pioneers on our system too?
-        ) qpDetails.year = parseInt(year);
-
-        if (exam && (exam.toLowerCase() === "midsem" || exam.toLowerCase() === "endsem")) qpDetails.exam = exam.toLowerCase() as Exam;
-
-        if (semester && (semester.toLowerCase() === "spring" || semester.toLowerCase() === "autumn")) qpDetails.semester = semester.toLowerCase() as Semester;
-
-        return qpDetails;
+    const filenameOrPdfFallback = <T>(
+        filenameData: T | null,
+        pdfData: T | null,
+        validator: (data: T) => boolean,
+        fallback: T
+    ): T => {
+        return filenameData !== null && validator(filenameData) ?
+            filenameData :
+            pdfData !== null && validator(pdfData) ?
+                pdfData : fallback;
     }
 
+    const course_code = filenameOrPdfFallback(filenameCourseCode, pdfCourseCode, validateCourseCode, 'Unknown Course');
+    const year = filenameOrPdfFallback(filenameYear, pdfYear, validateYear, new Date().getFullYear());
+    const exam = filenameOrPdfFallback(filenameExam, pdfExam, validateExam, 'unknown');
+    const semester = filenameOrPdfFallback(filenameSemester, pdfSemester, validateSemester, new Date().getMonth() > 7 ? "autumn" : "spring");
 
+    const qpDetails: IQuestionPaper = {
+        course_code,
+        year,
+        exam,
+        semester,
+        course_name: getCourseFromCode(course_code) ?? "Unknown Course",
+    };
+
+    return qpDetails;
 };
 
