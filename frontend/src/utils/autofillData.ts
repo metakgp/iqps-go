@@ -52,8 +52,10 @@ function extractDetailsFromText(text: string) {
     const examTypeMatch = lines.match(/[^\w]*(Mid|End)[^\w]*/i);
     const examType = examTypeMatch ? examTypeMatch[1] : 'Unknown';
 
-    const semesterMatch = lines.match(/[^\w]*(Spring|Autumn)[^\w]*/i);
-    const semester = semesterMatch ? semesterMatch[1] : 'Unknown';
+    console.log(text)
+
+    const semesterMatch = lines.match(/[^\w]*(spring|autumn)[^\w]*/i);
+    const semester = semesterMatch ? semesterMatch[1].toLowerCase() : 'Unknown';
 
     return {
         courseCode,
