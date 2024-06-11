@@ -228,10 +228,10 @@ const UploadPage: Component = () => {
                 <div class="upload-section">
                     {awaitingResponse() && (
                         <div class="loading">
-                            <div class="spinner" style={{ margin: '10px 0' }}>
+                            <div class="spinner">
                                 <Spinner />
                             </div>
-                            <p style={{ fontSize: '1.2rem', color: '#333' }}>
+                            <p class="message">
                                 Loading files, please wait...
                             </p>
                         </div>
