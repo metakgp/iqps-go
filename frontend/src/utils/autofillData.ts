@@ -53,8 +53,9 @@ function extractDetailsFromText(text: string): IExtractedDetails {
     const courseCodeMatch = lines.match(/[^\w]*([A-Z]{2}\d{5})[^\w]*/);
     const courseCode = courseCodeMatch ? courseCodeMatch[1] : null;
 
-    const yearMatch = lines.match(/[^\d]*(2\d{3})[^\d]*/); // Someone change this in the year 3000
-    const year = yearMatch ? Number(yearMatch[1]) : null;
+    const yearMatch = lines.match(/([^\d]|^)(2\d{3})([^\d]|$)/); // Someone change this in the year 3000
+    console.log(lines, yearMatch)
+    const year = yearMatch ? Number(yearMatch[2]) : null;
 
     const examTypeMatch = lines.match(/[^\w]*(Mid|End)[^\w]*/i);
     const examType = examTypeMatch ? examTypeMatch[1].toLowerCase() + "sem" as Exam : null;
