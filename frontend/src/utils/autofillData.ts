@@ -94,17 +94,17 @@ async function getAutofillDataFromPDF(file: File): Promise<{ courseCode: string,
 }
 
 function extractDetailsFromFilename(filename: string): { course_code: string, year: string, exam: string, semester: string } {
-    const courseCodeMatch = filename.match(/[A-Z]{2}\d{5}/i);
-    const course_code = courseCodeMatch ? courseCodeMatch[1] : 'Unknown Course';
+    const courseCodeMatch = filename.match(/[a-z]{2}\d{5}/i);
+    const course_code = courseCodeMatch ? courseCodeMatch[0] : 'Unknown Course';
 
     const yearMatch = filename.match(/\d{4}/);
-    const year = yearMatch ? yearMatch[1] : 'Unknown Year';
+    const year = yearMatch ? yearMatch[0] : 'Unknown Year';
 
-    const examMatch = filename.match(/(Mid|End)/i);
-    const exam = examMatch ? examMatch[1].toLowerCase() + "sem" : 'Unknown';
+    const examMatch = filename.match(/(mid|end)/i);
+    const exam = examMatch ? examMatch[0].toLowerCase() + "sem" : 'Unknown';
 
     const semesterMatch = filename.match(/(spring|autumn)/i);
-    const semester = semesterMatch ? semesterMatch[1].toLowerCase() : 'Unknown';
+    const semester = semesterMatch ? semesterMatch[0].toLowerCase() : 'Unknown';
 
     return {
         course_code,
