@@ -2,23 +2,18 @@ import COURSE_CODE_MAP from "../data/courses.json";
 import { Exam, IQuestionPaper, IQuestionPaperFile, Semester } from "../types/types";
 import * as pdfjsLib from 'pdfjs-dist';
 import Tesseract from 'tesseract.js';
+import { validate, validateCourseCode } from "./validateInput";
 
 // Access the worker source path from environment variables
 const pdfWorkerSrc = import.meta.env.VITE_PDF_WORKER_SRC;
 
 if (typeof pdfWorkerSrc === 'string') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 } else {
-  console.error('PDF WORKER Error: Invalid workerSrc type:', pdfWorkerSrc);
+    console.error('PDF WORKER Error: Invalid workerSrc type:', pdfWorkerSrc);
 }
 
-type Courses = {
-    [key: string]: string;
-};
-
 export const sanitizeQP = async (qp: IQuestionPaperFile) => {
-    
-
     const sanitizedCourseName = qp.course_name
         .replace(/[^\w\d\_]/g, "-")
         .replace(/\$+/g, "$");
@@ -67,23 +62,23 @@ function extractDetailsFromText(text: string) {
 
 async function extractTextFromPDF(pdfFile: File): Promise<string> {
     const pdfData = await pdfFile.arrayBuffer();
-    
+
     const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
     const page = await pdf.getPage(1);
-    
+
     const viewport = page.getViewport({ scale: 1.5 });
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d')!;
-    
+
     canvas.width = viewport.width;
     canvas.height = viewport.height;
-    
+
     await page.render({ canvasContext: context, viewport: viewport }).promise;
-    
+
     const imageData = canvas.toDataURL('image/png');
-    
+
     const { data: { text } } = await Tesseract.recognize(imageData, 'eng');
-    
+
     return text;
 }
 
@@ -94,14 +89,15 @@ async function getAutofillDataFromPDF(file: File): Promise<{ courseCode: string,
     return { courseCode, year, examType };
 }
 
-
 export const autofillData = async (
     filename: string, file: File,
 ): Promise<IQuestionPaper> => {
-    
     try {
-    
         const { courseCode, year, examType } = await getAutofillDataFromPDF(file);
+
+        if (!validateCourseCode(courseCode)) {
+            throw 'Invalid course code detected. Trying from filename.'
+        }
 
         const qpDetails: IQuestionPaper = {
             course_code: courseCode,
@@ -110,9 +106,9 @@ export const autofillData = async (
             semester: new Date().getMonth() > 7 ? "autumn" : "spring",
             course_name: getCourseFromCode(courseCode) ?? "Unknown Course",
         };
-    
+
         return qpDetails;
-        
+
     } catch (error) {
         console.error('Error autofilling data:', error);
         // Split filename at underscores
@@ -129,20 +125,20 @@ export const autofillData = async (
             course_name: getCourseFromCode(course_code) ?? "Unknown Course",
         }
 
-    if (
-        year &&
-        year.length === 4 && // Someome will fix this in year 10000 if metaKGP and KGP still exist then. Until then, it will at least prevent lazy asses from writing 21 instead of 2021
-        !isNaN(parseInt(year)) &&
-        parseInt(year) <= new Date().getFullYear() // Imagine sending a question paper from the future, should we support this just in case? I mean metaKGP are pioneers in technology, shouldn't we support other pioneers on our system too?
-    ) qpDetails.year = parseInt(year);
+        if (
+            year &&
+            year.length === 4 && // Someome will fix this in year 10000 if metaKGP and KGP still exist then. Until then, it will at least prevent lazy asses from writing 21 instead of 2021
+            !isNaN(parseInt(year)) &&
+            parseInt(year) <= new Date().getFullYear() // Imagine sending a question paper from the future, should we support this just in case? I mean metaKGP are pioneers in technology, shouldn't we support other pioneers on our system too?
+        ) qpDetails.year = parseInt(year);
 
-    if (exam && (exam.toLowerCase() === "midsem" || exam.toLowerCase() === "endsem")) qpDetails.exam = exam.toLowerCase() as Exam;
+        if (exam && (exam.toLowerCase() === "midsem" || exam.toLowerCase() === "endsem")) qpDetails.exam = exam.toLowerCase() as Exam;
 
-    if (semester && (semester.toLowerCase() === "spring" || semester.toLowerCase() === "autumn")) qpDetails.semester = semester.toLowerCase() as Semester;
+        if (semester && (semester.toLowerCase() === "spring" || semester.toLowerCase() === "autumn")) qpDetails.semester = semester.toLowerCase() as Semester;
 
-    return qpDetails;
+        return qpDetails;
     }
 
-    
+
 };
 

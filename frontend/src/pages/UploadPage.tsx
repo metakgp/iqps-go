@@ -134,7 +134,7 @@ const UploadPage: Component = () => {
         if (!awaitingResponse()) {
             try {
                 const formData = new FormData();
-                qPapers().forEach((qp) => {
+                qPapers().forEach(async (qp) => {
                     const {
                         file,
                         course_code,
@@ -143,7 +143,7 @@ const UploadPage: Component = () => {
                         exam,
                         semester,
                         file_name
-                    } = sanitizeQP(qp);
+                    } = await sanitizeQP(qp);
 
                     formData.append("files", file, file_name);
                     formData.append(
@@ -153,7 +153,6 @@ const UploadPage: Component = () => {
                 });
 
                 setAwaitingResponse(true);
-                console.log(formData);
                 const response = await fetch(
                     `${import.meta.env.VITE_BACKEND_URL}/upload`,
                     {

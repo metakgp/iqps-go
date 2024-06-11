@@ -1,5 +1,9 @@
 import { IErrorMessage, IQuestionPaperFile } from "../types/types";
 
+export const validateCourseCode = (course_code: string): boolean => {
+    return course_code.length === 7 && course_code.match(/[a-z][a-z]\d\d\d\d\d/i) !== null;
+}
+
 export const validate = (data: IQuestionPaperFile): IErrorMessage => {
     const error_message: IErrorMessage = {
         courseCodeErr: null,
@@ -8,7 +12,7 @@ export const validate = (data: IQuestionPaperFile): IErrorMessage => {
         examErr: null,
         semesterErr: null,
     };
-    if (!data.course_code || data.course_code.length !== 7) {
+    if (!data.course_code || !validateCourseCode(data.course_code)) {
         error_message.courseCodeErr = "Invalid Course Code";
     }
 
