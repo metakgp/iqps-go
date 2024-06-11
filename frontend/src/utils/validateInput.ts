@@ -1,7 +1,7 @@
 import { IErrorMessage, IQuestionPaperFile } from "../types/types";
 
 export const validateCourseCode = (course_code: string): boolean => {
-    return course_code.length === 7 && course_code.match(/[a-z][a-z]\d\d\d\d\d/i) !== null;
+    return course_code.length === 7 && course_code.match(/[a-z]{2}\d{5}/i) !== null;
 }
 
 export const validateYear = (year: number): boolean => {
