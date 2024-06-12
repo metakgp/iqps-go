@@ -19,6 +19,7 @@
   "dependencies": {
     "@solid-primitives/keyboard": "^1.2.8",
     "@solidjs/router": "^0.13.2",
+    "@thisbeyond/solid-select": "^0.14.0",
     "@vercel/analytics": "^1.2.0",
     "solid-icons": "^1.1.0",
     "solid-js": "^1.8.11",

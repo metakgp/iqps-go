@@ -14,6 +14,9 @@ importers:
       '@solidjs/router':
         specifier: ^0.13.2
         version: 0.13.2(solid-js@1.8.11)
+      '@thisbeyond/solid-select':
+        specifier: ^0.14.0
+        version: 0.14.0(solid-js@1.8.11)
       '@vercel/analytics':
         specifier: ^1.2.0
         version: 1.2.0(react@18.3.1)
@@ -485,6 +488,11 @@ packages:
     resolution: {integrity: sha512-zPlQUXaaUMFzz70SNN8scITooBaJyvIJci3ilyHUBXr9+mzEJGCUSohRJx/VXKo9+p+HEBHY48GnChiPYfLsjg==}
     peerDependencies:
       solid-js: ^1.8.6
+
+  '@thisbeyond/solid-select@0.14.0':
+    resolution: {integrity: sha512-ecq4U3Vnc/nJbU84ARuPg2scNuYt994ljF5AmBlzuZW87x43mWiGJ5hEWufIJJMpDT6CcnCIx/xbrdDkaDEHQw==}
+    peerDependencies:
+      solid-js: ^1.5
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -1271,6 +1279,10 @@ snapshots:
       solid-js: 1.8.11
 
   '@solidjs/router@0.13.2(solid-js@1.8.11)':
+    dependencies:
+      solid-js: 1.8.11
+
+  '@thisbeyond/solid-select@0.14.0(solid-js@1.8.11)':
     dependencies:
       solid-js: 1.8.11
 

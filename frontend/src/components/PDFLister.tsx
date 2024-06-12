@@ -3,7 +3,7 @@ import { Component, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Exam, IAdminQuestionPaperResult, Semester, approvalStatus } from "../types/types";
 import { IoCheckmarkCircle } from "solid-icons/io";
-import { createShortcut } from "@solid-primitives/keyboard";
+import { CoursesSelectMenu } from "./CoursesSelectMenu";
 
 type props = {
     questionPaper: IAdminQuestionPaperResult;
@@ -37,19 +37,11 @@ export const ListElement: Component<props> = (props) => {
         }
     }
 
-    // createShortcut(
-    //     ["Alt", "V"],
-    //     () => {
-    //         paperApprove(questionPaperDetails.approval);
-    //     },
-    //     { preventDefault: true},
-    // )
-
     return (
         <tr>
-            <td><input type="number" value={questionPaperDetails.year} onInput={(e) => setQuestionPaperDetails("year", parseInt(e.target.value))} readonly={!props.isEditMode}/></td>
-            <td><input type="string" value={questionPaperDetails.course_code} onInput={(e) => setQuestionPaperDetails("course_code", e.target.value)} readonly={!props.isEditMode}/></td>
+            <td><CoursesSelectMenu qp={props.questionPaper} update={setQuestionPaperDetails}/></td>
             <td><input type="string" value={questionPaperDetails.course_name} onInput={(e) => setQuestionPaperDetails("course_name", e.target.value)} readonly={!props.isEditMode}/></td>
+            <td><input type="number" value={questionPaperDetails.year} onInput={(e) => setQuestionPaperDetails("year", parseInt(e.target.value))} readonly={!props.isEditMode}/></td>
             <td><input type="string" value={questionPaperDetails.exam} onInput={(e) => setQuestionPaperDetails("exam", e.target.value)} readonly={!props.isEditMode}/></td>
             <td><input type="string" value={questionPaperDetails.semester} onInput={(e) => setQuestionPaperDetails("semester", e.target.value)} readonly={!props.isEditMode}/></td>
             <td><PDFIcon/><a href={props.questionPaper.filelink} target="_blank">{questionPaperDetails.course_code}.pdf</a></td>

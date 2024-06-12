@@ -31,9 +31,9 @@ export const PDFLister: Component<props> = (props) => {
             <table>
                 <thead>
                     <tr>
-                        <th>Year</th>
                         <th>Code</th>
                         <th>Course Name</th>
+                        <th>Year</th>
                         <th>Exam</th>
                         <th>Semester</th>
                         <th>File</th>
