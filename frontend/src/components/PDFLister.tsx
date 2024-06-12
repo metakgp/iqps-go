@@ -1,12 +1,10 @@
 import { AiFillCloseCircle, AiFillWarning, AiOutlineFilePdf as PDFIcon } from "solid-icons/ai";
+import COURSE_CODE_MAP from "../data/courses.json";
 import { Component } from "solid-js";
 import { createStore } from "solid-js/store";
 import { IAdminQuestionPaperResult, approvalStatus } from "../types/types";
 import { IoCheckmarkCircle } from "solid-icons/io";
-import { CoursesSelectMenu } from "./CoursesSelectMenu";
 import { Select, createOptions } from "@thisbeyond/solid-select";
-import "@thisbeyond/solid-select/style.css";
-import "../styles/courseSelectMenu.scss";
 
 type props = {
     questionPaper: IAdminQuestionPaperResult;
@@ -40,17 +38,23 @@ export const ListElement: Component<props> = (props) => {
     }
 
     return (
-        <tr>
-            <td><CoursesSelectMenu 
-                qp={props.questionPaper} 
-                update={setQuestionPaperDetails}
-                info="course_code"
+        <tr class="qp-table-tr">
+            <td><Select
+                class="select"  
+                {...createOptions(Object.keys(COURSE_CODE_MAP))} 
+                initialValue={questionPaperDetails.course_code}
+                onChange={(value) => {
+                    setQuestionPaperDetails("course_code", value);     
+                }}
                 />
             </td>
-            <td><CoursesSelectMenu 
-                qp={props.questionPaper}
-                update={setQuestionPaperDetails}
-                info="course_name"
+            <td><Select
+                class="select"  
+                {...createOptions(Object.values(COURSE_CODE_MAP))} 
+                initialValue={questionPaperDetails.course_name}
+                onChange={(value) => {
+                    setQuestionPaperDetails("course_name", value);     
+                }}
                 />
             </td>
             <td><Select

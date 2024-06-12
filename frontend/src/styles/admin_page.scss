@@ -1,0 +1,68 @@
+.select {
+    .solid-select-container {
+        color: #fa7f25;
+    }
+    .solid-select-control {
+        outline-color: #fca560;
+        border-color: #fca560;
+    }
+    .solid-select-placeholder {
+        background-color: red;
+        color: white;
+        border: white;
+        padding: 2px;
+        border-radius: 5px;
+    }
+    .solid-select-option:hover {
+        background-color: #ff851b;
+        color: #001f3f;
+    }
+    .solid-select-option[data-focused=true] {
+        background-color: #001f3f;
+        color: #ff851b;
+    }
+    .solid-select-list {
+        background-color: black;
+        color: white;
+    }
+}
+
+.qp-table {
+    table-layout: auto;
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+
+    caption {
+        padding-bottom: 7px;
+        font-weight: light;
+    }
+
+    thead {
+        background-color: #ff851b;
+        color: #001f3f;
+    }
+    
+    td {
+        text-align: center;
+        border-color: grey;
+        border-collapse: collapse;
+        border-bottom: 1px solid;
+    }
+
+    tbody tr:hover {
+        background-color: #001f3f;
+        padding: 1px;
+        color: #ff851b;
+        font-weight: bolder;
+    } 
+
+    tbody tr:focus {
+        background-color: white;
+        padding: 1px;
+        color: black;
+        font-weight: bolder;
+    } 
+}
+
+

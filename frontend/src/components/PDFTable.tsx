@@ -12,9 +12,10 @@ export const PDFLister: Component<props> = (props) => {
     
     return (
         <div>
-            <table>
+            <table class="qp-table">
+            <caption><em>Approval status of all submited question papers</em></caption>
                 <thead>
-                    <tr>
+                    <tr class="qp-table-row">
                         <th>Code</th>
                         <th>Course Name</th>
                         <th>Year</th>
@@ -24,11 +25,12 @@ export const PDFLister: Component<props> = (props) => {
                         <th>Approval</th>
                     </tr>
                 </thead>
-                
-                <For each={reviewList}>{(item) => (
-                    <ListElement questionPaper={item} />
-                )}
-                </For>
+                <tbody>
+                     <For each={reviewList}>{(item) => (
+                         <ListElement questionPaper={item} />
+                     )}
+                     </For>
+                </tbody>
             </table>
         </div>
     )
