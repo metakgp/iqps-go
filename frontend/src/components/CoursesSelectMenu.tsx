@@ -24,7 +24,7 @@ export const CoursesSelectMenu: Component<props> = (props) => {
     return (
         <Select 
             {...course_info} 
-            class="select-course"  
+            class="select"  
             initialValue={props.qp[props.info]}
             onChange={(value) => {
                 props.update(props.info, value);     

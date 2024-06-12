@@ -5,10 +5,12 @@ import { Exam, IAdminQuestionPaperResult, Semester, approvalStatus } from "../ty
 import { IoCheckmarkCircle } from "solid-icons/io";
 import { CoursesSelectMenu } from "./CoursesSelectMenu";
 import { getCourseFromCode } from "../utils/autofillData";
+import { Select, createOptions } from "@thisbeyond/solid-select";
+import "@thisbeyond/solid-select/style.css";
+import "../styles/courseSelectMenu.scss";
 
 type props = {
     questionPaper: IAdminQuestionPaperResult;
-    isEditMode: boolean;
 }
 
 export const ListElement: Component<props> = (props) => {
@@ -52,11 +54,20 @@ export const ListElement: Component<props> = (props) => {
                 info="course_name"
                 />
             </td>
-            <td><input type="number" value={questionPaperDetails.year} onInput={(e) => setQuestionPaperDetails("year", parseInt(e.target.value))} readonly={!props.isEditMode}/></td>
-            <td><input type="string" value={questionPaperDetails.exam} onInput={(e) => setQuestionPaperDetails("exam", e.target.value)} readonly={!props.isEditMode}/></td>
-            <td><input type="string" value={questionPaperDetails.semester} onInput={(e) => setQuestionPaperDetails("semester", e.target.value)} readonly={!props.isEditMode}/></td>
+            <td><Select
+                class="select" 
+                // returns every year since 1951 till today as options for year dropdown
+                {...createOptions([...Array.from({length: new Date().getFullYear() - 1950}, (e, i) => (new Date().getFullYear() - i).toString())])}
+                initialValue={questionPaperDetails.year}
+                onChange={(value) => {
+                    setQuestionPaperDetails(value);
+                }}
+                />
+            </td>
+            <td><input type="string" value={questionPaperDetails.exam} onInput={(e) => setQuestionPaperDetails("exam", e.target.value)}/></td>
+            <td><input type="string" value={questionPaperDetails.semester} onInput={(e) => setQuestionPaperDetails("semester", e.target.value)}/></td>
             <td><PDFIcon/><a href={props.questionPaper.filelink} target="_blank">{questionPaperDetails.course_code}.pdf</a></td>
-            <td><button onClick={(e) => {e.preventDefault();if (props.isEditMode) {paperApprove(questionPaperDetails.approval)}}} onContextMenu={(e) => {e.preventDefault();if (props.isEditMode){paperReject(questionPaperDetails.approval)}}}>{approvalStatus(questionPaperDetails.approval)} </button></td>
+            <td><button onClick={(e) => {e.preventDefault();paperApprove(questionPaperDetails.approval)}} onContextMenu={(e) => {e.preventDefault();paperReject(questionPaperDetails.approval)}}>{approvalStatus(questionPaperDetails.approval)} </button></td>
         </tr>
     )
 }
