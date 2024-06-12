@@ -1,10 +1,9 @@
 import { AiFillCloseCircle, AiFillWarning, AiOutlineFilePdf as PDFIcon } from "solid-icons/ai";
-import { Component, createSignal } from "solid-js";
+import { Component } from "solid-js";
 import { createStore } from "solid-js/store";
-import { Exam, IAdminQuestionPaperResult, Semester, approvalStatus } from "../types/types";
+import { IAdminQuestionPaperResult, approvalStatus } from "../types/types";
 import { IoCheckmarkCircle } from "solid-icons/io";
 import { CoursesSelectMenu } from "./CoursesSelectMenu";
-import { getCourseFromCode } from "../utils/autofillData";
 import { Select, createOptions } from "@thisbeyond/solid-select";
 import "@thisbeyond/solid-select/style.css";
 import "../styles/courseSelectMenu.scss";
@@ -64,8 +63,24 @@ export const ListElement: Component<props> = (props) => {
                 }}
                 />
             </td>
-            <td><input type="string" value={questionPaperDetails.exam} onInput={(e) => setQuestionPaperDetails("exam", e.target.value)}/></td>
-            <td><input type="string" value={questionPaperDetails.semester} onInput={(e) => setQuestionPaperDetails("semester", e.target.value)}/></td>
+            <td><Select
+                class="select"
+                {...createOptions(["endsem", "midsem"])}
+                initialValue={questionPaperDetails.exam}
+                onChange={(value) => {
+                    setQuestionPaperDetails("exam", value)
+                }}
+                />
+            </td>
+            <td><Select
+                class="select"
+                {...createOptions(["autumn", "spring"])}
+                initialValue={questionPaperDetails.semester}
+                onChange={(value) => {
+                    setQuestionPaperDetails("semester", value)
+                }}
+                />
+            </td>
             <td><PDFIcon/><a href={props.questionPaper.filelink} target="_blank">{questionPaperDetails.course_code}.pdf</a></td>
             <td><button onClick={(e) => {e.preventDefault();paperApprove(questionPaperDetails.approval)}} onContextMenu={(e) => {e.preventDefault();paperReject(questionPaperDetails.approval)}}>{approvalStatus(questionPaperDetails.approval)} </button></td>
         </tr>

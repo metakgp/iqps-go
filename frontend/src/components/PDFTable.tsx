@@ -1,4 +1,4 @@
-import { Component, createSignal, For } from "solid-js";
+import { Component, For } from "solid-js";
 import { IAdminQuestionPaperResult } from "../types/types";
 import { ListElement } from "./PDFLister";
 import { createStore } from "solid-js/store";

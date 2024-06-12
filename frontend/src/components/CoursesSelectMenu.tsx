@@ -5,7 +5,6 @@ import "@thisbeyond/solid-select/style.css";
 import "../styles/courseSelectMenu.scss";
 import { IAdminQuestionPaperResult } from "../types/types";
 import { Store } from "solid-js/store";
-import { getCourseFromCode } from "../utils/autofillData";
 
 type props = {
     qp: Store<IAdminQuestionPaperResult>;
