@@ -4,6 +4,7 @@ import { createStore } from "solid-js/store";
 import { Exam, IAdminQuestionPaperResult, Semester, approvalStatus } from "../types/types";
 import { IoCheckmarkCircle } from "solid-icons/io";
 import { CoursesSelectMenu } from "./CoursesSelectMenu";
+import { getCourseFromCode } from "../utils/autofillData";
 
 type props = {
     questionPaper: IAdminQuestionPaperResult;
@@ -39,8 +40,18 @@ export const ListElement: Component<props> = (props) => {
 
     return (
         <tr>
-            <td><CoursesSelectMenu qp={props.questionPaper} update={setQuestionPaperDetails}/></td>
-            <td><input type="string" value={questionPaperDetails.course_name} onInput={(e) => setQuestionPaperDetails("course_name", e.target.value)} readonly={!props.isEditMode}/></td>
+            <td><CoursesSelectMenu 
+                qp={props.questionPaper} 
+                update={setQuestionPaperDetails}
+                info="course_code"
+                />
+            </td>
+            <td><CoursesSelectMenu 
+                qp={props.questionPaper}
+                update={setQuestionPaperDetails}
+                info="course_name"
+                />
+            </td>
             <td><input type="number" value={questionPaperDetails.year} onInput={(e) => setQuestionPaperDetails("year", parseInt(e.target.value))} readonly={!props.isEditMode}/></td>
             <td><input type="string" value={questionPaperDetails.exam} onInput={(e) => setQuestionPaperDetails("exam", e.target.value)} readonly={!props.isEditMode}/></td>
             <td><input type="string" value={questionPaperDetails.semester} onInput={(e) => setQuestionPaperDetails("semester", e.target.value)} readonly={!props.isEditMode}/></td>
