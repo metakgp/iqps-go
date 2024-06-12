@@ -44,6 +44,9 @@
     }
     
     td {
+        :nth-child(1){
+            text-align: left;
+        };
         text-align: center;
         border-color: grey;
         border-collapse: collapse;
