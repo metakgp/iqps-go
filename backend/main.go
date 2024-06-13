@@ -14,10 +14,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
-	"github.com/rs/cors"
-
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 )
 
 type QuestionPaper struct {
@@ -308,6 +308,97 @@ func populateDB(filename string) error {
 	return nil
 }
 
+func GhAuth(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	type BodyReg struct {
+		GhCode string `json:"code"`
+	}
+
+	type GithubAccessTokenResponse struct {
+		AccessToken string `json:"access_token"`
+		Scope       string `json:"scope"`
+		TokenType   string `json:"token_type"`
+	}
+
+	type GithubUserResponse struct {
+		Name      string `json:"name"`
+		Login     string `json:"login"`
+		ID        int    `json:"id"`
+		AvatarURL string `json:"avatar_url"`
+	}
+
+	bodyReg := BodyReg{}
+	if err := json.NewDecoder(r.Body).Decode(&bodyReg); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if bodyReg.GhCode == "" {
+		http.Error(w, "Code cannot be empty", http.StatusBadRequest)
+		return
+	}
+	gh_pubKey := os.Getenv("GH_CLIENT_ID")
+	gh_pvtKey := os.Getenv("GH_PRIVATE_ID")
+	jwt_key := os.Getenv("TOKEN")
+	uri := fmt.Sprintf("https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&code=%s", gh_pubKey, gh_pvtKey, bodyReg.GhCode)
+
+	req, _ := http.NewRequest("POST", uri, nil)
+	req.Header.Set("Accept", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+	var tokenResponse GithubAccessTokenResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tokenResponse); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	req, _ = http.NewRequest("GET", "https://api.github.com/user", nil)
+	req.Header.Set("Authorization", "Bearer "+tokenResponse.AccessToken)
+
+	resp, err = client.Do(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	var userResponse GithubUserResponse
+	if err := json.NewDecoder(resp.Body).Decode(&userResponse); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	uname := userResponse.Login
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"name": uname,
+	})
+
+	tokenString, err := token.SignedString([]byte(jwt_key))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Header.Add(w.Header(), "content-type", "application/json")
+
+	err = json.NewEncoder(w).Encode(&tokenString)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func CheckError(err error) {
 	if err != nil {
 		panic(err)
@@ -351,6 +442,7 @@ func main() {
 	http.HandleFunc("/year", year)
 	http.HandleFunc("/library", library)
 	http.HandleFunc("/upload", upload)
+	http.HandleFunc("/ghreg", GhAuth)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"https://qp.metakgp.org", "http://localhost:3000"},
