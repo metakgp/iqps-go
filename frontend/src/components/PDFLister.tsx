@@ -5,6 +5,7 @@ import { createStore } from "solid-js/store";
 import { IAdminQuestionPaperResult, approvalStatus } from "../types/types";
 import { IoCheckmarkCircle } from "solid-icons/io";
 import { Select, createOptions } from "@thisbeyond/solid-select";
+import { fileNamer } from "../utils/fileNamer";
 
 type props = {
     questionPaper: IAdminQuestionPaperResult;
@@ -63,7 +64,7 @@ export const ListElement: Component<props> = (props) => {
                 {...createOptions([...Array.from({length: new Date().getFullYear() - 1950}, (e, i) => (new Date().getFullYear() - i).toString())])}
                 initialValue={questionPaperDetails.year}
                 onChange={(value) => {
-                    setQuestionPaperDetails(value);
+                    setQuestionPaperDetails("year", value);
                 }}
                 />
             </td>
@@ -85,7 +86,7 @@ export const ListElement: Component<props> = (props) => {
                 }}
                 />
             </td>
-            <td><PDFIcon/><a href={props.questionPaper.filelink} target="_blank">{questionPaperDetails.course_code}.pdf</a></td>
+            <td><PDFIcon/><a href={props.questionPaper.filelink} target="_blank">{fileNamer(questionPaperDetails)}</a></td>
             <td><button onClick={(e) => {e.preventDefault();paperApprove(questionPaperDetails.approval)}} onContextMenu={(e) => {e.preventDefault();paperReject(questionPaperDetails.approval)}}>{approvalStatus(questionPaperDetails.approval)} </button></td>
         </tr>
     )
