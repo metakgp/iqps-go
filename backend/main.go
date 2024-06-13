@@ -342,6 +342,8 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	gh_pubKey := os.Getenv("GH_CLIENT_ID")
 	gh_pvtKey := os.Getenv("GH_PRIVATE_ID")
 	jwt_key := os.Getenv("TOKEN")
+
+	// Get the access token for authenticating other endpoints
 	uri := fmt.Sprintf("https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&code=%s", gh_pubKey, gh_pvtKey, bodyReg.GhCode)
 
 	req, _ := http.NewRequest("POST", uri, nil)
@@ -354,12 +356,15 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer resp.Body.Close()
+
+	// Decode the response
 	var tokenResponse GithubAccessTokenResponse
 	if err := json.NewDecoder(resp.Body).Decode(&tokenResponse); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// Get the username of the user who made the request
 	req, _ = http.NewRequest("GET", "https://api.github.com/user", nil)
 	req.Header.Set("Authorization", "Bearer "+tokenResponse.AccessToken)
 
@@ -370,6 +375,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 
+	// Decode the response
 	var userResponse GithubUserResponse
 	if err := json.NewDecoder(resp.Body).Decode(&userResponse); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -377,15 +383,17 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uname := userResponse.Login
-
+	// check if uname is empty
 	if uname == "" {
 		http.Error(w, "No user found", http.StatusUnauthorized)
 		return
 	}
 
+	// Get check parameters
 	org_name := os.Getenv("ORG_NAME")
 	org_team := os.Getenv("ORG_TEAM_SLUG")
 
+	// Send request to check status of the user in the given org's team
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/memberships/%s", org_name, org_team, uname)
 	req, _ = http.NewRequest("GET", url, nil)
 	req.Header.Set("Authorization", "Bearer "+tokenResponse.AccessToken)
@@ -401,17 +409,19 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer resp.Body.Close()
-
+	//decode the response
 	if err := json.NewDecoder(resp.Body).Decode(&checkResp); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// Check if user is present in the team
 	if checkResp.State != "active" {
 		http.Error(w, "User is not authenticated", http.StatusUnauthorized)
 		return
 	}
 
+	// Create the response JWT
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"name": uname,
 	})
@@ -424,6 +434,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 
 	http.Header.Add(w.Header(), "content-type", "application/json")
 
+	// Send the response
 	err = json.NewEncoder(w).Encode(&tokenString)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
