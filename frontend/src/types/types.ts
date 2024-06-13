@@ -38,7 +38,7 @@ export type UploadResults = IUploadResult[];
 
 export interface IAdminQuestionPaperResult extends IQuestionPaper {
     id: number;
-    filelink: string;
+    file_link: string;
     approval: approvalStatus;
     reviewedBy: string | null;
 }

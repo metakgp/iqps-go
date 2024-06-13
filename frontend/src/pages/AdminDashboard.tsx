@@ -1,9 +1,11 @@
-import { Component } from "solid-js";
+import { Component, createSignal } from "solid-js";
 import { PDFLister } from "../components/PDFTable";
 import { arr } from "../data/dummyQPs";
+import { createStore } from "solid-js/store";
+import { IAdminQuestionPaperResult } from "../types/types";
 
 export const AdminPage: Component = () => {
-  console.log(arr);
+  
   return (
     <div class="admin-page">
       <div class="title">
