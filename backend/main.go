@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -308,6 +309,15 @@ func populateDB(filename string) error {
 	return nil
 }
 
+func ConvertTeamNameToSlug(teamName string) string {
+	slug := strings.ToLower(teamName)
+	slug = strings.ReplaceAll(slug, " ", "-")
+	re := regexp.MustCompile(`[^a-z0-9-]`)
+	slug = re.ReplaceAllString(slug, "")
+
+	return slug
+}
+
 func GhAuth(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -325,10 +335,8 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type GithubUserResponse struct {
-		Name      string `json:"name"`
-		Login     string `json:"login"`
-		ID        int    `json:"id"`
-		AvatarURL string `json:"avatar_url"`
+		Login string `json:"login"`
+		ID    int    `json:"id"`
 	}
 
 	bodyReg := BodyReg{}
@@ -379,6 +387,40 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uname := userResponse.Login
+
+	if uname == "" {
+		http.Error(w, "No user found", http.StatusUnauthorized)
+		return
+	}
+
+	org_name := os.Getenv("ORG_NAME")
+	org_team := ConvertTeamNameToSlug(os.Getenv("ORG_TEAM"))
+
+	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/memberships/%s", org_name, org_team, uname)
+	req, _ = http.NewRequest("GET", url, nil)
+	req.Header.Set("Authorization", "Bearer "+tokenResponse.AccessToken)
+	resp, err = client.Do(req)
+
+	var checkResp struct {
+		State string `json:"state"`
+	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	defer resp.Body.Close()
+
+	if err := json.NewDecoder(resp.Body).Decode(&checkResp); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if checkResp.State != "active" {
+		http.Error(w, "User is not authenticated", http.StatusUnauthorized)
+		return
+	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"name": uname,
