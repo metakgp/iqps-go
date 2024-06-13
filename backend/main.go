@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -309,15 +308,6 @@ func populateDB(filename string) error {
 	return nil
 }
 
-func ConvertTeamNameToSlug(teamName string) string {
-	slug := strings.ToLower(teamName)
-	slug = strings.ReplaceAll(slug, " ", "-")
-	re := regexp.MustCompile(`[^a-z0-9-]`)
-	slug = re.ReplaceAllString(slug, "")
-
-	return slug
-}
-
 func GhAuth(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -394,7 +384,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	org_name := os.Getenv("ORG_NAME")
-	org_team := ConvertTeamNameToSlug(os.Getenv("ORG_TEAM"))
+	org_team := os.Getenv("ORG_TEAM_SLUG")
 
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/memberships/%s", org_name, org_team, uname)
 	req, _ = http.NewRequest("GET", url, nil)
