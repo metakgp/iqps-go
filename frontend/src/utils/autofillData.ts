@@ -30,6 +30,10 @@ export function getCourseFromCode<K extends keyof typeof COURSE_CODE_MAP>(code: 
     }
 };
 
+export function getCodefromCourse<K extends keyof typeof COURSE_CODE_MAP>(course: string): typeof COURSE_CODE_MAP[K] | null {
+    return Object.keys(COURSE_CODE_MAP).find((key) => COURSE_CODE_MAP[key] === course);
+};
+
 export const autofillData = (
     filename: string
 ): IQuestionPaper => {
