@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -19,6 +20,10 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
 )
+
+type contextKey string
+
+const claimsKey = contextKey("claims")
 
 type QuestionPaper struct {
 	ID              int    `json:"id"`
@@ -440,6 +445,49 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func JWTMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// get the authorisation header
+		tokenString := r.Header.Get("Authorization")
+		if tokenString == "" {
+			w.WriteHeader(http.StatusUnauthorized)
+			fmt.Fprint(w, "Missing authorization header")
+			return
+		}
+		JWTtoken := strings.Split(tokenString, " ")
+
+		if len(JWTtoken) != 2 {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "Authorisation head is of inccorect type")
+			return
+		}
+		//parse the token
+		token, err := jwt.Parse(JWTtoken[1], func(t *jwt.Token) (interface{}, error) {
+			if _, OK := t.Method.(*jwt.SigningMethodHMAC); !OK {
+				return nil, errors.New("bad signed method received")
+			}
+
+			return []byte("JWT_KEY"), nil
+		})
+
+		// Check if error in parsing jwt token
+		if err != nil {
+			http.Error(w, "Bad JWT token", http.StatusUnauthorized)
+			return
+		}
+		// Get the claims
+		claims, ok := token.Claims.(jwt.MapClaims)
+
+		if ok && token.Valid {
+			// If valid claims found, send response
+			ctx := context.WithValue(r.Context(), claimsKey, claims)
+			handler.ServeHTTP(w, r.WithContext(ctx))
+		} else {
+			fmt.Printf("Invalid JWT Token")
+		}
+	})
 }
 
 func CheckError(err error) {
