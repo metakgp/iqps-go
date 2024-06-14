@@ -469,7 +469,7 @@ func JWTMiddleware(handler http.Handler) http.Handler {
 				return nil, errors.New("bad signed method received")
 			}
 
-			return []byte("JWT_KEY"), nil
+			return []byte(os.Getenv("TOKEN")), nil
 		})
 
 		// Check if error in parsing jwt token
