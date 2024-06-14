@@ -480,7 +480,7 @@ func JWTMiddleware(handler http.Handler) http.Handler {
 		// Get the claims
 		claims, ok := token.Claims.(jwt.MapClaims)
 
-		if ok && token.Valid {
+		if ok && token.Valid && claims["username"] != nil {
 			// If valid claims found, send response
 			ctx := context.WithValue(r.Context(), claimsKey, claims)
 			handler.ServeHTTP(w, r.WithContext(ctx))
