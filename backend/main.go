@@ -428,7 +428,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 
 	// Create the response JWT
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"name": uname,
+		"username": uname,
 	})
 
 	tokenString, err := token.SignedString([]byte(jwt_key))
@@ -501,7 +501,7 @@ func protectedRoute(w http.ResponseWriter, r *http.Request) {
 	claims := getClaims(r)
 
 	if claims != nil {
-		fmt.Fprintf(w, "Hello, %s", claims["name"])
+		fmt.Fprintf(w, "Hello, %s", claims["username"])
 	} else {
 		http.Error(w, "No claims found", http.StatusUnauthorized)
 	}
@@ -550,7 +550,7 @@ func main() {
 	http.HandleFunc("/year", year)
 	http.HandleFunc("/library", library)
 	http.HandleFunc("/upload", upload)
-	http.HandleFunc("/ghreg", GhAuth)
+	http.HandleFunc("/oauth", GhAuth)
 	http.Handle("/protected", JWTMiddleware(http.HandlerFunc(protectedRoute)))
 
 	c := cors.New(cors.Options{
