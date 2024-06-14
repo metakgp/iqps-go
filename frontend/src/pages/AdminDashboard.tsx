@@ -1,5 +1,5 @@
 import { Component, createSignal } from "solid-js";
-import { PDFLister } from "../components/PDFTable";
+import { PDFLister } from "../components/PDFTableHead";
 import { arr } from "../data/dummyQPs";
 import { createStore } from "solid-js/store";
 import { IAdminQuestionPaperResult } from "../types/types";

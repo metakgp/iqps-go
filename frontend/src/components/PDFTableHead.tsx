@@ -1,6 +1,6 @@
 import { Component, For, createSignal } from "solid-js";
 import { IAdminQuestionPaperResult } from "../types/types";
-import { ListElement } from "./PDFLister";
+import { ListElement } from "./PDFTableBody";
 import { createStore } from "solid-js/store";
 
 type props =  {
