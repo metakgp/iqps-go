@@ -4,6 +4,11 @@
         border-width: 1px;
         border-color: #ff4136;
     }
+    .solid-select-input:disabled{
+        color: green;
+        border-color: green;
+        border-width: 1px;
+    }
     .solid-select-container {
         color: #fa7f25;
     }
@@ -71,6 +76,24 @@
         color: black;
         font-weight: bolder;
     } 
+}
+
+.qp-table-tr-pending {
+    background-color: #8b8000;
+}
+.qp-table-tr-approve {
+    background-color: darkgreen;
+}
+.qp-table-tr-reject {
+    background-color: darkred;
+}
+
+.approve-button {
+    color: green;
+}
+
+.reject-button {
+    color: red
 }
 
 
