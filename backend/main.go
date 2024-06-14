@@ -490,6 +490,23 @@ func JWTMiddleware(handler http.Handler) http.Handler {
 	})
 }
 
+func getClaims(r *http.Request) jwt.MapClaims {
+	if claims, ok := r.Context().Value(claimsKey).(jwt.MapClaims); ok {
+		return claims
+	}
+	return nil
+}
+
+func protectedRoute(w http.ResponseWriter, r *http.Request) {
+	claims := getClaims(r)
+
+	if claims != nil {
+		fmt.Fprintf(w, "Hello, %s", claims["name"])
+	} else {
+		http.Error(w, "No claims found", http.StatusUnauthorized)
+	}
+}
+
 func CheckError(err error) {
 	if err != nil {
 		panic(err)
@@ -534,6 +551,7 @@ func main() {
 	http.HandleFunc("/library", library)
 	http.HandleFunc("/upload", upload)
 	http.HandleFunc("/ghreg", GhAuth)
+	http.Handle("/protected", JWTMiddleware(http.HandlerFunc(protectedRoute)))
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"https://qp.metakgp.org", "http://localhost:3000"},
