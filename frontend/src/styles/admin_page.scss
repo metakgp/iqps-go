@@ -1,4 +1,9 @@
 .select {
+    .solid-select-input:focus{
+        color: #ff4136;
+        border-width: 1px;
+        border-color: #ff4136;
+    }
     .solid-select-container {
         color: #fa7f25;
     }
@@ -7,7 +12,7 @@
         border-color: #fca560;
     }
     .solid-select-placeholder {
-        background-color: red;
+        background-color: #ff4136;
         color: white;
         border: white;
         padding: 2px;
