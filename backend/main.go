@@ -334,6 +334,10 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 		ID    int    `json:"id"`
 	}
 
+	var respData struct {
+		Token string `json:"tokenString"`
+	}
+
 	bodyReg := BodyReg{}
 	if err := json.NewDecoder(r.Body).Decode(&bodyReg); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -422,6 +426,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 
 	// Check if user is present in the team
 	if checkResp.State != "active" {
+
 		http.Error(w, "User is not authenticated", http.StatusUnauthorized)
 		return
 	}
@@ -440,7 +445,9 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	http.Header.Add(w.Header(), "content-type", "application/json")
 
 	// Send the response
-	err = json.NewEncoder(w).Encode(&tokenString)
+
+	respData.Token = tokenString
+	err = json.NewEncoder(w).Encode(&respData)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
