@@ -51,7 +51,7 @@ var (
 	uploadedQpsPath            string
 	gh_pubKey                  string
 	gh_pvtKey                  string
-	jwt_key                    string
+	jwt_secret                 string
 	org_name                   string
 	org_team                   string
 )
@@ -436,7 +436,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 		"username": uname,
 	})
 
-	tokenString, err := token.SignedString([]byte(jwt_key))
+	tokenString, err := token.SignedString([]byte(jwt_secret))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -476,7 +476,7 @@ func JWTMiddleware(handler http.Handler) http.Handler {
 				return nil, errors.New("bad signed method received")
 			}
 
-			return []byte(jwt_key), nil
+			return []byte(jwt_secret), nil
 		})
 
 		// Check if error in parsing jwt token
@@ -535,7 +535,7 @@ func main() {
 	org_name = os.Getenv("GH_ORG_NAME")
 	org_team = os.Getenv("GH_ORG_TEAM_SLUG")
 
-	jwt_key = os.Getenv("JWT_TOKEN")
+	jwt_secret = os.Getenv("JWT_SECRET")
 
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
