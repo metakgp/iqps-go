@@ -56,7 +56,7 @@ var (
 	org_team                   string
 )
 
-type BodyReg struct {
+type RequestBody struct {
 	GhCode string `json:"code"`
 }
 
@@ -343,19 +343,19 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bodyReg := BodyReg{}
-	if err := json.NewDecoder(r.Body).Decode(&bodyReg); err != nil {
+	requestBody := RequestBody{}
+	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if bodyReg.GhCode == "" {
-		http.Error(w, "Code cannot be empty", http.StatusBadRequest)
+	if requestBody.GhCode == "" {
+		http.Error(w, "Github OAuth Code cannot be empty", http.StatusBadRequest)
 		return
 	}
 
 	// Get the access token for authenticating other endpoints
-	uri := fmt.Sprintf("https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&code=%s", gh_pubKey, gh_pvtKey, bodyReg.GhCode)
+	uri := fmt.Sprintf("https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&code=%s", gh_pubKey, gh_pvtKey, requestBody.GhCode)
 
 	req, _ := http.NewRequest("POST", uri, nil)
 	req.Header.Set("Accept", "application/json")
