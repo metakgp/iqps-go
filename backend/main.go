@@ -535,7 +535,7 @@ func main() {
 	org_name = os.Getenv("GH_ORG_NAME")
 	org_team = os.Getenv("GH_ORG_TEAM_SLUG")
 
-	jwt_key = os.Getenv("TOKEN")
+	jwt_key = os.Getenv("JWT_TOKEN")
 
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
