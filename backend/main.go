@@ -400,8 +400,6 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get check parameters
-
 	// Send request to check status of the user in the given org's team
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/memberships/%s", org_name, org_team, uname)
 	req, _ = http.NewRequest("GET", url, nil)
