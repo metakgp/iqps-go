@@ -535,6 +535,22 @@ func main() {
 
 	jwt_secret = os.Getenv("JWT_SECRET")
 
+	if gh_pubKey == "" {
+		panic("Client id for Github OAuth cannot be empty")
+	}
+	if gh_pvtKey == "" {
+		panic("Client Private Key for Github OAuth cannot be empty")
+	}
+	if org_name == "" {
+		panic("Organisation name cannot be empty")
+	}
+	if org_team == "" {
+		panic("Team name of the Organistion cannot be empty")
+	}
+	if jwt_secret == "" {
+		panic("JWT Secret Key cannot be empty")
+	}
+
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
 	dbname := os.Getenv("DB_NAME")
