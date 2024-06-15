@@ -335,7 +335,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var respData struct {
-		Token string `json:"tokenString"`
+		Token string `json:"token"`
 	}
 
 	bodyReg := BodyReg{}
