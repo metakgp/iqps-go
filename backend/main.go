@@ -49,7 +49,31 @@ var (
 	staticFilesUrl             string
 	staticFilesStorageLocation string
 	uploadedQpsPath            string
+	gh_pubKey                  string
+	gh_pvtKey                  string
+	jwt_key                    string
+	org_name                   string
+	org_team                   string
 )
+
+type BodyReg struct {
+	GhCode string `json:"code"`
+}
+
+type GithubAccessTokenResponse struct {
+	AccessToken string `json:"access_token"`
+	Scope       string `json:"scope"`
+	TokenType   string `json:"token_type"`
+}
+
+type GithubUserResponse struct {
+	Login string `json:"login"`
+	ID    int    `json:"id"`
+}
+
+var respData struct {
+	Token string `json:"token"`
+}
 
 const init_db = `CREATE TABLE IF NOT EXISTS qp (
     id SERIAL PRIMARY KEY,
@@ -319,25 +343,6 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type BodyReg struct {
-		GhCode string `json:"code"`
-	}
-
-	type GithubAccessTokenResponse struct {
-		AccessToken string `json:"access_token"`
-		Scope       string `json:"scope"`
-		TokenType   string `json:"token_type"`
-	}
-
-	type GithubUserResponse struct {
-		Login string `json:"login"`
-		ID    int    `json:"id"`
-	}
-
-	var respData struct {
-		Token string `json:"token"`
-	}
-
 	bodyReg := BodyReg{}
 	if err := json.NewDecoder(r.Body).Decode(&bodyReg); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -348,9 +353,6 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Code cannot be empty", http.StatusBadRequest)
 		return
 	}
-	gh_pubKey := os.Getenv("GH_CLIENT_ID")
-	gh_pvtKey := os.Getenv("GH_PRIVATE_ID")
-	jwt_key := os.Getenv("TOKEN")
 
 	// Get the access token for authenticating other endpoints
 	uri := fmt.Sprintf("https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&code=%s", gh_pubKey, gh_pvtKey, bodyReg.GhCode)
@@ -399,8 +401,6 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get check parameters
-	org_name := os.Getenv("ORG_NAME")
-	org_team := os.Getenv("ORG_TEAM_SLUG")
 
 	// Send request to check status of the user in the given org's team
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/memberships/%s", org_name, org_team, uname)
@@ -467,7 +467,7 @@ func JWTMiddleware(handler http.Handler) http.Handler {
 
 		if len(JWTtoken) != 2 {
 			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, "Authorisation head is of inccorect type")
+			fmt.Fprint(w, "Authorisation head is of incorrect type")
 			return
 		}
 		//parse the token
@@ -492,7 +492,7 @@ func JWTMiddleware(handler http.Handler) http.Handler {
 			ctx := context.WithValue(r.Context(), claimsKey, claims)
 			handler.ServeHTTP(w, r.WithContext(ctx))
 		} else {
-			fmt.Printf("Invalid JWT Token")
+			http.Error(w, "Invalid JWT token", http.StatusUnauthorized)
 		}
 	})
 }
@@ -504,15 +504,15 @@ func getClaims(r *http.Request) jwt.MapClaims {
 	return nil
 }
 
-// func protectedRoute(w http.ResponseWriter, r *http.Request) {
-// 	claims := getClaims(r)
+func protectedRoute(w http.ResponseWriter, r *http.Request) {
+	claims := getClaims(r)
 
-// 	if claims != nil {
-// 		fmt.Fprintf(w, "Hello, %s", claims["username"])
-// 	} else {
-// 		http.Error(w, "No claims found", http.StatusUnauthorized)
-// 	}
-// }
+	if claims != nil {
+		fmt.Fprintf(w, "Hello, %s", claims["username"])
+	} else {
+		http.Error(w, "No claims found", http.StatusUnauthorized)
+	}
+}
 
 func CheckError(err error) {
 	if err != nil {
@@ -529,6 +529,13 @@ func main() {
 	host := os.Getenv("DB_HOST")
 	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	CheckError(err)
+
+	gh_pubKey = os.Getenv("GH_CLIENT_ID")
+	gh_pvtKey = os.Getenv("GH_PRIVATE_ID")
+	org_name = os.Getenv("GH_ORG_NAME")
+	org_team = os.Getenv("GH_ORG_TEAM_SLUG")
+
+	jwt_key = os.Getenv("TOKEN")
 
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
@@ -558,7 +565,7 @@ func main() {
 	http.HandleFunc("/library", library)
 	http.HandleFunc("/upload", upload)
 	http.HandleFunc("/oauth", GhAuth)
-	// http.Handle("/protected", JWTMiddleware(http.HandlerFunc(protectedRoute)))
+	http.Handle("/protected", JWTMiddleware(http.HandlerFunc(protectedRoute)))
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"https://qp.metakgp.org", "http://localhost:3000"},
