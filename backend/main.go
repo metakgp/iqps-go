@@ -476,7 +476,7 @@ func JWTMiddleware(handler http.Handler) http.Handler {
 				return nil, errors.New("bad signed method received")
 			}
 
-			return []byte(os.Getenv("TOKEN")), nil
+			return []byte(jwt_key), nil
 		})
 
 		// Check if error in parsing jwt token
