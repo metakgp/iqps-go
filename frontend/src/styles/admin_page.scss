@@ -96,4 +96,31 @@
     color: red
 }
 
+.title {
+    background-color: #0d0d0d;
+    overflow: hidden;
+    A {
+        float: left;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 17px;
+    }
+    A:hover {
+        background-color: #ddd;
+        color: black;
+    }
+    A.admin {
+        background-color: #04Aa6d;
+        color: white;
+    }
+    span.user {
+        float: right;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 17px;
+    }
+}
 
