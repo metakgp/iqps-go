@@ -1,35 +1,25 @@
+$approved-button: #0cce6b;
+$ut-orange: #ff851b;
+$oxford-blue: #001f3f;
+$rejected-button: #c41e3cf8;
+
+.admin-page {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 5rem;
+}
+
 .select {
-    .solid-select-input:focus{
-        color: #ff4136;
-        border-width: 1px;
-        border-color: #ff4136;
-    }
-    .solid-select-input:disabled{
-        color: green;
-        border-color: green;
-        border-width: 1px;
-    }
-    .solid-select-container {
-        color: #fa7f25;
-    }
-    .solid-select-control {
-        outline-color: #fca560;
-        border-color: #fca560;
-    }
-    .solid-select-placeholder {
-        background-color: #ff4136;
-        color: white;
-        border: white;
-        padding: 2px;
-        border-radius: 5px;
-    }
+    .solid-select-control[data-disabled="true"] {
+        background-color: #dddddd2f;
+      }
     .solid-select-option:hover {
-        background-color: #ff851b;
-        color: #001f3f;
+        background-color: $ut-orange;
+        color: $oxford-blue;
     }
     .solid-select-option[data-focused=true] {
-        background-color: #001f3f;
-        color: #ff851b;
+        background-color: $oxford-blue;
+        color: $ut-orange;
     }
     .solid-select-list {
         background-color: black;
@@ -44,13 +34,13 @@
     margin-right: auto;
 
     caption {
-        padding-bottom: 7px;
+        padding-bottom: 10px;
         font-weight: light;
     }
 
     thead {
-        background-color: #ff851b;
-        color: #001f3f;
+        background-color: $ut-orange;
+        color: $oxford-blue;
     }
     
     td {
@@ -58,50 +48,26 @@
             text-align: left;
         };
         text-align: center;
-        border-color: grey;
+        border-color: #c8c8c8;
         border-collapse: collapse;
         border-bottom: 1px solid;
-    }
-
-    tbody tr:hover {
-        background-color: #001f3f;
-        padding: 1px;
-        color: #ff851b;
-        font-weight: bolder;
     } 
-
-    tbody tr:focus {
-        background-color: white;
-        padding: 1px;
-        color: black;
-        font-weight: bolder;
-    } 
-}
-
-.qp-table-tr-pending {
-    background-color: #8b8000;
-}
-.qp-table-tr-approve {
-    background-color: darkgreen;
-}
-.qp-table-tr-reject {
-    background-color: darkred;
 }
 
 .approve-button {
-    color: green;
+    color: $approved-button;
 }
 
 .reject-button {
-    color: red
+    color: $rejected-button;
 }
 
 .title {
-    background-color: #0d0d0d;
+    background-color: $oxford-blue;
     overflow: hidden;
     A {
         float: left;
-        color: #f2f2f2;
+        color: $ut-orange;
         text-align: center;
         padding: 14px 16px;
         text-decoration: none;
@@ -112,8 +78,8 @@
         color: black;
     }
     A.admin {
-        background-color: #04Aa6d;
-        color: white;
+        background-color: $ut-orange;
+        color: $oxford-blue;
     }
     span.user {
         float: right;

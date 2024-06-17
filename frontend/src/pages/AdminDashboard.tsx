@@ -10,7 +10,7 @@ export const AdminPage: Component = () => {
     <div class="admin-page">
       <div class="title">
         <header>
-          <A href="/admin" class="admin">Admin Page</A>
+          <A href="/admin" class="admin">IQPS   Admin Page</A>
           <A href="/" class="search" target="_blank">Search</A>
           <A href="/upload" class="upload" target="_blank">Upload</A>
           <span class="user">Welcome {user}</span>
