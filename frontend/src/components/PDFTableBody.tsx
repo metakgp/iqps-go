@@ -15,30 +15,29 @@ type props = {
 export const ListElement: Component<props> = (props) => {
     const [questionPaperDetails, setQuestionPaperDetails] = createStore<IAdminQuestionPaperResult>(props.questionPaper);
 
-    function paperApprove(approvalStatus: approvalStatus){
-        if (approvalStatus === null) {
+    function paperApprove(approvalStatus: boolean){
+        if (approvalStatus === false) {
             confirm("Are you sure you want to APPROVE this paper?");
             setQuestionPaperDetails("approval", true);
         }
-        else {
-            setQuestionPaperDetails("approval", null)
-        }
     };
 
-    function paperReject(approvalStatus: approvalStatus){
-        if (approvalStatus === null) {
-            confirm("Are you sure you want to REJECT this paper?")
-            setQuestionPaperDetails("approval", false)
-        }
-        else {
-            setQuestionPaperDetails("approval", null)
+    function whichButton (approvalStatus: boolean) {
+        if (approvalStatus) {
+            return (
+                <IoCheckmarkCircle/>
+            )
+        } else {
+            return (
+                <AiFillCloseCircle/>
+            )
         }
     }
 
     return (
         <tr classList={{["qp-table-tr-pending"]: questionPaperDetails.approval === null ? true : false, ["qp-table-tr-approve"]: questionPaperDetails.approval === true, ["qp-table-tr-reject"]: questionPaperDetails.approval === false}}>
             <td><Select
-                disabled={questionPaperDetails.approval === null ? false : true}
+                disabled={questionPaperDetails.approval}
                 class="select"  
                 {...createOptions(Object.keys(COURSE_CODE_MAP))} 
                 initialValue={questionPaperDetails.course_code}
@@ -49,7 +48,7 @@ export const ListElement: Component<props> = (props) => {
                 />
             </td>
             <td><Select
-                disabled={questionPaperDetails.approval === null ? false : true}
+                disabled={questionPaperDetails.approval}
                 class="select"  
                 {...createOptions(Object.values(COURSE_CODE_MAP))} 
                 initialValue={questionPaperDetails.course_name}
@@ -60,7 +59,7 @@ export const ListElement: Component<props> = (props) => {
                 />
             </td>
             <td><Select
-                disabled={questionPaperDetails.approval === null ? false : true}
+                disabled={questionPaperDetails.approval}
                 class="select" 
                 // returns every year since 1951 till today as options for year dropdown
                 {...createOptions([...Array.from({length: new Date().getFullYear() - 1950}, (e, i) => (new Date().getFullYear() - i).toString())])}
@@ -71,7 +70,7 @@ export const ListElement: Component<props> = (props) => {
                 />
             </td>
             <td><Select
-                disabled={questionPaperDetails.approval === null ? false : true}
+                disabled={questionPaperDetails.approval}
                 class="select"
                 {...createOptions(["endsem", "midsem"])}
                 initialValue={questionPaperDetails.exam}
@@ -81,7 +80,7 @@ export const ListElement: Component<props> = (props) => {
                 />
             </td>
             <td><Select
-                disabled={questionPaperDetails.approval === null ? false : true}
+                disabled={questionPaperDetails.approval}
                 class="select"
                 {...createOptions(["autumn", "spring"])}
                 initialValue={questionPaperDetails.semester}
@@ -93,19 +92,12 @@ export const ListElement: Component<props> = (props) => {
             <td><PDFIcon/><a href={props.questionPaper.file_link} target="_blank">{fileNamer(questionPaperDetails)}</a></td>
             <td>
                 <button 
-                    disabled={questionPaperDetails.approval === null ? false : true}
-                    class="approve-button"
+                disabled={questionPaperDetails.approval}
+                classList={{["approve-button"]: questionPaperDetails.approval, ["reject-button"]: !questionPaperDetails.approval}}                    
                     onClick={() => {
                         paperApprove(questionPaperDetails.approval);
                     }}
-                ><IoCheckmarkCircle/></button>
-                <button 
-                    disabled={questionPaperDetails.approval === null ? false : true}
-                    class="reject-button"
-                    onClick={() => {
-                        paperReject(questionPaperDetails.approval);
-                    }}
-                ><AiFillCloseCircle/></button>
+                >{whichButton(questionPaperDetails.approval)}</button>
             </td>
         </tr>
     )

@@ -1,6 +1,5 @@
 export type Exam = "midsem" | "endsem";
 export type Semester = "spring" | "autumn";
-export type approvalStatus = boolean | null;
 
 export interface IQuestionPaper {
     course_code: string;
@@ -39,7 +38,7 @@ export type UploadResults = IUploadResult[];
 export interface IAdminQuestionPaperResult extends IQuestionPaper {
     id: number;
     file_link: string;
-    approval: approvalStatus;
+    approval: boolean;
     reviewedBy: string | null;
 }
 
