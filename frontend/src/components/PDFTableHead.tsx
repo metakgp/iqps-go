@@ -42,9 +42,9 @@ export const PDFLister: Component<props> = (props) => {
         setOrder(sortOrder);
         handleSorting(accessor, sortOrder);
     }
-    
+
     return (
-        <div>
+        <div class="pdf-lister">
             <table class="qp-table">
             <caption><em>Approval status of all submited question papers</em></caption>
                 <thead>

@@ -27,6 +27,9 @@ $rejected-button: #c41e3cf8;
     }
 
     .qp-table {
+        background-color: rgba($surface-1, 0.2);
+        border-radius: 10px;
+
         table-layout: auto;
         border-collapse: collapse;
         margin-left: auto;
@@ -37,18 +40,36 @@ $rejected-button: #c41e3cf8;
             font-weight: light;
         }
 
-        thead {
-            background-color: $surface-1;
+        th {
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba($fg-color, 0.2);
+
+            &:nth-child(1) {
+                border-radius: 5px 0 0 5px;
+            }
+
+            &:nth-last-child(1) {
+                border-radius: 0 5px 5px 0;
+            }
         }
 
         td {
-            :nth-child(1){
+            :nth-child(1) {
                 text-align: left;
-            };
+            }
+
             text-align: center;
-            border-color: #c8c8c8;
-            border-collapse: collapse;
-            border-bottom: 1px solid;
+            padding: 0.5rem;
+        }
+
+        tr {
+            border: 1px solid transparent;
+            border-radius: 8px;
+
+            &:nth-of-type(odd) {
+                background-color: rgba($fg-color, 0.05);
+            }
         }
     }
 
