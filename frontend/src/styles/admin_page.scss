@@ -123,6 +123,11 @@
         display: flex;
         gap: 5px;
         align-items: center;
+
+        background-color: $accent-color;
+        color: $fg-color;
+        padding: 0.2rem 0.5rem;
+        border-radius: 5px;
     }
 
     .title {

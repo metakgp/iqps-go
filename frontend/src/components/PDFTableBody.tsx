@@ -90,7 +90,7 @@ export const ListElement: Component<props> = (props) => {
             </td>
             <td>
                 <a href={props.questionPaper.file_link} target="_blank" class="pdf-link">
-                    <PDFIcon size={23} />
+                    <PDFIcon size="1.4rem" />
                     {fileNamer(questionPaperDetails)}
                 </a>
             </td>
