@@ -1,5 +1,5 @@
-$approved-button: #0cce6b;
-$rejected-button: #c41e3cf8;
+$approved-button: hsl(149, 89%, 43%);
+$rejected-button: hsl(349, 75%, 53%);
 
 .admin-page {
     display: flex;
@@ -27,6 +27,15 @@ $rejected-button: #c41e3cf8;
             background-color: $surface-1;
         }
 
+        &[data-disabled="true"] {
+            border: none;
+            background-color: transparent;
+
+            .solid-select-control {
+                background-color: transparent !important;
+            }
+        }
+
         &:hover {
             cursor: pointer;
         }
@@ -47,7 +56,7 @@ $rejected-button: #c41e3cf8;
         }
 
         th {
-            padding: 0.8rem 1rem;
+            padding: 0.5rem;
             text-align: left;
             border-bottom: 1px solid rgba($fg-color, 0.2);
 
@@ -73,6 +82,17 @@ $rejected-button: #c41e3cf8;
             border: 1px solid transparent;
             border-radius: 8px;
         }
+    }
+
+    .approve-button, .reject-button {
+        background-color: inherit;
+        border: none;
+        padding: 0.2rem 0.2rem;
+        border-radius: 5px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .approve-button {

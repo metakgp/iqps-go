@@ -26,11 +26,11 @@ export const ListElement: Component<props> = (props) => {
     function whichButton (approvalStatus: boolean) {
         if (approvalStatus) {
             return (
-                <IoCheckmarkCircle/>
+                <><IoCheckmarkCircle size="2rem"/> Appvoed</>
             )
         } else {
             return (
-                <AiFillCloseCircle/>
+                <><AiFillCloseCircle  size="2rem"/> Not Approved</>
             )
         }
     }
@@ -98,8 +98,11 @@ export const ListElement: Component<props> = (props) => {
             </td>
             <td>
                 <button
-                disabled={questionPaperDetails.approval}
-                classList={{["approve-button"]: questionPaperDetails.approval, ["reject-button"]: !questionPaperDetails.approval}}
+                    disabled={questionPaperDetails.approval}
+                    classList={{
+                        ["approve-button"]: questionPaperDetails.approval,
+                        ["reject-button"]: !questionPaperDetails.approval
+                    }}
                     onClick={() => {
                         paperApprove(questionPaperDetails.approval);
                     }}
