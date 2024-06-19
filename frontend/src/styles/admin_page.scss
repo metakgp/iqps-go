@@ -30,8 +30,10 @@
         &[data-disabled="true"] {
             border: none;
             background-color: transparent;
+            padding: 0;
 
             .solid-select-control {
+                padding: 0;
                 background-color: transparent !important;
             }
         }
