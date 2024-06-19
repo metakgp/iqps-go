@@ -1,4 +1,5 @@
-import { AiFillCloseCircle, AiOutlineFilePdf as PDFIcon } from "solid-icons/ai";
+import { AiFillCloseCircle } from "solid-icons/ai";
+import { FaSolidFilePdf as PDFIcon } from "solid-icons/fa";
 import COURSE_CODE_MAP from "../data/courses.json";
 import { Component } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -90,10 +91,10 @@ export const ListElement: Component<props> = (props) => {
                 />
             </td>
             <td>
-                <div class="pdf-link">
-                    <PDFIcon size={30} />
-                    <a href={props.questionPaper.file_link} target="_blank">{fileNamer(questionPaperDetails)}</a>
-                </div>
+                <a href={props.questionPaper.file_link} target="_blank" class="pdf-link">
+                    <PDFIcon size={23} />
+                    {fileNamer(questionPaperDetails)}
+                </a>
             </td>
             <td>
                 <button
