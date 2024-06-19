@@ -16,11 +16,9 @@ type props = {
 export const ListElement: Component<props> = (props) => {
     const [questionPaperDetails, setQuestionPaperDetails] = createStore<IAdminQuestionPaperResult>(props.questionPaper);
 
-    function paperApprove(approvalStatus: boolean){
-        if (approvalStatus === false) {
-            let doApprove =confirm("Are you sure you want to APPROVE this paper?");
-            if (doApprove) setQuestionPaperDetails("approval", true);
-        }
+    function toggleApproval(approvalStatus: boolean) {
+        let confirmed = confirm(`Are you sure you want to ${approvalStatus ? 'DISAPPROVE' : 'APPROVE'} this paper?`);
+        if (confirmed) setQuestionPaperDetails("approval", !approvalStatus);
     };
 
     function whichButton (approvalStatus: boolean) {
@@ -98,13 +96,12 @@ export const ListElement: Component<props> = (props) => {
             </td>
             <td>
                 <button
-                    disabled={questionPaperDetails.approval}
                     classList={{
                         ["approve-button"]: questionPaperDetails.approval,
                         ["reject-button"]: !questionPaperDetails.approval
                     }}
                     onClick={() => {
-                        paperApprove(questionPaperDetails.approval);
+                        toggleApproval(questionPaperDetails.approval);
                     }}
                 >{whichButton(questionPaperDetails.approval)}</button>
             </td>
