@@ -9,6 +9,8 @@ $rejected-button: #c41e3cf8;
     .select {
         padding: 0.15rem 0.2rem;
         margin: 0;
+        border-width: 1px;
+        border-color: rgba($fg-color, 0.23);
 
         .solid-select-option {
             &:hover {
