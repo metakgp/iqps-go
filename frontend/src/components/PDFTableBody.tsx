@@ -26,11 +26,11 @@ export const ListElement: Component<props> = (props) => {
     function whichButton (approvalStatus: boolean) {
         if (approvalStatus) {
             return (
-                <><IoCheckmarkCircle size="2rem"/> Approved</>
+                <><IoCheckmarkCircle size="1.4rem"/> Approved</>
             )
         } else {
             return (
-                <><AiFillCloseCircle  size="2rem"/> Not Approved</>
+                <><AiFillCloseCircle  size="1.4rem"/> Not Approved</>
             )
         }
     }
