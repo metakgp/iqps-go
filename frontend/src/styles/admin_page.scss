@@ -1,5 +1,5 @@
-$approved-button: hsl(149, 89%, 43%);
-$rejected-button: hsl(349, 75%, 53%);
+$approved-button: hsl(149, 80%, 40%);
+$rejected-button: hsl(349, 70%, 50%);
 
 .admin-page {
     display: flex;
@@ -87,20 +87,27 @@ $rejected-button: hsl(349, 75%, 53%);
     .approve-button, .reject-button {
         background-color: inherit;
         border: none;
-        padding: 0.2rem 0.2rem;
+        padding: 0.2rem 0.5rem;
         border-radius: 5px;
 
         display: flex;
+        gap: 5px;
         align-items: center;
         justify-content: center;
+
+        &:hover {
+            filter: brightness(-10%);
+        }
     }
 
     .approve-button {
-        color: $approved-button;
+        background-color: $approved-button;
+        color: black;
     }
 
     .reject-button {
-        color: $rejected-button;
+        color: black;
+        background-color: $rejected-button;
     }
 
     .pdf-link {
