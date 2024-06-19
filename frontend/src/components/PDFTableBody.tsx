@@ -18,8 +18,8 @@ export const ListElement: Component<props> = (props) => {
 
     function paperApprove(approvalStatus: boolean){
         if (approvalStatus === false) {
-            confirm("Are you sure you want to APPROVE this paper?");
-            setQuestionPaperDetails("approval", true);
+            let doApprove =confirm("Are you sure you want to APPROVE this paper?");
+            if (doApprove) setQuestionPaperDetails("approval", true);
         }
     };
 
