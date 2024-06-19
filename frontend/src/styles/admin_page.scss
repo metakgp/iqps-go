@@ -7,86 +7,86 @@ $rejected-button: #c41e3cf8;
     display: flex;
     flex-direction: column;
     padding-bottom: 5rem;
-}
 
-.select {
-    .solid-select-control[data-disabled="true"] {
-        background-color: #dddddd2f;
-      }
-    .solid-select-option:hover {
-        background-color: $ut-orange;
-        color: $oxford-blue;
-    }
-    .solid-select-option[data-focused=true] {
-        background-color: $oxford-blue;
-        color: $ut-orange;
-    }
-    .solid-select-list {
-        background-color: black;
-        color: white;
-    }
-}
-
-.qp-table {
-    table-layout: auto;
-    border-collapse: collapse;
-    margin-left: auto;
-    margin-right: auto;
-
-    caption {
-        padding-bottom: 10px;
-        font-weight: light;
+    .select {
+        .solid-select-control[data-disabled="true"] {
+            background-color: #dddddd2f;
+        }
+        .solid-select-option:hover {
+            background-color: $ut-orange;
+            color: $oxford-blue;
+        }
+        .solid-select-option[data-focused=true] {
+            background-color: $oxford-blue;
+            color: $ut-orange;
+        }
+        .solid-select-list {
+            background-color: black;
+            color: white;
+        }
     }
 
-    thead {
-        background-color: $ut-orange;
-        color: $oxford-blue;
-    }
-    
-    td {
-        :nth-child(1){
-            text-align: left;
-        };
-        text-align: center;
-        border-color: #c8c8c8;
+    .qp-table {
+        table-layout: auto;
         border-collapse: collapse;
-        border-bottom: 1px solid;
-    } 
-}
+        margin-left: auto;
+        margin-right: auto;
 
-.approve-button {
-    color: $approved-button;
-}
+        caption {
+            padding-bottom: 10px;
+            font-weight: light;
+        }
 
-.reject-button {
-    color: $rejected-button;
-}
+        thead {
+            background-color: $ut-orange;
+            color: $oxford-blue;
+        }
 
-.title {
-    background-color: $oxford-blue;
-    overflow: hidden;
-    A {
-        float: left;
-        color: $ut-orange;
-        text-align: center;
-        padding: 14px 16px;
-        text-decoration: none;
-        font-size: 17px;
+        td {
+            :nth-child(1){
+                text-align: left;
+            };
+            text-align: center;
+            border-color: #c8c8c8;
+            border-collapse: collapse;
+            border-bottom: 1px solid;
+        }
     }
-    A:hover {
-        background-color: #ddd;
-        color: black;
+
+    .approve-button {
+        color: $approved-button;
     }
-    A.admin {
-        background-color: $ut-orange;
-        color: $oxford-blue;
+
+    .reject-button {
+        color: $rejected-button;
     }
-    span.user {
-        float: right;
-        text-align: center;
-        padding: 14px 16px;
-        text-decoration: none;
-        font-size: 17px;
+
+    .title {
+        background-color: $oxford-blue;
+        overflow: hidden;
+        A {
+            float: left;
+            color: $ut-orange;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-size: 17px;
+        }
+        A:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        A.admin {
+            background-color: $ut-orange;
+            color: $oxford-blue;
+        }
+        span.user {
+            float: right;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-size: 17px;
+        }
     }
 }
 
