@@ -1,6 +1,4 @@
 $approved-button: #0cce6b;
-$ut-orange: #ff851b;
-$oxford-blue: #001f3f;
 $rejected-button: #c41e3cf8;
 
 .admin-page {
@@ -9,17 +7,19 @@ $rejected-button: #c41e3cf8;
     padding-bottom: 5rem;
 
     .select {
-        .solid-select-control[data-disabled="true"] {
-            background-color: #dddddd2f;
+        .solid-select-option {
+            background-color: $bg-color;
+
+            &:hover {
+                color: $accent-complementary;
+            }
+
+            &[data-focused=true] {
+                color: $fg-color;
+                background-color: $accent-color-darker;
+            }
         }
-        .solid-select-option:hover {
-            background-color: $ut-orange;
-            color: $oxford-blue;
-        }
-        .solid-select-option[data-focused=true] {
-            background-color: $oxford-blue;
-            color: $ut-orange;
-        }
+
         .solid-select-list {
             background-color: black;
             color: white;
@@ -38,8 +38,7 @@ $rejected-button: #c41e3cf8;
         }
 
         thead {
-            background-color: $ut-orange;
-            color: $oxford-blue;
+            background-color: $surface-1;
         }
 
         td {
@@ -62,23 +61,20 @@ $rejected-button: #c41e3cf8;
     }
 
     .title {
-        background-color: $oxford-blue;
         overflow: hidden;
         A {
             float: left;
-            color: $ut-orange;
             text-align: center;
             padding: 14px 16px;
             text-decoration: none;
             font-size: 17px;
         }
         A:hover {
-            background-color: #ddd;
-            color: black;
+            text-decoration: underline;
         }
         A.admin {
-            background-color: $ut-orange;
-            color: $oxford-blue;
+            background-color: $accent-color-darker;
+            color: $fg-color;
         }
         span.user {
             float: right;
