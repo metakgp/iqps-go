@@ -87,11 +87,11 @@ $rejected-button: hsl(349, 70%, 50%);
     .approve-button, .reject-button {
         background-color: inherit;
         border: none;
-        padding: 0.2rem 0.5rem;
+        padding: 0.2rem 0.5rem 0.2rem 0.37rem;
         border-radius: 5px;
 
         display: flex;
-        gap: 5px;
+        gap: 3px;
         align-items: center;
         justify-content: center;
 
