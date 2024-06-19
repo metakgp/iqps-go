@@ -81,6 +81,12 @@ $rejected-button: #c41e3cf8;
         color: $rejected-button;
     }
 
+    .pdf-link {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+
     .title {
         overflow: hidden;
         A {
