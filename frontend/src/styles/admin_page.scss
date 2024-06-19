@@ -24,6 +24,7 @@
 
         .solid-select-list {
             background-color: $surface-1;
+            border-radius: 10px;
         }
 
         &[data-disabled="true"] {
