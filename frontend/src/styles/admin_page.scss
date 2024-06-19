@@ -7,22 +7,26 @@ $rejected-button: #c41e3cf8;
     padding-bottom: 5rem;
 
     .select {
-        .solid-select-option {
-            background-color: $bg-color;
+        padding: 0.15rem 0.2rem;
+        margin: 0;
 
+        .solid-select-option {
             &:hover {
-                color: $accent-complementary;
+                background-color: $surface-2;
             }
 
             &[data-focused=true] {
-                color: $fg-color;
-                background-color: $accent-color-darker;
+                color: $accent-complementary-lighter;
+                background-color: $surface-1;
             }
         }
 
         .solid-select-list {
-            background-color: black;
-            color: white;
+            background-color: $surface-1;
+        }
+
+        &:hover {
+            cursor: pointer;
         }
     }
 
@@ -66,10 +70,6 @@ $rejected-button: #c41e3cf8;
         tr {
             border: 1px solid transparent;
             border-radius: 8px;
-
-            &:nth-of-type(odd) {
-                background-color: rgba($fg-color, 0.05);
-            }
         }
     }
 
