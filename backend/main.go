@@ -518,16 +518,7 @@ func CheckError(err error) {
 	}
 }
 
-func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Println(err)
-	}
-
-	host := os.Getenv("DB_HOST")
-	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
-	CheckError(err)
-
+func LoadGhEnv() {
 	gh_pubKey = os.Getenv("GH_CLIENT_ID")
 	gh_pvtKey = os.Getenv("GH_PRIVATE_ID")
 	org_name = os.Getenv("GH_ORG_NAME")
@@ -550,6 +541,19 @@ func main() {
 	if jwt_secret == "" {
 		panic("JWT Secret Key cannot be empty")
 	}
+}
+
+func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Println(err)
+	}
+
+	host := os.Getenv("DB_HOST")
+	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
+	CheckError(err)
+
+	LoadGhEnv()
 
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
