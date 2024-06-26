@@ -21,6 +21,11 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - UPLOADED_QPS_PATH=${UPLOADED_QPS_PATH}
+      - GH_CLIENT_ID=${GH_CLIENT_ID}
+      - GH_PRIVATE_ID=${GH_PRIVATE_ID}
+      - JWT_SECRET=${JWT_SECRET}
+      - GH_ORG_NAME=${GH_ORG_NAME}
+      - GH_ORG_TEAM_SLUG=${GH_ORG_TEAM_SLUG}
 
 networks:
   metaploy-network:
