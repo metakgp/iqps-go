@@ -188,10 +188,6 @@ func search(w http.ResponseWriter, r *http.Request) {
 }
 
 func upload(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 	var response []uploadEndpointRes
 	// Max total size of 50MB
 	const MaxBodySize = 50 << 20 // 1<<20  = 1024*1024 = 1MB
@@ -338,10 +334,6 @@ func populateDB(filename string) error {
 }
 
 func GhAuth(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 
 	ghOAuthReqBody := GhOAuthReqBody{}
 	if err := json.NewDecoder(r.Body).Decode(&ghOAuthReqBody); err != nil {
@@ -581,8 +573,8 @@ func main() {
 	http.HandleFunc("/search", search)
 	http.HandleFunc("/year", year)
 	http.HandleFunc("/library", library)
-	http.HandleFunc("/upload", upload)
-	http.HandleFunc("/oauth", GhAuth)
+	http.HandleFunc("POST /upload", upload)
+	http.HandleFunc("GET /oauth", GhAuth)
 	//http.Handle("/protected", JWTMiddleware(http.HandlerFunc(protectedRoute)))
 
 	c := cors.New(cors.Options{
