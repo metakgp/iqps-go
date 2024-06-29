@@ -151,6 +151,7 @@ const UploadPage: Component = () => {
                         `${course_code}_${course_name}_${year}_${exam}_${semester}`
                     );
                 });
+                toast.loading(`Uploading ${qPapers().length} files.`);
 
                 setAwaitingResponse(true);
                 const response = await fetch(
