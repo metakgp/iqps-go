@@ -134,7 +134,8 @@ const UploadPage: Component = () => {
         if (!awaitingResponse()) {
             try {
                 const formData = new FormData();
-                qPapers().forEach(async (qp) => {
+
+                for (const qp of qPapers()) {
                     const {
                         file,
                         course_code,
@@ -150,7 +151,8 @@ const UploadPage: Component = () => {
                         file_name,
                         `${course_code}_${course_name}_${year}_${exam}_${semester}`
                     );
-                });
+                }
+
                 toast(`Uploading ${qPapers().length} file${qPapers().length > 1 ? 's' : ''}.`);
 
                 setAwaitingResponse(true);
