@@ -180,6 +180,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files := r.MultipartForm.File["files"]
+	log.Printf("/upload: Received %d files.", len(files))
 	if len(files) > maxLimit {
 		http.Error(w, fmt.Sprintf("maximum %d files allowed", maxLimit), http.StatusBadRequest)
 		return
