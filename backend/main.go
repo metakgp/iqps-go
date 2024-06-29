@@ -163,7 +163,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	var response []uploadEndpointRes
+	var response []uploadEndpointRes = make([]uploadEndpointRes, 0)
 	// Max total size of 50MB
 	const MaxBodySize = 50 << 20 // 1<<20  = 1024*1024 = 1MB
 	r.Body = http.MaxBytesReader(w, r.Body, MaxBodySize)
