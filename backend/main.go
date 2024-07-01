@@ -355,7 +355,8 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error Getting Github Access Token: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
@@ -363,7 +364,8 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	// Decode the response
 	var tokenResponse GithubAccessTokenResponse
 	if err := json.NewDecoder(resp.Body).Decode(&tokenResponse); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error Decoding Github Access Token: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
@@ -373,7 +375,8 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 
 	resp, err = client.Do(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error getting username: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
@@ -381,7 +384,8 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	// Decode the response
 	var userResponse GithubUserResponse
 	if err := json.NewDecoder(resp.Body).Decode(&userResponse); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error decoding username: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
@@ -403,14 +407,16 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error validating user membership: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	defer resp.Body.Close()
 	//decode the response
 	if err := json.NewDecoder(resp.Body).Decode(&checkResp); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error decoding gh validation body: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
@@ -428,7 +434,8 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 
 	tokenString, err := token.SignedString([]byte(jwt_secret))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error Sigining JWT: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
