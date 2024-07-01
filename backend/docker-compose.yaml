@@ -1,6 +1,7 @@
 services:
   iqps-backend:
-    image: iqps-backend
+    image: metakgporg/iqps-backend
+    container_name: iqps-backend
     build: .
     restart: always
     networks:
