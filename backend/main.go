@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 
 	_ "github.com/lib/pq"
@@ -316,11 +315,6 @@ func CheckError(err error) {
 }
 
 func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Println(err)
-	}
-
 	host := os.Getenv("DB_HOST")
 	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	CheckError(err)
