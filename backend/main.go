@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -17,7 +18,12 @@ import (
 	"github.com/rs/cors"
 
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 )
+
+type contextKey string
+
+const claimsKey = contextKey("claims")
 
 type QuestionPaper struct {
 	ID              int    `json:"id"`
@@ -43,7 +49,31 @@ var (
 	staticFilesUrl             string
 	staticFilesStorageLocation string
 	uploadedQpsPath            string
+	gh_pubKey                  string
+	gh_pvtKey                  string
+	jwt_secret                 string
+	org_name                   string
+	org_team                   string
 )
+
+type GhOAuthReqBody struct {
+	GhCode string `json:"code"`
+}
+
+type GithubAccessTokenResponse struct {
+	AccessToken string `json:"access_token"`
+	Scope       string `json:"scope"`
+	TokenType   string `json:"token_type"`
+}
+
+type GithubUserResponse struct {
+	Login string `json:"login"`
+	ID    int    `json:"id"`
+}
+
+var respData struct {
+	Token string `json:"token"`
+}
 
 const init_db = `CREATE TABLE IF NOT EXISTS qp (
     id SERIAL PRIMARY KEY,
@@ -308,9 +338,212 @@ func populateDB(filename string) error {
 	return nil
 }
 
+func GhAuth(w http.ResponseWriter, r *http.Request) {
+
+	ghOAuthReqBody := GhOAuthReqBody{}
+	if err := json.NewDecoder(r.Body).Decode(&ghOAuthReqBody); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if ghOAuthReqBody.GhCode == "" {
+		http.Error(w, "Github OAuth Code cannot be empty", http.StatusBadRequest)
+		return
+	}
+
+	// Get the access token for authenticating other endpoints
+	uri := fmt.Sprintf("https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&code=%s", gh_pubKey, gh_pvtKey, ghOAuthReqBody.GhCode)
+
+	req, _ := http.NewRequest("POST", uri, nil)
+	req.Header.Set("Accept", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error Getting Github Access Token: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Decode the response
+	var tokenResponse GithubAccessTokenResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tokenResponse); err != nil {
+		fmt.Println("Error Decoding Github Access Token: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Get the username of the user who made the request
+	req, _ = http.NewRequest("GET", "https://api.github.com/user", nil)
+	req.Header.Set("Authorization", "Bearer "+tokenResponse.AccessToken)
+
+	resp, err = client.Do(req)
+	if err != nil {
+		fmt.Println("Error getting username: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Decode the response
+	var userResponse GithubUserResponse
+	if err := json.NewDecoder(resp.Body).Decode(&userResponse); err != nil {
+		fmt.Println("Error decoding username: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	uname := userResponse.Login
+	// check if uname is empty
+	if uname == "" {
+		http.Error(w, "No user found", http.StatusUnauthorized)
+		return
+	}
+
+	// Send request to check status of the user in the given org's team
+	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/memberships/%s", org_name, org_team, uname)
+	req, _ = http.NewRequest("GET", url, nil)
+	req.Header.Set("Authorization", "Bearer "+tokenResponse.AccessToken)
+	resp, err = client.Do(req)
+
+	var checkResp struct {
+		State string `json:"state"`
+	}
+
+	if err != nil {
+		fmt.Println("Error validating user membership: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	defer resp.Body.Close()
+	//decode the response
+	if err := json.NewDecoder(resp.Body).Decode(&checkResp); err != nil {
+		fmt.Println("Error decoding gh validation body: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Check if user is present in the team
+	if checkResp.State != "active" {
+
+		http.Error(w, "User is not authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	// Create the response JWT
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"username": uname,
+	})
+
+	tokenString, err := token.SignedString([]byte(jwt_secret))
+	if err != nil {
+		fmt.Println("Error Sigining JWT: ", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	http.Header.Add(w.Header(), "content-type", "application/json")
+
+	// Send the response
+
+	respData.Token = tokenString
+	err = json.NewEncoder(w).Encode(&respData)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func JWTMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// get the authorisation header
+		tokenString := r.Header.Get("Authorization")
+		if tokenString == "" {
+			w.WriteHeader(http.StatusUnauthorized)
+			fmt.Fprint(w, "Missing authorization header")
+			return
+		}
+		JWTtoken := strings.Split(tokenString, " ")
+
+		if len(JWTtoken) != 2 {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "Authorisation head is of incorrect type")
+			return
+		}
+		//parse the token
+		token, err := jwt.Parse(JWTtoken[1], func(t *jwt.Token) (interface{}, error) {
+			if _, OK := t.Method.(*jwt.SigningMethodHMAC); !OK {
+				return nil, errors.New("bad signed method received")
+			}
+
+			return []byte(jwt_secret), nil
+		})
+
+		// Check if error in parsing jwt token
+		if err != nil {
+			http.Error(w, "Bad JWT token", http.StatusUnauthorized)
+			return
+		}
+		// Get the claims
+		claims, ok := token.Claims.(jwt.MapClaims)
+
+		if ok && token.Valid && claims["username"] != nil {
+			// If valid claims found, send response
+			ctx := context.WithValue(r.Context(), claimsKey, claims)
+			handler.ServeHTTP(w, r.WithContext(ctx))
+		} else {
+			http.Error(w, "Invalid JWT token", http.StatusUnauthorized)
+		}
+	})
+}
+
+func getClaims(r *http.Request) jwt.MapClaims {
+	if claims, ok := r.Context().Value(claimsKey).(jwt.MapClaims); ok {
+		return claims
+	}
+	return nil
+}
+
+// func protectedRoute(w http.ResponseWriter, r *http.Request) {
+// 	claims := getClaims(r)
+
+// 	if claims != nil {
+// 		fmt.Fprintf(w, "Hello, %s", claims["username"])
+// 	} else {
+// 		http.Error(w, "No claims found", http.StatusUnauthorized)
+// 	}
+// }
+
 func CheckError(err error) {
 	if err != nil {
 		panic(err)
+	}
+}
+
+func LoadGhEnv() {
+	gh_pubKey = os.Getenv("GH_CLIENT_ID")
+	gh_pvtKey = os.Getenv("GH_PRIVATE_ID")
+	org_name = os.Getenv("GH_ORG_NAME")
+	org_team = os.Getenv("GH_ORG_TEAM_SLUG")
+
+	jwt_secret = os.Getenv("JWT_SECRET")
+
+	if gh_pubKey == "" {
+		panic("Client id for Github OAuth cannot be empty")
+	}
+	if gh_pvtKey == "" {
+		panic("Client Private Key for Github OAuth cannot be empty")
+	}
+	if org_name == "" {
+		panic("Organisation name cannot be empty")
+	}
+	if org_team == "" {
+		panic("Team name of the Organistion cannot be empty")
+	}
+	if jwt_secret == "" {
+		panic("JWT Secret Key cannot be empty")
 	}
 }
 
@@ -318,6 +551,8 @@ func main() {
 	host := os.Getenv("DB_HOST")
 	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	CheckError(err)
+
+	LoadGhEnv()
 
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
@@ -345,7 +580,9 @@ func main() {
 	http.HandleFunc("/search", search)
 	http.HandleFunc("/year", year)
 	http.HandleFunc("/library", library)
-	http.HandleFunc("/upload", upload)
+	http.HandleFunc("POST /upload", upload)
+	http.HandleFunc("GET /oauth", GhAuth)
+	//http.Handle("/protected", JWTMiddleware(http.HandlerFunc(protectedRoute)))
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"https://qp.metakgp.org", "http://localhost:3000"},
