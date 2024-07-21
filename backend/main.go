@@ -15,8 +15,13 @@ import (
 	"strings"
 	"time"
 
+<<<<<<< HEAD
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
+=======
+	"github.com/rs/cors"
+
+>>>>>>> upstream/main
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
 )
@@ -188,7 +193,11 @@ func search(w http.ResponseWriter, r *http.Request) {
 }
 
 func upload(w http.ResponseWriter, r *http.Request) {
-	var response []uploadEndpointRes
+	if r.Method != "POST" {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var response []uploadEndpointRes = make([]uploadEndpointRes, 0)
 	// Max total size of 50MB
 	const MaxBodySize = 50 << 20 // 1<<20  = 1024*1024 = 1MB
 	r.Body = http.MaxBytesReader(w, r.Body, MaxBodySize)
@@ -205,6 +214,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files := r.MultipartForm.File["files"]
+	log.Printf("/upload: Received %d files.", len(files))
 	if len(files) > maxLimit {
 		http.Error(w, fmt.Sprintf("maximum %d files allowed", maxLimit), http.StatusBadRequest)
 		return
@@ -543,11 +553,6 @@ func LoadGhEnv() {
 }
 
 func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Println(err)
-	}
-
 	host := os.Getenv("DB_HOST")
 	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	CheckError(err)

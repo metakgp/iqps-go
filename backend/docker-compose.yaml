@@ -1,8 +1,11 @@
 services:
   iqps-backend:
-    image: iqps-backend
+    image: metakgporg/iqps-backend
+    container_name: iqps-backend
     build: .
     restart: always
+    env_file:
+      - .env
     networks:
       metaploy-network:
         aliases:
@@ -12,20 +15,6 @@ services:
       - ./db:/db
       - nginx-config-volume:/etc/nginx/sites-enabled
       - odins-vault:/srv/static
-    environment:
-      - STATIC_FILES_URL=${STATIC_FILES_URL}
-      - STATIC_FILES_STORAGE_LOCATION=${STATIC_FILES_STORAGE_LOCATION}
-      - DB_NAME=${DB_NAME}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - UPLOADED_QPS_PATH=${UPLOADED_QPS_PATH}
-      - GH_CLIENT_ID=${GH_CLIENT_ID}
-      - GH_PRIVATE_ID=${GH_PRIVATE_ID}
-      - JWT_SECRET=${JWT_SECRET}
-      - GH_ORG_NAME=${GH_ORG_NAME}
-      - GH_ORG_TEAM_SLUG=${GH_ORG_TEAM_SLUG}
 
 networks:
   metaploy-network:

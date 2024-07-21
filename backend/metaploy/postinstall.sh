@@ -9,8 +9,6 @@ trap 'cleanup' SIGQUIT SIGTERM SIGHUP
 
 "${@}" &
 
-cp /iqps.metaploy.conf /etc/nginx/sites-enabled
+cp ./iqps.metaploy.conf /etc/nginx/sites-enabled
 
 wait $!
-
-echo "lmao"

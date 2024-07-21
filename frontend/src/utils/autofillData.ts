@@ -54,7 +54,6 @@ function extractDetailsFromText(text: string): IExtractedDetails {
     const courseCode = courseCodeMatch ? courseCodeMatch[1] : null;
 
     const yearMatch = lines.match(/([^\d]|^)(2\d{3})([^\d]|$)/); // Someone change this in the year 3000
-    console.log(lines, yearMatch)
     const year = yearMatch ? Number(yearMatch[2]) : null;
 
     const examTypeMatch = lines.match(/[^\w]*(Mid|End)[^\w]*/i);

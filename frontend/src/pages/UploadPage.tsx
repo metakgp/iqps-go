@@ -134,7 +134,8 @@ const UploadPage: Component = () => {
         if (!awaitingResponse()) {
             try {
                 const formData = new FormData();
-                qPapers().forEach(async (qp) => {
+                const numPapers = qPapers().length;
+                for (const qp of qPapers()) {
                     const {
                         file,
                         course_code,
@@ -150,7 +151,8 @@ const UploadPage: Component = () => {
                         file_name,
                         `${course_code}_${course_name}_${year}_${exam}_${semester}`
                     );
-                });
+                }
+                toast(`Uploading ${numPapers} file${numPapers > 1 ? 's' : ''}.`);
 
                 setAwaitingResponse(true);
                 const response = await fetch(
@@ -160,9 +162,9 @@ const UploadPage: Component = () => {
                         body: formData
                     }
                 );
-                const data: UploadResults = await response.json();
+                const upload_results: UploadResults = await response.json();
 
-                data.forEach((result) => {
+                for (const result of upload_results) {
                     if (result.status === "success") {
                         toast.success(
                             `File ${result.filename} uploaded successfully`
@@ -172,7 +174,12 @@ const UploadPage: Component = () => {
                             `Failed to upload file ${result.filename}: ${result.description}`
                         );
                     }
-                });
+                }
+
+                if (upload_results.length < numPapers) {
+                    const failedPapers = numPapers - upload_results.length;
+                    toast.error(`${failedPapers} paper${failedPapers > 1 ? 's' : ''} failed to upload.`)
+                }
 
                 clearQPapers();
                 setAwaitingResponse(false);
