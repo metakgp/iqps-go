@@ -15,13 +15,8 @@ import (
 	"strings"
 	"time"
 
-<<<<<<< HEAD
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
-=======
 	"github.com/rs/cors"
 
->>>>>>> upstream/main
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
 )
