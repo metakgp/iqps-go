@@ -15,10 +15,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/rs/cors"
 
 	_ "github.com/lib/pq"
-	"github.com/rs/cors"
 )
 
 type contextKey string
