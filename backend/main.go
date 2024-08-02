@@ -187,6 +187,32 @@ func search(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func list_unapproved_papers(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.Query("SELECT * FROM qp WHERE approve_status = false")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var qps []QuestionPaper = make([]QuestionPaper, 0)
+	for rows.Next() {
+		qp := QuestionPaper{}
+		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary, &qp.UploadTimestamp, &qp.ApproveStatus, &qp.CourseDetails)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		qps = append(qps, qp)
+	}
+	http.Header.Add(w.Header(), "content-type", "application/json")
+	err = json.NewEncoder(w).Encode(&qps)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func upload(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
