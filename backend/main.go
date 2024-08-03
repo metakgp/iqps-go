@@ -213,6 +213,31 @@ func list_unapproved_papers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func approve(w https.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w,"method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id, err := strconv.Atoi(r.FormValue("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, err = db.Exec("UPDATE qp SET approve_status = true WHERE id = $1", id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func upload(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -376,6 +401,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Github OAuth Code cannot be empty", http.StatusBadRequest)
 		return
 	}
+
 
 	// Get the access token for authenticating other endpoints
 	uri := fmt.Sprintf("https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&code=%s", gh_pubKey, gh_pvtKey, ghOAuthReqBody.GhCode)
@@ -608,6 +634,8 @@ func main() {
 	http.HandleFunc("/library", library)
 	http.HandleFunc("POST /upload", upload)
 	http.HandleFunc("GET /oauth", GhAuth)
+	//http.HandleFunc("/unapproved", JWTMiddleware(http.HandlerFunc(list_unapproved_papers)))
+	//http.HandleFunc("/approve", JWTMiddleware(http.HandlerFunc(approve)))
 	//http.Handle("/protected", JWTMiddleware(http.HandlerFunc(protectedRoute)))
 
 	c := cors.New(cors.Options{
