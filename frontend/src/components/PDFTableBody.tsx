@@ -3,11 +3,11 @@ import { FaSolidFilePdf as PDFIcon } from "solid-icons/fa";
 import COURSE_CODE_MAP from "../data/courses.json";
 import { Component } from "solid-js";
 import { createStore } from "solid-js/store";
-import { IAdminQuestionPaperResult, approvalStatus } from "../types/types";
+import { IAdminQuestionPaperResult } from "../types/types";
 import { IoCheckmarkCircle } from "solid-icons/io";
 import { Select, createOptions } from "@thisbeyond/solid-select";
 import { fileNamer } from "../utils/fileNamer";
-import { getCodefromCourse, getCourseFromCode } from "../utils/autofillData";
+import { getCodeFromCourse, getCourseFromCode } from "../utils/autofillData";
 
 type props = {
     questionPaper: IAdminQuestionPaperResult;
@@ -51,9 +51,9 @@ export const ListElement: Component<props> = (props) => {
                 class="select"
                 {...createOptions(Object.values(COURSE_CODE_MAP))}
                 initialValue={questionPaperDetails.course_name}
-                onChange={(value) => {
+                onChange={(value: string) => {
                     setQuestionPaperDetails("course_name", value);
-                    setQuestionPaperDetails("course_code", getCodefromCourse(value));
+                    setQuestionPaperDetails("course_code", getCodeFromCourse(value) ?? "Unknown Course");
                 }}
                 />
             </td>
