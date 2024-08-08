@@ -1,21 +1,27 @@
-FROM golang:1.21 AS builder
+FROM golang:1.22.4 AS builder
 
 WORKDIR /src
-COPY . .
+
+COPY go.mod go.sum ./
+
 RUN go mod download
-RUN CGO_ENABLED=1 GOOS=linux go build -o /app --tags "fts5" -a -ldflags '-linkmode external -extldflags "-static"' .
 
-FROM busybox:1.36-musl
+COPY . .
 
-# Copy metaploy configuration
-COPY metaploy/iqps.metaploy.conf /
-COPY metaploy/postinstall.sh /
+RUN CGO_ENABLED=1 GOOS=linux go build -o ./build --tags "fts5" -a -ldflags '-linkmode external -extldflags "-static"' .
 
-# Set the postinstall script as executable
-RUN chmod +x /postinstall.sh
+FROM alpine:latest AS app
 
-# Copy the binary from the builder
-COPY --from=builder /app /app
+RUN apk --no-cache add tzdata ca-certificates bash
 
-# Run postinstall script and the binary
-CMD ["/postinstall.sh", "/app"]
+ENV TZ="Asia/Kolkata"
+
+WORKDIR /app
+
+COPY metaploy/ ./
+
+RUN chmod +x ./postinstall.sh
+
+COPY --from=builder /src/build .
+
+CMD ["./postinstall.sh", "./build"]
