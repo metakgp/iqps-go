@@ -581,7 +581,7 @@ func main() {
 	http.HandleFunc("/year", year)
 	http.HandleFunc("/library", library)
 	http.HandleFunc("POST /upload", upload)
-	http.HandleFunc("GET /oauth", GhAuth)
+	http.HandleFunc("POST /oauth", GhAuth)
 	//http.Handle("/protected", JWTMiddleware(http.HandlerFunc(protectedRoute)))
 
 	c := cors.New(cors.Options{
