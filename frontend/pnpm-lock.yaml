@@ -8,12 +8,18 @@ importers:
 
   .:
     dependencies:
+      '@solid-primitives/keyboard':
+        specifier: ^1.2.8
+        version: 1.2.8(solid-js@1.8.11)
       '@solidjs/router':
         specifier: ^0.13.2
         version: 0.13.2(solid-js@1.8.11)
+      '@thisbeyond/solid-select':
+        specifier: ^0.14.0
+        version: 0.14.0(solid-js@1.8.11)
       '@vercel/analytics':
         specifier: ^1.2.0
-        version: 1.2.0
+        version: 1.2.0(react@18.3.1)
       canvas:
         specifier: ^2.11.2
         version: 2.11.2
@@ -445,8 +451,13 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
-  '@solid-primitives/keyboard@1.2.6':
-    resolution: {integrity: sha512-ZbXkzAwFs+6hyaZ2hT9uQ38iPZzGTjV6kWvVvJ3BDfKASg0dDDuhEZRKmpkmpLfnqOabV58BUkASJWMAA4dZCg==}
+  '@solid-primitives/event-listener@2.3.3':
+    resolution: {integrity: sha512-DAJbl+F0wrFW2xmcV8dKMBhk9QLVLuBSW+TR4JmIfTaObxd13PuL7nqaXnaYKDWOYa6otB00qcCUIGbuIhSUgQ==}
+    peerDependencies:
+      solid-js: ^1.6.12
+
+  '@solid-primitives/keyboard@1.2.8':
+    resolution: {integrity: sha512-pJtcbkjozS6L1xvTht9rPpyPpX55nAkfBzbFWdf3y0Suwh6qClTibvvObzKOf7uzQ+8aZRDH4LsoGmbTKXtJjQ==}
     peerDependencies:
       solid-js: ^1.6.12
 
@@ -475,6 +486,11 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
+  '@solid-primitives/rootless@1.4.5':
+    resolution: {integrity: sha512-GFJE9GC3ojx0aUKqAUZmQPyU8fOVMtnVNrkdk2yS4kd17WqVSpXpoTmo9CnOwA+PG7FTzdIkogvfLQSLs4lrww==}
+    peerDependencies:
+      solid-js: ^1.6.12
+
   '@solid-primitives/scheduled@1.4.2':
     resolution: {integrity: sha512-duKaugDQtPk0v6MnkBuEalWk66/vA2G7zzoimQEvmUdh2+K2o8t908HIfI2NdBfwakQMQBV4epE3TFeN2Vsveg==}
     peerDependencies:
@@ -500,10 +516,20 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
+  '@solid-primitives/utils@6.2.3':
+    resolution: {integrity: sha512-CqAwKb2T5Vi72+rhebSsqNZ9o67buYRdEJrIFzRXz3U59QqezuuxPsyzTSVCacwS5Pf109VRsgCJQoxKRoECZQ==}
+    peerDependencies:
+      solid-js: ^1.6.12
+
   '@solidjs/router@0.13.2':
     resolution: {integrity: sha512-zPlQUXaaUMFzz70SNN8scITooBaJyvIJci3ilyHUBXr9+mzEJGCUSohRJx/VXKo9+p+HEBHY48GnChiPYfLsjg==}
     peerDependencies:
       solid-js: ^1.8.6
+
+  '@thisbeyond/solid-select@0.14.0':
+    resolution: {integrity: sha512-ecq4U3Vnc/nJbU84ARuPg2scNuYt994ljF5AmBlzuZW87x43mWiGJ5hEWufIJJMpDT6CcnCIx/xbrdDkaDEHQw==}
+    peerDependencies:
+      solid-js: ^1.5
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -834,6 +860,10 @@ packages:
   jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
 
+  loose-envify@1.4.0:
+    resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
+    hasBin: true
+
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
@@ -959,6 +989,10 @@ packages:
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
+
+  react@18.3.1:
+    resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
+    engines: {node: '>=0.10.0'}
 
   readable-stream@3.6.2:
     resolution: {integrity: sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA==}
@@ -1558,7 +1592,7 @@ snapshots:
       '@solid-primitives/cursor': 0.0.112(solid-js@1.8.11)
       '@solid-primitives/event-bus': 1.0.9(solid-js@1.8.11)
       '@solid-primitives/event-listener': 2.3.1(solid-js@1.8.11)
-      '@solid-primitives/keyboard': 1.2.6(solid-js@1.8.11)
+      '@solid-primitives/keyboard': 1.2.8(solid-js@1.8.11)
       '@solid-primitives/platform': 0.1.1(solid-js@1.8.11)
       '@solid-primitives/rootless': 1.4.3(solid-js@1.8.11)
       '@solid-primitives/scheduled': 1.4.2(solid-js@1.8.11)
@@ -1602,11 +1636,16 @@ snapshots:
       '@solid-primitives/utils': 6.2.2(solid-js@1.8.11)
       solid-js: 1.8.11
 
-  '@solid-primitives/keyboard@1.2.6(solid-js@1.8.11)':
+  '@solid-primitives/event-listener@2.3.3(solid-js@1.8.11)':
     dependencies:
-      '@solid-primitives/event-listener': 2.3.1(solid-js@1.8.11)
-      '@solid-primitives/rootless': 1.4.3(solid-js@1.8.11)
-      '@solid-primitives/utils': 6.2.2(solid-js@1.8.11)
+      '@solid-primitives/utils': 6.2.3(solid-js@1.8.11)
+      solid-js: 1.8.11
+
+  '@solid-primitives/keyboard@1.2.8(solid-js@1.8.11)':
+    dependencies:
+      '@solid-primitives/event-listener': 2.3.3(solid-js@1.8.11)
+      '@solid-primitives/rootless': 1.4.5(solid-js@1.8.11)
+      '@solid-primitives/utils': 6.2.3(solid-js@1.8.11)
       solid-js: 1.8.11
 
   '@solid-primitives/media@2.2.6(solid-js@1.8.11)':
@@ -1639,6 +1678,11 @@ snapshots:
       '@solid-primitives/utils': 6.2.2(solid-js@1.8.11)
       solid-js: 1.8.11
 
+  '@solid-primitives/rootless@1.4.5(solid-js@1.8.11)':
+    dependencies:
+      '@solid-primitives/utils': 6.2.3(solid-js@1.8.11)
+      solid-js: 1.8.11
+
   '@solid-primitives/scheduled@1.4.2(solid-js@1.8.11)':
     dependencies:
       solid-js: 1.8.11
@@ -1663,7 +1707,15 @@ snapshots:
     dependencies:
       solid-js: 1.8.11
 
+  '@solid-primitives/utils@6.2.3(solid-js@1.8.11)':
+    dependencies:
+      solid-js: 1.8.11
+
   '@solidjs/router@0.13.2(solid-js@1.8.11)':
+    dependencies:
+      solid-js: 1.8.11
+
+  '@thisbeyond/solid-select@0.14.0(solid-js@1.8.11)':
     dependencies:
       solid-js: 1.8.11
 
@@ -1703,9 +1755,11 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
-  '@vercel/analytics@1.2.0':
+  '@vercel/analytics@1.2.0(react@18.3.1)':
     dependencies:
       server-only: 0.0.1
+    optionalDependencies:
+      react: 18.3.1
 
   abbrev@1.1.1: {}
 
@@ -2008,6 +2062,11 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
+  loose-envify@1.4.0:
+    dependencies:
+      js-tokens: 4.0.0
+    optional: true
+
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
@@ -2114,6 +2173,11 @@ snapshots:
       source-map-js: 1.0.2
 
   queue-microtask@1.2.3: {}
+
+  react@18.3.1:
+    dependencies:
+      loose-envify: 1.4.0
+    optional: true
 
   readable-stream@3.6.2:
     dependencies:
