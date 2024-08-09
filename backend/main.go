@@ -604,15 +604,15 @@ func getClaims(r *http.Request) jwt.MapClaims {
 	return nil
 }
 
-// func protectedRoute(w http.ResponseWriter, r *http.Request) {
-// 	claims := getClaims(r)
+func protectedRoute(w http.ResponseWriter, r *http.Request) {
+	claims := getClaims(r)
 
-// 	if claims != nil {
-// 		fmt.Fprintf(w, "Hello, %s", claims["username"])
-// 	} else {
-// 		http.Error(w, "No claims found", http.StatusUnauthorized)
-// 	}
-// }
+	if claims != nil {
+		fmt.Fprintf(w, "Hello, %s", claims["username"])
+	} else {
+		http.Error(w, "No claims found", http.StatusUnauthorized)
+	}
+}
 
 func CheckError(err error) {
 	if err != nil {
@@ -685,9 +685,10 @@ func main() {
 	http.HandleFunc("/library", library)
 	http.HandleFunc("POST /upload", upload)
 	http.HandleFunc("POST /oauth", GhAuth)
-	// http.HandleFunc("/unapproved", JWTMiddleware(http.HandlerFunc(list_unapproved_papers)))
-	// http.HandleFunc("/approve", JWTMiddleware(http.HandlerFunc(approve)))
-	// http.Handle("/protected", JWTMiddleware(http.HandlerFunc(protectedRoute)))
+	http.HandleFunc("/unapproved", JWTMiddleware(http.HandlerFunc(list_unapproved_papers)))
+	http.HandleFunc("/approve", JWTMiddleware(http.HandlerFunc(approve)))
+	http.Handle("/protected", JWTMiddleware(http.HandlerFunc(protectedRoute)))
+	http.Handle("/protected", JWTMiddleware(http.HandlerFunc(update_qp)))
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"https://qp.metakgp.org", "http://localhost:3000"},
