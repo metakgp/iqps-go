@@ -54,6 +54,7 @@ var (
 	jwt_secret                 string
 	org_name                   string
 	org_team                   string
+	gh_org_admin_token         string
 )
 
 type GhOAuthReqBody struct {
@@ -339,7 +340,6 @@ func populateDB(filename string) error {
 }
 
 func GhAuth(w http.ResponseWriter, r *http.Request) {
-
 	ghOAuthReqBody := GhOAuthReqBody{}
 	if err := json.NewDecoder(r.Body).Decode(&ghOAuthReqBody); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -404,7 +404,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	// Send request to check status of the user in the given org's team
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/memberships/%s", org_name, org_team, uname)
 	req, _ = http.NewRequest("GET", url, nil)
-	req.Header.Set("Authorization", "Bearer "+tokenResponse.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+gh_org_admin_token)
 	resp, err = client.Do(req)
 
 	var checkResp struct {
@@ -418,7 +418,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer resp.Body.Close()
-	//decode the response
+	// decode the response
 	if err := json.NewDecoder(resp.Body).Decode(&checkResp); err != nil {
 		fmt.Println("Error decoding gh validation body: ", err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -472,7 +472,7 @@ func JWTMiddleware(handler http.Handler) http.Handler {
 			fmt.Fprint(w, "Authorisation head is of incorrect type")
 			return
 		}
-		//parse the token
+		// parse the token
 		token, err := jwt.Parse(JWTtoken[1], func(t *jwt.Token) (interface{}, error) {
 			if _, OK := t.Method.(*jwt.SigningMethodHMAC); !OK {
 				return nil, errors.New("bad signed method received")
@@ -480,7 +480,6 @@ func JWTMiddleware(handler http.Handler) http.Handler {
 
 			return []byte(jwt_secret), nil
 		})
-
 		// Check if error in parsing jwt token
 		if err != nil {
 			http.Error(w, "Bad JWT token", http.StatusUnauthorized)
@@ -527,6 +526,7 @@ func LoadGhEnv() {
 	gh_pvtKey = os.Getenv("GH_PRIVATE_ID")
 	org_name = os.Getenv("GH_ORG_NAME")
 	org_team = os.Getenv("GH_ORG_TEAM_SLUG")
+	gh_org_admin_token := os.Getenv("GH_ORG_ADMIN_TOKEN")
 
 	jwt_secret = os.Getenv("JWT_SECRET")
 
@@ -544,6 +544,9 @@ func LoadGhEnv() {
 	}
 	if jwt_secret == "" {
 		panic("JWT Secret Key cannot be empty")
+	}
+	if gh_org_admin_token == "" {
+		panic("Github Organisation Admin Token cannot be empty")
 	}
 }
 
@@ -582,7 +585,7 @@ func main() {
 	http.HandleFunc("/library", library)
 	http.HandleFunc("POST /upload", upload)
 	http.HandleFunc("POST /oauth", GhAuth)
-	//http.Handle("/protected", JWTMiddleware(http.HandlerFunc(protectedRoute)))
+	// http.Handle("/protected", JWTMiddleware(http.HandlerFunc(protectedRoute)))
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"https://qp.metakgp.org", "http://localhost:3000"},
