@@ -238,6 +238,53 @@ func approve(w https.ResponseWriter, r *http.Request) {
 	}
 }
 
+func update_qp(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id, err := strconv.Atoi(r.FormValue("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	courseCode := r.FormValue("course_code")
+	courseName := r.FormValue("course_name")
+	year, err := strconv.Atoi(r.FormValue("year"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	exam := r.FormValue("exam")
+	fileLink := r.FormValue("filelink")
+	fromLibrary, err := strconv.ParseBool(r.FormValue("from_library"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	uploadTimestamp := r.FormValue("upload_timestamp")
+	approveStatus, err := strconv.ParseBool(r.FormValue("approve_status"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	courseDetails := r.FormValue("course_details")
+
+	_, err := db.Exec("UPDATE qp SET course_code = $1, course_name = $2, year = $3, exam = $4, filelink = $5, from_library = $6, upload_timestamp = $7, approve_status = $8, course_details = $9 WHERE id = $10", courseCode, courseName, year, exam, fileLink, fromLibrary, uploadTimestamp, approveStatus, courseDetails, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func upload(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
