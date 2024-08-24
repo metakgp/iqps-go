@@ -1,9 +1,17 @@
 import { Component } from "solid-js";
 import { PDFLister } from "../components/PDFTableHead";
 import { arr } from "../data/dummyQPs";
-import { A } from "@solidjs/router";
+import { A, useNavigate } from "@solidjs/router";
+import { useAuth } from "../components/AuthProvider";
 
 export const AdminPage: Component = () => {
+  const auth = useAuth();
+  const navigate = useNavigate();
+
+  if (!auth.isAuthenticated()) {
+    navigate('/oauth');
+  }
+
   let user = "User";
 
   return (
