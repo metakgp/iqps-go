@@ -58,6 +58,11 @@ func downloadFile(new_qp qpRaw) {
 	defer file.Close()
 }
 
+func sanitizeFilename(s string) string {
+	// replaces all spaces with _
+	return strings.ReplaceAll(s, "%20", "_")
+}
+
 func main() {
 
 	c := colly.NewCollector(
@@ -81,13 +86,13 @@ func main() {
 			return
 		}
 		link := e.Attr("href")
-		url := e.Request.AbsoluteURL(link)
+		file_url := e.Request.AbsoluteURL(link)
 		var name string
 		var year int
 		var exam_type string
 
-		if strings.Contains(url, ".pdf") {
-			temp := strings.Split(url, "/")
+		if strings.Contains(file_url, ".pdf") {
+			temp := strings.Split(file_url, "/")
 			name = temp[len(temp)-1]
 			year, _ = strconv.Atoi(temp[4])
 			exam_type = strings.ToLower(temp[5])
@@ -105,13 +110,13 @@ func main() {
 				}
 			}
 
-			new_qp = append(new_qp, qpRaw{strings.Join(temp[4:], "_"), name, year, exam_type, url})
+			new_qp = append(new_qp, qpRaw{sanitizeFilename(strings.Join(temp[4:], "_")), name, year, exam_type, file_url})
 		}
 
 		c.Visit(e.Request.AbsoluteURL(link))
 	})
 
-	c.Visit("http://10.18.24.75/peqp")
+	c.Visit("http://10.18.24.75/peqp/2024")
 	c.Wait()
 
 	file, err := os.Create("qp.csv")
