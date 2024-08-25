@@ -1,7 +1,6 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
 import { Route, Router } from "@solidjs/router";
-import { inject } from "@vercel/analytics";
 
 import App from "./pages/LandingPage";
 import "./styles/styles.scss";
@@ -12,8 +11,6 @@ import { AdminPage } from "./pages/AdminDashboard";
 import { AuthProvider } from "./components/AuthProvider";
 
 const root = document.getElementById("root");
-
-inject();
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   throw new Error(
