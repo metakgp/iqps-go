@@ -6,7 +6,6 @@ import { useAuth } from "../components/AuthProvider";
 
 export const AdminPage: Component = () => {
   const auth = useAuth();
-  const navigate = useNavigate();
 
   if (!auth.isAuthenticated()) {
     window.location.assign(`https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GH_OAUTH_CLIENT_ID}`);
