@@ -9,7 +9,7 @@ export const AdminPage: Component = () => {
   const navigate = useNavigate();
 
   if (!auth.isAuthenticated()) {
-    navigate('/oauth');
+    window.location.assign(`https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GH_OAUTH_CLIENT_ID}`);
   }
 
   let user = "User";
