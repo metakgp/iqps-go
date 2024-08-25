@@ -118,6 +118,7 @@ The currently active maintainer(s) of this project.
 
 - [Rajiv Harlalka](https://github.com/rajivharlalka)
 - [Arpit Bhardwaj](https://github.com/proffapt)
+- [Harsh Khandeparkar](https://github.com/harshkhandeparkar)
 
 ### Creator(s)
 
