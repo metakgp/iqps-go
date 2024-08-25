@@ -6,6 +6,8 @@
 @import "./search_results.scss";
 @import "./upload_page.scss";
 @import "./modal.scss";
+@import "@thisbeyond/solid-select/style.css";
+@import "../styles/admin_page.scss";
 
 .toast {
   background-color: $surface-1 !important;
@@ -92,7 +94,8 @@ a {
 }
 
 input,
-select {
+select,
+.select {
   width: 100%;
   padding: 8px 10px;
   margin-bottom: 1rem;

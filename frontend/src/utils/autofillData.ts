@@ -39,6 +39,16 @@ export function getCourseFromCode<K extends keyof typeof COURSE_CODE_MAP>(code: 
     }
 };
 
+export function getCodeFromCourse<K extends keyof typeof COURSE_CODE_MAP>(course: string): K | null {
+    const index = Object.values(COURSE_CODE_MAP).indexOf(course);
+
+    if (index !== -1) {
+        return Object.keys(COURSE_CODE_MAP)[index] as K;
+    } else {
+        return null;
+    }
+};
+
 interface IExtractedDetails {
     course_code: string | null,
     year: number | null,
