@@ -527,7 +527,7 @@ func LoadGhEnv() {
 	gh_pvtKey = os.Getenv("GH_PRIVATE_ID")
 	org_name = os.Getenv("GH_ORG_NAME")
 	org_team = os.Getenv("GH_ORG_TEAM_SLUG")
-	gh_org_admin_token := os.Getenv("GH_ORG_ADMIN_TOKEN")
+	gh_org_admin_token = os.Getenv("GH_ORG_ADMIN_TOKEN")
 
 	jwt_secret = os.Getenv("JWT_SECRET")
 
