@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 
 	_ "github.com/lib/pq"
@@ -551,6 +552,7 @@ func LoadGhEnv() {
 }
 
 func main() {
+	err := godotenv.Load()
 	host := os.Getenv("DB_HOST")
 	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	CheckError(err)
