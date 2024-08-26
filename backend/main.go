@@ -215,78 +215,6 @@ func listUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func approve(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	err := r.ParseForm()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	id, err := strconv.Atoi(r.FormValue("id"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	_, err = db.Exec("UPDATE qp SET approve_status = true WHERE id = $1", id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func updateQP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	err := r.ParseForm()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	id, err := strconv.Atoi(r.FormValue("id"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	courseCode := r.FormValue("course_code")
-	courseName := r.FormValue("course_name")
-	year, err := strconv.Atoi(r.FormValue("year"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	exam := r.FormValue("exam")
-	fileLink := r.FormValue("filelink")
-	fromLibrary, err := strconv.ParseBool(r.FormValue("from_library"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	uploadTimestamp := r.FormValue("upload_timestamp")
-	approveStatus, err := strconv.ParseBool(r.FormValue("approve_status"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	courseDetails := r.FormValue("course_details")
-
-	_, err = db.Exec("UPDATE qp SET course_code = $1, course_name = $2, year = $3, exam = $4, filelink = $5, from_library = $6, upload_timestamp = $7, approve_status = $8, course_details = $9 WHERE id = $10", courseCode, courseName, year, exam, fileLink, fromLibrary, uploadTimestamp, approveStatus, courseDetails, id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
 func upload(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -597,23 +525,6 @@ func JWTMiddleware(handler http.Handler) http.Handler {
 	})
 }
 
-func getClaims(r *http.Request) jwt.MapClaims {
-	if claims, ok := r.Context().Value(claimsKey).(jwt.MapClaims); ok {
-		return claims
-	}
-	return nil
-}
-
-func protectedRoute(w http.ResponseWriter, r *http.Request) {
-	claims := getClaims(r)
-
-	if claims != nil {
-		fmt.Fprintf(w, "Hello, %s", claims["username"])
-	} else {
-		http.Error(w, "No claims found", http.StatusUnauthorized)
-	}
-}
-
 func CheckError(err error) {
 	if err != nil {
 		panic(err)
@@ -650,7 +561,7 @@ func LoadGhEnv() {
 }
 
 func main() {
-	err := godotenv.Load()
+	godotenv.Load()
 	host := os.Getenv("DB_HOST")
 	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	CheckError(err)
@@ -686,8 +597,6 @@ func main() {
 	http.HandleFunc("POST /upload", upload)
 	http.HandleFunc("POST /oauth", GhAuth)
 	http.Handle("/unapproved", JWTMiddleware(http.HandlerFunc(listUnapprovedPapers)))
-	http.Handle("/approve", JWTMiddleware(http.HandlerFunc(approve)))
-	http.Handle("/update", JWTMiddleware(http.HandlerFunc(UpdateQP)))
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"https://qp.metakgp.org", "http://localhost:3000"},
