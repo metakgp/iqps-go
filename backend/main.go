@@ -27,16 +27,16 @@ type contextKey string
 const claimsKey = contextKey("claims")
 
 type QuestionPaper struct {
-	ID              int    `json:"id"`
-	CourseCode      string `json:"course_code"`
-	CourseName      string `json:"course_name"`
-	Year            int    `json:"year"`
-	Exam            string `json:"exam"`
-	FileLink        string `json:"filelink"`
-	FromLibrary     bool   `json:"from_library"`
-	UploadTimestamp string `json:"upload_timestamp"`
-	ApproveStatus   bool   `json:"approve_status"`
-	CourseDetails   string `json:"course_details"`
+	ID              int    `json:"id,omitempty"`
+	CourseCode      string `json:"course_code,omitempty"`
+	CourseName      string `json:"course_name,omitempty"`
+	Year            int    `json:"year,omitempty"`
+	Exam            string `json:"exam,omitempty"`
+	FileLink        string `json:"filelink,omitempty"`
+	FromLibrary     bool   `json:"from_library,omitempty"`
+	UploadTimestamp string `json:"upload_timestamp,omitempty"`
+	ApproveStatus   bool   `json:"approve_status,omitempty"`
+	CourseDetails   string `json:"course_details,omitempty"`
 }
 
 type uploadEndpointRes struct {
@@ -190,7 +190,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 }
 
 func listUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT * FROM qp WHERE approve_status = false")
+	rows, err := db.Query("SELECT course_code, course_name, year, exam, filelink FROM qp WHERE approve_status = false ORDER BY upload_timestamp ASC")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -200,7 +200,7 @@ func listUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
 	var qps []QuestionPaper = make([]QuestionPaper, 0)
 	for rows.Next() {
 		qp := QuestionPaper{}
-		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary, &qp.UploadTimestamp, &qp.ApproveStatus, &qp.CourseDetails)
+		err := rows.Scan(&qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -596,7 +596,7 @@ func main() {
 	http.HandleFunc("/library", library)
 	http.HandleFunc("POST /upload", upload)
 	http.HandleFunc("POST /oauth", GhAuth)
-	http.Handle("/unapproved", JWTMiddleware(http.HandlerFunc(listUnapprovedPapers)))
+	http.Handle("GET /unapproved", JWTMiddleware(http.HandlerFunc(listUnapprovedPapers)))
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"https://qp.metakgp.org", "http://localhost:3000"},
