@@ -189,7 +189,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func list_unapproved_papers(w http.ResponseWriter, r *http.Request) {
+func listUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
 	rows, err := db.Query("SELECT * FROM qp WHERE approve_status = false")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -215,7 +215,7 @@ func list_unapproved_papers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func approve(w https.ResponseWriter, r *http.Request) {
+func approve(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -240,7 +240,7 @@ func approve(w https.ResponseWriter, r *http.Request) {
 	}
 }
 
-func update_qp(w http.ResponseWriter, r *http.Request) {
+func updateQP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -280,7 +280,7 @@ func update_qp(w http.ResponseWriter, r *http.Request) {
 	}
 	courseDetails := r.FormValue("course_details")
 
-	_, err := db.Exec("UPDATE qp SET course_code = $1, course_name = $2, year = $3, exam = $4, filelink = $5, from_library = $6, upload_timestamp = $7, approve_status = $8, course_details = $9 WHERE id = $10", courseCode, courseName, year, exam, fileLink, fromLibrary, uploadTimestamp, approveStatus, courseDetails, id)
+	_, err = db.Exec("UPDATE qp SET course_code = $1, course_name = $2, year = $3, exam = $4, filelink = $5, from_library = $6, upload_timestamp = $7, approve_status = $8, course_details = $9 WHERE id = $10", courseCode, courseName, year, exam, fileLink, fromLibrary, uploadTimestamp, approveStatus, courseDetails, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -685,10 +685,9 @@ func main() {
 	http.HandleFunc("/library", library)
 	http.HandleFunc("POST /upload", upload)
 	http.HandleFunc("POST /oauth", GhAuth)
-	http.HandleFunc("/unapproved", JWTMiddleware(http.HandlerFunc(list_unapproved_papers)))
-	http.HandleFunc("/approve", JWTMiddleware(http.HandlerFunc(approve)))
-	http.Handle("/protected", JWTMiddleware(http.HandlerFunc(protectedRoute)))
-	http.Handle("/protected", JWTMiddleware(http.HandlerFunc(update_qp)))
+	http.Handle("/unapproved", JWTMiddleware(http.HandlerFunc(listUnapprovedPapers)))
+	http.Handle("/approve", JWTMiddleware(http.HandlerFunc(approve)))
+	http.Handle("/update", JWTMiddleware(http.HandlerFunc(UpdateQP)))
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"https://qp.metakgp.org", "http://localhost:3000"},
