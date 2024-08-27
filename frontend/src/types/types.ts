@@ -40,12 +40,3 @@ interface IUploadResult {
 };
 
 export type UploadResults = IUploadResult[];
-
-export interface IAdminQuestionPaperResult extends IQuestionPaper {
-    id: number;
-    file_link: string;
-    approval: boolean;
-    reviewedBy: string | null;
-}
-
-export type QuestionPaperReviewResults = IAdminQuestionPaperResult[];

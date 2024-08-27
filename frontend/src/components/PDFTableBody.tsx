@@ -3,22 +3,22 @@ import { FaSolidFilePdf as PDFIcon } from "solid-icons/fa";
 import COURSE_CODE_MAP from "../data/courses.json";
 import { Component } from "solid-js";
 import { createStore } from "solid-js/store";
-import { IAdminQuestionPaperResult } from "../types/types";
+import { IAdminDashboardQP } from "../types/types";
 import { IoCheckmarkCircle } from "solid-icons/io";
 import { Select, createOptions } from "@thisbeyond/solid-select";
 import { fileNamer } from "../utils/fileNamer";
 import { getCodeFromCourse, getCourseFromCode } from "../utils/autofillData";
 
 type props = {
-    questionPaper: IAdminQuestionPaperResult;
+    questionPaper: IAdminDashboardQP;
 }
 
 export const ListElement: Component<props> = (props) => {
-    const [questionPaperDetails, setQuestionPaperDetails] = createStore<IAdminQuestionPaperResult>(props.questionPaper);
+    const [questionPaperDetails, setQuestionPaperDetails] = createStore<IAdminDashboardQP>(props.questionPaper);
 
     function toggleApproval(approvalStatus: boolean) {
         let confirmed = confirm(`Are you sure you want to ${approvalStatus ? 'DISAPPROVE' : 'APPROVE'} this paper?`);
-        if (confirmed) setQuestionPaperDetails("approval", !approvalStatus);
+        if (confirmed) setQuestionPaperDetails("approve_status", !approvalStatus);
     };
 
     function whichButton (approvalStatus: boolean) {
@@ -34,9 +34,9 @@ export const ListElement: Component<props> = (props) => {
     }
 
     return (
-        <tr classList={{["qp-table-tr-pending"]: questionPaperDetails.approval === null ? true : false, ["qp-table-tr-approve"]: questionPaperDetails.approval === true, ["qp-table-tr-reject"]: questionPaperDetails.approval === false}}>
+        <tr classList={{["qp-table-tr-pending"]: questionPaperDetails.approve_status === null ? true : false, ["qp-table-tr-approve"]: questionPaperDetails.approve_status === true, ["qp-table-tr-reject"]: questionPaperDetails.approve_status === false}}>
             <td><Select
-                disabled={questionPaperDetails.approval}
+                disabled={questionPaperDetails.approve_status}
                 class="select"
                 {...createOptions(Object.keys(COURSE_CODE_MAP))}
                 initialValue={questionPaperDetails.course_code}
@@ -47,7 +47,7 @@ export const ListElement: Component<props> = (props) => {
                 />
             </td>
             <td><Select
-                disabled={questionPaperDetails.approval}
+                disabled={questionPaperDetails.approve_status}
                 class="select"
                 {...createOptions(Object.values(COURSE_CODE_MAP))}
                 initialValue={questionPaperDetails.course_name}
@@ -58,7 +58,7 @@ export const ListElement: Component<props> = (props) => {
                 />
             </td>
             <td><Select
-                disabled={questionPaperDetails.approval}
+                disabled={questionPaperDetails.approve_status}
                 class="select"
                 // returns every year since 1951 till today as options for year dropdown
                 {...createOptions([...Array.from({length: new Date().getFullYear() - 1950}, (e, i) => (new Date().getFullYear() - i).toString())])}
@@ -69,7 +69,7 @@ export const ListElement: Component<props> = (props) => {
                 />
             </td>
             <td><Select
-                disabled={questionPaperDetails.approval}
+                disabled={questionPaperDetails.approve_status}
                 class="select"
                 {...createOptions(["endsem", "midsem"])}
                 initialValue={questionPaperDetails.exam}
@@ -79,7 +79,7 @@ export const ListElement: Component<props> = (props) => {
                 />
             </td>
             <td><Select
-                disabled={questionPaperDetails.approval}
+                disabled={questionPaperDetails.approve_status}
                 class="select"
                 {...createOptions(["autumn", "spring"])}
                 initialValue={questionPaperDetails.semester}
@@ -89,7 +89,7 @@ export const ListElement: Component<props> = (props) => {
                 />
             </td>
             <td>
-                <a href={props.questionPaper.file_link} target="_blank" class="pdf-link">
+                <a href={props.questionPaper.filelink} target="_blank" class="pdf-link">
                     <PDFIcon size="1.4rem" />
                     {fileNamer(questionPaperDetails)}
                 </a>
@@ -97,13 +97,13 @@ export const ListElement: Component<props> = (props) => {
             <td>
                 <button
                     classList={{
-                        ["approve-button"]: questionPaperDetails.approval,
-                        ["reject-button"]: !questionPaperDetails.approval
+                        ["approve-button"]: questionPaperDetails.approve_status,
+                        ["reject-button"]: !questionPaperDetails.approve_status
                     }}
                     onClick={() => {
-                        toggleApproval(questionPaperDetails.approval);
+                        toggleApproval(questionPaperDetails.approve_status);
                     }}
-                >{whichButton(questionPaperDetails.approval)}</button>
+                >{whichButton(questionPaperDetails.approve_status)}</button>
             </td>
         </tr>
     )
