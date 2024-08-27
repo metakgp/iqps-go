@@ -19,7 +19,7 @@ export const PDFLister: Component<props> = (props) => {
         {label: "Year", accessor: "year"},
         {label: "Exam", accessor: "exam"},
         {label: "Semester", accessor: "semester"},
-        {label: "FIle", accessor: "filelink"},
+        {label: "File", accessor: "filelink"},
         {label: "Approval", accessor: "approve_status"}
     ]
 
