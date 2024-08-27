@@ -41,14 +41,14 @@ interface IOkResponse<T> {
 
 interface IErrorResponse {
 	is_ok: false;
-	status_code: number;
+	status_code: number | string;
 	response: IHTTPMessage;
 }
 
 type BackendResponse<T> = IOkResponse<T> | IErrorResponse;
 
 export interface IHTTPMessage {
-	status_code: number;
+	status_code?: number;
 	message: string;
 }
 
@@ -77,33 +77,43 @@ export async function makeRequest<E extends keyof IEndpointTypes>(
 	params: IEndpointTypes[E]["request"] | null = null,
 	jwt: string | null = null,
 ): Promise<BackendResponse<IEndpointTypes[E]["response"]>> {
-	const response = await makeBackendRequest(endpoint, method, jwt, params);
-
 	try {
-		if (response.ok) {
+		const response = await makeBackendRequest(endpoint, method, jwt, params);
+
+		try {
+			if (response.ok) {
+				return {
+					is_ok: true,
+					status_code: 200,
+					response: await response.json(),
+				};
+			}
+
 			return {
-				is_ok: true,
-				status_code: 200,
-				response: await response.json(),
+				is_ok: false,
+				status_code: response.status,
+				response: {
+					status_code: response.status,
+					message: await response.text()
+				},
+			};
+		} catch (e) {
+			return {
+				is_ok: false,
+				status_code: response.status,
+				response: {
+					status_code: response.status,
+					message: "An unexpected error occurred.",
+				},
 			};
 		}
-
-		return {
-			is_ok: false,
-			status_code: response.status,
-			response: {
-				status_code: response.status,
-				message: await response.text()
-			},
-		};
 	} catch (e) {
 		return {
 			is_ok: false,
-			status_code: response.status,
+			status_code: 'over 9000',
 			response: {
-				status_code: response.status,
-				message: "An unexpected error occurred.",
-			},
-		};
+				message: `An unexpected error occurred: ${e}`
+			}
+		}
 	}
 }
