@@ -4,6 +4,7 @@ import SearchResults from "./SearchResults";
 import type { ISearchResult } from "../types/types";
 import "../styles/styles.scss";
 import { copyLink } from "../utils/copyLink";
+import { makeRequest } from "../utils/backend";
 
 const CourseSearchForm: Component=()=> {
   const currentURL = new URL(window.location.toString());
@@ -22,13 +23,11 @@ const CourseSearchForm: Component=()=> {
       if (courseName()) params.append("course", courseName());
       if (exam()) params.append("exam", exam());
 
-      try {
-        setAwaitingResponse(true);
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/search?${params}`, {
-          method: "GET", // GET request
-        });
+      setAwaitingResponse(true);
+      const response = await makeRequest(`search?${params}`, 'get');
 
-        const data: ISearchResult[] = await response.json();
+      if (response.is_ok) {
+        const data: ISearchResult[] = response.response;
 
         setSearchResults(data); // Handle the response data
 
@@ -42,12 +41,12 @@ const CourseSearchForm: Component=()=> {
         }
 
         setAwaitingResponse(false);
-      } catch (error) {
+      } else {
         setSuccess(false);
         setAwaitingResponse(false);
         setErrMsg("Error fetching data. Please try again later.");
 
-        console.error("Error fetching data:", error);
+        console.error("Error fetching data:", response.response.message);
       }
     }
   }
