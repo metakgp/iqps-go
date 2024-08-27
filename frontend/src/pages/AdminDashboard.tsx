@@ -20,7 +20,7 @@ export const AdminPage: Component = () => {
       setUnapprovedPapers(response.response);
       setFetchStatus("fetched");
     } else {
-      setErrMsg(`Error fetching papers: ${response.response.message} (${response.status_code})`);
+      setErrMsg(`Error fetching papers: ${response.response.message} (Status code: ${response.status_code})`);
       setFetchStatus("error");
     }
   }
