@@ -494,6 +494,7 @@ func JWTMiddleware(handler http.Handler) http.Handler {
 		}
 		JWTtoken := strings.Split(tokenString, " ")
 
+		fmt.Println(JWTtoken)
 		if len(JWTtoken) != 2 {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprint(w, "Authorisation head is of incorrect type")
@@ -599,7 +600,10 @@ func main() {
 	http.Handle("GET /unapproved", JWTMiddleware(http.HandlerFunc(listUnapprovedPapers)))
 
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"https://qp.metakgp.org", "http://localhost:3000"},
+		AllowCredentials: true,
+		AllowedHeaders:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedOrigins:   []string{"https://qp.metakgp.org", "http://localhost:3000"},
 	})
 
 	fmt.Println("Starting server on port 5000")
