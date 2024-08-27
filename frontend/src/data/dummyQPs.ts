@@ -1,4 +1,4 @@
-import { IAdminQuestionPaperResult } from "../types/types";
+import { IAdminDashboardQP } from "../types/types";
 import { getCourseFromCode } from "../utils/autofillData";
 import COURSE_CODE_MAP from "./courses.json"
 
@@ -8,20 +8,20 @@ let files = ["./dummyPDFs/sample1.pdf", "./dummyPDFs/sample2.pdf", "./dummyPDFs/
 
 const courses = Object.keys(COURSE_CODE_MAP);
 
-export let arr: IAdminQuestionPaperResult[] = [];
+export let arr: IAdminDashboardQP[] = [];
 
 for ( let i: number = 0; i < dataElements; i++){
     let courseIndex = Math.floor(Math.random() * courses.length);
-    let qp: IAdminQuestionPaperResult = {
+    let qp: IAdminDashboardQP = {
         course_code: courses[courseIndex],
         course_name: getCourseFromCode(courses[courseIndex])!,
         id: i,
         year: new Date().getFullYear() - (1 + Math.floor(Math.random() * 4)),
         semester: Math.floor(Math.random() * 2) ? "spring" : "autumn",
         exam: Math.floor(Math.random() * 2) ? "midsem" : "endsem",
-        approval: false,
-        reviewedBy: null,
-        file_link: files[Math.floor(Math.random() * 5)],
+        approve_status: false,
+        filelink: files[Math.floor(Math.random() * 5)],
+        from_library: false
     };
     arr.push(qp);
 }
