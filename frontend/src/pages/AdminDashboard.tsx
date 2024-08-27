@@ -4,19 +4,24 @@ import { A } from "@solidjs/router";
 import { useAuth } from "../components/AuthProvider";
 import { IAdminDashboardQP } from "../types/types";
 import { makeRequest } from "../utils/backend";
+import { Spinner } from "../components/Spinner";
 
 export const AdminPage: Component = () => {
   const auth = useAuth();
+  const [fetchStatus, setFetchStatus] = createSignal<"fetched" | "awaiting" | "error" | "not fetched">("not fetched");
   const [unapprovedPapers, setUnapprovedPapers] = createSignal<IAdminDashboardQP[]>([]);
   const [errMsg, setErrMsg] = createSignal<string | null>(null);
 
   const fetchUnapprovedPapers = async () => {
+    setFetchStatus("awaiting");
     const response = await makeRequest('unapproved', 'get', null, auth.jwt());
 
     if (response.is_ok) {
       setUnapprovedPapers(response.response);
+      setFetchStatus("fetched");
     } else {
-      setErrMsg(`Error fetching papers: ${response.response.message} (${response.status_code})`)
+      setErrMsg(`Error fetching papers: ${response.response.message} (${response.status_code})`);
+      setFetchStatus("error");
     }
   }
 
@@ -27,25 +32,30 @@ export const AdminPage: Component = () => {
   }
 
   return (
-    <div class="admin-page">
-      <div class="title">
-        <header>
-          <A href="#" class="admin">IQPS Admin Page</A>
-          <A href="/" class="search">Search</A>
-          <A href="/upload" class="upload">Upload</A>
-          {auth.isAuthenticated() ?
-            <span class="user">Welcome Admin!</span> :
-            <span class="user">Unauthenticated login attempted. This incident will be reported.</span>
+    <>
+      {auth.isAuthenticated() &&
+        <div class="admin-page">
+          <div class="title">
+            <header>
+              <A href="#" class="admin">IQPS Admin Page</A>
+              <A href="/" class="search">Search</A>
+              <A href="/upload" class="upload">Upload</A>
+              <span class="user">Welcome Admin!</span>
+            </header>
+          </div>
+          {errMsg() !== null && <span class="error">{errMsg()}</span>}
+          {fetchStatus() === "awaiting" && <div class="spinner"><Spinner /></div>}
+          {
+            fetchStatus() === "fetched" && (
+              unapprovedPapers().length > 0 ?
+                <div>
+                  <PDFLister QuestionPapers={unapprovedPapers()} />
+                </div> :
+                <p>No unapproved papers left.</p>
+            )
           }
-        </header>
-      </div>
-      {errMsg() !== null && <span class="error">{errMsg()}</span>}
-      {
-        auth.isAuthenticated() && (unapprovedPapers().length > 0) &&
-        <div>
-          <PDFLister QuestionPapers={unapprovedPapers()} />
         </div>
       }
-    </div>
+    </>
   )
 }
