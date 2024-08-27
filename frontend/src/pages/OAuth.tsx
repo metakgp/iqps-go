@@ -1,6 +1,7 @@
 import { Component, createSignal } from "solid-js";
 import { useAuth } from "../components/AuthProvider";
 import { useNavigate } from "@solidjs/router";
+import { makeRequest } from "../utils/backend";
 
 export const OAuthPage: Component = () => {
     const auth = useAuth();
@@ -8,21 +9,11 @@ export const OAuthPage: Component = () => {
     const [message, setMessage] = createSignal<string>("Authenticating, please wait...");
 
     const loginHandler = async (code: string) => {
-        const response = await fetch(
-            `${import.meta.env.VITE_BACKEND_URL}/oauth`,
-            {
-                method: "POST",
-                body: JSON.stringify({
-                    code
-                })
-            }
-        );
+        const response = await makeRequest('oauth', 'post', {code});
 
-        if (response.ok) {
-            const body = await response.json();
-
-            if ("token" in body) {
-                auth.logIn(body["token"]);
+        if (response.is_ok) {
+            if ("token" in response.response) {
+                auth.logIn(response.response["token"]);
                 navigate('/admin');
             }
             else {

@@ -56,6 +56,14 @@ export interface IEndpointTypes {
 	[route: `search?${string}`]: {
 		request: null,
 		response: ISearchResult[]
+	},
+	oauth: {
+		request: {
+			code: string
+		},
+		response: {
+			token: string
+		}
 	}
 }
 
