@@ -9,12 +9,15 @@ import { arr } from "../data/dummyQPs";
 export const AdminPage: Component = () => {
   const auth = useAuth();
   const [unapprovedPapers, setUnapprovedPapers] = createSignal<IAdminDashboardQP[]>(arr);
+  const [errMsg, setErrMsg] = createSignal<string | null>(null);
 
   const fetchUnapprovedPapers = async () => {
     const response = await makeRequest('unapproved', 'get', null, auth.jwt());
 
     if (response.is_ok) {
       setUnapprovedPapers(response.response);
+    } else {
+      setErrMsg(`Error fetching papers: ${response.response.message} (${response.status_code})`)
     }
   }
 
@@ -37,6 +40,7 @@ export const AdminPage: Component = () => {
           }
         </header>
       </div>
+      {errMsg() !== null && <span class="error">{errMsg()}</span>}
       {
         auth.isAuthenticated() &&
         <div>
