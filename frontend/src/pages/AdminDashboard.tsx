@@ -4,11 +4,10 @@ import { A } from "@solidjs/router";
 import { useAuth } from "../components/AuthProvider";
 import { IAdminDashboardQP } from "../types/types";
 import { makeRequest } from "../utils/backend";
-import { arr } from "../data/dummyQPs";
 
 export const AdminPage: Component = () => {
   const auth = useAuth();
-  const [unapprovedPapers, setUnapprovedPapers] = createSignal<IAdminDashboardQP[]>(arr);
+  const [unapprovedPapers, setUnapprovedPapers] = createSignal<IAdminDashboardQP[]>([]);
   const [errMsg, setErrMsg] = createSignal<string | null>(null);
 
   const fetchUnapprovedPapers = async () => {
@@ -42,7 +41,7 @@ export const AdminPage: Component = () => {
       </div>
       {errMsg() !== null && <span class="error">{errMsg()}</span>}
       {
-        auth.isAuthenticated() &&
+        auth.isAuthenticated() && (unapprovedPapers().length > 0) &&
         <div>
           <PDFLister QuestionPapers={unapprovedPapers()} />
         </div>
