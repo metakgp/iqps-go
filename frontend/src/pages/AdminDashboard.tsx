@@ -1,18 +1,27 @@
 import { Component, createSignal } from "solid-js";
 import { PDFLister } from "../components/PDFTableHead";
-import { arr } from "../data/dummyQPs";
 import { A } from "@solidjs/router";
 import { useAuth } from "../components/AuthProvider";
 import { IAdminDashboardQP } from "../types/types";
+import { makeRequest } from "../utils/backend";
+import { arr } from "../data/dummyQPs";
 
 export const AdminPage: Component = () => {
   const auth = useAuth();
-  const [unapprovedPapers, setUnapprovedPapers] = createSignal<IAdminDashboardQP[]>([]);
+  const [unapprovedPapers, setUnapprovedPapers] = createSignal<IAdminDashboardQP[]>(arr);
+
+  const fetchUnapprovedPapers = async () => {
+    const response = await makeRequest('unapproved', 'get', null, auth.jwt());
+
+    if (response.is_ok) {
+      setUnapprovedPapers(response.response);
+    }
+  }
 
   if (!auth.isAuthenticated()) {
     window.location.assign(`https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GH_OAUTH_CLIENT_ID}`);
   } else {
-
+    fetchUnapprovedPapers();
   }
 
   return (
