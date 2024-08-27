@@ -1,4 +1,4 @@
-import { ISearchResult } from "../types/types";
+import { IAdminDashboardQP, IQuestionPaper, ISearchResult } from "../types/types";
 
 const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL;
 
@@ -64,6 +64,10 @@ export interface IEndpointTypes {
 		response: {
 			token: string
 		}
+	},
+	unapproved: {
+		request: null,
+		response: IAdminDashboardQP[]
 	}
 }
 
