@@ -394,7 +394,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create JWT token
-	expirationTime := time.Now().Add(5 * time.Minute)
+	expirationTime := time.Now().Add(5 * time.Hour)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		Username: uname,
 		RegisteredClaims: jwt.RegisteredClaims{
