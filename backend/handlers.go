@@ -140,7 +140,7 @@ func ListUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
 			sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
 			return
 		}
-		qp.FileLink = fmt.Sprintf("%s/%s", config.Get().UploadedQPsPath, qp.FileLink)
+		qp.FileLink = fmt.Sprintf("%s/%s", config.Get().StaticFilesUrl, qp.FileLink)
 		qps = append(qps, qp)
 	}
 	config.Get().Logger.Info("listUnapprovedPapers: Unapproved Question paper count", slog.Int("QP count", len(qps)))
