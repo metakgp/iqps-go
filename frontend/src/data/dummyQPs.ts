@@ -1,4 +1,4 @@
-import { IAdminDashboardQP } from "../types/types";
+import { IAdminDashboardQP } from "../types/question_paper";
 import { getCourseFromCode } from "../utils/autofillData";
 import COURSE_CODE_MAP from "./courses.json"
 

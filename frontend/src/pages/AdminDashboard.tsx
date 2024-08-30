@@ -2,7 +2,7 @@ import { Component, createSignal } from "solid-js";
 import { PDFLister } from "../components/PDFTableHead";
 import { A } from "@solidjs/router";
 import { useAuth } from "../components/AuthProvider";
-import { IAdminDashboardQP } from "../types/types";
+import { IAdminDashboardQP } from "../types/question_paper";
 import { makeRequest } from "../utils/backend";
 import { Spinner } from "../components/Spinner";
 

@@ -1,5 +1,5 @@
 import COURSE_CODE_MAP from "../data/courses.json";
-import { Exam, IQuestionPaper, IQuestionPaperFile, Semester } from "../types/types";
+import { Exam, IQuestionPaper, IQuestionPaperFile, Semester } from "../types/question_paper";
 import * as pdfjsLib from 'pdfjs-dist';
 import Tesseract from 'tesseract.js';
 import { validate, validateCourseCode, validateExam, validateSemester, validateYear } from "./validateInput";

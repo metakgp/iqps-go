@@ -1,7 +1,7 @@
 import { Component, createSignal } from "solid-js";
 import { IoSearch as SearchIcon, IoLink as ShareIcon } from "solid-icons/io";
 import SearchResults from "./SearchResults";
-import type { ISearchResult } from "../types/types";
+import type { ISearchResult } from "../types/question_paper";
 import "../styles/styles.scss";
 import { copyLink } from "../utils/copyLink";
 import { makeRequest } from "../utils/backend";

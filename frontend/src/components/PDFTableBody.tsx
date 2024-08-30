@@ -3,7 +3,7 @@ import { FaSolidFilePdf as PDFIcon } from "solid-icons/fa";
 import COURSE_CODE_MAP from "../data/courses.json";
 import { Component } from "solid-js";
 import { createStore } from "solid-js/store";
-import { IAdminDashboardQP } from "../types/types";
+import { IAdminDashboardQP } from "../types/question_paper";
 import { IoCheckmarkCircle } from "solid-icons/io";
 import { Select, createOptions } from "@thisbeyond/solid-select";
 import { fileNamer } from "../utils/fileNamer";

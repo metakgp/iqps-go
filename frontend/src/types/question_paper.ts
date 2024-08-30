@@ -32,11 +32,3 @@ export interface IErrorMessage {
     examErr: string | null;
     semesterErr: string | null;
 };
-
-interface IUploadResult {
-    filename: string;
-    status: string;
-    description: string;
-};
-
-export type UploadResults = IUploadResult[];

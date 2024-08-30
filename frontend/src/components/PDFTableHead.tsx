@@ -1,5 +1,5 @@
 import { Component, For, createSignal } from "solid-js";
-import { IAdminDashboardQP } from "../types/types";
+import { IAdminDashboardQP } from "../types/question_paper";
 import { ListElement } from "./PDFTableBody";
 import { createStore } from "solid-js/store";
 

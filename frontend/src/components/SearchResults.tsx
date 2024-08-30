@@ -1,5 +1,5 @@
 import { Component, For, createEffect, createSignal } from "solid-js";
-import type { ISearchResult } from "../types/types";
+import type { ISearchResult } from "../types/question_paper";
 import { Spinner } from "./Spinner";
 import { IoLink as ShareIcon } from "solid-icons/io";
 import { FaSolidFilePdf as DownloadIcon } from "solid-icons/fa";

@@ -1,4 +1,4 @@
-import { IErrorMessage, IQuestionPaperFile } from "../types/types";
+import { IErrorMessage, IQuestionPaperFile } from "../types/question_paper";
 
 export const validateCourseCode = (course_code: string): boolean => {
     return course_code.length === 7 && course_code.match(/[a-z]{2}\d{5}/i) !== null;
