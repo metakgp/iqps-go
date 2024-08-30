@@ -1,7 +1,7 @@
 import { Header } from "../components/Common/Common";
 import { FaUpload } from "react-icons/fa6";
 
-function LandingPage() {
+function SearchPage() {
 	return <>
 		<Header
 			title="Intelligent Question Paper Search"
@@ -16,4 +16,4 @@ function LandingPage() {
 	</>;
 }
 
-export default LandingPage;
+export default SearchPage;

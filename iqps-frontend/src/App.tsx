@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
+import SearchPage from "./pages/SearchPage";
 import UploadPage from "./pages/UploadPage";
 import OAuthPage from "./pages/OAuthPage";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -12,7 +12,7 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={<LandingPage />}
+            element={<SearchPage />}
           />
           <Route
             path="/upload"
