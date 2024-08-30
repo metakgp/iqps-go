@@ -1,0 +1,46 @@
+.search-form {
+	padding: 20px 15%;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	margin-bottom: 20px;
+
+	.search-form-btns {
+		display: flex;
+		gap: 1rem;
+	}
+
+	label {
+		display: block;
+		margin-bottom: 0.5rem;
+		color: rgba($fg-color, 0.7);
+		font-size: 0.9rem;
+	}
+
+	button {
+		background-color: rgba($accent-color, 0.8);
+		color: rgba($fg-color, 0.75);
+		padding: 10px 15px;
+		margin-bottom: 1rem;
+		border: none;
+		border-radius: 5px;
+		font-weight: 600;
+		font-size: 1rem;
+		cursor: pointer;
+
+		&:hover {
+			background-color: $accent-color-darker;
+		}
+
+		&:disabled {
+			background-color: $accent-color-disabled;
+
+			&:hover {
+				cursor: default;
+			}
+		}
+	}
+
+	@media only screen and (max-width: 768px) {
+		padding: 0;
+	}
+}
