@@ -6,6 +6,7 @@ import { AiOutlineCloudUpload, AiOutlineFileAdd } from "react-icons/ai";
 import { isQPValid, validate } from "../../utils/validateInput";
 import { UploadDragAndDrop } from "./UploadDragAndDrop";
 import PaperEditModal from "./PaperEditModal";
+import { autofillData } from "../../utils/autofillData";
 
 interface IUploadFormProps {
 	max_upload_limit: number;
