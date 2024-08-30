@@ -58,3 +58,29 @@ a {
 	gap: 8px;
 	align-items: center;
 }
+
+input,
+select,
+.select {
+	width: 100%;
+	padding: 8px 10px;
+	margin-bottom: 1rem;
+	outline: none;
+	border: 2px solid rgba($fg-color, 0.5);
+	border-radius: 5px;
+	box-sizing: border-box;
+	font-family: "Hanken Grotesk", sans-serif;
+	font-size: 1rem;
+
+	background-color: rgba($surface-1, 0.2);
+	color: rgba($fg-color, 0.8);
+
+	&:focus {
+		border-color: rgba($fg-color, 0.8);
+	}
+
+	option {
+		background-color: $bg-color;
+		color: rgba($fg-color, 0.8);
+	}
+}

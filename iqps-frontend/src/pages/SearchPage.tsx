@@ -1,5 +1,6 @@
 import { Header } from "../components/Common/Common";
 import { FaUpload } from "react-icons/fa6";
+import CourseSearchForm from "../components/Search/SearchForm";
 
 function SearchPage() {
 	return <>
@@ -13,6 +14,7 @@ function SearchPage() {
 				button_text: "Upload!"
 			}}
 		/>
+		<CourseSearchForm />
 	</>;
 }
 
