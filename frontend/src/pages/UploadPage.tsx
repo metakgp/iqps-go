@@ -5,10 +5,11 @@ import toast, { Toaster } from "solid-toast";
 import { AiOutlineCloudUpload as UploadIcon, AiOutlineFileAdd as FileAddIcon } from "solid-icons/ai";
 import { IoSearch as SearchIcon } from "solid-icons/io";
 import { autofillData, sanitizeQP } from "../utils/autofillData";
-import { IQuestionPaperFile, UploadResults } from "../types/types";
+import { IQuestionPaperFile } from "../types/question_paper";
 import Modal from "../components/EditModal";
 import { Spinner } from "../components/Spinner";
 import { validate } from "../utils/validateInput";
+import { makeRequest } from "../utils/backend";
 
 const UploadPage: Component = () => {
     let MAX_UPLOAD_LIMIT = parseInt(import.meta.env.VITE_MAX_UPLOAD_LIMIT)
@@ -155,37 +156,37 @@ const UploadPage: Component = () => {
                 toast(`Uploading ${numPapers} file${numPapers > 1 ? 's' : ''}.`);
 
                 setAwaitingResponse(true);
-                const response = await fetch(
-                    `${import.meta.env.VITE_BACKEND_URL}/upload`,
-                    {
-                        method: "POST",
-                        body: formData
-                    }
-                );
-                const upload_results: UploadResults = await response.json();
+                const response = await makeRequest('upload', 'post', formData);
 
-                for (const result of upload_results) {
-                    if (result.status === "success") {
-                        toast.success(
-                            `File ${result.filename} uploaded successfully`
-                        );
-                    } else {
-                        toast.error(
-                            `Failed to upload file ${result.filename}: ${result.description}`
-                        );
+                if (response.status === 'success') {
+                    const upload_results = response.data;
+
+                    for (const result of upload_results) {
+                        if (result.status === "success") {
+                            toast.success(
+                                `File ${result.filename} uploaded successfully`
+                            );
+                        } else {
+                            toast.error(
+                                `Failed to upload file ${result.filename}: ${result.description}`
+                            );
+                        }
                     }
+
+                    if (upload_results.length < numPapers) {
+                        const failedPapers = numPapers - upload_results.length;
+                        toast.error(`${failedPapers} paper${failedPapers > 1 ? 's' : ''} failed to upload.`);
+                    }
+
+                    clearQPapers();
+                } else {
+                    toast.error(`Failed to upload files. Error: ${response.message} (${response.status_code})`);
                 }
 
-                if (upload_results.length < numPapers) {
-                    const failedPapers = numPapers - upload_results.length;
-                    toast.error(`${failedPapers} paper${failedPapers > 1 ? 's' : ''} failed to upload.`)
-                }
-
-                clearQPapers();
                 setAwaitingResponse(false);
             } catch (error) {
                 toast.error("Failed to upload file due to an unknown error. Please try again later.");
-                console.error("Error during upload:", error);
+                console.error("Upload error:", error);
                 setAwaitingResponse(false);
             }
         }
