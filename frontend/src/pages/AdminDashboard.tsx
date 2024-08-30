@@ -16,11 +16,11 @@ export const AdminPage: Component = () => {
     setFetchStatus("awaiting");
     const response = await makeRequest('unapproved', 'get', null, auth.jwt());
 
-    if (response.is_ok) {
-      setUnapprovedPapers(response.response);
+    if (response.status === 'success') {
+      setUnapprovedPapers(response.data);
       setFetchStatus("fetched");
     } else {
-      setErrMsg(`Error fetching papers: ${response.response.message} (Status code: ${response.status_code})`);
+      setErrMsg(`Error fetching papers: ${response.message} (Status code: ${response.status_code})`);
       setFetchStatus("error");
     }
   }

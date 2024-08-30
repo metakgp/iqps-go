@@ -11,9 +11,9 @@ export const OAuthPage: Component = () => {
     const loginHandler = async (code: string) => {
         const response = await makeRequest('oauth', 'post', {code});
 
-        if (response.is_ok) {
-            if ("token" in response.response) {
-                auth.logIn(response.response["token"]);
+        if (response.status === 'success') {
+            if ("token" in response.data) {
+                auth.logIn(response.data["token"]);
                 navigate('/admin');
             }
             else {
