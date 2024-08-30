@@ -5,6 +5,7 @@ import Spinner from "../Spinner/Spinner";
 import { AiOutlineCloudUpload, AiOutlineFileAdd } from "react-icons/ai";
 import { validate } from "../../utils/validateInput";
 import { UploadDragAndDrop } from "./UploadDragAndDrop";
+import PaperEditModal from "./PaperEditModal";
 
 interface IUploadFormProps {
 	max_upload_limit: number;
@@ -46,6 +47,14 @@ export function UploadForm(props: IUploadFormProps) {
 		setQPapers((prevQPs) =>
 			prevQPs.filter((qp) => qp.file.name !== filename)
 		);
+	};
+
+	const updateQPaper = (updated: IQuestionPaperFile) => {
+		let updateData = qPapers.map((qp) => {
+			if (qp.file.name == updated.file.name) return updated;
+			else return qp;
+		});
+		setQPapers(updateData);
 	};
 
 	const fileInputRef = createRef<HTMLInputElement>();
@@ -96,5 +105,13 @@ export function UploadForm(props: IUploadFormProps) {
 				!props.awaitingResponse && <UploadDragAndDrop max_upload_limit={props.max_upload_limit} fileInputRef={fileInputRef} addQPapers={addQPapers} openFileDialog={openFileDialog} />
 			)
 		}
+
+		{selectedQPaper !== null && (
+			<PaperEditModal
+				onClose={() => setSelectedQPaper(null)}
+				qPaper={selectedQPaper}
+				updateQPaper={updateQPaper}
+			/>
+		)}
 	</div >;
 }
