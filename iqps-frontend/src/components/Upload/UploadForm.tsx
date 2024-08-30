@@ -3,7 +3,7 @@ import { IQuestionPaperFile } from "../../types/question_paper";
 import { FileCard } from "./FileCard";
 import Spinner from "../Spinner/Spinner";
 import { AiOutlineCloudUpload, AiOutlineFileAdd } from "react-icons/ai";
-import { validate } from "../../utils/validateInput";
+import { isQPValid, validate } from "../../utils/validateInput";
 import { UploadDragAndDrop } from "./UploadDragAndDrop";
 import PaperEditModal from "./PaperEditModal";
 
@@ -11,17 +11,13 @@ interface IUploadFormProps {
 	max_upload_limit: number;
 	awaitingResponse: boolean;
 
-	handleUpload: () => void;
+	handleUpload: (qpapers: IQuestionPaperFile[]) => Promise<boolean>;
 	setAwaitingResponse: Dispatch<React.SetStateAction<boolean>>;
 }
 export function UploadForm(props: IUploadFormProps) {
 	const [qPapers, setQPapers] = useState<IQuestionPaperFile[]>([]);
 	const [selectedQPaper, setSelectedQPaper] =
 		useState<IQuestionPaperFile | null>(null);
-
-	const isQPValid = (data: IQuestionPaperFile) => {
-		return !Object.values(validate(data)).some(Boolean);
-	};
 
 	const addQPapers = async (newFiles: File[]) => {
 		try {
@@ -57,6 +53,13 @@ export function UploadForm(props: IUploadFormProps) {
 		setQPapers(updateData);
 	};
 
+	const onUpload: MouseEventHandler = async (e) => {
+		e.preventDefault();
+		const success = await props.handleUpload(qPapers);
+
+		if (success) setQPapers([]);
+	}
+
 	const fileInputRef = createRef<HTMLInputElement>();
 	const openFileDialog: MouseEventHandler = (e) => {
 		e.stopPropagation();
@@ -84,7 +87,7 @@ export function UploadForm(props: IUploadFormProps) {
 						)}
 					</div>
 					<div className="upload-section-btns">
-						<button onClick={props.handleUpload} className="upload-btn">
+						<button onClick={onUpload} className="upload-btn">
 							{props.awaitingResponse ? (
 								<>
 									Uploading
