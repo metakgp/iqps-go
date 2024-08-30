@@ -6,6 +6,7 @@ import { createRef, useState } from "react";
 import { Exam, ISearchResult } from "../../types/question_paper";
 import { copyLink } from "../../utils/copyLink";
 import { makeRequest } from "../../utils/backend";
+import SearchResults from "./SearchResults";
 
 function CourseSearchForm() {
 	const currentURL = new URL(window.location.toString());
@@ -95,7 +96,7 @@ function CourseSearchForm() {
 		<SearchResults
 			awaitingResults={awaitingResponse}
 			success={success}
-			errMsg={msg}
+			msg={msg}
 			results={searchResults}
 		/>
 	</div>;
