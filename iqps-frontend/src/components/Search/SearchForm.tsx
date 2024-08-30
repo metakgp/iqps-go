@@ -11,7 +11,7 @@ import SearchResults from "./SearchResults";
 function CourseSearchForm() {
 	const currentURL = new URL(window.location.toString());
 
-	const [courseName, setCourseName] = useState<string>(currentURL.searchParams.get('query') ?? '');
+	const [query, setQuery] = useState<string>(currentURL.searchParams.get('query') ?? '');
 	const [exam, setExam] = useState<Exam | ''>(currentURL.searchParams.get('exam') as Exam ?? '');
 
 	const [searchResults, setSearchResults] = useState<ISearchResult[]>([]);
@@ -25,8 +25,10 @@ function CourseSearchForm() {
 	const fetchResults = async () => {
 		if (!awaitingResponse) {
 			const params = new URLSearchParams();
-			if (courseName !== '') params.append("course", courseName);
-			if (exam !== '') params.append("exam", exam);
+			if (query === '') return;
+
+			params.append("course", query);
+			params.append("exam", exam);
 
 			setAwaitingResponse(true);
 			const response = await makeRequest(`search?${params}`, 'get');
@@ -62,7 +64,7 @@ function CourseSearchForm() {
 
 		// Add the query to the URL
 		const url = new URL(window.location.toString());
-		url.searchParams.set('query', courseName);
+		url.searchParams.set('query', query);
 		url.searchParams.set('exam', exam);
 
 		window.history.replaceState(window.history.state, "", url);
@@ -70,7 +72,7 @@ function CourseSearchForm() {
 
 	// Load results if the link has a query
 	useEffect(() => {
-		if (courseName !== '') {
+		if (query !== '') {
 			fetchResults();
 		}
 	}, [])
@@ -79,7 +81,7 @@ function CourseSearchForm() {
 		<form onSubmit={handleSubmit}>
 			<div>
 				<label htmlFor="course">Course Name:</label>
-				<input ref={courseInputRef} autoFocus={true} id="course" value={courseName} onInput={() => setCourseName(courseInputRef.current?.value ?? '')} />
+				<input ref={courseInputRef} autoFocus={true} id="course" value={query} onInput={() => setQuery(courseInputRef.current?.value ?? '')} />
 			</div>
 			<div>
 				<label htmlFor="exam">Exam:</label>
