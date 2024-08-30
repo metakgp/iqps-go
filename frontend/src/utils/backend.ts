@@ -1,14 +1,12 @@
-import { IAdminDashboardQP, IQuestionPaper, ISearchResult } from "../types/types";
+import { AllowedBackendMethods, BackendResponse, IEndpointTypes } from "../types/backend";
 
-const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL;
-
-type AllowedBackendMethods = "get" | "post";
+export const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL;
 
 async function makeBackendRequest(
 	endpoint: string,
 	method: AllowedBackendMethods,
 	jwt: string | null,
-	body: Object | null,
+	body: Object | FormData | null,
 ): Promise<Response> {
 	const headers: {
 		"Content-Type"?: string;
@@ -16,7 +14,12 @@ async function makeBackendRequest(
 	} = new Object();
 
 	if (jwt !== null) headers["Authorization"] = `Bearer ${jwt}`;
-	if (body !== null) headers["Content-Type"] = "application/json";
+	if (
+		!(
+			body == null ||
+			body instanceof FormData
+		)
+	) headers["Content-Type"] = "application/json";
 
 	switch (method) {
 		case "get":
@@ -28,46 +31,8 @@ async function makeBackendRequest(
 			return await fetch(`${BACKEND_URL}/${endpoint}`, {
 				method,
 				headers,
-				body: JSON.stringify(body ?? {}),
+				body: body instanceof FormData ? body : JSON.stringify(body ?? {}),
 			});
-	}
-}
-
-interface IOkResponse<T> {
-	is_ok: true;
-	status_code: 200;
-	response: T;
-}
-
-interface IErrorResponse {
-	is_ok: false;
-	status_code: number | string;
-	response: IHTTPMessage;
-}
-
-type BackendResponse<T> = IOkResponse<T> | IErrorResponse;
-
-export interface IHTTPMessage {
-	status_code?: number;
-	message: string;
-}
-
-export interface IEndpointTypes {
-	[route: `search?${string}`]: {
-		request: null,
-		response: ISearchResult[]
-	},
-	oauth: {
-		request: {
-			code: string
-		},
-		response: {
-			token: string
-		}
-	},
-	unapproved: {
-		request: null,
-		response: IAdminDashboardQP[]
 	}
 }
 
@@ -81,39 +46,22 @@ export async function makeRequest<E extends keyof IEndpointTypes>(
 		const response = await makeBackendRequest(endpoint, method, jwt, params);
 
 		try {
-			if (response.ok) {
-				return {
-					is_ok: true,
-					status_code: 200,
-					response: await response.json(),
-				};
-			}
-
 			return {
-				is_ok: false,
-				status_code: response.status,
-				response: {
-					status_code: response.status,
-					message: await response.text()
-				},
-			};
+				...await response.json(),
+				status_code: response.status
+			}
 		} catch (e) {
 			return {
-				is_ok: false,
+				status: "error",
 				status_code: response.status,
-				response: {
-					status_code: response.status,
-					message: "An unexpected error occurred.",
-				},
+				message: await response.text()
 			};
 		}
 	} catch (e) {
 		return {
-			is_ok: false,
-			status_code: 'over 9000',
-			response: {
-				message: `An unexpected error occurred: ${e}`
-			}
+			status: "error",
+			status_code: 'Over 9000',
+			message: `An unexpected error occurred: ${e}`
 		}
 	}
 }
