@@ -27,7 +27,7 @@ function SearchResults(props: ISearchResultsProps) {
 	const updateFilters = (field: FilterFields, value: string) => {
 		switch (field) {
 			case 'filterByYear':
-				setFilterByYear(parseInt(value));
+				setFilterByYear(value === 'null' ? null : parseInt(value));
 				break;
 			case 'sortBy':
 				setSortBy(value as SortBy);
@@ -63,6 +63,7 @@ function SearchResults(props: ISearchResultsProps) {
 		setDisplayedResults(sorted_results);
 	}
 
+	// To update when new results are fetched
 	useEffect(() => {
 		const unique_years: Set<number> = new Set();
 
@@ -71,6 +72,9 @@ function SearchResults(props: ISearchResultsProps) {
 
 		updateDisplayedResults();
 	}, [props.results])
+
+	// To update when filters are changed
+	useEffect(updateDisplayedResults, [filterByYear, sortBy, sortOrder])
 
 	return <div className="search-results">
 		{
