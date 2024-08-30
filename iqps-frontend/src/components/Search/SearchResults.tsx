@@ -94,7 +94,7 @@ function SearchResults(props: ISearchResultsProps) {
 									</tr>
 								</thead>
 								<tbody>
-									{displayedResults.map(ResultCard)}
+									{displayedResults.map((result, i) => <ResultCard key={i} {...result} />)}
 								</tbody>
 							</table>
 						</>
@@ -187,7 +187,7 @@ function Select(props: ISelectProps) {
 			value={props.value}
 			onInput={props.onInput}
 		>
-			{props.options.map(({ value, title }) => <option value={value}>{title}</option>)}
+			{props.options.map(({ value, title }, i) => <option key={i} value={value}>{title}</option>)}
 		</select>
 	</div>;
 }
