@@ -4,6 +4,7 @@ import { FileCard, IFileCardProps } from "./FileCard";
 import Spinner from "../Spinner/Spinner";
 import { AiOutlineCloudUpload, AiOutlineFileAdd } from "react-icons/ai";
 import { validate } from "../../utils/validateInput";
+import toast from "react-hot-toast";
 
 interface IUploadDragAndDropProps {
 	removeQPaper: IFileCardProps['removeQPaper'];
@@ -71,6 +72,28 @@ export function UploadDragAndDrop(props: IUploadDragAndDropProps) {
 		} finally {
 			props.setAwaitingResponse(false); // Set loading state to false
 		}
+	};
+
+	const onFileDrop: DragEventHandler<HTMLDivElement> = async (e) => {
+		e.preventDefault();
+
+		if (e.dataTransfer) {
+			const pdfFiles = [...e.dataTransfer.files].filter(
+				(file) => file.type === "application/pdf"
+			);
+			if (pdfFiles && pdfFiles.length > 0) {
+				if (pdfFiles.length > props.max_upload_limit) {
+					toast.error(`max ${props.max_upload_limit} files allowed`);
+					return;
+				}
+				await addQPapers(pdfFiles);
+			} else {
+				toast.error("Could not catch files. Please try again");
+			}
+			e.dataTransfer.clearData();
+		}
+
+		setIsDragging(false);
 	};
 
 	return <div className="upload-section">
