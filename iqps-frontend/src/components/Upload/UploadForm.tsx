@@ -1,23 +1,23 @@
 import { ChangeEvent, createRef, Dispatch, DragEventHandler, MouseEventHandler, useState } from "react";
 import { IQuestionPaperFile } from "../../types/question_paper";
-import { FileCard, IFileCardProps } from "./FileCard";
+import { FileCard } from "./FileCard";
 import Spinner from "../Spinner/Spinner";
 import { AiOutlineCloudUpload, AiOutlineFileAdd } from "react-icons/ai";
 import { validate } from "../../utils/validateInput";
 import toast from "react-hot-toast";
 
-interface IUploadDragAndDropProps {
-	removeQPaper: IFileCardProps['removeQPaper'];
+interface IUploadFormProps {
 	max_upload_limit: number;
 	awaitingResponse: boolean;
 
-	openModal: () => void;
 	handleUpload: () => void;
 	setAwaitingResponse: Dispatch<React.SetStateAction<boolean>>;
 }
-export function UploadDragAndDrop(props: IUploadDragAndDropProps) {
+export function UploadForm(props: IUploadFormProps) {
 	const [qPapers, setQPapers] = useState<IQuestionPaperFile[]>([]);
 	const [isDragging, setIsDragging] = useState<boolean>(false);
+	const [selectedQPaper, setSelectedQPaper] =
+		useState<IQuestionPaperFile | null>(null);
 
 	const fileInputRef = createRef<HTMLInputElement>();
 
@@ -74,6 +74,12 @@ export function UploadDragAndDrop(props: IUploadDragAndDropProps) {
 		}
 	};
 
+	const removeQPaper = (filename: string) => {
+		setQPapers((prevQPs) =>
+			prevQPs.filter((qp) => qp.file.name !== filename)
+		);
+	};
+
 	const onFileDrop: DragEventHandler<HTMLDivElement> = async (e) => {
 		e.preventDefault();
 
@@ -104,8 +110,8 @@ export function UploadDragAndDrop(props: IUploadDragAndDropProps) {
 						(qp, i) => <div key={i}>
 							<FileCard
 								qPaper={qp}
-								removeQPaper={props.removeQPaper}
-								edit={props.openModal}
+								removeQPaper={removeQPaper}
+								edit={setSelectedQPaper}
 							/>
 							{!isQPValid(qp) && (
 								<p className="error-msg">

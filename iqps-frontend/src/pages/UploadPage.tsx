@@ -10,8 +10,6 @@ function UploadPage() {
 	if (isNaN(MAX_UPLOAD_LIMIT) || MAX_UPLOAD_LIMIT < 1) {
 		MAX_UPLOAD_LIMIT = 10
 	}
-	const [selectedQPaper, setSelectedQPaper] =
-		useState<IQuestionPaperFile | null>(null);
 	const [awaitingResponse, setAwaitingResponse] =
 		useState<boolean>(false);
 
@@ -40,7 +38,14 @@ function UploadPage() {
 							Loading files, please wait...
 						</p>
 					</div> :
-				<UploadDragAndDrop />
+					<UploadDragAndDrop
+						max_upload_limit={MAX_UPLOAD_LIMIT}
+						awaitingResponse={awaitingResponse}
+
+						openModal={ }
+						handleUpload={ }
+						setAwaitingResponse={setAwaitingResponse}
+					/>
 			}
 		</div>
 	</>;
