@@ -2,7 +2,7 @@ import { FaSearch } from "react-icons/fa";
 import { IoLink } from "react-icons/io5";
 
 import './search_form.scss';
-import { createRef, useState } from "react";
+import { createRef, FormEvent, useEffect, useState } from "react";
 import { Exam, ISearchResult } from "../../types/question_paper";
 import { copyLink } from "../../utils/copyLink";
 import { makeRequest } from "../../utils/backend";
@@ -56,7 +56,7 @@ function CourseSearchForm() {
 		}
 	}
 
-	const handleSubmit = async (event: any) => {
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault(); // Prevent the default form submit action
 		await fetchResults(); // Search the query
 
@@ -67,6 +67,13 @@ function CourseSearchForm() {
 
 		window.history.replaceState(window.history.state, "", url);
 	}
+
+	// Load results if the link has a query
+	useEffect(() => {
+		if (courseName !== '') {
+			fetchResults();
+		}
+	}, [])
 
 	return <div className="search-form">
 		<form onSubmit={handleSubmit}>
