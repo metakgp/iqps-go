@@ -3,6 +3,7 @@ import LandingPage from "./pages/LandingPage";
 import UploadPage from "./pages/UploadPage";
 import OAuthPage from "./pages/OAuthPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import { Footer } from "./components/Common/Common";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             element={<AdminDashboard />}
           />
         </Routes>
+        <Footer />
       </BrowserRouter>
     </>
   )

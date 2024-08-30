@@ -1,0 +1,32 @@
+@import "../../styles/variables";
+
+.meta-footer {
+	width: 100%;
+	text-align: center;
+
+	margin-top: auto;
+	margin-bottom: 10px;
+}
+
+.header {
+	margin-bottom: 2rem;
+	text-align: center;
+
+	.header-link {
+		display: flex;
+		justify-content: center;
+		gap: 0.5rem;
+		align-items: center;
+
+		.header-link-btn {
+			gap: 0.3rem;
+			display: inline-flex;
+			align-items: center;
+
+			background-color: rgba($accent-color, 0.8);
+			color: $fg-color;
+			padding: 0.35rem 0.5rem;
+			border-radius: 5px;
+		}
+	}
+}
