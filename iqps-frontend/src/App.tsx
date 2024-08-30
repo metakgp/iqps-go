@@ -4,6 +4,7 @@ import UploadPage from "./pages/UploadPage";
 import OAuthPage from "./pages/OAuthPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import { Footer } from "./components/Common/Common";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -28,6 +29,12 @@ function App() {
           />
         </Routes>
         <Footer />
+        <Toaster
+          toastOptions={{
+            position: 'bottom-center',
+            className: 'toast'
+          }}
+        />
       </BrowserRouter>
     </>
   )
