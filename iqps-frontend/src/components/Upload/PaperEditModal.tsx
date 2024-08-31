@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { validate } from "../../utils/validateInput";
-import { IErrorMessage, IQuestionPaperFile } from "../../types/question_paper";
+import { Exam, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
 import { getCourseFromCode } from "../../utils/autofillData";
 import { Select } from "../Common/Common";
 
@@ -102,47 +102,27 @@ function PaperEditModal(props: IPaperEditModalProps) {
 					label="Exam:"
 					validationError={validationErrors.examErr}
 				>
-					<div className="radio-group">
-						<label>
-							<input
-								type="radio"
-								checked={data.exam == "midsem"}
-								onInput={(e) => e.currentTarget.checked && changeData('exam', 'midsem')}
-							/>
-							Mid Semester
-						</label>
-						<label>
-							<input
-								type="radio"
-								checked={data.exam == "endsem"}
-								onInput={(e) => e.currentTarget.checked && changeData('exam', 'endsem')}
-							/>
-							End Semester
-						</label>
-					</div>
+					<RadioGroup
+						options={[
+							{label: 'Mid Semester', value: 'midsem'},
+							{label: 'End Semester', value: 'endsem'}
+						]}
+						value={data.exam as Exam}
+						onSelect={(value: Exam) => changeData('exam', value)}
+					/>
 				</FormGroup>
 				<FormGroup
 					label="Semester:"
 					validationError={validationErrors.semesterErr}
 				>
-					<div className="radio-group">
-						<label>
-							<input
-								type="radio"
-								checked={data.semester == "autumn"}
-								onInput={(e) => e.currentTarget.checked && changeData('semester', 'autumn')}
-							/>
-							Autumn Semester
-						</label>
-						<label>
-							<input
-								type="radio"
-								checked={data.semester == "spring"}
-								onInput={(e) => e.currentTarget.checked && changeData('semester', 'spring')}
-							/>
-							Spring Semester
-						</label>
-					</div>
+					<RadioGroup
+						options={[
+							{label: 'Autumn Semester', value: 'autumn'},
+							{label: 'Spring Semester', value: 'spring'}
+						]}
+						value={data.semester}
+						onSelect={(value: Semester) => changeData('semester', value)}
+					/>
 				</FormGroup>
 				<div className="control-group">
 					<button
@@ -188,6 +168,31 @@ function FormGroup(props: IFormGroupProps) {
 				</p>
 			)}
 		</div>
+	</div>
+}
+
+interface IRadioGroupProps<T> {
+	value: T;
+	options: {
+		label: string;
+		value: T;
+	}[];
+	onSelect: (value: T) => void;
+}
+function RadioGroup<T>(props: IRadioGroupProps<T>) {
+	return <div className="radio-group">
+		{
+			props.options.map(({label, value}, i) => {
+				return <label key={i}>
+					<input
+						type="radio"
+						checked={props.value === value}
+						onInput={(e) => e.currentTarget.checked && props.onSelect(value)}
+					/>
+					{label}
+				</label>
+			})
+		}
 	</div>
 }
 
