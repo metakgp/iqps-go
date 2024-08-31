@@ -48,8 +48,7 @@ function PaperEditModal(props: IPaperEditModalProps) {
 		<div className="modal">
 			<form className="upload-form">
 				<h2>Edit Course Details</h2>
-				<div className="form-group">
-					<label htmlFor="filename">Filename:</label>
+				<FormGroup label="Filename:">
 					<input
 						type="text"
 						id="filename"
@@ -57,7 +56,7 @@ function PaperEditModal(props: IPaperEditModalProps) {
 						value={data.file.name}
 						disabled
 					/>
-				</div>
+				</FormGroup>
 				<div className="two-columns">
 					<FormGroup
 						label="Course Code:"
@@ -176,7 +175,7 @@ function PaperEditModal(props: IPaperEditModalProps) {
 interface IFormGroupProps {
 	label: string;
 	children: React.ReactNode;
-	validationError: string | null;
+	validationError?: string | null;
 }
 function FormGroup(props: IFormGroupProps) {
 	return <div className="form-group">
