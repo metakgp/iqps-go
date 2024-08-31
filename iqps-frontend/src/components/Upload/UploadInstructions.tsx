@@ -1,3 +1,5 @@
+import './upload_instructions.scss';
+
 export function UploadInstructions() {
 	return <div className="upload-instructions">
 		<h2 className="instruction-heading">Upload Instructions</h2>

@@ -1,0 +1,56 @@
+.upload-instructions {
+	width: 30%;
+	height: 100%;
+	padding: 0 1rem;
+
+	.instruction-section {
+		margin-bottom: 1rem;
+
+		h3 {
+			margin-bottom: 0.5rem;
+		}
+
+		p {
+			margin: 0;
+			margin-bottom: 0.25rem;
+		}
+
+		.file-format-example {
+			background-color: $accent-color;
+			font-weight: bold;
+			padding: 0.1rem 0.5rem;
+			border-radius: 0.25rem;
+			margin-top: 0.25rem;
+			overflow: auto;
+			margin-bottom: 0.45rem;
+			width: fit-content;
+			max-width: 100%;
+		}
+	}
+
+	.note {
+		margin-top: 1rem;
+	}
+
+	.instruction-heading {
+		text-align: left;
+		margin-top: 0;
+		margin-bottom: 1rem;
+		font-size: 1.5rem;
+
+		.accordion-icon {
+			display: none;
+			transition: all 0.4s ease;
+			transform: rotateX(0deg);
+		}
+
+		&.accordion-open .accordion-icon {
+			transition: all 0.4s ease;
+			transform: rotateX(180deg);
+		}
+	}
+
+	@media screen and (max-width: 1000px) {
+		width: 100%;
+	}
+}
