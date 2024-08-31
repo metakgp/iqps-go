@@ -1,17 +1,40 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { validate } from "../../utils/validateInput";
 import { IErrorMessage, IQuestionPaperFile } from "../../types/question_paper";
+import { getCourseFromCode } from "../../utils/autofillData";
 
 interface IPaperEditModalProps {
-    onClose: () => void;
-    qPaper: IQuestionPaperFile;
-    updateQPaper: (qp: IQuestionPaperFile) => void;
+	onClose: () => void;
+	qPaper: IQuestionPaperFile;
+	updateQPaper: (qp: IQuestionPaperFile) => void;
 };
 function PaperEditModal(props: IPaperEditModalProps) {
 	const [data, setData] = useState(props.qPaper);
 	const [validationErrors, setValidationErrors] = useState<IErrorMessage>(validate(props.qPaper));
 	const [isDataValid, setIsDataValid] = useState<boolean>(false);
+
+	// Check for data validity on change
+	useEffect(() => {
+		const errors = validate(data);
+
+		setValidationErrors(errors);
+		setIsDataValid(Object.values(errors).every((err) => err === null));
+	}, [data])
+
+	// Automatically fill course name if course code changes
+	useEffect(() => {
+		if (data.course_code.length === 7) {
+			const course_name = getCourseFromCode(data.course_code);
+
+			if (course_name !== null) setData((prev_data) => {
+				return {
+					...prev_data,
+					course_name
+				}
+			})
+		}
+	}, [data])
 
 	return <div className="modal-overlay">
 		<div className="modal">
