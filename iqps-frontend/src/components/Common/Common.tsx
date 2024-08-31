@@ -36,3 +36,24 @@ export function Header(props: IHeaderProps) {
 export function Navbar() {
 	return <></>;
 }
+
+interface ISelectProps {
+	value: React.SelectHTMLAttributes<HTMLSelectElement>['value'];
+	onInput: React.FormEventHandler<HTMLSelectElement>;
+	options: { value: string; title: string }[];
+	id?: string;
+	required?: boolean;
+}
+export function Select(props: ISelectProps) {
+	return <div className="select-wrapper">
+		<select
+			value={props.value}
+			onInput={props.onInput}
+			id={props.id}
+			required={props.required}
+		>
+			{props.options.map(({ value, title }, i) => <option key={i} value={value}>{title}</option>)}
+		</select>
+	</div>;
+}
+

@@ -5,6 +5,7 @@ import Spinner from '../Spinner/Spinner';
 import './search_results.scss';
 import { IoLink } from 'react-icons/io5';
 import { FaFilePdf } from 'react-icons/fa6';
+import { Select } from '../Common/Common';
 
 type SortBy = 'course_name' | 'year';
 type SortOrder = 'ascending' | 'descending';
@@ -178,22 +179,6 @@ function ResultCard(result: ISearchResult) {
 			</div>
 		</td>
 	</tr>;
-}
-
-interface ISelectProps {
-	value: React.SelectHTMLAttributes<HTMLSelectElement>['value'];
-	onInput: React.FormEventHandler<HTMLSelectElement>;
-	options: { value: string; title: string }[];
-}
-function Select(props: ISelectProps) {
-	return <div className="select-wrapper">
-		<select
-			value={props.value}
-			onInput={props.onInput}
-		>
-			{props.options.map(({ value, title }, i) => <option key={i} value={value}>{title}</option>)}
-		</select>
-	</div>;
 }
 
 export default SearchResults;

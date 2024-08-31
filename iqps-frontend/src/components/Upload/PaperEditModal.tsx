@@ -3,6 +3,10 @@ import toast from "react-hot-toast";
 import { validate } from "../../utils/validateInput";
 import { IErrorMessage, IQuestionPaperFile } from "../../types/question_paper";
 import { getCourseFromCode } from "../../utils/autofillData";
+import { Select } from "../Common/Common";
+
+const CURRENT_YEAR = new Date().getFullYear();
+const SELECT_YEARS = (new Array(6).fill(0)).map((_, i) => CURRENT_YEAR - i).reverse();
 
 interface IPaperEditModalProps {
 	onClose: () => void;
@@ -13,6 +17,15 @@ function PaperEditModal(props: IPaperEditModalProps) {
 	const [data, setData] = useState(props.qPaper);
 	const [validationErrors, setValidationErrors] = useState<IErrorMessage>(validate(props.qPaper));
 	const [isDataValid, setIsDataValid] = useState<boolean>(false);
+
+	const changeData = <T extends keyof IQuestionPaperFile>(property: T, value: IQuestionPaperFile[T]) => {
+		setData((prev_data) => {
+			return {
+				...prev_data,
+				[property]: value
+			}
+		})
+	}
 
 	// Check for data validity on change
 	useEffect(() => {
@@ -27,12 +40,7 @@ function PaperEditModal(props: IPaperEditModalProps) {
 		if (data.course_code.length === 7) {
 			const course_name = getCourseFromCode(data.course_code);
 
-			if (course_name !== null) setData((prev_data) => {
-				return {
-					...prev_data,
-					course_name
-				}
-			})
+			if (course_name !== null) changeData('course_name', course_name);
 		}
 	}, [data])
 
@@ -45,183 +53,103 @@ function PaperEditModal(props: IPaperEditModalProps) {
 					<input
 						type="text"
 						id="filename"
-						name="filename"
 						required
 						value={data.file.name}
 						disabled
 					/>
 				</div>
 				<div className="two-columns">
-					<div className="form-group">
-						<label htmlFor="course_code">Course Code:</label>
+					<FormGroup
+						label="Course Code:"
+						validationError={validationErrors.courseCodeErr}
+					>
 						<input
 							type="text"
 							id="course_code"
-							name="course_code"
 							required
 							value={data.course_code}
-							onInput={(e) => {
-								setData((prev) => {
-									return {
-										...prev,
-										course_code: e.currentTarget.value,
-									};
-								});
-							}}
+							onInput={(e) => changeData('course_code', e.currentTarget.value)}
 						/>
-						{validationErrors.courseCodeErr !== null && (
-							<p className="error-msg">
-								{validationErrors.courseCodeErr}
-							</p>
-						)}
-					</div>
-					<div className="form-group">
-						<label htmlFor="year">Year:</label>
-						<select
+					</FormGroup>
+					<FormGroup
+						label="Year:"
+						validationError={validationErrors.yearErr}
+					>
+						<Select
 							id="year"
-							name="year"
-							required
 							value={data.year}
-							onChange={(e) => {
-								setData((prev) => ({
-									...prev,
-									year: parseInt(e.target.value),
-								}));
-							}}
-						>
-							<option value="">-- Select Year --</option>
-							<option value="2024">2024</option>
-							<option value="2023">2023</option>
-							<option value="2022">2022</option>
-							<option value="2021">2021</option>
-							<option value="2020">2020</option>
-							<option value="2019">2019</option>
-						</select>
-						{validationErrors.yearErr && (
-							<p className="error-msg">{validationErrors.yearErr}</p>
-						)}
-					</div>
-				</div>
-				<div className="form-group">
-					<label htmlFor="course_name">Course Name:</label>
-					<div>
-						<input
-							type="text"
-							id="course_name"
-							name="course_name"
-							required
-							value={data.course_name}
-							onInput={(e) => {
-								setData((prev) => ({
-									...prev,
-									course_name: e.currentTarget.value,
-								}));
-							}}
+							required={true}
+							onInput={(e) => changeData('year', parseInt(e.currentTarget.value))}
+							options={[
+								{ value: "", title: "-- Select Year --" },
+								...SELECT_YEARS.map((year) => ({ value: year.toString(), title: year.toString() }))
+							]}
 						/>
-						{validationErrors.courseNameErr !== null && (
-							<p className="error-msg">
-								{validationErrors.courseNameErr}
-							</p>
-						)}
-					</div>
+					</FormGroup>
 				</div>
-				<div className="form-group">
-					<label htmlFor="exam">Exam:</label>
+				<FormGroup
+					label="Course Name:"
+					validationError={validationErrors.courseNameErr}
+				>
+					<input
+						type="text"
+						id="course_name"
+						required
+						value={data.course_name}
+						onInput={(e) => changeData('course_name', e.currentTarget.value)}
+					/>
+				</FormGroup>
+				<FormGroup
+					label="Exam:"
+					validationError={validationErrors.examErr}
+				>
 					<div className="radio-group">
 						<label>
 							<input
 								type="radio"
-								id="exam-mid-semester"
-								name="exam"
-								value="midsem"
-								required
 								checked={data.exam == "midsem"}
-								onInput={(e) => {
-									if (e.currentTarget.checked) {
-										setData((prev) => ({
-											...prev,
-											exam: "midsem",
-										}))
-									}
-								}}
+								onInput={(e) => e.currentTarget.checked && changeData('exam', 'midsem')}
 							/>
 							Mid Semester
 						</label>
 						<label>
 							<input
 								type="radio"
-								id="exam-end-semester"
-								name="exam"
-								value="endsem"
-								required
 								checked={data.exam == "endsem"}
-								onInput={(e) => {
-									if (e.currentTarget.checked) {
-										setData((prev) => ({
-											...prev,
-											exam: "endsem",
-										}))
-									}
-								}}
+								onInput={(e) => e.currentTarget.checked && changeData('exam', 'endsem')}
 							/>
 							End Semester
 						</label>
 					</div>
-					{validationErrors.examErr !== null && (
-						<p className="error-msg">{validationErrors.examErr}</p>
-					)}
-				</div>
-				<div className="form-group">
-					<label htmlFor="semester">Semester:</label>
+				</FormGroup>
+				<FormGroup
+					label="Semester:"
+					validationError={validationErrors.semesterErr}
+				>
 					<div className="radio-group">
 						<label>
 							<input
 								type="radio"
-								id="semester-autumn"
-								name="semester"
-								value="autumn"
-								required
 								checked={data.semester == "autumn"}
-								onInput={(e) => {
-									if (e.currentTarget.checked) {
-										setData((prev) => ({
-											...prev,
-											semester: "autumn"
-										}))
-									}
-								}}
+								onInput={(e) => e.currentTarget.checked && changeData('semester', 'autumn')}
 							/>
 							Autumn Semester
 						</label>
 						<label>
 							<input
 								type="radio"
-								id="semester-spring"
-								name="semester"
-								value="spring"
-								required
 								checked={data.semester == "spring"}
-								onInput={(e) => {
-									if (e.currentTarget.value) {
-										setData((prev) => ({
-											...prev,
-											semester: "spring",
-										}))
-									}
-								}}
+								onInput={(e) => e.currentTarget.checked && changeData('semester', 'spring')}
 							/>
 							Spring Semester
 						</label>
 					</div>
-					{validationErrors.semesterErr !== null && (
-						<p className="error-msg">{validationErrors.semesterErr}</p>
-					)}
-				</div>
+				</FormGroup>
 				<div className="control-group">
 					<button
 						onClick={(e) => {
 							e.preventDefault();
-							close();
+							props.onClose();
 						}}
 						className="cancel-btn"
 					>
@@ -230,11 +158,9 @@ function PaperEditModal(props: IPaperEditModalProps) {
 					<button
 						onClick={(e) => {
 							e.preventDefault();
-							toast.success(
-								"File details updated successfully"
-							);
+							toast.success("File details updated successfully");
 							props.updateQPaper(data);
-							close();
+							props.onClose();
 						}}
 						disabled={!isDataValid}
 						className={`save-btn ${!isDataValid ? 'disabled' : ''}`}
@@ -245,6 +171,25 @@ function PaperEditModal(props: IPaperEditModalProps) {
 			</form>
 		</div>
 	</div>;
+}
+
+interface IFormGroupProps {
+	label: string;
+	children: React.ReactNode;
+	validationError: string | null;
+}
+function FormGroup(props: IFormGroupProps) {
+	return <div className="form-group">
+		<label>{props.label}</label>
+		<div>
+			{props.children}
+			{props.validationError && (
+				<p className="error-msg">
+					{props.validationError}
+				</p>
+			)}
+		</div>
+	</div>
 }
 
 export default PaperEditModal;
