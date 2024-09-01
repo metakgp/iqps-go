@@ -5,13 +5,13 @@ var respData struct {
 }
 
 type QuestionPaper struct {
-	ID              int    `json:"id,omitempty"`
-	CourseCode      string `json:"course_code,omitempty"`
-	CourseName      string `json:"course_name,omitempty"`
-	Year            int    `json:"year,omitempty"`
-	Exam            string `json:"exam,omitempty"`
-	FileLink        string `json:"filelink,omitempty"`
-	FromLibrary     bool   `json:"from_library,omitempty"`
+	ID              int    `json:"id"`
+	CourseCode      string `json:"course_code"`
+	CourseName      string `json:"course_name"`
+	Year            int    `json:"year"`
+	Exam            string `json:"exam"`
+	FileLink        string `json:"filelink"`
+	FromLibrary     bool   `json:"from_library"`
 	UploadTimestamp string `json:"upload_timestamp,omitempty"`
 	ApproveStatus   bool   `json:"approve_status,omitempty"`
 	CourseDetails   string `json:"course_details,omitempty"`

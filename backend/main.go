@@ -28,7 +28,7 @@ func main() {
 		AllowCredentials: true,
 		AllowedHeaders:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
-		AllowedOrigins:   []string{"https://qp.metakgp.org", "http://localhost:3000"},
+		AllowedOrigins:   []string{"https://qp.metakgp.org", "http://localhost:3000", "http://localhost:5173"},
 	})
 
 	logger.Info("Main: Starting server on port 5000")

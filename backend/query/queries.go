@@ -17,7 +17,7 @@ FROM
     FROM
       qp
     WHERE
-      course_details_tsvector @ @ websearch_to_tsquery('simple', $ 1)
+      course_details_tsvector @@ websearch_to_tsquery('simple', $1)
       AND approve_status = true
     UNION
     SELECT
@@ -33,7 +33,7 @@ FROM
     from
       qp
     where
-      course_details % > > $ 1
+      course_details %>> $1
       AND approve_status = true
     UNION
     SELECT
@@ -49,9 +49,9 @@ FROM
     from
       qp
     where
-      course_details_tsvector @ @ to_tsquery(
+      course_details_tsvector @@ to_tsquery(
         'simple',
-        websearch_to_tsquery('simple', $ 1) :: text || ':*'
+        websearch_to_tsquery('simple', $1)::text || ':*'
       )
       AND approve_status = true
   )`

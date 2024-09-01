@@ -99,8 +99,8 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rows, err := db.Query(query, params...)
+	config.Get().Logger.Debug("rows were fetched")
 	if err != nil {
-		defer rows.Close()
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
@@ -114,6 +114,9 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 			sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
 			return
 		}
+		if qp.Exam == "" {
+			qp.Exam = "unknown"
+		}
 		qp.FileLink = fmt.Sprintf("%s/%s", config.Get().StaticFilesUrl, qp.FileLink)
 		qps = append(qps, qp)
 	}
@@ -124,9 +127,8 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 
 func ListUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
 	db := db.GetDB()
-	rows, err := db.Query("SELECT course_code, course_name, year, exam, filelink FROM qp WHERE approve_status = false ORDER BY upload_timestamp ASC")
+	rows, err := db.Query("SELECT course_code, course_name, year, exam,filelink,id, from_library FROM qp WHERE approve_status = false ORDER BY upload_timestamp ASC")
 	if err != nil {
-		defer rows.Close()
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
@@ -135,7 +137,7 @@ func ListUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
 	var qps []QuestionPaper = make([]QuestionPaper, 0)
 	for rows.Next() {
 		qp := QuestionPaper{}
-		err := rows.Scan(&qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink)
+		err := rows.Scan(&qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.ID, &qp.FromLibrary)
 		if err != nil {
 			sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
 			return
@@ -159,7 +161,7 @@ func HandleFileUpload(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseMultipartForm(MaxBodySize)
 	if err != nil {
-		sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
+		sendErrorResponse(w, http.StatusInternalServerError, "Incorrect File Size", nil)
 		config.Get().Logger.Error("HandleFileUpload: Request Body Size Exceeded")
 		return
 	}
@@ -320,7 +322,6 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error Getting Github Access Token: ", err.Error())
-		defer resp.Body.Close()
 		sendErrorResponse(w, http.StatusInternalServerError, "Could not connect to Github", nil)
 		return
 	}
@@ -341,7 +342,6 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	resp, err = client.Do(req)
 	if err != nil {
 		fmt.Println("Error getting username: ", err.Error())
-		defer resp.Body.Close()
 		sendErrorResponse(w, http.StatusInternalServerError, "Could not decode github token", nil)
 		return
 	}
@@ -374,7 +374,6 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Println("Error validating user membership: ", err.Error())
-		defer resp.Body.Close()
 		sendErrorResponse(w, http.StatusInternalServerError, "could not validate user membership", nil)
 		return
 	}
