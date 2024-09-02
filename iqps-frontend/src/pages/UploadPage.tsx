@@ -97,7 +97,7 @@ function UploadPage() {
 		return false;
 	};
 
-	return <>
+	return <div id="upload-page">
 		<Header
 			title="Question Paper Upload"
 			subtitle="Upload your question papers for the benefit of humanity."
@@ -131,7 +131,7 @@ function UploadPage() {
 					/>
 			}
 		</div>
-	</>;
+	</div>;
 }
 
 export default UploadPage;

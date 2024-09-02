@@ -1,5 +1,12 @@
 @import "../../styles/variables";
 
+#upload-page {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-bottom: 5rem;
+}
+
 .error-msg {
 	margin: 0;
 	padding: 0;
@@ -30,37 +37,6 @@
 	width: 100%;
 	align-items: start;
 	justify-content: center;
-
-	.upload-instructions {
-		width: 30%;
-		height: 100%;
-		padding: 0 1rem;
-
-		.instruction-section {
-			margin-bottom: 1rem;
-
-			h3 {
-				margin-bottom: 0.5rem;
-			}
-
-			p {
-				margin: 0;
-				margin-bottom: 0.25rem;
-			}
-
-			.file-format-example {
-				background-color: $accent-color;
-				font-weight: bold;
-				padding: 0.1rem 0.5rem;
-				border-radius: 0.25rem;
-				margin-top: 0.25rem;
-				overflow: auto;
-				margin-bottom: 0.45rem;
-				width: fit-content;
-				max-width: 100%;
-			}
-		}
-	}
 
 	@media screen and (max-width: 1000px) {
 		flex-direction: column;
