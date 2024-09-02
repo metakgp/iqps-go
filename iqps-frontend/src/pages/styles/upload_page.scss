@@ -1,0 +1,70 @@
+@import "../../styles/variables";
+
+.error-msg {
+	margin: 0;
+	padding: 0;
+	color: crimson;
+	font-size: 0.9rem;
+	font-weight: bold;
+	margin-top: 0.5rem;
+	padding-left: 5rem;
+}
+
+.loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	padding: 20px;
+	border: 2px dashed #ccc;
+	border-radius: 5px;
+
+	.message {
+		font-size: 1.2rem;
+	}
+}
+
+.upload-wrapper {
+	display: flex;
+	gap: 2rem;
+	width: 100%;
+	align-items: start;
+	justify-content: center;
+
+	.upload-instructions {
+		width: 30%;
+		height: 100%;
+		padding: 0 1rem;
+
+		.instruction-section {
+			margin-bottom: 1rem;
+
+			h3 {
+				margin-bottom: 0.5rem;
+			}
+
+			p {
+				margin: 0;
+				margin-bottom: 0.25rem;
+			}
+
+			.file-format-example {
+				background-color: $accent-color;
+				font-weight: bold;
+				padding: 0.1rem 0.5rem;
+				border-radius: 0.25rem;
+				margin-top: 0.25rem;
+				overflow: auto;
+				margin-bottom: 0.45rem;
+				width: fit-content;
+				max-width: 100%;
+			}
+		}
+	}
+
+	@media screen and (max-width: 1000px) {
+		flex-direction: column;
+		align-items: center;
+		justify-content: start;
+	}
+}

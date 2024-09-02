@@ -9,6 +9,7 @@ import { IQuestionPaperFile } from "../types/question_paper";
 import { isQPValid } from "../utils/validateInput";
 import { makeRequest } from "../utils/backend";
 import { sanitizeQP } from "../utils/autofillData";
+import './styles/upload_page.scss';
 
 function UploadPage() {
 	let MAX_UPLOAD_LIMIT = parseInt(import.meta.env.VITE_MAX_UPLOAD_LIMIT)

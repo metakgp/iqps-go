@@ -52,4 +52,14 @@
 			}
 		}
 	}
+
+	.uploaded-files {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+
+		.error-msg {
+			margin-bottom: 0rem;
+		}
+	}
 }
