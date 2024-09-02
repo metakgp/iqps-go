@@ -46,7 +46,7 @@ function PaperEditModal(props: IPaperEditModalProps) {
 
 	return <div className="modal-overlay">
 		<div className="modal">
-			<form className="upload-form">
+			<form>
 				<h2>Edit Course Details</h2>
 				<FormGroup label="Filename:">
 					<input
