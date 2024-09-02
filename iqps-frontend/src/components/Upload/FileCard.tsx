@@ -1,6 +1,7 @@
 import { AiOutlineDelete, AiOutlineFilePdf } from "react-icons/ai";
 import { IQuestionPaperFile } from "../../types/question_paper";
 import { FaRegPenToSquare } from "react-icons/fa6";
+import './file_card.scss';
 
 export interface IFileCardProps {
     qPaper: IQuestionPaperFile;
