@@ -3,10 +3,11 @@ import { IQuestionPaperFile } from "../../types/question_paper";
 import { FileCard } from "./FileCard";
 import Spinner from "../Spinner/Spinner";
 import { AiOutlineCloudUpload, AiOutlineFileAdd } from "react-icons/ai";
-import { isQPValid, validate } from "../../utils/validateInput";
+import { isQPValid } from "../../utils/validateInput";
 import { UploadDragAndDrop } from "./UploadDragAndDrop";
 import PaperEditModal from "./PaperEditModal";
 import { autofillData } from "../../utils/autofillData";
+import './styles/upload_form.scss';
 
 interface IUploadFormProps {
 	max_upload_limit: number;
@@ -67,7 +68,7 @@ export function UploadForm(props: IUploadFormProps) {
 		fileInputRef.current?.click();
 	};
 
-	return <div className="upload-section">
+	return <div className="upload-form">
 		{
 			qPapers.length > 0 ? (
 				<>
@@ -87,7 +88,7 @@ export function UploadForm(props: IUploadFormProps) {
 							</div>
 						)}
 					</div>
-					<div className="upload-section-btns">
+					<div className="upload-form-btns">
 						<button onClick={onUpload} className="upload-btn">
 							{props.awaitingResponse ? (
 								<>
