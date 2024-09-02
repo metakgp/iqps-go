@@ -1,6 +1,7 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { AiOutlineCloudUpload } from "react-icons/ai";
+import './styles/upload_drag_and_drop.scss';
 
 interface IUploadDragAndDropProps {
 	max_upload_limit: number;
