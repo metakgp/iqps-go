@@ -1,4 +1,4 @@
-import './upload_instructions.scss';
+import './styles/upload_instructions.scss';
 
 export function UploadInstructions() {
 	return <div className="upload-instructions">
