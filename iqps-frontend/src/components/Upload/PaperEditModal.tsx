@@ -4,6 +4,7 @@ import { validate } from "../../utils/validateInput";
 import { Exam, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
 import { getCourseFromCode } from "../../utils/autofillData";
 import { Select } from "../Common/Common";
+import './styles/paper_edit_modal.scss';
 
 const CURRENT_YEAR = new Date().getFullYear();
 const SELECT_YEARS = (new Array(6).fill(0)).map((_, i) => CURRENT_YEAR - i).reverse();
