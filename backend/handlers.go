@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5"
 	"github.com/metakgp/iqps/backend/pkg/config"
 	"github.com/metakgp/iqps/backend/pkg/db"
 	"github.com/metakgp/iqps/backend/query"
@@ -44,7 +45,7 @@ func HandleHealthCheck(w http.ResponseWriter, r *http.Request) {
 
 func HandleQPYear(w http.ResponseWriter, r *http.Request) {
 	db := db.GetDB()
-	result := db.QueryRow("SELECT MIN(year), MAX(year) FROM qp")
+	result := db.QueryRow(context.Background(), "SELECT MIN(year), MAX(year) FROM iqps_test")
 	var minYear, maxYear int
 	err := result.Scan(&minYear, &maxYear)
 	if err != nil {
@@ -58,7 +59,7 @@ func HandleQPYear(w http.ResponseWriter, r *http.Request) {
 
 func HandleLibraryPapers(w http.ResponseWriter, r *http.Request) {
 	db := db.GetDB()
-	rows, err := db.Query("SELECT * FROM qp WHERE from_library = 'true'")
+	rows, err := db.Query(context.Background(), "SELECT * FROM iqps_test WHERE from_library = 'true'")
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, "Could not Query Question Paper, Try Later!", nil)
 		return
@@ -87,18 +88,25 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := query.QP_SEARCH_QUERY
+	query := query.QP_SEARCH
 
-	var params []interface{}
-	params = append(params, course)
-
+	// var params []interface{}
+	// params = append(params, course)
+	params := pgx.NamedArgs{
+		"query_text":  course,
+		"match_count": 50,
+	}
 	exam := r.URL.Query().Get("exam")
 	if exam != "" {
-		query = fmt.Sprintf(`%s WHERE (exam = $2 OR exam = '')`, query)
-		params = append(params, exam)
+		query = fmt.Sprintf(`%s WHERE (exam = @exam OR exam = '')`, query)
+		params = pgx.NamedArgs{
+			"query_text":  course,
+			"match_count": 50,
+			"exam":        exam,
+		}
 	}
 
-	rows, err := db.Query(query, params...)
+	rows, err := db.Query(context.Background(), query, params)
 	config.Get().Logger.Debug("rows were fetched")
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
@@ -127,7 +135,7 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 
 func ListUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
 	db := db.GetDB()
-	rows, err := db.Query("SELECT course_code, course_name, year, exam,filelink,id, from_library FROM qp WHERE approve_status = false ORDER BY upload_timestamp ASC")
+	rows, err := db.Query(context.Background(), "SELECT course_code, course_name, year, exam,filelink,id, from_library FROM iqps_test WHERE approve_status = false ORDER BY upload_timestamp ASC")
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
 		return
@@ -285,15 +293,14 @@ func populateDB(filename string) error {
 
 	courseCode := qpData[0]
 	courseName := qpData[1]
-	courseDetails := strings.Join(strings.Split(filename, "_"), " ")
 
 	year, _ := strconv.Atoi(qpData[2])
 	exam := qpData[3]
 	fromLibrary := false
 	fileLink := filepath.Join(config.Get().UploadedQPsPath, filename+".pdf")
-	query := "INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library,course_details) VALUES ($1, $2, $3, $4, $5, $6,$7);"
+	query := "INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6);"
 
-	_, err := db.Exec(query, courseCode, courseName, year, exam, fileLink, fromLibrary, courseDetails)
+	_, err := db.Exec(context.Background(), query, courseCode, courseName, year, exam, fileLink, fromLibrary)
 	if err != nil {
 		return fmt.Errorf("failed to add qp to database: %v", err.Error())
 	}
