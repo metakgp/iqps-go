@@ -147,3 +147,11 @@ select option {
   color: rgba($fg-color, 0.8);
   animation: spin 1s infinite;
 }
+
+.meta-footer {
+  width: 100%;
+  text-align: center;
+
+  margin-top: auto;
+  margin-bottom: 10px;
+}
