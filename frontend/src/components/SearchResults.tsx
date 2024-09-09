@@ -16,13 +16,13 @@ const examMap = (exam: string) => {
   return exam.slice(0, 3).toUpperCase();
 };
 
-type SortBy = 'course_name' | 'year';
+type SortBy = 'course_name' | 'year' | undefined;
 type SortOrder = 'ascending' | 'descending';
 
 const SearchResults: Component<Props> = (props) => {
   const [displayedResults, setDisplayedResults] = createSignal<ISearchResult[]>(props.results);
   const [filterByYear, setFilterByYear] = createSignal<number | null>(null);
-  const [sortBy, setSortBy] = createSignal<SortBy>("year");
+  const [sortBy, setSortBy] = createSignal<SortBy>(undefined);
   const [sortOrder, setSortOrder] = createSignal<SortOrder>("descending");
   const [availableYears, setAvailableYears] = createSignal<number[]>([]);
 
@@ -39,6 +39,11 @@ const SearchResults: Component<Props> = (props) => {
     let filtered_results = props.results.slice();
     if (filterByYear() !== null) filtered_results = filtered_results.filter((result) => result.year === filterByYear());
 
+    if (!sortBy()) {
+        setDisplayedResults(filtered_results)
+        return
+    }
+
     const sorted_results = filtered_results.sort((a, b) => {
       // Fall back to course name sorting when results are filtered by year.
       const fallback_sorting = sortBy() === 'year' && filterByYear() !== null;
@@ -54,6 +59,8 @@ const SearchResults: Component<Props> = (props) => {
           return first.year - second.year;
         case "course_name":
           return first.course_name.localeCompare(second.course_name);
+        default:
+            return 0;
       }
     });
 
@@ -127,7 +134,7 @@ const SearchResults: Component<Props> = (props) => {
                             <td style={{display: 'flex', "align-items": 'center'}}>
                               <p>
                               {result.course_name}&nbsp;
-                              {result.exam !== "" && <span class="result-card-tag">{examMap(result.exam)}</span>}
+                              {result.exam && <span class="result-card-tag">{examMap(result.exam)}</span>}
                               </p>
                               <div class="result-card-btns">
                                 <a
