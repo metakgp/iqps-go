@@ -1,0 +1,21 @@
+@import "../../styles/variables";
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.spinner {
+	margin: none;
+	width: 2rem;
+	height: 2rem;
+
+	fill: rgba($accent-color, 0.8);
+	color: rgba($fg-color, 0.8);
+	animation: spin 1s infinite;
+}

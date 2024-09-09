@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal } from "solid-js";
-import { IErrorMessage, IQuestionPaperFile } from "../types/types";
+import { IErrorMessage, IQuestionPaperFile } from "../types/question_paper";
 import { getCourseFromCode } from "../utils/autofillData";
 import toast from "solid-toast";
 import { validate } from "../utils/validateInput";

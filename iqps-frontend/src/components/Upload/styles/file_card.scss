@@ -1,0 +1,80 @@
+@import "../../../styles/variables";
+
+.file-card {
+	display: flex;
+
+	.file-data {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+		overflow: hidden;
+
+		.course-name,
+		.file-name {
+			flex-shrink: 1;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+			text-align: left;
+		}
+
+		.file-name {
+			margin: 0;
+			margin-bottom: 0.25rem;
+			font-size: 1.1rem;
+			font-weight: bold;
+		}
+
+		.course-name {
+			font-size: 1rem;
+		}
+	}
+
+	.btn-group {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.close-btn {
+		color: crimson;
+		padding: 0.5rem;
+		border: none;
+		background: none;
+		box-shadow: none;
+		height: fit-content;
+
+		&:hover {
+			cursor: pointer;
+		}
+	}
+
+	.edit-btn {
+		color: #fff8;
+		padding: 0.5rem;
+		border: none;
+		background: none;
+		box-shadow: none;
+		height: fit-content;
+
+		&:hover {
+			cursor: pointer;
+		}
+	}
+
+	.pills {
+		margin-top: 0.2rem;
+		display: flex;
+		gap: 0.5rem;
+
+		.pill {
+			padding: 0.25rem 0.5rem;
+			border-radius: 1rem;
+			font-size: 0.7rem;
+			font-weight: bold;
+			color: white;
+			background-color: $accent-color-darker;
+		}
+	}
+}

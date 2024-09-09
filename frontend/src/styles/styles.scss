@@ -44,14 +44,6 @@ body {
     display: flex;
     flex-direction: column;
     width: 100%;
-
-    .meta-footer {
-      width: 100%;
-      text-align: center;
-
-      margin-top: auto;
-      margin-bottom: 10px;
-    }
   }
 }
 
@@ -154,4 +146,12 @@ select option {
   fill: rgba($accent-color, 0.8);
   color: rgba($fg-color, 0.8);
   animation: spin 1s infinite;
+}
+
+.meta-footer {
+  width: 100%;
+  text-align: center;
+
+  margin-top: auto;
+  margin-bottom: 10px;
 }

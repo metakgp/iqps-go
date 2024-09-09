@@ -1,0 +1,46 @@
+@import "../../styles/variables";
+
+#upload-page {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-bottom: 5rem;
+}
+
+.error-msg {
+	margin: 0;
+	padding: 0;
+	color: crimson;
+	font-size: 0.9rem;
+	font-weight: bold;
+	margin-top: 0.5rem;
+	padding-left: 5rem;
+}
+
+.loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	padding: 20px;
+	border: 2px dashed #ccc;
+	border-radius: 5px;
+
+	.message {
+		font-size: 1.2rem;
+	}
+}
+
+.upload-wrapper {
+	display: flex;
+	gap: 2rem;
+	width: 100%;
+	align-items: start;
+	justify-content: center;
+
+	@media screen and (max-width: 1000px) {
+		flex-direction: column;
+		align-items: center;
+		justify-content: start;
+	}
+}

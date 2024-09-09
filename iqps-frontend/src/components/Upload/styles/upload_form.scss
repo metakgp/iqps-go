@@ -1,0 +1,65 @@
+@import "../../../styles/variables";
+
+.upload-form {
+	max-width: 40rem;
+	width: 100%;
+	height: 100%;
+
+	.upload-form-btns {
+		display: flex;
+
+		button {
+			width: fit-content;
+			border: none;
+			outline: none;
+			background: rgba($accent-color, 0.5);
+			color: $fg-color;
+			font-size: 1.1rem;
+			font-weight: bold;
+			padding: 0.25rem 1rem;
+			border-radius: 1rem;
+			border: 2px solid $accent-color;
+			margin-left: 1rem;
+			margin-top: 1rem;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+
+			.spinner {
+				width: 1rem;
+				height: 1rem;
+			}
+
+			&:hover {
+				color: $fg-color;
+				background-color: $accent-color;
+				cursor: pointer;
+				transition: all 0.2s ease;
+
+				.spinner {
+					fill: rgba($fg-color, 0.8);
+					color: rgba($accent-color, 0.8);
+				}
+			}
+		}
+
+		.upload-btn {
+			border-color: #248f24;
+			background-color: rgba(#248f24, 0.5);
+
+			&:hover {
+				background-color: #248f24;
+			}
+		}
+	}
+
+	.uploaded-files {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+
+		.error-msg {
+			margin-bottom: 0rem;
+		}
+	}
+}

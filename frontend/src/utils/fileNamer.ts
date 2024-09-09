@@ -1,4 +1,4 @@
-import { IAdminQuestionPaperResult } from "../types/types";
+import { IAdminQuestionPaperResult } from "../types/question_paper";
 
 export function fileNamer (qp: IAdminQuestionPaperResult) {
     let exam = qp.exam === "endsem" ? "E" : "M";

@@ -1,7 +1,7 @@
 import { Component, createSignal } from "solid-js";
 import { IoSearch as SearchIcon, IoLink as ShareIcon } from "solid-icons/io";
 import SearchResults from "./SearchResults";
-import type { ISearchResult } from "../types/types";
+import type { ISearchResult } from "../types/question_paper";
 import "../styles/styles.scss";
 import { copyLink } from "../utils/copyLink";
 import { makeRequest } from "../utils/backend";
@@ -26,8 +26,8 @@ const CourseSearchForm: Component=()=> {
       setAwaitingResponse(true);
       const response = await makeRequest(`search?${params}`, 'get');
 
-      if (response.is_ok) {
-        const data: ISearchResult[] = response.response;
+      if (response.status === 'success') {
+        const data: ISearchResult[] = response.data;
 
         setSearchResults(data); // Handle the response data
 
@@ -46,7 +46,7 @@ const CourseSearchForm: Component=()=> {
         setAwaitingResponse(false);
         setErrMsg("Error fetching data. Please try again later.");
 
-        console.error("Error fetching data:", response.response.message);
+        console.error("Error fetching data:", response.message);
       }
     }
   }

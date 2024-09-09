@@ -3,7 +3,7 @@ import {
     AiOutlineDelete as CloseIcon,
 } from "solid-icons/ai";
 import { Component } from "solid-js";
-import { IQuestionPaperFile } from "../types/types";
+import { IQuestionPaperFile } from "../types/question_paper";
 import { FaRegularPenToSquare as EditIcon } from "solid-icons/fa";
 
 type Props = {
