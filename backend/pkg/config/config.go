@@ -69,8 +69,12 @@ func Get() *Config {
 	}
 
 	log := logrus.New()
+	logLocation := os.Getenv("IQPS_LOG_LOCATION")
+	if logLocation == "" {
+		logLocation = "/var/log/iqps/logs/application.log"
+	}
 	log.SetOutput(&lumberjack.Logger{
-		Filename: "~/iqps/logs/application.log",
+		Filename: logLocation,
 		MaxSize:  10, // Max size in MB
 	})
 
