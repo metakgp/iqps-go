@@ -65,7 +65,6 @@ with fuzzy as (
     from iqps_test
     where (course_code || ' ' || course_name) %>> @query_text
     order by rank_ix
-    limit least(@match_count, 30)
 ),
 full_text as (
   select
@@ -78,7 +77,6 @@ full_text as (
     fts_course_details @@ websearch_to_tsquery(@query_text)
     AND approve_status = true
   order by rank_ix
-  limit least(@match_count, 30) * 2
 ),
 partial_search as (
   select id, 
@@ -90,9 +88,8 @@ partial_search as (
         websearch_to_tsquery('simple', @query_text)::text || ':*'
       )
       AND approve_status = true
-  limit least(@match_count, 30) * 2
-)
-select
+),  result as (
+  select
   iqps_test.id,iqps_test.course_code, iqps_test.course_name, iqps_test.year, iqps_test.exam, iqps_test.filelink, iqps_test.from_library, iqps_test.upload_timestamp, iqps_test.approve_status
 from
   fuzzy
@@ -104,6 +101,6 @@ order by
   coalesce(1.0 / (50 + full_text.rank_ix), 0.0) * 1 +
   coalesce(1.0 / (50 + partial_search.rank_ix), 0.0) * 1
   desc
-limit
-  least(@match_count, 30)
+)
+  select * from result
 `

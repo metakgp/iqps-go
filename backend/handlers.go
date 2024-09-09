@@ -45,7 +45,7 @@ func HandleHealthCheck(w http.ResponseWriter, r *http.Request) {
 
 func HandleQPYear(w http.ResponseWriter, r *http.Request) {
 	db := db.GetDB()
-	result := db.QueryRow(context.Background(), "SELECT MIN(year), MAX(year) FROM iqps_test")
+	result := db.QueryRow(context.Background(), "SELECT MIN(year), MAX(year) FROM iqps")
 	var minYear, maxYear int
 	err := result.Scan(&minYear, &maxYear)
 	if err != nil {
@@ -59,7 +59,7 @@ func HandleQPYear(w http.ResponseWriter, r *http.Request) {
 
 func HandleLibraryPapers(w http.ResponseWriter, r *http.Request) {
 	db := db.GetDB()
-	rows, err := db.Query(context.Background(), "SELECT * FROM iqps_test WHERE from_library = 'true'")
+	rows, err := db.Query(context.Background(), "SELECT * FROM iqps WHERE from_library = 'true'")
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, "Could not Query Question Paper, Try Later!", nil)
 		return
@@ -93,16 +93,14 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 	// var params []interface{}
 	// params = append(params, course)
 	params := pgx.NamedArgs{
-		"query_text":  course,
-		"match_count": 50,
+		"query_text": course,
 	}
 	exam := r.URL.Query().Get("exam")
 	if exam != "" {
 		query = fmt.Sprintf(`%s WHERE (exam = @exam OR exam = '')`, query)
 		params = pgx.NamedArgs{
-			"query_text":  course,
-			"match_count": 50,
-			"exam":        exam,
+			"query_text": course,
+			"exam":       exam,
 		}
 	}
 
@@ -135,7 +133,7 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 
 func ListUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
 	db := db.GetDB()
-	rows, err := db.Query(context.Background(), "SELECT course_code, course_name, year, exam,filelink,id, from_library FROM iqps_test WHERE approve_status = false ORDER BY upload_timestamp ASC")
+	rows, err := db.Query(context.Background(), "SELECT course_code, course_name, year, exam,filelink,id, from_library FROM iqps WHERE approve_status = false ORDER BY upload_timestamp ASC")
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
 		return
@@ -205,8 +203,8 @@ func HandleFileUpload(w http.ResponseWriter, r *http.Request) {
 		defer file.Close()
 
 		fileType := fileHeader.Header.Get("Content-Type")
-		config.Get().Logger.Error("HandleFileUpload:", slog.String("Invalid file type", fileType))
 		if fileType != "application/pdf" {
+			config.Get().Logger.Error("HandleFileUpload:", slog.String("Invalid file type", fileType))
 			resp.Status = "failed"
 			resp.Description = "invalid file type. Only PDFs are supported"
 			response = append(response, resp)
@@ -298,7 +296,7 @@ func populateDB(filename string) error {
 	exam := qpData[3]
 	fromLibrary := false
 	fileLink := filepath.Join(config.Get().UploadedQPsPath, filename+".pdf")
-	query := "INSERT INTO qp (course_code, course_name, year, exam, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6);"
+	query := "INSERT INTO iqps (course_code, course_name, year, exam, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6);"
 
 	_, err := db.Exec(context.Background(), query, courseCode, courseName, year, exam, fileLink, fromLibrary)
 	if err != nil {

@@ -15,7 +15,7 @@ var (
 	mu       sync.Mutex
 )
 
-const init_db = `CREATE TABLE IF NOT EXISTS iqps_test (
+const init_db = `CREATE TABLE IF NOT EXISTS iqps (
     id SERIAL PRIMARY KEY,
     course_code TEXT NOT NULL DEFAULT '',
     course_name TEXT NOT NULL,
@@ -28,9 +28,9 @@ const init_db = `CREATE TABLE IF NOT EXISTS iqps_test (
 		fts_course_details tsvector GENERATED ALWAYS AS (to_tsvector('english', course_code || ' ' || course_name)) stored
 );
 
-CREATE INDEX IF NOT EXISTS iqps_test_fts ON iqps_test USING gin (fts_course_details);
+CREATE INDEX IF NOT EXISTS iqps_fts ON iqps USING gin (fts_course_details);
 
-create index IF NOT EXISTS idx_course_name_trgm on iqps_test using gin (course_name gin_trgm_ops);
+create index IF NOT EXISTS idx_course_name_trgm on iqps using gin (course_name gin_trgm_ops);
 
 `
 
