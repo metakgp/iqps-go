@@ -62,7 +62,7 @@ with fuzzy as (
     select id,
            similarity(course_code || ' ' || course_name, @query_text) as sim_score,
            row_number() over (order by similarity(course_code || ' ' || course_name, @query_text) desc) as rank_ix
-    from iqps_test
+    from iqps
     where (course_code || ' ' || course_name) %>> @query_text
     order by rank_ix
 ),
@@ -72,7 +72,7 @@ full_text as (
     ts_rank_cd(fts_course_details, websearch_to_tsquery(@query_text)) as rank_score,
     row_number() over(order by ts_rank_cd(fts_course_details , websearch_to_tsquery(@query_text)) desc) as rank_ix
   from
-    iqps_test
+    iqps
   where
     fts_course_details @@ websearch_to_tsquery(@query_text)
     AND approve_status = true
@@ -82,7 +82,7 @@ partial_search as (
   select id, 
     ts_rank_cd(fts_course_details , to_tsquery('simple', websearch_to_tsquery('simple', @query_text)::text || ':*' )) as rank_score,
     row_number() over(order by ts_rank_cd(fts_course_details , to_tsquery('simple', websearch_to_tsquery('simple', @query_text)::text || ':*' )) desc) as rank_ix
-  from iqps_test where 
+  from iqps where 
       fts_course_details @@ to_tsquery(
         'simple',
         websearch_to_tsquery('simple', @query_text)::text || ':*'
@@ -90,12 +90,12 @@ partial_search as (
       AND approve_status = true
 ),  result as (
   select
-  iqps_test.id,iqps_test.course_code, iqps_test.course_name, iqps_test.year, iqps_test.exam, iqps_test.filelink, iqps_test.from_library, iqps_test.upload_timestamp, iqps_test.approve_status
+  iqps.id,iqps.course_code, iqps.course_name, iqps.year, iqps.exam, iqps.filelink, iqps.from_library, iqps.upload_timestamp, iqps.approve_status
 from
   fuzzy
   full outer join full_text on fuzzy.id = full_text.id
   full outer join partial_search on coalesce(fuzzy.id, full_text.id) = partial_search.id
-  join iqps_test on coalesce(fuzzy.id, full_text.id, partial_search.id) = iqps_test.id
+  join iqps on coalesce(fuzzy.id, full_text.id, partial_search.id) = iqps.id
 order by
   coalesce(1.0 / (50 + fuzzy.rank_ix), 0.0) * 1 +
   coalesce(1.0 / (50 + full_text.rank_ix), 0.0) * 1 +
