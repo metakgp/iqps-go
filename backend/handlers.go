@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -127,7 +126,7 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 		qps = append(qps, qp)
 	}
 
-	config.Get().Logger.Info("HandleQPSearch: Question paper search query %s returned %d results", course, len(qps))
+	config.Get().Logger.Info("HandleQPSearch: Question paper search query:$%", course, ":$%result count:", len(qps))
 	sendResponse(w, http.StatusOK, qps)
 }
 
@@ -151,7 +150,7 @@ func ListUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
 		qp.FileLink = fmt.Sprintf("%s/%s", config.Get().StaticFilesUrl, qp.FileLink)
 		qps = append(qps, qp)
 	}
-	config.Get().Logger.Info("listUnapprovedPapers: Unapproved Question paper count", slog.Int("QP count", len(qps)))
+	config.Get().Logger.Info("listUnapprovedPapers: Unapproved Question paper count: ", len(qps))
 	sendResponse(w, http.StatusOK, qps)
 }
 
@@ -177,7 +176,7 @@ func HandleFileUpload(w http.ResponseWriter, r *http.Request) {
 	files := r.MultipartForm.File["files"]
 	log.Printf("/upload: Received %d files.", len(files))
 	if len(files) > maxLimit {
-		config.Get().Logger.Error("HandleFileUpload: Allowed %s file uploads, found %d", slog.Int("max Limit", maxLimit), slog.Int("Upload Length", len(files)))
+		config.Get().Logger.Error("HandleFileUpload: Allowed max Limit: ", maxLimit, " file uploads, found:", "Upload Length", len(files))
 		sendErrorResponse(w, http.StatusBadRequest, fmt.Sprintf("maximum %d files allowed", maxLimit), nil)
 		return
 	}
@@ -186,7 +185,7 @@ func HandleFileUpload(w http.ResponseWriter, r *http.Request) {
 		resp := uploadEndpointRes{Filename: fileHeader.Filename, Status: "success"}
 
 		if fileHeader.Size > 10<<20 {
-			config.Get().Logger.Error("HandleFileUpload: File of size %s uploaded", slog.Int64("filesize", fileHeader.Size))
+			config.Get().Logger.Errorf("HandleFileUpload: File of size %d uploaded", fileHeader.Size)
 			resp.Status = "failed"
 			resp.Description = "file size exceeds 10MB"
 			response = append(response, resp)
@@ -204,7 +203,7 @@ func HandleFileUpload(w http.ResponseWriter, r *http.Request) {
 
 		fileType := fileHeader.Header.Get("Content-Type")
 		if fileType != "application/pdf" {
-			config.Get().Logger.Error("HandleFileUpload:", slog.String("Invalid file type", fileType))
+			config.Get().Logger.Error("HandleFileUpload: Invalid file type ", fileType)
 			resp.Status = "failed"
 			resp.Description = "invalid file type. Only PDFs are supported"
 			response = append(response, resp)

@@ -1,9 +1,11 @@
 package config
 
 import (
-	"log/slog"
 	"os"
 	"strconv"
+
+	"github.com/sirupsen/logrus"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type Config struct {
@@ -14,7 +16,7 @@ type Config struct {
 	StaticFilesStorageLocation string
 	UploadedQPsPath            string
 	MaxUploadLimit             int
-	Logger                     *slog.Logger
+	Logger                     *logrus.Logger
 }
 
 type githubSecrets struct {
@@ -66,6 +68,12 @@ func Get() *Config {
 		maxUploadLimit = 10
 	}
 
+	log := logrus.New()
+	log.SetOutput(&lumberjack.Logger{
+		Filename: "~/iqps/logs/application.log",
+		MaxSize:  10, // Max size in MB
+	})
+
 	config = &Config{
 		DB:                         pgConf,
 		GithubSecrets:              githubSecrets,
@@ -73,7 +81,7 @@ func Get() *Config {
 		StaticFilesUrl:             os.Getenv("STATIC_FILES_URL"),
 		StaticFilesStorageLocation: os.Getenv("STATIC_FILES_STORAGE_LOCATION"),
 		UploadedQPsPath:            os.Getenv("UPLOADED_QPS_PATH"),
-		Logger:                     slog.Default(),
+		Logger:                     log,
 		MaxUploadLimit:             maxUploadLimit,
 	}
 	config.Logger.Info("config successfully setup")

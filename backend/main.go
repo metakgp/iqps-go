@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -30,7 +31,7 @@ func main() {
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
 		AllowedOrigins:   []string{"https://qp.metakgp.org", "http://localhost:3000", "http://localhost:5173"},
 	})
-
+	fmt.Print("Logs are in ~/iqps/logs/ \n")
 	logger.Info("Main: Starting server on port 5000")
 	err := http.ListenAndServe(":5000", c.Handler(http.DefaultServeMux))
 	if errors.Is(err, http.ErrServerClosed) {

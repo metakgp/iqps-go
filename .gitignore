@@ -12,3 +12,4 @@ qp.tar.xz
 go.work.sum
 
 frontend/public/pdf.worker.min.mjs
+*.log
