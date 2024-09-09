@@ -6,12 +6,12 @@ import (
 	"log"
 	"sync"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/metakgp/iqps/backend/pkg/config"
 )
 
 var (
-	database *pgx.Conn
+	database *pgxpool.Pool
 	mu       sync.Mutex
 )
 
@@ -34,12 +34,12 @@ create index IF NOT EXISTS idx_course_name_trgm on iqps using gin (course_name g
 
 `
 
-func InitDB() *pgx.Conn {
+func InitDB() *pgxpool.Pool {
 	var err error
 	dbConfig := config.Get().DB
 	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", dbConfig.Host, dbConfig.Port, dbConfig.Username, dbConfig.Password, dbConfig.DBname)
 	// database, err = sql.Open("postgres", psqlconn)
-	database, err = pgx.Connect(context.Background(), psqlconn)
+	database, err = pgxpool.New(context.Background(), psqlconn)
 	if err != nil {
 		panic("Invalid Database connection string")
 	}
@@ -58,7 +58,7 @@ func InitDB() *pgx.Conn {
 	return database
 }
 
-func GetDB() *pgx.Conn {
+func GetDB() *pgxpool.Pool {
 	if database == nil {
 		mu.Lock()
 		defer mu.Unlock()
