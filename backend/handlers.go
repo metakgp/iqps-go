@@ -58,7 +58,7 @@ func HandleQPYear(w http.ResponseWriter, r *http.Request) {
 
 func HandleLibraryPapers(w http.ResponseWriter, r *http.Request) {
 	db := db.GetDB()
-	rows, err := db.Query(context.Background(), "SELECT * FROM iqps WHERE from_library = 'true'")
+	rows, err := db.Query(context.Background(), "SELECT id, course_code, course_name, year, exam, filelink, from_library FROM iqps WHERE from_library = 'true'")
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, "Could not Query Question Paper, Try Later!", nil)
 		return
@@ -71,7 +71,7 @@ func HandleLibraryPapers(w http.ResponseWriter, r *http.Request) {
 		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary)
 		if err != nil {
 			sendErrorResponse(w, http.StatusInternalServerError, "error parsing question paper details, contact admin ", nil)
-			config.Get().Logger.Error("HandleLibraryPapers: Error in parsing question paper details")
+			config.Get().Logger.Error("HandleLibraryPapers: Error in parsing question paper details:", err.Error())
 			return
 		}
 		qps = append(qps, qp)
