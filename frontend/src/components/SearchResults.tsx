@@ -16,13 +16,13 @@ const examMap = (exam: string) => {
   return exam.slice(0, 3).toUpperCase();
 };
 
-type SortBy = 'course_name' | 'year' | undefined;
+type SortBy = 'relevance' |'course_name' | 'year';
 type SortOrder = 'ascending' | 'descending';
 
 const SearchResults: Component<Props> = (props) => {
   const [displayedResults, setDisplayedResults] = createSignal<ISearchResult[]>(props.results);
   const [filterByYear, setFilterByYear] = createSignal<number | null>(null);
-  const [sortBy, setSortBy] = createSignal<SortBy>(undefined);
+  const [sortBy, setSortBy] = createSignal<SortBy>('relevance');
   const [sortOrder, setSortOrder] = createSignal<SortOrder>("descending");
   const [availableYears, setAvailableYears] = createSignal<number[]>([]);
 
@@ -39,7 +39,7 @@ const SearchResults: Component<Props> = (props) => {
     let filtered_results = props.results.slice();
     if (filterByYear() !== null) filtered_results = filtered_results.filter((result) => result.year === filterByYear());
 
-    if (!sortBy()) {
+    if (sortBy() === 'relevance') {
         setDisplayedResults(filtered_results)
         return
     }
@@ -60,7 +60,7 @@ const SearchResults: Component<Props> = (props) => {
         case "course_name":
           return first.course_name.localeCompare(second.course_name);
         default:
-            return 0;
+          return 0;
       }
     });
 
@@ -95,10 +95,11 @@ const SearchResults: Component<Props> = (props) => {
                         id="sortBy"
                         value={sortBy()}
                         onInput={(e) => {
-                          setSortBy(e.target.value as "course_name" | "year");
+                          setSortBy(e.target.value as SortBy);
                           updateDisplayedResults();
                         }}
                       >
+                        <option value='relevance'>Sort by Relevance</option>
                         <option value="year">Sort by Year</option>
                         <option value="course_name">Sort by Course Name</option>
                       </select>
@@ -109,7 +110,7 @@ const SearchResults: Component<Props> = (props) => {
                         id="sortOrder"
                         value={sortOrder()}
                         onInput={(e) => {
-                          setSortOrder(e.target.value as "ascending" | "descending");
+                          setSortOrder(e.target.value as SortOrder);
                           updateDisplayedResults();
                         }}
                       >
