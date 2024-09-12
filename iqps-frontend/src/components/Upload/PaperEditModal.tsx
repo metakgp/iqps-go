@@ -188,7 +188,7 @@ function RadioGroup<T>(props: IRadioGroupProps<T>) {
 					<input
 						type="radio"
 						checked={props.value === value}
-						onInput={(e) => e.currentTarget.checked && props.onSelect(value)}
+						onChange={(e) => e.currentTarget.checked && props.onSelect(value)}
 					/>
 					{label}
 				</label>
