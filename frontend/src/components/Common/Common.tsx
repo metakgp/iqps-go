@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { FaSearch } from 'react-icons/fa';
 
 import './common_styles.scss';
 import { IconType } from 'react-icons';
