@@ -25,7 +25,9 @@
 	padding: 20px;
 	border: 2px dashed #ccc;
 	border-radius: 5px;
-
+	height: 100%;
+	width: 100%;
+	max-width: 40rem;
 	.message {
 		font-size: 1.2rem;
 	}
