@@ -11,19 +11,19 @@ import './styles/upload_form.scss';
 
 interface IUploadFormProps {
 	max_upload_limit: number;
-	awaitingResponse: boolean;
+	uploading: boolean;
 
 	handleUpload: (qpapers: IQuestionPaperFile[]) => Promise<boolean>;
-	setAwaitingResponse: Dispatch<React.SetStateAction<boolean>>;
 }
 export function UploadForm(props: IUploadFormProps) {
 	const [qPapers, setQPapers] = useState<IQuestionPaperFile[]>([]);
 	const [selectedQPaper, setSelectedQPaper] =
 		useState<IQuestionPaperFile | null>(null);
+	const [processing, setProcessing] = useState<boolean>(false);
 
 	const addQPapers = async (newFiles: File[]) => {
 		try {
-			props.setAwaitingResponse(true); // Set loading state to true
+			setProcessing(true); // Set loading state to true
 			const newQPsPromises = newFiles.map(async (newFile) => {
 				const qpDetails = await autofillData(newFile.name, newFile);
 				return { file: newFile, ...qpDetails };
@@ -37,7 +37,7 @@ export function UploadForm(props: IUploadFormProps) {
 		} catch (error) {
 			console.error('Error adding question papers:', error);
 		} finally {
-			props.setAwaitingResponse(false); // Set loading state to false
+			setProcessing(false); // Set loading state to false
 		}
 	};
 
@@ -68,7 +68,7 @@ export function UploadForm(props: IUploadFormProps) {
 		fileInputRef.current?.click();
 	};
 
-	return <div className="upload-form">
+	return !processing ? <div className="upload-form">
 		{
 			qPapers.length > 0 ? (
 				<>
@@ -90,9 +90,9 @@ export function UploadForm(props: IUploadFormProps) {
 					</div>
 					<div className="upload-form-btns">
 						<button onClick={onUpload} className="upload-btn">
-							{props.awaitingResponse ? (
+							{(processing || props.uploading) ? (
 								<>
-									Uploading
+									{props.uploading ? 'Uploading Files' : 'Processing Files'}
 									<div className="spinner">
 										<Spinner />
 									</div>
@@ -107,7 +107,7 @@ export function UploadForm(props: IUploadFormProps) {
 					</div>
 				</>
 			) : (
-				!props.awaitingResponse && <UploadDragAndDrop max_upload_limit={props.max_upload_limit} fileInputRef={fileInputRef} addQPapers={addQPapers} openFileDialog={openFileDialog} />
+				!(processing || props.uploading) && <UploadDragAndDrop max_upload_limit={props.max_upload_limit} fileInputRef={fileInputRef} addQPapers={addQPapers} openFileDialog={openFileDialog} />
 			)
 		}
 
@@ -118,5 +118,11 @@ export function UploadForm(props: IUploadFormProps) {
 				updateQPaper={updateQPaper}
 			/>
 		)}
-	</div >;
+	</div > :
+		<div className="loading">
+			<div className="spinner">
+				<Spinner />
+			</div>
+			<p className="message">Processing files, please wait...</p>
+		</div>;
 }
