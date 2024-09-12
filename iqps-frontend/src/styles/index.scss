@@ -84,3 +84,11 @@ select,
 		color: rgba($fg-color, 0.8);
 	}
 }
+
+.toast {
+	background-color: $surface-1 !important;
+	color: $fg-color !important;
+	fill: $fg-color !important;
+
+	border-radius: 10px !important;
+}
