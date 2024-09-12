@@ -38,7 +38,7 @@ function UploadPage() {
 }
 
 {
-    /* 
+    /*
 Screens: DnD screen, Loading Screen, Uploading Screen, Files Screen
 
 DnD Screen: No files + No loading (qPapers.length < 1 && !processing)
@@ -113,7 +113,7 @@ function UploadPageMain() {
             return false;
         }
 
-        if (!processing) {
+        if (!uploading) {
             try {
                 const formData = new FormData();
                 const numPapers = qPapers.length;
