@@ -1,29 +1,12 @@
 import { defineConfig } from 'vite';
-import solidPlugin from 'vite-plugin-solid';
-import copy from 'rollup-plugin-copy';
+import react from '@vitejs/plugin-react';
 
-export default defineConfig(({ mode }) => {
-  // Determine the correct worker source path based on the mode
-  const pdfWorkerSrc = mode === 'development' ? '/src/utils/pdf.worker.min.mjs' : '/pdf.worker.min.mjs';
-
+// https://vitejs.dev/config/
+export default defineConfig(() => {
   return {
     plugins: [
-      /* 
-      Uncomment the following line to enable solid-devtools.
-      For more info see https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#readme
-      */
-      // devtools(),
-      solidPlugin(),
-      copy({
-        targets: [
-          { src: 'src/utils/pdf.worker.min.mjs', dest: 'dist' },
-          { src: 'src/utils/pdf.worker.min.mjs', dest: 'public' }
-        ]
-      })
+      react()
     ],
-    server: {
-      port: 3000,
-    },
     build: {
       target: 'esnext',
       rollupOptions: {
@@ -35,9 +18,6 @@ export default defineConfig(({ mode }) => {
           }
         }
       }
-    },
-    define: {
-      'import.meta.env.VITE_PDF_WORKER_SRC': JSON.stringify(pdfWorkerSrc)
     }
-  };
-});
+  }
+})

@@ -1,7 +1,6 @@
-import { MouseEvent } from 'react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'solid-toast';
 
-export function copyLink(e: MouseEvent, link: string) {
+export function copyLink(e: Event, link: string) {
 	e.preventDefault();
 
   toast.promise(navigator.clipboard.writeText(link), {

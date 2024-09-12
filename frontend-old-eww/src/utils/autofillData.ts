@@ -1,14 +1,17 @@
 import COURSE_CODE_MAP from "../data/courses.json";
 import { Exam, IQuestionPaper, IQuestionPaperFile, Semester } from "../types/question_paper";
-import * as pdfjs from 'pdfjs-dist';
+import * as pdfjsLib from 'pdfjs-dist';
 import Tesseract from 'tesseract.js';
-import { validateCourseCode, validateExam, validateSemester, validateYear } from "./validateInput";
+import { validate, validateCourseCode, validateExam, validateSemester, validateYear } from "./validateInput";
 
-// Set the pdfjs worker source
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    'pdfjs-dist/build/pdf.worker.min.mjs',
-    import.meta.url,
-).toString();
+// Access the worker source path from environment variables
+const pdfWorkerSrc = import.meta.env.VITE_PDF_WORKER_SRC;
+
+if (typeof pdfWorkerSrc === 'string') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
+} else {
+    console.error('PDF WORKER Error: Invalid workerSrc type:', pdfWorkerSrc);
+}
 
 export const sanitizeQP = async (qp: IQuestionPaperFile) => {
     const sanitizedCourseName = qp.course_name
@@ -80,7 +83,7 @@ function extractDetailsFromText(text: string): IExtractedDetails {
 async function extractTextFromPDF(pdfFile: File): Promise<string> {
     const pdfData = await pdfFile.arrayBuffer();
 
-    const pdf = await pdfjs.getDocument({ data: pdfData }).promise;
+    const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
     const page = await pdf.getPage(1);
 
     const viewport = page.getViewport({ scale: 1.5 });

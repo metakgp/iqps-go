@@ -7,7 +7,7 @@ import { IoLink } from 'react-icons/io5';
 import { FaFilePdf } from 'react-icons/fa6';
 import { Select } from '../Common/Common';
 
-type SortBy = 'course_name' | 'year';
+type SortBy = 'relevance' | 'course_name' | 'year';
 type SortOrder = 'ascending' | 'descending';
 type FilterByYear = number | null;
 type FilterFields = 'filterByYear' | 'sortBy' | 'sortOrder';
@@ -21,7 +21,7 @@ interface ISearchResultsProps {
 function SearchResults(props: ISearchResultsProps) {
 	const [displayedResults, setDisplayedResults] = useState<ISearchResult[]>(props.results);
 	const [filterByYear, setFilterByYear] = useState<FilterByYear>(null);
-	const [sortBy, setSortBy] = useState<SortBy>('year');
+	const [sortBy, setSortBy] = useState<SortBy>('relevance');
 	const [sortOrder, setSortOrder] = useState<SortOrder>('descending');
 	const [availableYears, setAvailableYears] = useState<number[]>([]);
 
@@ -42,6 +42,11 @@ function SearchResults(props: ISearchResultsProps) {
 	const updateDisplayedResults = () => {
 		let filtered_results = props.results.slice();
 		if (filterByYear !== null) filtered_results = filtered_results.filter((result) => result.year === filterByYear);
+
+		if (sortBy === 'relevance') {
+			setDisplayedResults(filtered_results);
+			return;
+		}
 
 		const sorted_results = filtered_results.sort((a, b) => {
 			// Fall back to course name sorting when results are filtered by year.
@@ -134,8 +139,9 @@ function ResultsFilter(props: IResultsFilterProps) {
 		<Select
 			value={props.sortBy}
 			options={[
+				{ value: 'relevance', title: 'Sort by Relevance' },
 				{ value: 'year', title: 'Sort by Year' },
-				{ value: 'course_name', title: 'Sort by Course Name' }
+				{ value: 'course_name', title: 'Sort by Course Name' },
 			]}
 			onInput={(e) => props.updateFilters('sortBy', e.currentTarget.value)}
 		/>

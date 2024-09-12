@@ -50,7 +50,3 @@ export const validate = (data: IQuestionPaperFile): IErrorMessage => {
 
     return error_message;
 };
-
-export const isQPValid = (data: IQuestionPaperFile) => {
-    return !Object.values(validate(data)).some(Boolean);
-};
