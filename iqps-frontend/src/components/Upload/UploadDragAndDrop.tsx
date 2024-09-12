@@ -5,7 +5,6 @@ import './styles/upload_drag_and_drop.scss';
 
 interface IUploadDragAndDropProps {
 	max_upload_limit: number;
-	fileInputRef: React.RefObject<HTMLInputElement>;
 
 	addQPapers: (newFiles: File[]) => Promise<void>;
 	openFileDialog: React.MouseEventHandler;
@@ -24,18 +23,6 @@ export function UploadDragAndDrop(props: IUploadDragAndDropProps) {
 		e.stopPropagation();
 		setIsDragging(false);
 	}
-
-	const onFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		e.preventDefault();
-		if (e.target) {
-			const newFiles = Array.from(
-				(e.target as HTMLInputElement).files || []
-			);
-			if (newFiles) {
-				await props.addQPapers(newFiles);
-			}
-		}
-	};
 
 	const onFileDrop: React.DragEventHandler<HTMLDivElement> = async (e) => {
 		e.preventDefault();
@@ -66,14 +53,6 @@ export function UploadDragAndDrop(props: IUploadDragAndDropProps) {
 		onDrop={onFileDrop}
 		onClick={props.openFileDialog}
 	>
-		<input
-			ref={props.fileInputRef}
-			type="file"
-			accept=".pdf"
-			hidden
-			multiple={true}
-			onChange={onFileInputChange}
-		/>
 		<AiOutlineCloudUpload className="upload-icon" size="5rem" />
 		<h2>Click or drop files to upload</h2>
 	</div>;

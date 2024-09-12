@@ -1,4 +1,4 @@
-import { createRef, Dispatch, MouseEventHandler, useState } from "react";
+import { createRef, MouseEventHandler, useState } from "react";
 import { IQuestionPaperFile } from "../../types/question_paper";
 import { FileCard } from "./FileCard";
 import Spinner from "../Spinner/Spinner";
@@ -63,62 +63,85 @@ export function UploadForm(props: IUploadFormProps) {
 	}
 
 	const fileInputRef = createRef<HTMLInputElement>();
+
 	const openFileDialog: MouseEventHandler = (e) => {
 		e.stopPropagation();
 		fileInputRef.current?.click();
 	};
 
-	return !processing ? <div className="upload-form">
-		{
-			qPapers.length > 0 ? (
-				<>
-					<div className="uploaded-files">
-						{qPapers.map(
-							(qp, i) => <div key={i}>
-								<FileCard
-									qPaper={qp}
-									removeQPaper={removeQPaper}
-									edit={setSelectedQPaper}
-								/>
-								{!isQPValid(qp) && (
-									<p className="error-msg">
-										Invalid course details
-									</p>
-								)}
-							</div>
-						)}
-					</div>
-					<div className="upload-form-btns">
-						<button onClick={onUpload} className="upload-btn">
-							{(processing || props.uploading) ? (
-								<>
-									{props.uploading ? 'Uploading Files' : 'Processing Files'}
-									<div className="spinner">
-										<Spinner />
-									</div>
-								</>
-							) : (
-								<><AiOutlineCloudUpload size="1.5rem" />Upload</>
-							)}
-						</button>
-						{qPapers.length <= props.max_upload_limit && <button onClick={openFileDialog}>
-							<AiOutlineFileAdd size="1.5rem" />Add More Files
-						</button>}
-					</div>
-				</>
-			) : (
-				!(processing || props.uploading) && <UploadDragAndDrop max_upload_limit={props.max_upload_limit} fileInputRef={fileInputRef} addQPapers={addQPapers} openFileDialog={openFileDialog} />
-			)
+	const onFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		e.preventDefault();
+		if (e.target) {
+			const newFiles = Array.from(
+				(e.target as HTMLInputElement).files || []
+			);
+			if (newFiles) {
+				await addQPapers(newFiles);
+			}
 		}
+	};
 
-		{selectedQPaper !== null && (
-			<PaperEditModal
-				onClose={() => setSelectedQPaper(null)}
-				qPaper={selectedQPaper}
-				updateQPaper={updateQPaper}
+	return !processing ?
+		<div className="upload-form">
+			{
+				qPapers.length > 0 ? (
+					<>
+						<div className="uploaded-files">
+							{qPapers.map(
+								(qp, i) => <div key={i}>
+									<FileCard
+										qPaper={qp}
+										removeQPaper={removeQPaper}
+										edit={setSelectedQPaper}
+									/>
+									{!isQPValid(qp) && (
+										<p className="error-msg">
+											Invalid course details
+										</p>
+									)}
+								</div>
+							)}
+						</div>
+						<div className="upload-form-btns">
+							<button onClick={onUpload} className="upload-btn">
+								{(processing || props.uploading) ? (
+									<>
+										{props.uploading ? 'Uploading Files' : 'Processing Files'}
+										<div className="spinner">
+											<Spinner />
+										</div>
+									</>
+								) : (
+									<><AiOutlineCloudUpload size="1.5rem" />Upload</>
+								)}
+							</button>
+							{qPapers.length <= props.max_upload_limit && <button onClick={openFileDialog}>
+								<AiOutlineFileAdd size="1.5rem" />Add More Files
+							</button>}
+						</div>
+					</>
+				) : (
+					!(processing || props.uploading) && <UploadDragAndDrop max_upload_limit={props.max_upload_limit} addQPapers={addQPapers} openFileDialog={openFileDialog} />
+				)
+			}
+
+			{selectedQPaper !== null && (
+				<PaperEditModal
+					onClose={() => setSelectedQPaper(null)}
+					qPaper={selectedQPaper}
+					updateQPaper={updateQPaper}
+				/>
+			)}
+
+			<input
+				ref={fileInputRef}
+				type="file"
+				accept=".pdf"
+				hidden
+				multiple={true}
+				onChange={onFileInputChange}
 			/>
-		)}
-	</div > :
+		</div > :
 		<div className="loading">
 			<div className="spinner">
 				<Spinner />

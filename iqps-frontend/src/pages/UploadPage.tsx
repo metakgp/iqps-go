@@ -1,21 +1,16 @@
 import { FaSearch } from "react-icons/fa";
 import { Header } from "../components/Common/Common";
-import { createRef, MouseEventHandler, useState } from "react";
-import Spinner from "../components/Spinner/Spinner";
+import { useState } from "react";
 import { UploadInstructions } from "../components/Upload/UploadInstructions";
 import toast from "react-hot-toast";
 import { IQuestionPaperFile } from "../types/question_paper";
 import { isQPValid } from "../utils/validateInput";
 import { makeRequest } from "../utils/backend";
-import { autofillData, sanitizeQP } from "../utils/autofillData";
+import { sanitizeQP } from "../utils/autofillData";
 import "./styles/upload_page.scss";
-import { UploadDragAndDrop } from "../components/Upload/UploadDragAndDrop";
-import { FileCard } from "../components/Upload/FileCard";
-import { AiOutlineCloudUpload, AiOutlineFileAdd } from "react-icons/ai";
-import PaperEditModal from "../components/Upload/PaperEditModal";
 import { UploadForm } from "../components/Upload/UploadForm";
 
-function UploadPage() {
+export default function UploadPage() {
     let MAX_UPLOAD_LIMIT = parseInt(import.meta.env.VITE_MAX_UPLOAD_LIMIT);
     if (isNaN(MAX_UPLOAD_LIMIT) || MAX_UPLOAD_LIMIT < 1) {
         MAX_UPLOAD_LIMIT = 10;
