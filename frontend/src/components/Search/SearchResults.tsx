@@ -123,18 +123,16 @@ interface IResultsFilterProps {
 }
 function ResultsFilter(props: IResultsFilterProps) {
 	return <div className="row results-filter">
-		<div className="select-wrapper">
-			<Select
-				value={(props.filterByYear ?? 'null').toString()}
-				options={[
-					{ value: 'null', title: 'All Years' },
-					...props.availableYears.map((year) => {
-						return { title: year.toString(), value: year.toString() }
-					})
-				]}
-				onInput={(e) => props.updateFilters('filterByYear', e.currentTarget.value)}
-			/>
-		</div>
+		<Select
+			value={(props.filterByYear ?? 'null').toString()}
+			options={[
+				{ value: 'null', title: 'All Years' },
+				...props.availableYears.map((year) => {
+					return { title: year.toString(), value: year.toString() }
+				})
+			]}
+			onInput={(e) => props.updateFilters('filterByYear', e.currentTarget.value)}
+		/>
 
 		<Select
 			value={props.sortBy}
