@@ -7,6 +7,7 @@ import { Exam, ISearchResult } from "../../types/question_paper";
 import { copyLink } from "../../utils/copyLink";
 import { makeRequest } from "../../utils/backend";
 import SearchResults from "./SearchResults";
+import { Select } from "../Common/Common";
 
 function CourseSearchForm() {
 	const currentURL = new URL(window.location.toString());
@@ -20,7 +21,6 @@ function CourseSearchForm() {
 	const [msg, setMsg] = useState<string>('Search for something.');
 
 	const courseInputRef = createRef<HTMLInputElement>();
-	const examSelectRef = createRef<HTMLSelectElement>();
 
 	const fetchResults = async () => {
 		if (!awaitingResponse) {
@@ -85,13 +85,16 @@ function CourseSearchForm() {
 			</div>
 			<div>
 				<label htmlFor="exam">Exam:</label>
-				<div className="select-wrapper">
-					<select ref={examSelectRef} id="exam" value={exam} onInput={() => setExam(examSelectRef.current?.value as Exam)}>
-						<option value="">Mid / End Semester</option>
-						<option value="midsem">Mid Semester</option>
-						<option value="endsem">End Semester</option>
-					</select>
-				</div>
+				<Select
+					id="exam"
+					options={[
+						{value: '', title: 'Mid / End Semester'},
+						{value: 'midsem', title: 'Mid Semester'},
+						{value: 'endsem', title: 'End Semester'}
+					]}
+					value={exam}
+					onInput={(e) => setExam(e.currentTarget.value as Exam)}
+				/>
 			</div>
 			<div className="search-form-btns">
 				<button className="icon-btn" type="submit" disabled={awaitingResponse}>
