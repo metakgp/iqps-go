@@ -144,5 +144,9 @@
 			right: 15px;
 			transform: translateY(calc(-100%));
 		}
+
+		&:has(select:focus)::after {
+			content: "▲";
+		}
 	}
 }
