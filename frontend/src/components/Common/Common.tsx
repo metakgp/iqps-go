@@ -50,6 +50,7 @@ export function Select(props: ISelectProps) {
 			onInput={props.onInput}
 			id={props.id}
 			required={props.required}
+			className="select"
 		>
 			{props.options.map(({ value, title }, i) => <option key={i} value={value}>{title}</option>)}
 		</select>

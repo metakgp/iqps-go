@@ -31,7 +31,25 @@
 	}
 }
 
-.select {
-	min-width: 150px;
-	margin-right: 30px;
+.select-wrapper {
+	position: relative;
+
+	.select {
+		appearance: none;
+		min-width: 150px;
+		margin-right: 30px;
+	}
+
+	&::after {
+		content: "▼";
+		line-height: 100%;
+		position: absolute;
+		top: calc(50%);
+		right: 15px;
+		transform: translateY(calc(-100%));
+	}
+
+	&:has(select:focus)::after {
+		content: "▲";
+	}
 }
