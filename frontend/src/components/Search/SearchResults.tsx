@@ -161,9 +161,9 @@ function ResultCard(result: ISearchResult) {
 	return <tr className="result-card">
 		<td>{result.year}</td>
 		<td style={{ display: 'flex', alignItems: 'center' }}>
-			<p>
+			<p title={result.exam !== "unknown" ? result.exam[0].toUpperCase() + result.exam.slice(1) : 'Exam Unknown'}>
 				{result.course_name}&nbsp;
-				{result.exam && result.exam !== "unknown" && <span className="result-card-tag">{result.exam.slice(3).toUpperCase()}</span>}
+				<span className="result-card-tag">{result.exam !== "unknown" ? result.exam.slice(0, 3).toUpperCase() : 'N/A'}</span>
 			</p>
 			<div className="result-card-btns">
 				<a
