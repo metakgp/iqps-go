@@ -43,6 +43,10 @@
 </details>
 
 ## About The Project
+<div align="center">
+  <img width="60%" alt="image" src="./frontend/public/banner.png">
+</div>
+
 IQPS is a platform for searching and uploading previous year question papers for IIT Kharagpur students. The frontend is deployed at https://qp.metakgp.org and the backend is hosted on a DigitalOcean droplet with 2GB RAM and a single CPU. See [MetaPloy](https://github.com/metakgp/metaploy) for the deployment architecture.
 IQPS was originally created by [Shubham Mishra](https://github.com/grapheo12) in python. You can find it [here](https://github.com/grapheo12/iqps).
 
