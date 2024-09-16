@@ -9,7 +9,7 @@ body {
 	display: flex;
 	font-family: "Hanken Grotesk", sans-serif;
 
-	color: rgba($fg-color, 0.8);
+	color: $fg-color;
 	background-color: $bg-color;
 
 	scrollbar-gutter: stable;
@@ -73,7 +73,7 @@ select,
 	font-size: 1rem;
 
 	background-color: $surface-1;
-	color: rgba($fg-color, 0.8);
+	color: $fg-color;
 }
 
 .toast {

@@ -15,7 +15,7 @@
 	width: 2rem;
 	height: 2rem;
 
-	fill: rgba($accent-color, 0.8);
-	color: rgba($fg-color, 0.8);
+	fill: $accent-color;
+	color: $fg-color-darker;
 	animation: spin 1s infinite;
 }

@@ -23,7 +23,7 @@
 			display: inline-flex;
 			align-items: center;
 
-			background-color: rgba($accent-color, 0.8);
+			background-color: $accent-color-darker;
 			color: $fg-color;
 			padding: 0.35rem 0.5rem;
 			border-radius: 5px;

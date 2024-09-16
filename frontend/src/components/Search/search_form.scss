@@ -19,8 +19,8 @@
 	}
 
 	button {
-		background-color: rgba($accent-color, 0.8);
-		color: rgba($fg-color, 0.75);
+		background-color: $accent-color-darker;
+		color: $fg-color;
 		padding: 10px 15px;
 		margin-bottom: 1rem;
 		border: none;
@@ -30,7 +30,7 @@
 		cursor: pointer;
 
 		&:hover {
-			background-color: $accent-color-darker;
+			background-color: $accent-color-darkerer;
 		}
 
 		&:disabled {

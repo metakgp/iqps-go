@@ -63,11 +63,11 @@
 		}
 
 		&.close-btn {
-			color: crimson;
+			color: $rejected-color;
 		}
 
 		&.edit-btn {
-			color: #fff8;
+			color: $fg-color-darker;
 		}
 
 	}
