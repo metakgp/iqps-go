@@ -2,7 +2,7 @@
 
 .search-results {
 	padding: 0.5rem 1rem;
-	background-color: rgba($surface-1, 0.2);
+	background-color: $surface-1;
 
 	.message {
 		padding: 0.5rem 0;
@@ -40,7 +40,7 @@
 			border-radius: 8px;
 
 			&:nth-of-type(odd) {
-				background-color: rgba($fg-color, 0.05);
+				background-color: $surface-2;
 			}
 		}
 

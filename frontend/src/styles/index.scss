@@ -64,6 +64,7 @@ select,
 .select {
 	width: 100%;
 	padding: 8px 10px;
+	outline: none;
 	margin-bottom: 1rem;
 	border: 1px solid rgba($fg-color, 0.5);
 	border-radius: 5px;
@@ -71,12 +72,12 @@ select,
 	font-family: "Hanken Grotesk", sans-serif;
 	font-size: 1rem;
 
-	background-color: $bg-color;
+	background-color: $surface-1;
 	color: rgba($fg-color, 0.8);
 }
 
 .toast {
-	background-color: $surface-1 !important;
+	background-color: $surface-2 !important;
 	color: $fg-color !important;
 	fill: $fg-color !important;
 
