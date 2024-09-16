@@ -3,11 +3,7 @@ import toast from "react-hot-toast";
 import { validate } from "../../utils/validateInput";
 import { Exam, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
 import { getCourseFromCode } from "../../utils/autofillData";
-import { Select } from "../Common/Common";
 import './styles/paper_edit_modal.scss';
-
-const CURRENT_YEAR = new Date().getFullYear();
-const SELECT_YEARS = (new Array(6).fill(0)).map((_, i) => CURRENT_YEAR - i).reverse();
 
 interface IPaperEditModalProps {
 	onClose: () => void;
@@ -75,15 +71,12 @@ function PaperEditModal(props: IPaperEditModalProps) {
 						label="Year:"
 						validationError={validationErrors.yearErr}
 					>
-						<Select
+						<input
+							type="number"
 							id="year"
+							required
 							value={data.year}
-							required={true}
 							onInput={(e) => changeData('year', parseInt(e.currentTarget.value))}
-							options={[
-								{ value: "", title: "-- Select Year --" },
-								...SELECT_YEARS.map((year) => ({ value: year.toString(), title: year.toString() }))
-							]}
 						/>
 					</FormGroup>
 				</div>
