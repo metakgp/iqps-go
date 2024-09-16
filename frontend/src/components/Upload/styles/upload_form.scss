@@ -59,3 +59,20 @@
 		gap: 1rem;
 	}
 }
+
+.loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	padding: 20px;
+	border: 2px dashed $surface-2;
+	border-radius: 5px;
+	height: 100%;
+	width: 100%;
+	max-width: 40rem;
+
+	.message {
+		font-size: 1.2rem;
+	}
+}
