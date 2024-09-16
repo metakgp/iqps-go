@@ -7,9 +7,10 @@ export interface IFileCardProps {
     qPaper: IQuestionPaperFile;
     removeQPaper: (filename: string) => void;
     edit: (qp: IQuestionPaperFile) => void;
+    invalidDetails: boolean;
 };
 
-export function FileCard({ qPaper, removeQPaper, edit }: IFileCardProps) {
+export function FileCard({ qPaper, removeQPaper, edit, invalidDetails }: IFileCardProps) {
     return (
         <div className="file-card">
             <div className="file-card-icon">
@@ -25,6 +26,9 @@ export function FileCard({ qPaper, removeQPaper, edit }: IFileCardProps) {
                     <div className="pill">{qPaper.exam}</div>
                     <div className="pill">{qPaper.semester}</div>
                 </div>
+                { invalidDetails &&
+                    <p className="error-msg">Invalid course details</p>
+                }
             </div>
             <div className="btn-group">
                 <button

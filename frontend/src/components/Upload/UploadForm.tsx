@@ -93,12 +93,8 @@ export function UploadForm(props: IUploadFormProps) {
 										qPaper={qp}
 										removeQPaper={removeQPaper}
 										edit={setSelectedQPaper}
+										invalidDetails={!isQPValid(qp)}
 									/>
-									{!isQPValid(qp) && (
-										<p className="error-msg">
-											Invalid course details
-										</p>
-									)}
 								</div>
 							)}
 						</div>
