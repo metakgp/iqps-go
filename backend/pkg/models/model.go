@@ -1,12 +1,8 @@
-package main
+package models
 
 import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
-
-var respData struct {
-	Token string `json:"token"`
-}
 
 type QuestionPaper struct {
 	ID              int              `json:"id"`
@@ -21,7 +17,7 @@ type QuestionPaper struct {
 	CourseDetails   string           `json:"course_details,omitempty"`
 }
 
-type uploadEndpointRes struct {
+type UploadEndpointRes struct {
 	Filename    string `json:"filename"`
 	Status      string `json:"status"`
 	Description string `json:"description"`

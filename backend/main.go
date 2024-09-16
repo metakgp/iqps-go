@@ -24,6 +24,7 @@ func main() {
 	http.HandleFunc("POST /upload", HandleFileUpload)
 	http.HandleFunc("POST /oauth", GhAuth)
 	http.Handle("GET /unapproved", JWTMiddleware(http.HandlerFunc(ListUnapprovedPapers)))
+	http.Handle("GET /all", JWTMiddleware(http.HandlerFunc(ListAllPapers)))
 
 	logger := config.Get().Logger
 	c := cors.New(cors.Options{

@@ -18,6 +18,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/metakgp/iqps/backend/pkg/config"
 	"github.com/metakgp/iqps/backend/pkg/db"
+	"github.com/metakgp/iqps/backend/pkg/models"
 	"github.com/metakgp/iqps/backend/query"
 )
 
@@ -44,7 +45,7 @@ func HandleHealthCheck(w http.ResponseWriter, r *http.Request) {
 
 func HandleQPYear(w http.ResponseWriter, r *http.Request) {
 	db := db.GetDB()
-	result := db.QueryRow(context.Background(), "SELECT MIN(year), MAX(year) FROM iqps")
+	result := db.Db.QueryRow(context.Background(), "SELECT MIN(year), MAX(year) FROM iqps")
 	var minYear, maxYear int
 	err := result.Scan(&minYear, &maxYear)
 	if err != nil {
@@ -58,16 +59,16 @@ func HandleQPYear(w http.ResponseWriter, r *http.Request) {
 
 func HandleLibraryPapers(w http.ResponseWriter, r *http.Request) {
 	db := db.GetDB()
-	rows, err := db.Query(context.Background(), "SELECT id, course_code, course_name, year, exam, filelink, from_library FROM iqps WHERE from_library = 'true'")
+	rows, err := db.Db.Query(context.Background(), "SELECT id, course_code, course_name, year, exam, filelink, from_library FROM iqps WHERE from_library = 'true'")
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, "Could not Query Question Paper, Try Later!", nil)
 		return
 	}
 	defer rows.Close()
 
-	var qps []QuestionPaper = make([]QuestionPaper, 0)
+	var qps []models.QuestionPaper = make([]models.QuestionPaper, 0)
 	for rows.Next() {
-		qp := QuestionPaper{}
+		qp := models.QuestionPaper{}
 		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary)
 		if err != nil {
 			sendErrorResponse(w, http.StatusInternalServerError, "error parsing question paper details, contact admin ", nil)
@@ -103,16 +104,16 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	rows, err := db.Query(context.Background(), query, params)
+	rows, err := db.Db.Query(context.Background(), query, params)
 	config.Get().Logger.Debug("rows were fetched")
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 	defer rows.Close()
-	var qps []QuestionPaper = make([]QuestionPaper, 0)
+	var qps []models.QuestionPaper = make([]models.QuestionPaper, 0)
 	for rows.Next() {
-		qp := QuestionPaper{}
+		qp := models.QuestionPaper{}
 		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary, &qp.UploadTimestamp, &qp.ApproveStatus)
 		if err != nil {
 			config.Get().Logger.Error("HandleQPSearch: Error parsing question paper details")
@@ -130,18 +131,31 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 	sendResponse(w, http.StatusOK, qps)
 }
 
+func ListAllPapers(w http.ResponseWriter, r *http.Request) {
+	db := db.GetDB()
+
+	qps, err := db.FetchAllQuestionPapers()
+	if err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+
+	config.Get().Logger.Info("listUnapprovedPapers: Unapproved Question paper count: ", len(qps))
+	sendResponse(w, http.StatusOK, qps)
+}
+
 func ListUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
 	db := db.GetDB()
-	rows, err := db.Query(context.Background(), "SELECT course_code, course_name, year, exam,filelink,id, from_library FROM iqps WHERE approve_status = false ORDER BY upload_timestamp ASC")
+	rows, err := db.Db.Query(context.Background(), "SELECT course_code, course_name, year, exam,filelink,id, from_library FROM iqps WHERE approve_status = false ORDER BY upload_timestamp ASC")
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 	defer rows.Close()
 
-	var qps []QuestionPaper = make([]QuestionPaper, 0)
+	var qps []models.QuestionPaper = make([]models.QuestionPaper, 0)
 	for rows.Next() {
-		qp := QuestionPaper{}
+		qp := models.QuestionPaper{}
 		err := rows.Scan(&qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.ID, &qp.FromLibrary)
 		if err != nil {
 			sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
@@ -159,7 +173,7 @@ func HandleFileUpload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	var response []uploadEndpointRes = make([]uploadEndpointRes, 0)
+	var response []models.UploadEndpointRes = make([]models.UploadEndpointRes, 0)
 	// Max total size of 50MB
 	const MaxBodySize = 50 << 20 // 1<<20  = 1024*1024 = 1MB
 	r.Body = http.MaxBytesReader(w, r.Body, MaxBodySize)
@@ -182,7 +196,7 @@ func HandleFileUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, fileHeader := range files {
-		resp := uploadEndpointRes{Filename: fileHeader.Filename, Status: "success"}
+		resp := models.UploadEndpointRes{Filename: fileHeader.Filename, Status: "success"}
 
 		if fileHeader.Size > 10<<20 {
 			config.Get().Logger.Errorf("HandleFileUpload: File of size %d uploaded", fileHeader.Size)
@@ -297,7 +311,7 @@ func populateDB(filename string) error {
 	fileLink := filepath.Join(config.Get().UploadedQPsPath, filename+".pdf")
 	query := "INSERT INTO iqps (course_code, course_name, year, exam, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6);"
 
-	_, err := db.Exec(context.Background(), query, courseCode, courseName, year, exam, fileLink, fromLibrary)
+	_, err := db.Db.Exec(context.Background(), query, courseCode, courseName, year, exam, fileLink, fromLibrary)
 	if err != nil {
 		return fmt.Errorf("failed to add qp to database: %v", err.Error())
 	}
@@ -305,7 +319,7 @@ func populateDB(filename string) error {
 }
 
 func GhAuth(w http.ResponseWriter, r *http.Request) {
-	ghOAuthReqBody := GhOAuthReqBody{}
+	ghOAuthReqBody := models.GhOAuthReqBody{}
 	if err := json.NewDecoder(r.Body).Decode(&ghOAuthReqBody); err != nil {
 		sendErrorResponse(w, http.StatusBadRequest, err.Error(), nil)
 		return
@@ -332,7 +346,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 
 	// Decode the response
-	var tokenResponse GithubAccessTokenResponse
+	var tokenResponse models.GithubAccessTokenResponse
 	if err := json.NewDecoder(resp.Body).Decode(&tokenResponse); err != nil {
 		fmt.Println("Error Decoding Github Access Token: ", err.Error())
 		sendErrorResponse(w, http.StatusInternalServerError, "Could not decode github token", nil)
@@ -352,7 +366,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 
 	// Decode the response
-	var userResponse GithubUserResponse
+	var userResponse models.GithubUserResponse
 	if err := json.NewDecoder(resp.Body).Decode(&userResponse); err != nil {
 		fmt.Println("Error decoding username: ", err.Error())
 		sendErrorResponse(w, http.StatusInternalServerError, "Could not decode github token", nil)
@@ -410,6 +424,9 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error Sigining JWT: ", err.Error())
 		sendErrorResponse(w, http.StatusInternalServerError, "Error signing JWT token, try again later", nil)
 		return
+	}
+	var respData struct {
+		Token string `json:"token"`
 	}
 	respData.Token = tokenString
 
