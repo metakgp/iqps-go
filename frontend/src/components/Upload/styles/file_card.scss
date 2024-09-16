@@ -3,6 +3,10 @@
 .file-card {
 	display: flex;
 
+	.file-card-icon {
+		margin-right: 0.5rem;
+	}
+
 	.file-data {
 		display: flex;
 		flex-direction: column;
@@ -37,9 +41,9 @@
 		justify-content: center;
 	}
 
-	.close-btn {
-		color: crimson;
+	.btn {
 		padding: 0.5rem;
+		border-radius: 10px;
 		border: none;
 		background: none;
 		box-shadow: none;
@@ -47,20 +51,21 @@
 
 		&:hover {
 			cursor: pointer;
+			background-color: $surface-1;
 		}
-	}
 
-	.edit-btn {
-		color: #fff8;
-		padding: 0.5rem;
-		border: none;
-		background: none;
-		box-shadow: none;
-		height: fit-content;
-
-		&:hover {
-			cursor: pointer;
+		&:active {
+			background-color: $surface-2;
 		}
+
+		&.close-btn {
+			color: crimson;
+		}
+
+		&.edit-btn {
+			color: #fff8;
+		}
+
 	}
 
 	.pills {

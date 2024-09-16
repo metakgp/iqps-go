@@ -1,7 +1,7 @@
-import { AiOutlineDelete, AiOutlineFilePdf } from "react-icons/ai";
 import { IQuestionPaperFile } from "../../types/question_paper";
-import { FaRegPenToSquare } from "react-icons/fa6";
+import { FaFilePdf, FaRegPenToSquare } from "react-icons/fa6";
 import './styles/file_card.scss';
+import { FaRegTrashAlt } from "react-icons/fa";
 
 export interface IFileCardProps {
     qPaper: IQuestionPaperFile;
@@ -12,7 +12,9 @@ export interface IFileCardProps {
 export function FileCard({ qPaper, removeQPaper, edit }: IFileCardProps) {
     return (
         <div className="file-card">
-            <AiOutlineFilePdf size="4.5rem" />
+            <div className="file-card-icon">
+                <FaFilePdf size="3.5rem" className="file-card-icon" />
+            </div>
             <div className="file-data">
                 <h4 className="file-name">{qPaper.file.name}</h4>
                 <div className="course-name">
@@ -27,11 +29,11 @@ export function FileCard({ qPaper, removeQPaper, edit }: IFileCardProps) {
             <div className="btn-group">
                 <button
                     onClick={() => removeQPaper(qPaper.file.name)}
-                    className="close-btn"
+                    className="close-btn btn"
                 >
-                    <AiOutlineDelete size="2rem" />
+                    <FaRegTrashAlt size="1.5rem" />
                 </button>
-                <button onClick={() => edit(qPaper)} className="edit-btn">
+                <button onClick={() => edit(qPaper)} className="edit-btn btn">
                     <FaRegPenToSquare size="1.5rem" />
                 </button>
             </div>
