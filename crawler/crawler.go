@@ -24,15 +24,15 @@ type QuestionPaper struct {
 }
 
 type qpRaw struct {
-	Filename string `json:"filename"`
-	Name     string `json:"name"`
-	Year     int    `json:"year"`
-	ExamType string `json:"exam_type"`
-	Url      string `json:"url"`
+	CourseCode string `json:"course_code"`
+	Filename   string `json:"filename"`
+	Name       string `json:"name"`
+	Year       int    `json:"year"`
+	ExamType   string `json:"exam_type"`
+	Url        string `json:"url"`
 }
 
 func downloadFile(new_qp qpRaw) {
-
 	res, err := http.Get(new_qp.Url)
 	if err != nil {
 		fmt.Println(err)
@@ -64,13 +64,12 @@ func sanitizeFilename(s string) string {
 }
 
 func main() {
-
 	c := colly.NewCollector(
 		colly.AllowedDomains("10.18.24.75"),
 		colly.MaxDepth(9),
 	)
 
-	res, err := http.Get("http://localhost:5000/library")
+	res, err := http.Get("https://iqps-server.metakgp.org/library")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -103,14 +102,25 @@ func main() {
 			} else {
 				exam_type = ""
 			}
+			
+			// as per 16/09/2024, filenames in library are of the form course-code_course-name_extra-details, 
+			//extracting course_code from the filename since course_code is a mandatory field
+			course_code := ""
+			name_split := strings.Split(name, "_")
+
+			if len(name_split[0]) == 7 {
+				course_code = name_split[0]
+				name_split = name_split[1:]
+				name = strings.Join(name_split, " ")
+			}
 
 			for i := range existing_qp {
-				if existing_qp[i].CourseName == name && existing_qp[i].Year == year && existing_qp[i].Exam == exam_type {
+				if existing_qp[i].CourseCode == course_code && existing_qp[i].Year == year && existing_qp[i].Exam == exam_type {
 					return
 				}
 			}
 
-			new_qp = append(new_qp, qpRaw{sanitizeFilename(strings.Join(temp[4:], "_")), name, year, exam_type, file_url})
+			new_qp = append(new_qp, qpRaw{course_code, sanitizeFilename(strings.Join(temp[4:], "_")), name, year, exam_type, file_url})
 		}
 
 		c.Visit(e.Request.AbsoluteURL(link))
@@ -129,7 +139,7 @@ func main() {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	header := []string{"course_name", "year", "exam", "filelink", "from_library"}
+	header := []string{"course_code", "course_name", "year", "exam", "filelink", "from_library", "approve_status"}
 	if err := writer.Write(header); err != nil {
 		fmt.Println("Error writing header to CSV:", err)
 		return
@@ -140,12 +150,16 @@ func main() {
 		if new_qp[i].ExamType != "" {
 			exam_type = new_qp[i].ExamType + "sem"
 		}
-		var row = []string{
+
+		row := []string{
+			new_qp[i].CourseCode,
 			strings.Trim(new_qp[i].Name, ".pdf"),
 			fmt.Sprint(new_qp[i].Year),
 			exam_type,
-			new_qp[i].Filename,
-			"true"}
+			"peqp/qp/" + new_qp[i].Filename,
+			"true",
+			"true",
+		}
 		if err := writer.Write(row); err != nil {
 			fmt.Println("Error writing row to CSV:", err)
 			return
