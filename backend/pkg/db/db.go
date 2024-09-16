@@ -16,7 +16,7 @@ var (
 )
 
 const init_db = `CREATE TABLE IF NOT EXISTS iqps (
-    id SERIAL PRIMARY KEY,
+    id integer primary key generated always as identity,
     course_code TEXT NOT NULL DEFAULT '',
     course_name TEXT NOT NULL,
     year INTEGER NOT NULL,
