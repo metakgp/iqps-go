@@ -100,7 +100,7 @@
                 width: fit-content;
                 border: none;
                 outline: none;
-                background: rgba($accent-color, 0.5);
+                background: $accent-color-darker;
                 color: $fg-color;
                 font-size: 1.1rem;
                 font-weight: bold;
@@ -117,15 +117,12 @@
                     width: 1rem;
                     height: 1rem;
                 }
+
                 &:hover {
                     color: $fg-color;
                     background-color: $accent-color;
                     cursor: pointer;
                     transition: all 0.2s ease;
-                    .spinner {
-                        fill: rgba($fg-color, 0.8);
-                        color: rgba($accent-color, 0.8);
-                    }
                 }
             }
             .upload-btn {
