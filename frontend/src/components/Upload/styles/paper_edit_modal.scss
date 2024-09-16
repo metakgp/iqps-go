@@ -86,11 +86,19 @@
 				border-radius: 1rem;
 
 				&.cancel-btn {
-					background-color: crimson;
+					background-color: $rejected-color;
+
+					&:hover {
+						background-color: $rejected-color-darker;
+					}
 				}
 
 				&.save-btn {
 					background-color: $accent-color;
+
+					&:hover {
+						background-color: $accent-color-darker;
+					}
 
 					&.disabled {
 						background-color: #3d3d3d;
