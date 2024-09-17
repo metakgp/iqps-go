@@ -28,7 +28,7 @@ export const validate = (data: IQuestionPaperFile): IErrorMessage => {
         error_message.courseCodeErr = "Invalid Course Code";
     }
 
-    if (!data.course_name) error_message.courseNameErr = "Invalid Course Name";
+    if (!data.course_name || data.course_name.trim().toLowerCase() === 'unknown course') error_message.courseNameErr = "Invalid Course Name";
 
     if (
         !data.year ||
