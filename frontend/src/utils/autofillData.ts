@@ -58,7 +58,15 @@ function extractDetailsFromText(text: string): IExtractedDetails {
     const lines = text.split('\n').slice(0, 10).join('\n');
 
     const courseCodeMatch = lines.match(/[^\w]*([A-Z]{2}\d{5})[^\w]*/);
-    const courseCode = courseCodeMatch ? courseCodeMatch[1] : null;
+    const courseCodeMatchWithSpace = lines.match(/[^\w]*([A-Z]{2}\s*\d{5})[^\w]*/); // Match course codes written as XX XXXXX
+
+    const courseCode = (
+        courseCodeMatch ? courseCodeMatch[1].toUpperCase() :
+        (
+            courseCodeMatchWithSpace ?
+            courseCodeMatchWithSpace[1].replace(/\s*/g, '').toUpperCase() : null
+        )
+    );
 
     const yearMatch = lines.match(/([^\d]|^)(2\d{3})([^\d]|$)/); // Someone change this in the year 3000
     const year = yearMatch ? Number(yearMatch[2]) : null;
