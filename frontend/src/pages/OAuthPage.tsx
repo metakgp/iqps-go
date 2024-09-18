@@ -11,9 +11,7 @@ export default function OAuthPage() {
 	const [awaitingResponse, setAwaitingRepsonse] = useState<boolean>(false);
 
 	const loginHandler = async (code: string) => {
-		console.log("handleraddo", code)
 		const response = await makeRequest('oauth', 'post', { code });
-		console.log("handleraddo", response)
 
 		if (response.status === 'success') {
 			if ("token" in response.data) {
