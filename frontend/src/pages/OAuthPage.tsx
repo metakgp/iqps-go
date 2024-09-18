@@ -8,9 +8,12 @@ export default function OAuthPage() {
 	const auth = useAuthContext();
 	const navigate = useNavigate();
 	const [message, setMessage] = useState<string>("Authenticating, please wait...");
+	const [awaitingResponse, setAwaitingRepsonse] = useState<boolean>(false);
 
 	const loginHandler = async (code: string) => {
+		console.log("handleraddo", code)
 		const response = await makeRequest('oauth', 'post', { code });
+		console.log("handleraddo", response)
 
 		if (response.status === 'success') {
 			if ("token" in response.data) {
@@ -23,6 +26,8 @@ export default function OAuthPage() {
 		} else {
 			setMessage("Authentication failed due to a server error. Please try again later.");
 		}
+
+		setAwaitingRepsonse(false);
 	}
 
 	useEffect(() => {
@@ -34,16 +39,17 @@ export default function OAuthPage() {
 			if (urlParams.get("code") === null) {
 				setMessage("No OAuth code found. Redirecting to home page in 5s.");
 				setTimeout(() => navigate("/"), 5000);
-			} else {
+			} else if (!awaitingResponse) {
+				setAwaitingRepsonse(true);
 				loginHandler(urlParams.get("code") as string);
 			}
 		}
-	}, [])
+	}, []);
 
 	return (
 		<Header
 			title="Admin OAuth"
-			subtitle={message}
+			subtitle={awaitingResponse ? "Authenticating with the server, please wait." : message}
 		/>
 	)
 }

@@ -34,13 +34,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	);
 
 	const login = (jwt: string) => {
-		setIsAuthenticated(true);
 		localStorage.setItem("jwt", jwt);
+		setIsAuthenticated(true);
 	};
 
 	const logout = () => {
 		localStorage.removeItem("jwt");
-
 		setIsAuthenticated(false);
 	};
 
