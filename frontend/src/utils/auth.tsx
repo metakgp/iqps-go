@@ -6,15 +6,17 @@ import React, {
 } from "react";
 
 interface IAuthContext {
+	isAuthenticated: boolean;
 	jwt: string | null;
-	onLogin: (jwt: string) => void;
-	onLogout: () => void;
+	login: (jwt: string) => void;
+	logout: () => void;
 }
 
 const DEFAULT_AUTH_CONTEXT: IAuthContext = {
+	isAuthenticated: false,
 	jwt: null,
-	onLogin: () => { },
-	onLogout: () => { }
+	login: () => { },
+	logout: () => { }
 };
 
 const getLsAuthJwt = () => {
@@ -31,12 +33,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		lsAuthJwt !== null && lsAuthJwt !== "",
 	);
 
-	const onLogin = (jwt: string) => {
+	const login = (jwt: string) => {
 		setIsAuthenticated(true);
 		localStorage.setItem("jwt", jwt);
 	};
 
-	const onLogout = () => {
+	const logout = () => {
 		localStorage.removeItem("jwt");
 
 		setIsAuthenticated(false);
@@ -46,10 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		() => ({
 			isAuthenticated,
 			jwt: lsAuthJwt,
-			onLogin,
-			onLogout
+			login,
+			logout
 		}),
-		[isAuthenticated, onLogin, onLogout],
+		[isAuthenticated, login, logout],
 	);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
