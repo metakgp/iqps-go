@@ -23,7 +23,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				...prev_data,
 				[property]: value
 			}
-		})
+		});
 	}
 
 	// Check for data validity on change
@@ -32,7 +32,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 
 		setValidationErrors(errors);
 		setIsDataValid(Object.values(errors).every((err) => err === null));
-	}, [data])
+	}, [validationErrors, isDataValid]);
 
 	// Automatically fill course name if course code changes
 	useEffect(() => {
@@ -41,7 +41,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 
 			if (course_name !== null) changeData('course_name', course_name);
 		}
-	}, [data])
+	}, [data]);
 
 	return <div className="modal-overlay">
 		<div className="modal">

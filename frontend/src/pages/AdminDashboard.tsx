@@ -7,10 +7,14 @@ import { Header } from "../components/Common/Common";
 import "./styles/admin_dashboard.scss";
 import { QPCard } from "../components/AdminDashboard/QPCard";
 import { MdLogout } from "react-icons/md";
+import PaperEditModal from "../components/Common/PaperEditModal";
 
 function AdminDashboard() {
 	const auth = useAuthContext();
 	const [unapprovedPapers, setUnapprovedPapers] = useState<IAdminDashboardQP[]>([]);
+
+	const [selectedQPaper, setSelectedQPaper] =
+		useState<IAdminDashboardQP | null>(null);
 
 	const fetchUnapprovedPapers = async () => {
 		const papers = await makeRequest('unapproved', 'get', null, auth.jwt);
@@ -46,9 +50,25 @@ function AdminDashboard() {
 		<div className="dashboard-container">
 			<p><b>Unapproved papers</b>: {unapprovedPapers.length}</p>
 			<div className="unapproved-table">
-				{unapprovedPapers.map((paper, i) => <QPCard qPaper={paper} key={i} />)}
+				{unapprovedPapers.map((paper, i) => <QPCard
+					onEdit={(e) => {
+						e.preventDefault();
+						setSelectedQPaper(paper);
+					}}
+					qPaper={paper}
+					key={i}
+				/>
+				)}
 			</div>
 		</div>
+
+		{selectedQPaper !== null && (
+			<PaperEditModal
+				onClose={() => setSelectedQPaper(null)}
+				qPaper={selectedQPaper}
+				updateQPaper={() => { }}
+			/>
+		)}
 	</div> : <p>You are unauthenticated. This incident will be reported.</p>;
 }
 

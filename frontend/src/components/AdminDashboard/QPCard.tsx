@@ -7,9 +7,10 @@ import "./styles/qp_card.scss";
 
 interface IQPCardProps {
     qPaper: IAdminDashboardQP;
+    onEdit: React.MouseEventHandler<HTMLButtonElement>;
 }
 
-export function QPCard({ qPaper }: IQPCardProps) {
+export function QPCard({ qPaper, onEdit }: IQPCardProps) {
     return (
         <div className="qp-card">
             <div className="qp-data">
@@ -21,7 +22,7 @@ export function QPCard({ qPaper }: IQPCardProps) {
                     <div className="pill">{qPaper.exam}</div>
                     <div className="pill">{qPaper.semester}</div>
                 </div>
-                { !validate(qPaper) &&
+                {!validate(qPaper) &&
                     <p className="error-msg">Invalid course details</p>
                 }
             </div>
@@ -29,20 +30,20 @@ export function QPCard({ qPaper }: IQPCardProps) {
                 <a
                     className="btn"
                     href={qPaper.filelink}
-					title="Open PDF"
-					target="_blank"
-					rel="noopener noreferrer"
+                    title="Open PDF"
+                    target="_blank"
+                    rel="noopener noreferrer"
                 >
                     <FaFilePdf size="1.5rem" />
                 </a>
+                <button onClick={onEdit} className="edit-btn btn">
+                    <FaRegPenToSquare size="1.5rem" />
+                </button>
                 <button
-                    onClick={() => {}}
+                    onClick={() => { }}
                     className="close-btn btn"
                 >
                     <FaRegTrashAlt size="1.5rem" />
-                </button>
-                <button onClick={() => {}} className="edit-btn btn">
-                    <FaRegPenToSquare size="1.5rem" />
                 </button>
             </div>
         </div>
