@@ -6,6 +6,7 @@ import { Header } from "../components/Common/Common";
 
 import "./styles/admin_dashboard.scss";
 import { QPCard } from "../components/AdminDashboard/QPCard";
+import { MdLogout } from "react-icons/md";
 
 function AdminDashboard() {
 	const auth = useAuthContext();
@@ -31,6 +32,15 @@ function AdminDashboard() {
 		<Header
 			title="Admin Dashboard"
 			subtitle="Top secret documents - to be approved inside n-sided polygon shaped buildings only."
+			link={{
+				onClick: (e) => {
+					e.preventDefault();
+					auth.logout();
+				},
+				text: "Want to destroy the paper trail?",
+				button_text: "Logout",
+				icon: MdLogout
+			}}
 		/>
 
 		<div className="dashboard-container">

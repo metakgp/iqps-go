@@ -23,10 +23,21 @@
 			display: inline-flex;
 			align-items: center;
 
+			font-weight: bold;
+			font-size: 1.2rem;
+
 			background-color: $accent-color-darker;
 			color: $fg-color;
 			padding: 0.35rem 0.5rem;
 			border-radius: 5px;
+
+			border: none;
+
+			&:hover {
+				background-color: $accent-color-darkerer;
+				cursor: pointer;
+				text-decoration: underline;
+			}
 		}
 	}
 }

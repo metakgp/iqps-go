@@ -4,6 +4,7 @@ import React, {
 	useMemo,
 	useState,
 } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface IAuthContext {
 	isAuthenticated: boolean;
@@ -28,6 +29,8 @@ const AuthContext = createContext<IAuthContext>(DEFAULT_AUTH_CONTEXT);
 export const useAuthContext = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+	const navigate = useNavigate();
+
 	const lsAuthJwt = getLsAuthJwt();
 	const [isAuthenticated, setIsAuthenticated] = useState(
 		lsAuthJwt !== null && lsAuthJwt !== "",
@@ -41,6 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const logout = () => {
 		localStorage.removeItem("jwt");
 		setIsAuthenticated(false);
+		navigate('/');
 	};
 
 	const value = useMemo(
