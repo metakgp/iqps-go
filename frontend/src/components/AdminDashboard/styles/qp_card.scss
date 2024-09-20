@@ -1,0 +1,74 @@
+@import "../../../styles/variables";
+
+.qp-card {
+	display: flex;
+	padding: 0.7rem 1rem;
+	border-radius: 0.5rem;
+
+	.qp-data {
+		display: flex;
+		gap: 0.2rem;
+		flex-direction: column;
+		flex-grow: 1;
+		overflow: hidden;
+
+		.course-name {
+			font-size: 1.2rem;
+			flex-shrink: 1;
+			text-align: left;
+		}
+
+		.error-msg {
+			padding-left: 0;
+		}
+	}
+
+	.btn-group {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.btn {
+		padding: 0.5rem;
+		border-radius: 10px;
+		border: none;
+		background: none;
+		box-shadow: none;
+		height: fit-content;
+
+		&:hover {
+			cursor: pointer;
+			background-color: $surface-2;
+		}
+
+		&:active {
+			background-color: $surface-2;
+		}
+
+		&.close-btn {
+			color: $rejected-color;
+		}
+
+		&.edit-btn {
+			color: $fg-color-darker;
+		}
+
+	}
+
+	.pills {
+		margin-top: 0.2rem;
+		display: flex;
+		gap: 0.5rem;
+
+		.pill {
+			padding: 0.25rem 0.5rem;
+			border-radius: 0.5rem;
+			font-size: 0.8rem;
+			font-weight: bold;
+			color: white;
+			background-color: $accent-color-darker;
+		}
+	}
+}

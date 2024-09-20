@@ -1,0 +1,24 @@
+@import "../../styles/variables";
+
+#admin-dashboard {
+	display: flex;
+	flex-direction: column;
+	justify-items: center;
+
+	.dashboard-container {
+		display: flex;
+		gap: 2rem;
+		justify-content: space-around;
+
+		.unapproved-table {
+			width: 80%;
+			display: flex;
+			flex-direction: column;
+			gap: 0.2rem;
+
+			.qp-card:nth-child(odd) {
+				background-color: $surface-1;
+			}
+		}
+	}
+}

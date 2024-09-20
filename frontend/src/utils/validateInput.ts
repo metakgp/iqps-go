@@ -1,4 +1,4 @@
-import { IErrorMessage, IQuestionPaperFile } from "../types/question_paper";
+import { IAdminDashboardQP, IErrorMessage, IQuestionPaperFile } from "../types/question_paper";
 
 export const validateCourseCode = (course_code: string): boolean => {
     return course_code.length === 7 && course_code.match(/[a-z]{2}\d{5}/i) !== null;
@@ -16,7 +16,7 @@ export const validateSemester = (semester: string): boolean => {
     return semester === "autumn" || semester === "spring";
 }
 
-export const validate = (data: IQuestionPaperFile): IErrorMessage => {
+export const validate = (data: IQuestionPaperFile | IAdminDashboardQP): IErrorMessage => {
     const error_message: IErrorMessage = {
         courseCodeErr: null,
         courseNameErr: null,
