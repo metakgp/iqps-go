@@ -27,7 +27,7 @@ function AdminDashboard() {
 		}
 	}, []);
 
-	return <div id="admin-dashboard">
+	return auth.isAuthenticated ? <div id="admin-dashboard">
 		<Header
 			title="Admin Dashboard"
 			subtitle="Top secret documents - to be approved inside n-sided polygon shaped buildings only."
@@ -39,8 +39,7 @@ function AdminDashboard() {
 				{unapprovedPapers.map((paper, i) => <QPCard qPaper={paper} key={i} />)}
 			</div>
 		</div>
-
-	</div>;
+	</div> : <p>You are unauthenticated. This incident will be reported.</p>;
 }
 
 export default AdminDashboard;
