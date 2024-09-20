@@ -1,21 +1,23 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { validate } from "../../utils/validateInput";
-import { Exam, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
+import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
 import { getCourseFromCode } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
 
-interface IPaperEditModalProps {
+type UpdateQPHandler<T> = (qp: T) => void;
+interface IPaperEditModalProps<T> {
 	onClose: () => void;
-	qPaper: IQuestionPaperFile;
-	updateQPaper: (qp: IQuestionPaperFile) => void;
+	qPaper: T;
+	updateQPaper: UpdateQPHandler<T>;
 };
-function PaperEditModal(props: IPaperEditModalProps) {
+
+function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props: IPaperEditModalProps<T>) {
 	const [data, setData] = useState(props.qPaper);
 	const [validationErrors, setValidationErrors] = useState<IErrorMessage>(validate(props.qPaper));
 	const [isDataValid, setIsDataValid] = useState<boolean>(false);
 
-	const changeData = <T extends keyof IQuestionPaperFile>(property: T, value: IQuestionPaperFile[T]) => {
+	const changeData = <K extends keyof T>(property: K, value: T[K]) => {
 		setData((prev_data) => {
 			return {
 				...prev_data,
@@ -45,15 +47,17 @@ function PaperEditModal(props: IPaperEditModalProps) {
 		<div className="modal">
 			<form>
 				<h2>Edit Course Details</h2>
-				<FormGroup label="Filename:">
-					<input
-						type="text"
-						id="filename"
-						required
-						value={data.file.name}
-						disabled
-					/>
-				</FormGroup>
+				{'file' in data &&
+					<FormGroup label="Filename:">
+						<input
+							type="text"
+							id="filename"
+							required
+							value={data.file.name}
+							disabled
+						/>
+					</FormGroup>
+				}
 				<div className="two-columns">
 					<FormGroup
 						label="Course Code:"
@@ -98,8 +102,8 @@ function PaperEditModal(props: IPaperEditModalProps) {
 				>
 					<RadioGroup
 						options={[
-							{label: 'Mid Semester', value: 'midsem'},
-							{label: 'End Semester', value: 'endsem'}
+							{ label: 'Mid Semester', value: 'midsem' },
+							{ label: 'End Semester', value: 'endsem' }
 						]}
 						value={data.exam as Exam}
 						onSelect={(value: Exam) => changeData('exam', value)}
@@ -111,8 +115,8 @@ function PaperEditModal(props: IPaperEditModalProps) {
 				>
 					<RadioGroup
 						options={[
-							{label: 'Autumn Semester', value: 'autumn'},
-							{label: 'Spring Semester', value: 'spring'}
+							{ label: 'Autumn Semester', value: 'autumn' },
+							{ label: 'Spring Semester', value: 'spring' }
 						]}
 						value={data.semester}
 						onSelect={(value: Semester) => changeData('semester', value)}
@@ -176,7 +180,7 @@ interface IRadioGroupProps<T> {
 function RadioGroup<T>(props: IRadioGroupProps<T>) {
 	return <div className="radio-group">
 		{
-			props.options.map(({label, value}, i) => {
+			props.options.map(({ label, value }, i) => {
 				return <label key={i}>
 					<input
 						type="radio"

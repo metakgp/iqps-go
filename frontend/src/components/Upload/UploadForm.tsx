@@ -5,7 +5,7 @@ import Spinner from "../Spinner/Spinner";
 import { AiOutlineCloudUpload, AiOutlineFileAdd } from "react-icons/ai";
 import { isQPValid } from "../../utils/validateInput";
 import { UploadDragAndDrop } from "./UploadDragAndDrop";
-import PaperEditModal from "./PaperEditModal";
+import PaperEditModal from "../Common/PaperEditModal";
 import { autofillData } from "../../utils/autofillData";
 import './styles/upload_form.scss';
 
