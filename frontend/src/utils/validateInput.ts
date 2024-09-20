@@ -45,7 +45,7 @@ export const validate = (data: IQuestionPaperFile | IAdminDashboardQP): IErrorMe
         !data.semester ||
         !validateSemester(data.semester)
     ) {
-        error_message.examErr = "Invalid semester";
+        error_message.semesterErr = "Invalid semester";
     }
 
     return error_message;
