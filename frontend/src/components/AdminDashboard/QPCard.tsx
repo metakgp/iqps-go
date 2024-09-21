@@ -4,6 +4,7 @@ import { isQPValid, validate } from "../../utils/validateInput";
 import { FaFilePdf, FaRegPenToSquare } from "react-icons/fa6";
 
 import "./styles/qp_card.scss";
+import { formatBackendTimestamp } from "../../utils/backend";
 
 interface IQPCardProps {
     qPaper: IAdminDashboardQP;
@@ -19,7 +20,7 @@ export function QPCard({ qPaper, onEdit }: IQPCardProps) {
             <div className="qp-data">
                 <div className="course-name">
                     {`${qPaper.course_code} - ${qPaper.course_name}`}
-                    <span className="upload-timestamp">(uploaded: {qPaper.upload_timestamp})</span>
+                    <span className="upload-timestamp">({formatBackendTimestamp(qPaper.upload_timestamp)})</span>
                 </div>
                 <div className="pills">
                     <div className="pill">{qPaper.year}</div>

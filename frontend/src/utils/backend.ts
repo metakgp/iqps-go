@@ -65,3 +65,17 @@ export async function makeRequest<E extends keyof IEndpointTypes>(
 		}
 	}
 }
+
+export function formatBackendTimestamp(timestamp: string): string {
+	const date = new Date(timestamp);
+
+	return date.toLocaleString('default', {
+		day: '2-digit',
+		month: 'short',
+		year: 'numeric',
+		minute: '2-digit',
+		hour: '2-digit',
+		hour12: true,
+		hourCycle: 'h12'
+	});
+}
