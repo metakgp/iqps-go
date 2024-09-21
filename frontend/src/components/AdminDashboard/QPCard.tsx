@@ -9,11 +9,47 @@ import { formatBackendTimestamp } from "../../utils/backend";
 interface IQPCardProps {
     qPaper: IAdminDashboardQP;
     onEdit: React.MouseEventHandler<HTMLButtonElement>;
+    onDelete: () => void;
 }
 
-export function QPCard({ qPaper, onEdit }: IQPCardProps) {
+export function QPCard({ qPaper, onEdit, onDelete }: IQPCardProps) {
     const errorMsg = validate(qPaper);
     const isValid = isQPValid(qPaper);
+
+    const handleDelete: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+        e.preventDefault();
+
+        const first_confirmation = window.confirm('Are you sure you want to DELETE the paper?');
+
+        if (first_confirmation) {
+            let minimum_prompt_time: number = 5; // In seconds
+
+            let num_prompts = 1;
+            let prompt_started = new Date().getTime() / 1000;
+            let confirmed = window.confirm('Are you SURE you want to DELETE the paper? (Confirm again)');
+            let prompt_ended = new Date().getTime() / 1000;
+
+            while (
+                (prompt_ended - prompt_started < minimum_prompt_time)
+                && confirmed
+            ) {
+                prompt_started = new Date().getTime() / 1000;
+                confirmed = window.confirm(
+                    num_prompts === 1 ? `At least take 5s to read the prompt. DO YOU WANT TO DELETE THE PAPER?` :
+                        num_prompts === 2 ? `It takes longer to read a longer message. This is serious. DELETE?` :
+                            `It's going to take longer each time. You put yourself in this spot. CONFIRM?`
+                );
+                prompt_ended = new Date().getTime() / 1000;
+
+                num_prompts += 1;
+                minimum_prompt_time += num_prompts;
+            }
+
+            if (confirmed) {
+                onDelete();
+            }
+        }
+    }
 
     return (
         <div className="qp-card">
@@ -45,7 +81,7 @@ export function QPCard({ qPaper, onEdit }: IQPCardProps) {
                     <FaRegPenToSquare size="1.5rem" />
                 </button>
                 <button
-                    onClick={() => { }}
+                    onClick={handleDelete}
                     className="close-btn btn"
                 >
                     <FaRegTrashAlt size="1.5rem" />
