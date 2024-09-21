@@ -13,6 +13,7 @@ import Spinner from "../components/Spinner/Spinner";
 function AdminDashboard() {
 	const auth = useAuthContext();
 	const [unapprovedPapers, setUnapprovedPapers] = useState<IAdminDashboardQP[]>([]);
+	const [numUniqueCourseCodes, setNumUniqueCourseCodes] = useState<number>(0);
 	const [awaitingResponse, setAwaitingResponse] = useState<boolean>(false);
 
 	const [selectedQPaper, setSelectedQPaper] =
@@ -24,6 +25,14 @@ function AdminDashboard() {
 
 		if (papers.status === 'success') {
 			setUnapprovedPapers(papers.data);
+			setNumUniqueCourseCodes(
+				// Make an array of course codes
+				papers.data.map((paper) => paper.course_code)
+					.filter(
+						// Keep unqiue values
+						(code, i, arr) => arr.indexOf(code) === i
+					).length
+			)
 		}
 
 		setAwaitingResponse(false);
@@ -36,6 +45,7 @@ function AdminDashboard() {
 			fetchUnapprovedPapers();
 		}
 	}, []);
+
 
 	return auth.isAuthenticated ? <div id="admin-dashboard">
 		<Header
@@ -56,8 +66,11 @@ function AdminDashboard() {
 			{
 				awaitingResponse ? <Spinner /> :
 					<>
-						<p><b>Unapproved papers</b>: {unapprovedPapers.length}</p>
-						<div className="unapproved-table">
+						<div className="side-panel">
+							<p><b>Unapproved papers</b>: {unapprovedPapers.length}</p>
+							<p><b>Unique Course Codes</b>: {numUniqueCourseCodes}</p>
+						</div>
+						<div className="papers-panel">
 							{unapprovedPapers.map((paper, i) => <QPCard
 								onEdit={(e) => {
 									e.preventDefault();

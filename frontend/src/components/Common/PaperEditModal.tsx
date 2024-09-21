@@ -7,6 +7,7 @@ import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } 
 import { getCourseFromCode } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
 import { IoMdCheckmarkCircle } from "react-icons/io";
+import { FaFilePdf } from "react-icons/fa6";
 
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
@@ -59,6 +60,19 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 							value={data.file.name}
 							disabled
 						/>
+					</FormGroup>
+				}
+				{'filelink' in data &&
+					<FormGroup label="File:">
+						<a
+							href={data.filelink}
+							className="pdf-link"
+							title="Open PDF"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<FaFilePdf size="1.5rem" /> {new URL(data.filelink).pathname.split('/').slice(-1)[0]}
+						</a>
 					</FormGroup>
 				}
 				<div className="two-columns">
@@ -129,10 +143,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				{
 					'approve_status' in data &&
 
-					<FormGroup
-						label="Approval Status:"
-						validationError={null}
-					>
+					<FormGroup label="Approval Status:">
 						<button
 							className={`btn approve-btn ${data.approve_status ? 'approved' : 'unapproved'}`}
 							onClick={(e) => {
@@ -140,7 +151,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 								changeData('approve_status' as keyof T, !data.approve_status as T[keyof T]);
 							}}
 						>
-						{data.approve_status ? <IoMdCheckmarkCircle /> : <MdCancel size="1.1rem" />} {data.approve_status ? 'APPROVED' : 'UNAPPROVED'}
+							{data.approve_status ? <IoMdCheckmarkCircle /> : <MdCancel size="1.1rem" />} {data.approve_status ? 'APPROVED' : 'UNAPPROVED'}
 						</button>
 					</FormGroup>
 				}
