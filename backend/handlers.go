@@ -156,7 +156,7 @@ func ListUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
 	var qps []models.QuestionPaper = make([]models.QuestionPaper, 0)
 	for rows.Next() {
 		qp := models.QuestionPaper{}
-		err := rows.Scan(&qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.ID, &qp.FromLibrary)
+		err := rows.Scan(&qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.ID, &qp.FromLibrary, &qp.ApproveStatus, &qp.UploadTimestamp)
 		if err != nil {
 			sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
 			return
