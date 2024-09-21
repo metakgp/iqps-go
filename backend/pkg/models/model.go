@@ -13,7 +13,7 @@ type QuestionPaper struct {
 	FileLink        string           `json:"filelink"`
 	FromLibrary     bool             `json:"from_library"`
 	UploadTimestamp pgtype.Timestamp `json:"upload_timestamp,omitempty"`
-	ApproveStatus   bool             `json:"approve_status,omitempty"`
+	ApproveStatus   bool             `json:"approve_status"`
 	CourseDetails   string           `json:"course_details,omitempty"`
 }
 
