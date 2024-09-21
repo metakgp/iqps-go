@@ -76,6 +76,9 @@ function AdminDashboard() {
 									e.preventDefault();
 									setSelectedQPaper(paper);
 								}}
+								onDelete={() => {
+									console.log('deleted paper')
+								}}
 								qPaper={paper}
 								key={i}
 							/>

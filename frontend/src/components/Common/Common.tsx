@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 
 import './styles/common_styles.scss';
 import { IconType } from 'react-icons';
-import { useState } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
 
 export function Footer() {
