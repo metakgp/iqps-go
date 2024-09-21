@@ -17,6 +17,7 @@ export interface ISearchResult extends IQuestionPaper {
 
 export interface IAdminDashboardQP extends ISearchResult {
     upload_timestamp: string;
+    approve_status: boolean;
 }
 
 export interface IQuestionPaperFile extends IQuestionPaper {

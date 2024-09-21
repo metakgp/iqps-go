@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { MdCancel } from "react-icons/md";
+
 import { validate } from "../../utils/validateInput";
 import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
 import { getCourseFromCode } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
+import { IoMdCheckmarkCircle } from "react-icons/io";
 
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
@@ -122,6 +125,26 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						onSelect={(value: Semester) => changeData('semester', value)}
 					/>
 				</FormGroup>
+
+				{
+					'approve_status' in data &&
+
+					<FormGroup
+						label="Approval Status:"
+						validationError={null}
+					>
+						<button
+							className={`btn approve-btn ${data.approve_status ? 'approved' : 'unapproved'}`}
+							onClick={(e) => {
+								e.preventDefault();
+								changeData('approve_status' as keyof T, !data.approve_status as T[keyof T]);
+							}}
+						>
+						{data.approve_status ? <IoMdCheckmarkCircle /> : <MdCancel size="1.1rem" />} {data.approve_status ? 'APPROVED' : 'UNAPPROVED'}
+						</button>
+					</FormGroup>
+				}
+
 				<div className="control-group">
 					<button
 						onClick={(e) => {

@@ -21,7 +21,10 @@
 		background-color: $surface-1;
 
 		.form-group {
+			display: flex;
+			flex-direction: column;
 			margin-bottom: 1rem;
+			gap: 0.25rem;
 		}
 
 		h2 {
@@ -103,6 +106,38 @@
 					&.disabled {
 						background-color: $bg-disabled;
 					}
+				}
+			}
+		}
+
+		.approve-btn {
+			border-radius: 5px;
+			outline: none;
+			border: none;
+
+			padding: 0.3rem 0.8rem;
+			font-size: 1.05rem;
+
+			display: flex;
+			gap: 0.3rem;
+			align-items: center;
+
+			&.approved {
+				background-color: $approved-color;
+				color: $fg-inverse;
+
+				&:hover {
+					background-color: $approved-color-darker;
+					color: $fg-inverse-darker;
+				}
+			}
+
+			&.unapproved {
+				background-color: $rejected-color;
+				color: $fg-color;
+
+				&:hover {
+					background-color: $rejected-color-darker;
 				}
 			}
 		}

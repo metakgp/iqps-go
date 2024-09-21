@@ -10,7 +10,7 @@ $accent-complementary-darker: hsl(37, 80%, 30%);
 $accent-complementary-disabled: hsl(37, 40%, 30%);
 
 $approved-color: hsl(149, 80%, 35%);
-$approved-color-darker: hsl(149, 80%, 25%);
+$approved-color-darker: hsl(149, 80%, 30%);
 
 $rejected-color: hsl(349, 70%, 45%);
 $rejected-color-darker: hsl(349, 70%, 40%);
@@ -22,4 +22,5 @@ $bg-disabled: hsl(0, 0%, 24%);
 
 $fg-color: hsl(0, 0%, 85%);
 $fg-color-darker: hsl(0, 0%, 75%);
-$fg-inverse: #3d3d3d;
+$fg-inverse: hsl(0, 0%, 10%);
+$fg-inverse-darker: hsl(0, 0%, 5%);
