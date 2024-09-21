@@ -51,6 +51,6 @@ export const validate = (data: IQuestionPaperFile | IAdminDashboardQP): IErrorMe
     return error_message;
 };
 
-export const isQPValid = (data: IQuestionPaperFile) => {
+export const isQPValid = (data: IQuestionPaperFile | IAdminDashboardQP) => {
     return !Object.values(validate(data)).some(Boolean);
 };
