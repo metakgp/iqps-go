@@ -64,3 +64,50 @@
 		content: "▲";
 	}
 }
+
+.number-input {
+	display: flex;
+	gap: 0.3rem;
+
+	input {
+		width: 100%;
+		appearance: textfield;
+		-webkit-appearance: textfield;
+		-moz-appearance: textfield;
+	}
+
+	.number-input-controls {
+		display: flex;
+		flex-direction: column;
+
+		.btn {
+			display: flex;
+			align-items: center;
+			flex-grow: 1;
+			gap: 0;
+
+			padding: 0 0.4rem;
+			margin: 0;
+
+			border: 0;
+			outline: none;
+
+			background-color: $surface-2;
+			color: $fg-color;
+
+			&:hover {
+				background-color: $surface-3;
+				cursor: pointer;
+			}
+
+			&:nth-child(1) {
+				border-radius: 3px 3px 0 0;
+				border-bottom: 1px solid rgba($fg-color-darker, 0.3);
+			}
+
+			&:nth-child(2) {
+				border-radius: 0 0 3px 3px;
+			}
+		}
+	}
+}

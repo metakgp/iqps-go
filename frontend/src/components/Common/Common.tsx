@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 
 import './styles/common_styles.scss';
 import { IconType } from 'react-icons';
+import { useState } from 'react';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
 
 export function Footer() {
 	return <h3 className="meta-footer">Made with ❤️ and {"</>"} by <a href="https://github.com/metakgp/iqps-go" target="_blank">MetaKGP</a></h3>;
@@ -69,3 +71,30 @@ export function Select(props: ISelectProps) {
 	</div>;
 }
 
+interface INumberInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+	value: number;
+	setValue: (x: number) => void;
+}
+export function NumberInput(props: INumberInputProps) {
+	const getClickHandler = (change: number) => {
+		return (e: React.MouseEvent<HTMLButtonElement>) => {
+			e.preventDefault();
+			props.setValue(props.value + change);
+		}
+	}
+
+	return <div className="number-input">
+		<input
+			type="number"
+			onChange={(e) => {
+				e.preventDefault();
+				props.setValue(parseInt(e.target.value));
+			}}
+			{...props}
+		/>
+		<div className="number-input-controls">
+			<button className="btn inc" onClick={getClickHandler(1)}><FaChevronUp size="0.7rem" /></button>
+			<button className="btn dec" onClick={getClickHandler(-1)}><FaChevronDown size="0.7rem" /></button>
+		</div>
+	</div>
+}

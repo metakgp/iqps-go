@@ -8,6 +8,7 @@ import { getCourseFromCode } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
+import { NumberInput } from "./Common";
 
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
@@ -92,12 +93,11 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						label="Year:"
 						validationError={validationErrors.yearErr}
 					>
-						<input
-							type="number"
+						<NumberInput
 							id="year"
 							required
 							value={data.year}
-							onInput={(e) => changeData('year', parseInt(e.currentTarget.value))}
+							setValue={(value) => changeData('year', value)}
 						/>
 					</FormGroup>
 				</div>
