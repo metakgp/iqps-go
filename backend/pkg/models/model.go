@@ -5,16 +5,18 @@ import (
 )
 
 type QuestionPaper struct {
-	ID              int              `json:"id"`
+	ID              int              `json:"id,string"`
 	CourseCode      string           `json:"course_code"`
 	CourseName      string           `json:"course_name"`
-	Year            int              `json:"year"`
+	Year            int              `json:"year,string"`
 	Exam            string           `json:"exam"`
 	FileLink        string           `json:"filelink"`
 	FromLibrary     bool             `json:"from_library"`
 	UploadTimestamp pgtype.Timestamp `json:"upload_timestamp,omitempty"`
 	ApproveStatus   bool             `json:"approve_status"`
-	CourseDetails   string           `json:"course_details,omitempty"`
+	Semester        string           `json:"semester"`
+	IsDeleted       bool             `json:"is_deleted"`
+	ApprovedBy      string           `json:"approved_by"`
 }
 
 type UploadEndpointRes struct {

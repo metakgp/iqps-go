@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/metakgp/iqps/backend/pkg/config"
 	"github.com/metakgp/iqps/backend/pkg/models"
 )
@@ -30,4 +31,42 @@ func (db *db) FetchAllQuestionPapers() ([]models.QuestionPaper, error) {
 	}
 
 	return qps, nil
+}
+
+func (db *db) InsertNewPaper(qpDetails *models.QuestionPaper) error {
+	query := "INSERT INTO iqps (course_code, course_name, year, exam, filelink, semester, approve_status, from_library, approved_by) VALUES (@course_code, @course_name, @year, @exam, @filelink, @semester, @approve_status, @from_library, @approved_by)"
+	params := pgx.NamedArgs{
+		"course_code":    qpDetails.CourseCode,
+		"course_name":    qpDetails.CourseName,
+		"year":           qpDetails.Year,
+		"exam":           qpDetails.Exam,
+		"semester":       qpDetails.Semester,
+		"filelink":       qpDetails.FileLink,
+		"from_library":   qpDetails.FromLibrary,
+		"approve_status": qpDetails.ApproveStatus,
+		"approved_by":    qpDetails.ApprovedBy,
+	}
+
+	_, err := db.Db.Exec(context.Background(), query, params)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *db) MarkPaperAsSoftDeletedAndUnApprove(qpID int) error {
+	query := "UPDATE iqps set approve_status=false, is_deleted = true where id=@qpID and is_deleted=false"
+	params := pgx.NamedArgs{
+		"qpID": qpID,
+	}
+
+	ct, err := db.Db.Exec(context.Background(), query, params)
+	if err != nil {
+		return err
+	}
+
+	if ct.RowsAffected() == 0 {
+		return fmt.Errorf("no such paper found to be approved")
+	}
+	return nil
 }
