@@ -203,7 +203,7 @@ func ListAllPapers(w http.ResponseWriter, r *http.Request) {
 
 func ListUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
 	db := db.GetDB()
-	rows, err := db.Db.Query(context.Background(), "SELECT course_code, course_name, year, exam, filelink, id, from_library, approve_status, upload_timestamp FROM iqps WHERE approve_status = false ORDER BY upload_timestamp ASC")
+	rows, err := db.Db.Query(context.Background(), "SELECT course_code, course_name, year, exam, filelink, id, from_library, approve_status, upload_timestamp FROM iqps WHERE approve_status = false and is_deleted=false ORDER BY upload_timestamp ASC")
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
 		return
