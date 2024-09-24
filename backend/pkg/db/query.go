@@ -33,8 +33,8 @@ func (db *db) FetchAllQuestionPapers() ([]models.QuestionPaper, error) {
 	return qps, nil
 }
 
-func (db *db) InsertNewPaper(qpDetails *models.QuestionPaper) error {
-	query := "INSERT INTO iqps (course_code, course_name, year, exam, filelink, semester, approve_status, from_library, approved_by) VALUES (@course_code, @course_name, @year, @exam, @filelink, @semester, @approve_status, @from_library, @approved_by)"
+func (db *db) InsertNewPaper(qpDetails *models.QuestionPaper) (int, error) {
+	query := "INSERT INTO iqps (course_code, course_name, year, exam, filelink, semester, approve_status, from_library, approved_by) VALUES (@course_code, @course_name, @year, @exam, @filelink, @semester, @approve_status, @from_library, @approved_by) RETURNING id"
 	params := pgx.NamedArgs{
 		"course_code":    qpDetails.CourseCode,
 		"course_name":    qpDetails.CourseName,
@@ -46,12 +46,12 @@ func (db *db) InsertNewPaper(qpDetails *models.QuestionPaper) error {
 		"approve_status": qpDetails.ApproveStatus,
 		"approved_by":    qpDetails.ApprovedBy,
 	}
-
-	_, err := db.Db.Exec(context.Background(), query, params)
+	var id int
+	err := db.Db.QueryRow(context.Background(), query, params).Scan(&id)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return id, nil
 }
 
 func (db *db) MarkPaperAsSoftDeletedAndUnApprove(qpID int) error {

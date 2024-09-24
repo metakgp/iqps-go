@@ -71,7 +71,7 @@ func HandleApprovePaper(w http.ResponseWriter, r *http.Request) {
 	}
 
 	destFileLink := fmt.Sprintf("peqp/qp/%s_%s_%v_%v_%v.pdf", qpDetails.CourseCode, qpDetails.CourseName, qpDetails.Year, qpDetails.Semester, qpDetails.Exam)
-	srcFile := filepath.Join(config.Get().StaticFilesStorageLocation, config.Get().UploadedQPsPath, qpDetails.FileLink)
+	srcFile := filepath.Join(config.Get().StaticFilesStorageLocation, qpDetails.FileLink)
 	destFile := utils.SanitizeFileLink(filepath.Join(config.Get().StaticFilesStorageLocation, destFileLink))
 
 	err := utils.CopyFile(srcFile, destFile)
@@ -93,13 +93,16 @@ func HandleApprovePaper(w http.ResponseWriter, r *http.Request) {
 		ApprovedBy:    approverUsername,
 	}
 
-	err = db.InsertNewPaper(&newQPDetails)
+	id, err := db.InsertNewPaper(&newQPDetails)
 	if err != nil {
 		// undelete file
+		utils.DeleteFile(destFile)
 		sendErrorResponse(w, http.StatusInternalServerError, "could not update file details, try again later", nil)
 		config.Get().Logger.Errorf("HandleApprovePaper: Could not approve paper: %+v", err.Error())
 		return
 	}
+	// log line to help which entry was made by deleting which paper for recovery
+	config.Get().Logger.Infof("HandleApprovePaper: Id %d added against Id %d", id, qpDetails.ID)
 
 	err = db.MarkPaperAsSoftDeletedAndUnApprove(qpDetails.ID)
 	if err != nil {
@@ -168,7 +171,7 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 	var qps []models.QuestionPaper = make([]models.QuestionPaper, 0)
 	for rows.Next() {
 		qp := models.QuestionPaper{}
-		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary, &qp.UploadTimestamp, &qp.ApproveStatus)
+		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary, &qp.UploadTimestamp, &qp.ApproveStatus, &qp.Semester)
 		if err != nil {
 			config.Get().Logger.Error("HandleQPSearch: Error parsing question paper details")
 			sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)

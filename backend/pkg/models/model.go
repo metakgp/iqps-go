@@ -15,8 +15,8 @@ type QuestionPaper struct {
 	UploadTimestamp pgtype.Timestamp `json:"upload_timestamp,omitempty"`
 	ApproveStatus   bool             `json:"approve_status"`
 	Semester        string           `json:"semester"`
-	IsDeleted       bool             `json:"is_deleted"`
-	ApprovedBy      string           `json:"approved_by"`
+	IsDeleted       bool             `json:"is_deleted,omitempty"`
+	ApprovedBy      string           `json:"approved_by,omitempty"`
 }
 
 type UploadEndpointRes struct {

@@ -93,7 +93,7 @@ partial_search as (
   limit 30
 ),  result as (
   select
-  iqps.id,iqps.course_code, iqps.course_name, iqps.year, iqps.exam, iqps.filelink, iqps.from_library, iqps.upload_timestamp, iqps.approve_status
+  iqps.id,iqps.course_code, iqps.course_name, iqps.year, iqps.exam, iqps.filelink, iqps.from_library, iqps.upload_timestamp, iqps.approve_status, iqps.semester
 from
   fuzzy
   full outer join full_text on fuzzy.id = full_text.id
