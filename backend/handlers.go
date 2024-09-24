@@ -19,6 +19,7 @@ import (
 	"github.com/metakgp/iqps/backend/pkg/config"
 	"github.com/metakgp/iqps/backend/pkg/db"
 	"github.com/metakgp/iqps/backend/pkg/models"
+	"github.com/metakgp/iqps/backend/pkg/utils"
 	"github.com/metakgp/iqps/backend/query"
 )
 
@@ -55,6 +56,62 @@ func HandleQPYear(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sendResponse(w, http.StatusOK, map[string]int{"min": minYear, "max": maxYear})
+}
+
+func HandleApprovePaper(w http.ResponseWriter, r *http.Request) {
+	approverUsername := r.Context().Value(CLAIMS_KEY).(*Claims).Username
+
+	db := db.GetDB()
+	var qpDetails models.QuestionPaper
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&qpDetails); err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, "Could not find Question Paper, Try Later!", nil)
+		config.Get().Logger.Errorf("HandleApprovePaper: could not approve paper, invalid Body: %+v", err.Error())
+		return
+	}
+
+	destFileLink := fmt.Sprintf("peqp/qp/%s_%s_%v_%v_%v.pdf", qpDetails.CourseCode, qpDetails.CourseName, qpDetails.Year, qpDetails.Semester, qpDetails.Exam)
+	srcFile := filepath.Join(config.Get().StaticFilesStorageLocation, qpDetails.FileLink)
+	destFile := utils.SanitizeFileLink(filepath.Join(config.Get().StaticFilesStorageLocation, destFileLink))
+
+	err := utils.CopyFile(srcFile, destFile)
+	if err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, "Could not move Question Paper, Try Later!", nil)
+		config.Get().Logger.Errorf("HandleApprovePaper: could not approve paper, could not move question paper: %+v", err.Error())
+		return
+	}
+
+	newQPDetails := models.QuestionPaper{
+		CourseCode:    qpDetails.CourseCode,
+		CourseName:    qpDetails.CourseName,
+		Year:          qpDetails.Year,
+		Exam:          qpDetails.Exam,
+		FileLink:      destFileLink,
+		ApproveStatus: true,
+		Semester:      qpDetails.Semester,
+		FromLibrary:   false,
+		ApprovedBy:    approverUsername,
+	}
+
+	id, err := db.InsertNewPaper(&newQPDetails)
+	if err != nil {
+		// undelete file
+		utils.DeleteFile(destFile)
+		sendErrorResponse(w, http.StatusInternalServerError, "could not update file details, try again later", nil)
+		config.Get().Logger.Errorf("HandleApprovePaper: Could not approve paper: %+v", err.Error())
+		return
+	}
+	// log line to help which entry was made by deleting which paper for recovery
+	config.Get().Logger.Infof("HandleApprovePaper: Id %d added against Id %d", id, qpDetails.ID)
+
+	err = db.MarkPaperAsSoftDeletedAndUnApprove(qpDetails.ID)
+	if err != nil {
+		utils.DeleteFile(destFile)
+		sendErrorResponse(w, http.StatusInternalServerError, "error updating paper details!", nil)
+		config.Get().Logger.Errorf("HandleApprovePaper: error soft-deleting paper: %+v PaperDetails: %d", err.Error(), qpDetails.ID)
+		return
+	}
+	sendResponse(w, http.StatusOK, httpResp{Message: "File Approved successfully"})
 }
 
 func HandleLibraryPapers(w http.ResponseWriter, r *http.Request) {
@@ -114,7 +171,7 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 	var qps []models.QuestionPaper = make([]models.QuestionPaper, 0)
 	for rows.Next() {
 		qp := models.QuestionPaper{}
-		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary, &qp.UploadTimestamp, &qp.ApproveStatus)
+		err := rows.Scan(&qp.ID, &qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.FromLibrary, &qp.UploadTimestamp, &qp.ApproveStatus, &qp.Semester)
 		if err != nil {
 			config.Get().Logger.Error("HandleQPSearch: Error parsing question paper details")
 			sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
