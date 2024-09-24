@@ -63,7 +63,7 @@ with fuzzy as (
            similarity(course_code || ' ' || course_name, @query_text) as sim_score,
            row_number() over (order by similarity(course_code || ' ' || course_name, @query_text) desc) as rank_ix
     from iqps
-    where (course_code || ' ' || course_name) %>> @query_text
+    where (course_code || ' ' || course_name) %>> @query_text AND approve_status = true
     order by rank_ix
     limit 30
 ),
