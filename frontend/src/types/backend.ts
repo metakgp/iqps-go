@@ -16,6 +16,7 @@ export interface IErrorResponse {
 
 export type BackendResponse<T> = IOkResponse<T> | IErrorResponse;
 
+
 export interface IEndpointTypes {
 	[route: `search?${string}`]: {
 		request: null,
@@ -40,5 +41,11 @@ export interface IEndpointTypes {
 			status: string;
 			description: string;
 		}[]
+	},
+	approve: {
+		request: IAdminDashboardQP<string>,
+		response: {
+			message: string;
+		}
 	}
 }

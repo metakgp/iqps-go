@@ -19,6 +19,10 @@
 			.qp-card:nth-child(odd) {
 				background-color: $surface-1;
 			}
+
+			.qp-card.approved {
+				background-color: rgba($approved-color-darker, 0.16);
+			}
 		}
 	}
 }
