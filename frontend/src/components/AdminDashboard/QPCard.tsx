@@ -52,7 +52,7 @@ export function QPCard({ qPaper, onEdit, onDelete }: IQPCardProps) {
     }
 
     return (
-        <div className="qp-card">
+        <div className={`qp-card ${qPaper.approve_status ? 'approved' : ''}`}>
             <div className="qp-data">
                 <div className="course-name">
                     {`${qPaper.course_code} - ${qPaper.course_name}`}

@@ -29,10 +29,23 @@ function AdminDashboard() {
 			filelink: new URL(qp.filelink).pathname, // TODO: PLEASE DO THIS IN THE BAKCEND AHHHH ITS CALLED FILELINK NOT FILEPATH DED
 			year: qp.year.toString()
 		}, auth.jwt);
-		console.log(response);
 
 		if (response.status === "success") {
 			toast.success(response.data.message);
+
+			setUnapprovedPapers((papers) => {
+				const newPapers = [...papers];
+
+				const selectedIndex = newPapers.indexOf(selectedQPaper!);
+				if (selectedIndex !== -1) {
+					newPapers[selectedIndex] = {
+						...qp,
+						approve_status: true
+					}
+				}
+
+				return newPapers;
+			})
 		} else {
 			toast.error(`Approve error: ${response.message} (${response.status_code})`);
 		}
