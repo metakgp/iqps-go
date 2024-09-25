@@ -96,7 +96,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						<NumberInput
 							id="year"
 							required
-							value={data.year}
+							value={typeof data.year === 'string' ? parseInt(data.year) : data.year}
 							setValue={(value) => changeData('year', value)}
 						/>
 					</FormGroup>
