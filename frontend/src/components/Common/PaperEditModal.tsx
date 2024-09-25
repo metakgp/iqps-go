@@ -143,7 +143,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				{
 					'approve_status' in data &&
 
-					<FormGroup label="Approval Status:">
+					<FormGroup label="Approval Status (does nothing rn):">
 						<button
 							className={`btn approve-btn ${data.approve_status ? 'approved' : 'unapproved'}`}
 							onClick={(e) => {
@@ -169,14 +169,16 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 					<button
 						onClick={(e) => {
 							e.preventDefault();
-							toast.success("File details updated successfully");
+							if (!('approve_status' in data)) {
+								toast.success("File details updated successfully");
+							}
 							props.updateQPaper(data);
 							props.onClose();
 						}}
 						disabled={!isDataValid}
 						className={`save-btn ${!isDataValid ? 'disabled' : ''}`}
 					>
-						Save
+						{'approve_status' in data ? 'Approve' : 'Save'}
 					</button>
 				</div>
 			</form>

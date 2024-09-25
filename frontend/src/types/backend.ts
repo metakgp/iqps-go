@@ -40,5 +40,11 @@ export interface IEndpointTypes {
 			status: string;
 			description: string;
 		}[]
+	},
+	approve: {
+		request: IAdminDashboardQP,
+		response: {
+			message: string;
+		}
 	}
 }

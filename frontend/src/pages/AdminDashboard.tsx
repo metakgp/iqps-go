@@ -9,6 +9,7 @@ import { QPCard } from "../components/AdminDashboard/QPCard";
 import { MdLogout } from "react-icons/md";
 import PaperEditModal from "../components/Common/PaperEditModal";
 import Spinner from "../components/Spinner/Spinner";
+import toast from "react-hot-toast";
 
 function AdminDashboard() {
 	const auth = useAuthContext();
@@ -19,8 +20,26 @@ function AdminDashboard() {
 	const [selectedQPaper, setSelectedQPaper] =
 		useState<IAdminDashboardQP | null>(null);
 
+	const handlePaperEdit = async (qp: IAdminDashboardQP) => {
+		// Only approves the paper rn
+		// TODO: Allow unapproving papers as well
+
+		const response = await makeRequest('approve', 'post', {
+			...qp,
+			filelink: new URL(qp.filelink).pathname // TODO: PLEASE DO THIS IN THE BAKCEND AHHHH ITS CALLED FILELINK NOT FILEPATH DED
+		}, auth.jwt);
+		console.log(response);
+
+		if (response.status === "success") {
+			toast.success(response.data.message);
+		} else {
+			toast.error(`Approve error: ${response.message} (${response.status_code})`);
+		}
+	}
+
 	const fetchUnapprovedPapers = async () => {
 		setAwaitingResponse(true);
+		// TODO: Show all uploaded papers or only unapproved based on user toggle
 		const papers = await makeRequest('unapproved', 'get', null, auth.jwt);
 
 		if (papers.status === 'success') {
@@ -92,7 +111,7 @@ function AdminDashboard() {
 			<PaperEditModal
 				onClose={() => setSelectedQPaper(null)}
 				qPaper={selectedQPaper}
-				updateQPaper={() => { }}
+				updateQPaper={(qp) => handlePaperEdit(qp)}
 			/>
 		)}
 	</div> : <p>You are unauthenticated. This incident will be reported.</p>;
