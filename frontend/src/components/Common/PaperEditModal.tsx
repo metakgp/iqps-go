@@ -119,8 +119,9 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				>
 					<RadioGroup
 						options={[
-							{ label: 'Mid Semester', value: 'midsem' },
-							{ label: 'End Semester', value: 'endsem' }
+							{label: 'Mid Semester', value: 'midsem'},
+							{label: 'End Semester', value: 'endsem'},
+							{label: 'Class Test', value: 'ct'}
 						]}
 						value={data.exam as Exam}
 						onSelect={(value: Exam) => changeData('exam', value)}

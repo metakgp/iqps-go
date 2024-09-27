@@ -91,6 +91,7 @@ function CourseSearchForm() {
 						{value: '', title: 'Mid / End Semester'},
 						{value: 'midsem', title: 'Mid Semester'},
 						{value: 'endsem', title: 'End Semester'}
+						{value: 'ct', title: 'Class Test'}
 					]}
 					value={exam}
 					onInput={(e) => setExam(e.currentTarget.value as Exam)}

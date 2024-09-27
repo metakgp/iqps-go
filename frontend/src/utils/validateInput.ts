@@ -9,7 +9,7 @@ export const validateYear = (year: number): boolean => {
 }
 
 export const validateExam = (exam: string): boolean => {
-    return exam === "midsem" || exam === "endsem";
+    return exam === "midsem" || exam === "endsem" || exam == "ct";
 }
 
 export const validateSemester = (semester: string): boolean => {

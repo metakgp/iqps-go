@@ -1,4 +1,4 @@
-export type Exam = "midsem" | "endsem";
+export type Exam = "midsem" | "endsem" | "ct";
 export type Semester = "spring" | "autumn";
 
 export interface IQuestionPaper<Y = number> {
