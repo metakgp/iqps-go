@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ISearchResult } from '../../types/question_paper';
+import { IQuestionPaper, ISearchResult } from '../../types/question_paper';
 import { copyLink } from '../../utils/copyLink';
 import Spinner from '../Spinner/Spinner';
 import './search_results.scss';
@@ -156,12 +156,32 @@ function ResultsFilter(props: IResultsFilterProps) {
 }
 
 function ResultCard(result: ISearchResult) {
+	const getExamTag = (exam: ISearchResult['exam']) => {
+		// unknown - N/A
+		// midsem - MID; endsem - END
+		// ctx - CT1, CT2, etc.
+		return exam === 'unknown' ? 'N/A' :
+			(exam === 'midsem' || exam === 'endsem') ?
+				exam.slice(0, 3).toUpperCase() :
+				exam.toUpperCase();
+	}
+
+	const getExamTooltip = (exam: ISearchResult['exam']) => {
+		// unknown - Exam Unknown
+		// midsem - Midsem; endsem - Endsem
+		// ctx - Class Test 1, Class Test 2, etc.
+		return exam === 'unknown' ? 'Exam Unknown' :
+			(exam === 'midsem' || exam === 'endsem') ?
+				exam[0].toUpperCase() + exam.slice(1) :
+				`Class Test ${exam.slice(2)}`;
+	}
+
 	return <tr className="result-card">
 		<td>{result.year}</td>
 		<td style={{ display: 'flex', alignItems: 'center' }}>
-			<p title={result.exam !== "unknown" ? result.exam[0].toUpperCase() + result.exam.slice(1) : 'Exam Unknown'}>
+			<p title={getExamTooltip(result.exam)}>
 				{result.course_name}&nbsp;
-				<span className="result-card-tag">{result.exam !== "unknown" ? result.exam.slice(0, 3).toUpperCase() : 'N/A'}</span>
+				<span className="result-card-tag">{getExamTag(result.exam)}</span>
 			</p>
 			<div className="result-card-btns">
 				<a
