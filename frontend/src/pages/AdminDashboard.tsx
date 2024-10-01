@@ -88,7 +88,7 @@ function AdminDashboard() {
 				return newPapers;
 			})
 		} else {
-			toast.error(`Approve error: ${response.message} (${response.status_code})`);
+			toast.error(`Delete error: ${response.message} (${response.status_code})`);
 		}
 	}
 
