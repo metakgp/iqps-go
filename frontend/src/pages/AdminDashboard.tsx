@@ -72,7 +72,7 @@ function AdminDashboard() {
 	};
 
 	const handlePaperDelete = async (deleteQp: IAdminDashboardQP) => {
-		const response = await makeRequest('delete', 'post', { id: deleteQp.id });
+		const response = await makeRequest('delete', 'post', { id: deleteQp.id }, auth.jwt);
 
 		if (response.status === "success") {
 			toast.success(response.data.message);
