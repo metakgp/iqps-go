@@ -86,7 +86,7 @@ func HandleApprovePaper(w http.ResponseWriter, r *http.Request) {
 		CourseName:    qpDetails.CourseName,
 		Year:          qpDetails.Year,
 		Exam:          qpDetails.Exam,
-		FileLink:      destFileLink,
+		FileLink:      utils.SanitizeFileLink(destFileLink),
 		ApproveStatus: true,
 		Semester:      qpDetails.Semester,
 		FromLibrary:   false,
@@ -371,8 +371,8 @@ func HandleDeletePaper(w http.ResponseWriter, r *http.Request) {
 		config.Get().Logger.Errorf("HandleDeletePaper: error soft-deleting paper: %+v PaperDetails: %d", err.Error(), requestBody.Id)
 		return
 	}
-	config.Get().Logger.Infof("HandleDeletePaper: disapproved paper: %d", requestBody.Id)
-	sendResponse(w, http.StatusOK, httpResp{Message: "File Disapproved successfully"})
+	config.Get().Logger.Infof("HandleDeletePaper: Deleted paper: %d", requestBody.Id)
+	sendResponse(w, http.StatusOK, httpResp{Message: "File Deleted successfully"})
 }
 
 func populateDB(filename string) error {
