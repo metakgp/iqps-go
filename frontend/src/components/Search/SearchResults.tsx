@@ -6,6 +6,7 @@ import './search_results.scss';
 import { IoLink } from 'react-icons/io5';
 import { FaFilePdf } from 'react-icons/fa6';
 import { Select } from '../Common/Common';
+import { useAuthContext } from '../../utils/auth';
 
 type SortBy = 'relevance' | 'course_name' | 'year';
 type SortOrder = 'ascending' | 'descending';
@@ -159,6 +160,8 @@ function ResultsFilter(props: IResultsFilterProps) {
 }
 
 function ResultCard(result: ISearchResult) {
+	const auth = useAuthContext();
+
 	const getExamTag = (exam: ISearchResult['exam']) => {
 		// unknown - N/A
 		// midsem - MID; endsem - END
@@ -183,7 +186,7 @@ function ResultCard(result: ISearchResult) {
 		<td>{result.year}</td>
 		<td style={{ display: 'flex', alignItems: 'center' }}>
 			<p title={getExamTooltip(result.exam)}>
-				{result.course_name}&nbsp;
+				{result.course_name}&nbsp;{auth.isAuthenticated ? `(id: ${result.id})` : ''}
 				<span className="result-card-tag">{getExamTag(result.exam)}</span>
 			</p>
 			<div className="result-card-btns">
