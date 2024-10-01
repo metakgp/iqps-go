@@ -9,7 +9,12 @@ export const validateYear = (year: number): boolean => {
 }
 
 export const validateExam = (exam: string): boolean => {
-    return exam === "midsem" || exam === "endsem";
+    return exam === "midsem"
+        || exam === "endsem"
+        || (
+            exam.startsWith('ct') &&
+            !isNaN(parseInt(exam.slice(2)))
+        );
 }
 
 export const validateSemester = (semester: string): boolean => {
