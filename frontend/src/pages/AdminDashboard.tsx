@@ -77,14 +77,7 @@ function AdminDashboard() {
 			toast.success(response.data.message);
 
 			setUnapprovedPapers((papers) => {
-				const newPapers = [...papers];
-
-				const selectedIndex = newPapers.indexOf(selectedQPaper!);
-				if (selectedIndex !== -1) {
-					newPapers.splice(selectedIndex, 1);
-				}
-
-				return newPapers;
+				return papers.filter((qp) => qp != deleteQp);
 			})
 		} else {
 			toast.error(`Delete error: ${response.message} (${response.status_code})`);
