@@ -71,6 +71,27 @@ function AdminDashboard() {
 		setAwaitingResponse(false);
 	};
 
+	const handlePaperDelete = async (deleteQp: IAdminDashboardQP) => {
+		const response = await makeRequest('delete', 'post', { id: deleteQp.id });
+
+		if (response.status === "success") {
+			toast.success(response.data.message);
+
+			setUnapprovedPapers((papers) => {
+				const newPapers = [...papers];
+
+				const selectedIndex = newPapers.indexOf(selectedQPaper!);
+				if (selectedIndex !== -1) {
+					newPapers.splice(selectedIndex, 1);
+				}
+
+				return newPapers;
+			})
+		} else {
+			toast.error(`Approve error: ${response.message} (${response.status_code})`);
+		}
+	}
+
 	useEffect(() => {
 		if (!auth.isAuthenticated) {
 			window.location.assign(OAUTH_LOGIN_URL);
@@ -110,7 +131,7 @@ function AdminDashboard() {
 									setSelectedQPaper(paper);
 								}}
 								onDelete={() => {
-									console.log('deleted paper')
+									handlePaperDelete(paper);
 								}}
 								qPaper={paper}
 								key={i}

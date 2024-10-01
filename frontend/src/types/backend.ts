@@ -47,5 +47,13 @@ export interface IEndpointTypes {
 		response: {
 			message: string;
 		}
+	},
+	delete: {
+		request: {
+			id: string;
+		},
+		response: {
+			message: string;
+		}
 	}
 }
