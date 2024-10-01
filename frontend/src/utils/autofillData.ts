@@ -19,11 +19,15 @@ export const sanitizeQP = async (qp: IQuestionPaperFile) => {
         .replace(/[^\w\d\_]/g, "-")
         .replace(/\$+/g, "$");
 
+    const sanitizedExam = qp.exam
+        .replace(/[^\w\d\_]/g, "-")
+        .replace(/\$+/g, "$");
 
     return {
         ...qp,
         course_name: sanitizedCourseName,
         file_name: sanitizedFilename,
+        exam: sanitizedExam,
         file: qp.file,
     };
 };
@@ -49,7 +53,7 @@ export function getCodeFromCourse<K extends keyof typeof COURSE_CODE_MAP>(course
 interface IExtractedDetails {
     course_code: string | null,
     year: number | null,
-    exam: Exam | null,
+    exam: Exam | 'ct' | null,
     semester: Semester | null
 }
 
@@ -62,17 +66,25 @@ function extractDetailsFromText(text: string): IExtractedDetails {
 
     const courseCode = (
         courseCodeMatch ? courseCodeMatch[1].toUpperCase() :
-        (
-            courseCodeMatchWithSpace ?
-            courseCodeMatchWithSpace[1].replace(/\s*/g, '').toUpperCase() : null
-        )
+            (
+                courseCodeMatchWithSpace ?
+                    courseCodeMatchWithSpace[1].replace(/\s*/g, '').toUpperCase() : null
+            )
     );
 
     const yearMatch = lines.match(/([^\d]|^)(2\d{3})([^\d]|$)/); // Someone change this in the year 3000
     const year = yearMatch ? Number(yearMatch[2]) : null;
 
-    const examTypeMatch = lines.match(/[^\w]*(Mid|End)[^\w]*/i);
-    const examType = examTypeMatch ? examTypeMatch[1].toLowerCase() + "sem" as Exam : null;
+    const examTypeMatch = lines.match(/[^\w]*(Mid|End|Class Test)[^\w]*/i);
+    const examTypeMatchStr = examTypeMatch ? examTypeMatch[1].toLowerCase() : null;
+    const examType = <IExtractedDetails['exam']>(
+        examTypeMatchStr ? (
+            (examTypeMatchStr == 'mid' || examTypeMatchStr == 'end') ?
+                examTypeMatchStr + 'sem'
+                : examTypeMatchStr === 'class test' ?
+                    'ct' : null
+        ) : null
+    );
 
     const semesterMatch = lines.match(/[^\w]*(spring|autumn)[^\w]*/i);
     const semester = semesterMatch ? semesterMatch[1].toLowerCase() as Semester : null;

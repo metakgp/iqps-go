@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { IQuestionPaper, ISearchResult } from '../../types/question_paper';
+import { ISearchResult } from '../../types/question_paper';
 import { copyLink } from '../../utils/copyLink';
 import Spinner from '../Spinner/Spinner';
 import './search_results.scss';
@@ -173,7 +173,7 @@ function ResultCard(result: ISearchResult) {
 		return exam === 'unknown' ? 'Exam Unknown' :
 			(exam === 'midsem' || exam === 'endsem') ?
 				exam[0].toUpperCase() + exam.slice(1) :
-				`Class Test ${exam.slice(2)}`;
+				`Class Test ${exam.slice(2).length > 0 ? exam.slice(2) : '?'}`;
 	}
 
 	return <tr className="result-card">
