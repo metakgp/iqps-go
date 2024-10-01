@@ -41,7 +41,7 @@ function SearchResults(props: ISearchResultsProps) {
 
 	const updateDisplayedResults = () => {
 		let filtered_results = props.results.slice();
-		if (filterByYear !== null) filtered_results = filtered_results.filter((result) => result.year === filterByYear);
+		if (filterByYear !== null) filtered_results = filtered_results.filter((result) => parseInt(result.year) === filterByYear);
 
 		if (sortBy === 'relevance') {
 			setDisplayedResults(filtered_results);
@@ -60,7 +60,7 @@ function SearchResults(props: ISearchResultsProps) {
 
 			switch (sort_by) {
 				case "year":
-					return first.year - second.year;
+					return parseInt(first.year) - parseInt(second.year);
 				case "course_name":
 					return first.course_name.localeCompare(second.course_name);
 			}
@@ -73,7 +73,7 @@ function SearchResults(props: ISearchResultsProps) {
 	useEffect(() => {
 		const unique_years: Set<number> = new Set();
 
-		props.results.forEach((result) => unique_years.add(result.year));
+		props.results.forEach((result) => unique_years.add(parseInt(result.year)));
 		setAvailableYears(Array.from(unique_years.values()).sort().reverse());
 
 		updateDisplayedResults();
@@ -86,29 +86,32 @@ function SearchResults(props: ISearchResultsProps) {
 		{
 			props.awaitingResults ? <div className="spinner"><Spinner /></div> :
 				!props.success ? <p className="message">{props.msg}</p> : (
-					displayedResults.length > 0 && (
-						<>
-							<ResultsFilter
-								filterByYear={filterByYear}
-								availableYears={availableYears}
-								sortBy={sortBy}
-								sortOrder={sortOrder}
-								updateFilters={updateFilters}
-							/>
-
-							<table className="search-results-table">
-								<thead>
-									<tr>
-										<th>Year</th>
-										<th>Course Name</th>
-									</tr>
-								</thead>
-								<tbody>
-									{displayedResults.map((result, i) => <ResultCard key={i} {...result} />)}
-								</tbody>
-							</table>
-						</>
-					)
+					<>
+						<ResultsFilter
+							filterByYear={filterByYear}
+							availableYears={availableYears}
+							sortBy={sortBy}
+							sortOrder={sortOrder}
+							updateFilters={updateFilters}
+						/>
+						{
+							displayedResults.length > 0 ? (
+								<>
+									<table className="search-results-table">
+										<thead>
+											<tr>
+												<th>Year</th>
+												<th>Course Name</th>
+											</tr>
+										</thead>
+										<tbody>
+											{displayedResults.map((result, i) => <ResultCard key={i} {...result} />)}
+										</tbody>
+									</table>
+								</>
+							) : <p>No results.</p>
+						}
+					</>
 				)
 		}
 	</div>;

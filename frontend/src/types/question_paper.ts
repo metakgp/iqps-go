@@ -13,7 +13,7 @@ export interface IQuestionPaper<Y = number> {
     exam: Exam | "ct" | "unknown";
 };
 
-export interface ISearchResult<Y = number> extends IQuestionPaper<Y> {
+export interface ISearchResult<Y = string> extends IQuestionPaper<Y> {
     id: string;
     filelink: string;
     from_library: boolean;
