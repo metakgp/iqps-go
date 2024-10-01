@@ -120,12 +120,26 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 					<RadioGroup
 						options={[
 							{ label: 'Mid Semester', value: 'midsem' },
-							{ label: 'End Semester', value: 'endsem' }
+							{ label: 'End Semester', value: 'endsem' },
+							{ label: 'Class Test', value: 'ct' }
 						]}
-						value={data.exam as Exam}
-						onSelect={(value: Exam) => changeData('exam', value)}
+						value={data.exam.startsWith('ct') ? 'ct' : data.exam as Exam}
+						onSelect={(value: Exam | 'ct') => changeData('exam', value)}
 					/>
 				</FormGroup>
+				{data.exam.startsWith('ct') &&
+					<FormGroup
+						label="Class Test Number:"
+						validationError={validationErrors.examErr}
+					>
+						<NumberInput
+							id="ctnum"
+							required
+							value={parseInt(data.exam.slice(2))}
+							setValue={(value) => changeData('exam', `ct${value}`)}
+						/>
+					</FormGroup>
+				}
 				<FormGroup
 					label="Semester:"
 					validationError={validationErrors.semesterErr}
