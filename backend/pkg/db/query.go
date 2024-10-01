@@ -54,10 +54,11 @@ func (db *db) InsertNewPaper(qpDetails *models.QuestionPaper) (int, error) {
 	return id, nil
 }
 
-func (db *db) MarkPaperAsSoftDeletedAndUnApprove(qpID int) error {
-	query := "UPDATE iqps set approve_status=false, is_deleted = true where id=@qpID and is_deleted=false"
+func (db *db) MarkPaperAsSoftDeletedAndUnApprove(qpID int, approvedBy string) error {
+	query := "UPDATE iqps set approve_status=false, is_deleted = true, approved_by=@approved_by where id=@qpID and is_deleted=false"
 	params := pgx.NamedArgs{
-		"qpID": qpID,
+		"qpID":        qpID,
+		"approved_by": approvedBy,
 	}
 
 	ct, err := db.Db.Exec(context.Background(), query, params)

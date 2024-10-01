@@ -104,7 +104,7 @@ func HandleApprovePaper(w http.ResponseWriter, r *http.Request) {
 	// log line to help which entry was made by deleting which paper for recovery
 	config.Get().Logger.Infof("HandleApprovePaper: Id %d added against Id %d", id, qpDetails.ID)
 
-	err = db.MarkPaperAsSoftDeletedAndUnApprove(qpDetails.ID)
+	err = db.MarkPaperAsSoftDeletedAndUnApprove(qpDetails.ID, approverUsername)
 	if err != nil {
 		utils.DeleteFile(destFile)
 		sendErrorResponse(w, http.StatusInternalServerError, "error updating paper details!", nil)
@@ -350,6 +350,29 @@ func HandleFileUpload(w http.ResponseWriter, r *http.Request) {
 	config.Get().Logger.Info("HandleFileUpload: files successfully uploaded")
 	// return response to client
 	sendResponse(w, http.StatusAccepted, response)
+}
+
+func HandleDeletePaper(w http.ResponseWriter, r *http.Request) {
+	approverUsername := r.Context().Value(CLAIMS_KEY).(*Claims).Username
+	db := db.GetDB()
+	var requestBody struct {
+		Id int `json:"id"`
+	}
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&requestBody); err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, "Could not find Question Paper, Try Later!", nil)
+		config.Get().Logger.Errorf("HandleDeletePaper: could not approve paper, invalid Body: %+v", err.Error())
+		return
+	}
+
+	err := db.MarkPaperAsSoftDeletedAndUnApprove(requestBody.Id, approverUsername)
+	if err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, "error updating paper details!", nil)
+		config.Get().Logger.Errorf("HandleDeletePaper: error soft-deleting paper: %+v PaperDetails: %d", err.Error(), requestBody.Id)
+		return
+	}
+	config.Get().Logger.Infof("HandleDeletePaper: disapproved paper: %d", requestBody.Id)
+	sendResponse(w, http.StatusOK, httpResp{Message: "File Disapproved successfully"})
 }
 
 func populateDB(filename string) error {

@@ -26,6 +26,7 @@ func main() {
 	http.Handle("GET /unapproved", JWTMiddleware(http.HandlerFunc(ListUnapprovedPapers)))
 	http.Handle("GET /all", JWTMiddleware(http.HandlerFunc(ListAllPapers)))
 	http.Handle("POST /approve", JWTMiddleware(http.HandlerFunc(HandleApprovePaper)))
+	http.Handle("POST /delete", JWTMiddleware(http.HandlerFunc(HandleDeletePaper)))
 
 	logger := config.Get().Logger
 	c := cors.New(cors.Options{
