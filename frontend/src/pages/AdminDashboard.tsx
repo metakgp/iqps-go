@@ -26,8 +26,7 @@ function AdminDashboard() {
 
 		const response = await makeRequest('approve', 'post', {
 			...qp,
-			filelink: new URL(qp.filelink).pathname, // TODO: PLEASE DO THIS IN THE BAKCEND AHHHH ITS CALLED FILELINK NOT FILEPATH DED
-			year: qp.year.toString()
+			filelink: new URL(qp.filelink).pathname // TODO: PLEASE DO THIS IN THE BAKCEND AHHHH ITS CALLED FILELINK NOT FILEPATH DED
 		}, auth.jwt);
 
 		if (response.status === "success") {

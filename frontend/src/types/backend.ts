@@ -43,14 +43,14 @@ export interface IEndpointTypes {
 		}[]
 	},
 	approve: {
-		request: IAdminDashboardQP<string>,
+		request: IAdminDashboardQP,
 		response: {
 			message: string;
 		}
 	},
 	delete: {
 		request: {
-			id: string;
+			id: number;
 		},
 		response: {
 			message: string;

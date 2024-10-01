@@ -41,7 +41,7 @@ function SearchResults(props: ISearchResultsProps) {
 
 	const updateDisplayedResults = () => {
 		let filtered_results = props.results.slice();
-		if (filterByYear !== null) filtered_results = filtered_results.filter((result) => parseInt(result.year) === filterByYear);
+		if (filterByYear !== null) filtered_results = filtered_results.filter((result) => result.year === filterByYear);
 
 		if (sortBy === 'relevance') {
 			setDisplayedResults(filtered_results);
@@ -60,7 +60,7 @@ function SearchResults(props: ISearchResultsProps) {
 
 			switch (sort_by) {
 				case "year":
-					return parseInt(first.year) - parseInt(second.year);
+					return first.year - second.year;
 				case "course_name":
 					return first.course_name.localeCompare(second.course_name);
 			}
@@ -73,7 +73,7 @@ function SearchResults(props: ISearchResultsProps) {
 	useEffect(() => {
 		const unique_years: Set<number> = new Set();
 
-		props.results.forEach((result) => unique_years.add(parseInt(result.year)));
+		props.results.forEach((result) => unique_years.add(result.year));
 		setAvailableYears(Array.from(unique_years.values()).sort().reverse());
 
 		updateDisplayedResults();

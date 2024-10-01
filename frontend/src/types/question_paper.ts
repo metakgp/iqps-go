@@ -5,21 +5,21 @@
 export type Exam = "midsem" | "endsem" | `ct${number}`;
 export type Semester = "spring" | "autumn";
 
-export interface IQuestionPaper<Y = number> {
+export interface IQuestionPaper {
     course_code: string;
     course_name: string;
-    year: Y;
+    year: number;
     semester: Semester;
     exam: Exam | "ct" | "unknown";
 };
 
-export interface ISearchResult<Y = string> extends IQuestionPaper<Y> {
-    id: string;
+export interface ISearchResult extends IQuestionPaper {
+    id: number;
     filelink: string;
     from_library: boolean;
 };
 
-export interface IAdminDashboardQP<Y = number> extends ISearchResult<Y> {
+export interface IAdminDashboardQP extends ISearchResult {
     upload_timestamp: string;
     approve_status: boolean;
 }
