@@ -78,7 +78,8 @@ export function NumberInput(props: INumberInputProps) {
 	const getClickHandler = (change: number) => {
 		return (e: React.MouseEvent<HTMLButtonElement>) => {
 			e.preventDefault();
-			props.setValue(props.value + change);
+			const newValue = props.value + change;
+			props.setValue(isNaN(newValue) ? 1 : newValue);
 		}
 	}
 

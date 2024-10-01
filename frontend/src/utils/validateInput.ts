@@ -8,12 +8,15 @@ export const validateYear = (year: number): boolean => {
     return !isNaN(year) && year <= new Date().getFullYear();
 }
 
-export const validateExam = (exam: string): boolean => {
+export const validateExam = (exam: string, strictCt: boolean = false): boolean => {
     return exam === "midsem"
         || exam === "endsem"
         || (
             exam.startsWith('ct') &&
-            !isNaN(parseInt(exam.slice(2)))
+            (
+                parseInt(exam.slice(2)) >= 0 || // Yes, class test 0 is allowed.
+                !strictCt // Only check for number if strict ct is true
+            )
         );
 }
 
@@ -42,7 +45,7 @@ export const validate = (data: IQuestionPaperFile | IAdminDashboardQP): IErrorMe
         error_message.yearErr = "Invalid Year";
     }
 
-    if (!data.exam || !validateExam(data.exam)) {
+    if (!data.exam || !validateExam(data.exam, true)) {
         error_message.examErr = "Invalid exam";
     }
 
