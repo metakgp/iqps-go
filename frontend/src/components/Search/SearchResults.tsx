@@ -76,6 +76,7 @@ function SearchResults(props: ISearchResultsProps) {
 
 		props.results.forEach((result) => unique_years.add(result.year));
 		setAvailableYears(Array.from(unique_years.values()).sort().reverse());
+		setFilterByYear(null);
 
 		updateDisplayedResults();
 	}, [props.results])
