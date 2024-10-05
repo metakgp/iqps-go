@@ -4,7 +4,7 @@ import { MdCancel } from "react-icons/md";
 
 import { validate } from "../../utils/validateInput";
 import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
-import { getCourseFromCode } from "../../utils/autofillData";
+import { getCodeFromCourse, getCourseFromCode } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
@@ -39,14 +39,18 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 		setIsDataValid(Object.values(errors).every((err) => err === null));
 	}, [validationErrors, isDataValid]);
 
-	// Automatically fill course name if course code changes
+	// Automatically fill course name if course code changes or vice versa
 	useEffect(() => {
-		if (data.course_code.length === 7) {
-			const course_name = getCourseFromCode(data.course_code);
+		const auto_course_name = getCourseFromCode(data.course_code);
 
-			if (course_name !== null) changeData('course_name', course_name);
-		}
-	}, [data]);
+		if (auto_course_name !== null) changeData('course_name', auto_course_name);
+	}, [data.course_code]);
+
+	useEffect(() => {
+		const auto_course_code = getCodeFromCourse(data.course_name);
+
+		if (auto_course_code !== null) changeData('course_code', auto_course_code);
+	}, [data.course_name]);
 
 	return <div className="modal-overlay">
 		<div className="modal">
