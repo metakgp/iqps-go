@@ -86,7 +86,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 							id="course_code"
 							required
 							value={data.course_code}
-							onInput={(e) => changeData('course_code', e.currentTarget.value)}
+							onInput={(e) => changeData('course_code', e.currentTarget.value.toUpperCase())}
 						/>
 					</FormGroup>
 					<FormGroup
@@ -110,7 +110,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						id="course_name"
 						required
 						value={data.course_name}
-						onInput={(e) => changeData('course_name', e.currentTarget.value)}
+						onInput={(e) => changeData('course_name', e.currentTarget.value.toUpperCase())}
 					/>
 				</FormGroup>
 				<FormGroup
