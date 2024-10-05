@@ -77,15 +77,18 @@ export function QPCard({ qPaper, onEdit, onDelete }: IQPCardProps) {
                 >
                     <FaFilePdf size="1.5rem" />
                 </a>
-                <button onClick={onEdit} className="edit-btn btn">
-                    <FaRegPenToSquare size="1.5rem" />
-                </button>
-                <button
-                    onClick={handleDelete}
-                    className="close-btn btn"
-                >
-                    <FaRegTrashAlt size="1.5rem" />
-                </button>
+                {!qPaper.approve_status && <>
+                    <button onClick={onEdit} className="edit-btn btn">
+                        <FaRegPenToSquare size="1.5rem" />
+                    </button>
+                    <button
+                        onClick={handleDelete}
+                        className="close-btn btn"
+                    >
+                        <FaRegTrashAlt size="1.5rem" />
+                    </button>
+                </>
+                }
             </div>
         </div>
     );
