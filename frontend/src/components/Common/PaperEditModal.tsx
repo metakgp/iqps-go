@@ -9,6 +9,7 @@ import './styles/paper_edit_modal.scss';
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
 import { NumberInput } from "./Common";
+import Spinner from "../Spinner/Spinner";
 
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
@@ -23,6 +24,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 	const [isDataValid, setIsDataValid] = useState<boolean>(false);
 
 	const [ocrDetails, setOcrDetails] = useState<IExtractedDetails | null>(null);
+	const [awaitingOcr, setAwaitingOcr] = useState<boolean>(false);
 
 	const changeData = <K extends keyof T>(property: K, value: T[K]) => {
 		setData((prev_data) => {
@@ -55,6 +57,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 	}, [data.course_name]);
 
 	const getOcrData = async (fileLink: string) => {
+		setAwaitingOcr(true);
 		const response = await fetch(fileLink);
 
 		if (response.ok) {
@@ -63,6 +66,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 
 			setOcrDetails(extractDetailsFromText(pdfText));
 		}
+		setAwaitingOcr(false);
 	}
 
 	useEffect(() => {
@@ -75,21 +79,26 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 		{'filelink' in data &&
 			<div className="modal" style={{ minWidth: '20%' }}>
 				<h2>OCR Details</h2>
-				<FormGroup label="Course Code:">
-					{ocrDetails?.course_code ?? "Unknown"}
-				</FormGroup>
-				<FormGroup label="Year:">
-					{ocrDetails?.year ?? "Unknown"}
-				</FormGroup>
-				<FormGroup label="Course Name:">
-					{getCourseFromCode(ocrDetails?.course_code ?? "")}
-				</FormGroup>
-				<FormGroup label="Exam:">
-					{ocrDetails?.exam ?? "Unknown"}
-				</FormGroup>
-				<FormGroup label="Semester:">
-					{ocrDetails?.semester ?? "Unknown"}
-				</FormGroup>
+				{
+					awaitingOcr ? <div style={{justifyContent: 'center', display: 'flex'}}><Spinner /></div> :
+						<>
+							<FormGroup label="Course Code:">
+								{ocrDetails?.course_code ?? "Unknown"}
+							</FormGroup>
+							<FormGroup label="Year:">
+								{ocrDetails?.year ?? "Unknown"}
+							</FormGroup>
+							<FormGroup label="Course Name:">
+								{getCourseFromCode(ocrDetails?.course_code ?? "")}
+							</FormGroup>
+							<FormGroup label="Exam:">
+								{ocrDetails?.exam ?? "Unknown"}
+							</FormGroup>
+							<FormGroup label="Semester:">
+								{ocrDetails?.semester ?? "Unknown"}
+							</FormGroup>
+						</>
+				}
 			</div>
 		}
 		<div className="modal">
