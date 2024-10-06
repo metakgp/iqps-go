@@ -50,14 +50,14 @@ export function getCodeFromCourse<K extends keyof typeof COURSE_CODE_MAP>(course
     }
 };
 
-interface IExtractedDetails {
+export interface IExtractedDetails {
     course_code: string | null,
     year: number | null,
     exam: Exam | 'ct' | null,
     semester: Semester | null
 }
 
-function extractDetailsFromText(text: string): IExtractedDetails {
+export function extractDetailsFromText(text: string): IExtractedDetails {
     // Extract the first 10 lines
     const lines = text.split('\n').slice(0, 10).join('\n');
 
@@ -97,9 +97,7 @@ function extractDetailsFromText(text: string): IExtractedDetails {
     };
 }
 
-async function extractTextFromPDF(pdfFile: File): Promise<string> {
-    const pdfData = await pdfFile.arrayBuffer();
-
+export async function extractTextFromPDF(pdfData: ArrayBuffer): Promise<string> {
     const pdf = await pdfjs.getDocument({ data: pdfData }).promise;
     const page = await pdf.getPage(1);
 
@@ -121,7 +119,8 @@ async function extractTextFromPDF(pdfFile: File): Promise<string> {
 
 async function getAutofillDataFromPDF(file: File): Promise<IExtractedDetails> {
     try {
-        const text = await extractTextFromPDF(file);
+        const pdfData = await file.arrayBuffer();
+        const text = await extractTextFromPDF(pdfData);
 
         const { course_code, year, exam, semester } = extractDetailsFromText(text);
         return { course_code, year, exam, semester };
