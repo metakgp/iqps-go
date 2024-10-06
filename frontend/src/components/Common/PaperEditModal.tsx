@@ -4,7 +4,7 @@ import { MdCancel } from "react-icons/md";
 
 import { validate } from "../../utils/validateInput";
 import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
-import { getCodeFromCourse, getCourseFromCode } from "../../utils/autofillData";
+import { extractDetailsFromText, extractTextFromPDF, getCodeFromCourse, getCourseFromCode, IExtractedDetails } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
@@ -21,6 +21,8 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 	const [data, setData] = useState(props.qPaper);
 	const [validationErrors, setValidationErrors] = useState<IErrorMessage>(validate(props.qPaper));
 	const [isDataValid, setIsDataValid] = useState<boolean>(false);
+
+	const [ocrDetails, setOcrDetails] = useState<IExtractedDetails | null>(null);
 
 	const changeData = <K extends keyof T>(property: K, value: T[K]) => {
 		setData((prev_data) => {
@@ -52,10 +54,42 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 		if (auto_course_code !== null) changeData('course_code', auto_course_code);
 	}, [data.course_name]);
 
+	const getOcrData = async (fileLink: string) => {
+		const response = await fetch(fileLink);
+
+		if (response.ok) {
+			const pdfData = await response.arrayBuffer();
+			const pdfText = await extractTextFromPDF(pdfData);
+
+			setOcrDetails(extractDetailsFromText(pdfText));
+		}
+	}
+
+	useEffect(() => {
+		if ('filelink' in props.qPaper) {
+			getOcrData(props.qPaper.filelink);
+		}
+	}, [])
+
 	return <div className="modal-overlay">
 		{'filelink' in data &&
-			<div className="modal">
+			<div className="modal" style={{ minWidth: '20%' }}>
 				<h2>OCR Details</h2>
+				<FormGroup label="Course Code:">
+					{ocrDetails?.course_code ?? "Unknown"}
+				</FormGroup>
+				<FormGroup label="Year:">
+					{ocrDetails?.year ?? "Unknown"}
+				</FormGroup>
+				<FormGroup label="Course Name:">
+					{getCourseFromCode(ocrDetails?.course_code ?? "")}
+				</FormGroup>
+				<FormGroup label="Exam:">
+					{ocrDetails?.exam ?? "Unknown"}
+				</FormGroup>
+				<FormGroup label="Semester:">
+					{ocrDetails?.semester ?? "Unknown"}
+				</FormGroup>
 			</div>
 		}
 		<div className="modal">
