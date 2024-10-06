@@ -53,6 +53,11 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 	}, [data.course_name]);
 
 	return <div className="modal-overlay">
+		{'filelink' in data &&
+			<div className="modal">
+				<h2>OCR Details</h2>
+			</div>
+		}
 		<div className="modal">
 			<form>
 				<h2>Edit Course Details</h2>
@@ -201,6 +206,11 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				</div>
 			</form>
 		</div>
+		{'filelink' in data &&
+			<div className="modal">
+				<h2>Similar Papers</h2>
+			</div>
+		}
 	</div>;
 }
 
