@@ -5,7 +5,7 @@ import Spinner from '../Spinner/Spinner';
 import './search_results.scss';
 import { IoLink } from 'react-icons/io5';
 import { FaFilePdf } from 'react-icons/fa6';
-import { Select } from '../Common/Common';
+import { Select } from '../Common/Form';
 import { useAuthContext } from '../../utils/auth';
 
 type SortBy = 'relevance' | 'course_name' | 'year';

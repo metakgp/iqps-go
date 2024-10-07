@@ -1,0 +1,99 @@
+@import "../../../styles/variables";
+
+.form-group {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 1rem;
+	gap: 0.25rem;
+}
+
+.radio-group {
+	display: flex;
+	justify-content: left;
+	gap: 2.5rem;
+
+	label {
+		display: flex;
+		align-items: center;
+		justify-content: start;
+		gap: 0.5rem;
+		font-weight: normal;
+		margin-bottom: 0;
+
+		input {
+			margin: 0;
+			width: fit-content;
+			padding: 0;
+		}
+	}
+}
+
+.number-input {
+	display: flex;
+	gap: 0.3rem;
+
+	input {
+		width: 100%;
+		appearance: textfield;
+		-webkit-appearance: textfield;
+		-moz-appearance: textfield;
+	}
+
+	.number-input-controls {
+		display: flex;
+		flex-direction: column;
+
+		.btn {
+			display: flex;
+			align-items: center;
+			flex-grow: 1;
+			gap: 0;
+
+			padding: 0 0.4rem;
+			margin: 0;
+
+			border: 0;
+			outline: none;
+
+			background-color: $surface-2;
+			color: $fg-color;
+
+			&:hover {
+				background-color: $surface-3;
+				cursor: pointer;
+			}
+
+			&:nth-child(1) {
+				border-radius: 3px 3px 0 0;
+				border-bottom: 1px solid rgba($fg-color-darker, 0.3);
+			}
+
+			&:nth-child(2) {
+				border-radius: 0 0 3px 3px;
+			}
+		}
+	}
+}
+
+.select-wrapper {
+	position: relative;
+
+	.select {
+		appearance: none;
+		min-width: 150px;
+		margin-right: 30px;
+	}
+
+	&::after {
+		content: "▼";
+		line-height: 100%;
+		position: absolute;
+		top: calc(50%);
+		right: 15px;
+		transform: translateY(calc(-100%));
+	}
+
+	&:has(select:focus)::after {
+		content: "▲";
+	}
+}

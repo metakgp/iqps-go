@@ -8,8 +8,8 @@ import { extractDetailsFromText, extractTextFromPDF, getCodeFromCourse, getCours
 import './styles/paper_edit_modal.scss';
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
-import { NumberInput } from "./Common";
 import Spinner from "../Spinner/Spinner";
+import { FormGroup, RadioGroup, NumberInput } from "./Form";
 
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
@@ -255,50 +255,6 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 			</div>
 		}
 	</div>;
-}
-
-interface IFormGroupProps {
-	label: string;
-	children: React.ReactNode;
-	validationError?: string | null;
-}
-function FormGroup(props: IFormGroupProps) {
-	return <div className="form-group">
-		<label>{props.label}</label>
-		<div>
-			{props.children}
-			{props.validationError && (
-				<p className="error-msg">
-					{props.validationError}
-				</p>
-			)}
-		</div>
-	</div>
-}
-
-interface IRadioGroupProps<T> {
-	value: T;
-	options: {
-		label: string;
-		value: T;
-	}[];
-	onSelect: (value: T) => void;
-}
-function RadioGroup<T>(props: IRadioGroupProps<T>) {
-	return <div className="radio-group">
-		{
-			props.options.map(({ label, value }, i) => {
-				return <label key={i}>
-					<input
-						type="radio"
-						checked={props.value === value}
-						onChange={(e) => e.currentTarget.checked && props.onSelect(value)}
-					/>
-					{label}
-				</label>
-			})
-		}
-	</div>
 }
 
 export default PaperEditModal;
