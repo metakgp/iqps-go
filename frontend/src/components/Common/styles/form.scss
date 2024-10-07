@@ -101,21 +101,20 @@
 .sugg-text-form {
 	position: relative;
 
-	.sugg-text-input {
-
-	}
-
 	.suggestions {
 		position: absolute;
 		display: flex;
 		flex-direction: column;
-		width: 100%;
+		width: 102%;
+		left: -1%;
+
+		z-index: 1000;
 
 		border-radius: 5px;
 		border: 2px solid rgba(white, 0.1);
 
 		&.hidden {
-			display: flex;
+			display: none;
 		}
 
 		.suggestion {

@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "fuse.js": "^7.0.0",
     "pdfjs-dist": "^4.6.82",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

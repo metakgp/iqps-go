@@ -132,15 +132,22 @@ export function SuggestionTextInput(props: ISuggestionTextInputProps) {
 			className="sugg-text-input"
 			value={props.value}
 			onInput={handleInput}
+			onFocus={(e) => {
+				e.preventDefault();
+				setSuggShown(true);
+			}}
 			aria-autocomplete="none"
 			autoComplete="off"
 		/>
-		<div className={`suggestions ${!suggShown && 'hidden'}`}>
+		<div className={`suggestions ${(suggShown && props.suggestions.length > 0) ? '' : 'hidden'}`}>
 			{props.suggestions.map((sugg, i) => (
 				<button
 					className={`suggestion ${i === selectedSugg ? 'selected' : ''}`}
 					onClick={(e) => {
 						e.preventDefault();
+						e.stopPropagation();
+
+						setSelectedSugg(0);
 						props.onValueChange(sugg);
 						setSuggShown(false);
 					}}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { MdCancel } from "react-icons/md";
+import Fuse from 'fuse.js';
 
 import { validate } from "../../utils/validateInput";
 import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
@@ -10,6 +11,8 @@ import { IoMdCheckmarkCircle } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
 import Spinner from "../Spinner/Spinner";
 import { FormGroup, RadioGroup, NumberInput, SuggestionTextInput } from "./Form";
+
+import COURSE_CODE_MAP from "../../data/courses.json";
 
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
@@ -75,6 +78,20 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 		}
 	}, [])
 
+	const courseCodes = Object.keys(COURSE_CODE_MAP);
+	const courseNames = Object.values(COURSE_CODE_MAP);
+
+	const courseNamesFuse = new Fuse(courseNames, {
+		isCaseSensitive: false,
+		minMatchCharLength: 3,
+		ignoreLocation: true
+	})
+
+	const trimSuggestions = (results: any[]) => {
+		if (results.length < 2) return [];
+		else return results.slice(0, 5);
+	}
+
 	return <div className="modal-overlay">
 		{'filelink' in data &&
 			<div className="modal" style={{ minWidth: '20%' }}>
@@ -133,22 +150,11 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						label="Course Code:"
 						validationError={validationErrors.courseCodeErr}
 					>
-						{/* <input
-							type="text"
-							id="course_code"
-							required
-							value={data.course_code}
-							onInput={(e) => changeData('course_code', e.currentTarget.value.toUpperCase())}
-						/> */}
 						<SuggestionTextInput
 							value={data.course_code}
 							onValueChange={(value) => changeData('course_code', value.toUpperCase())}
-							suggestions={['lmao', 'kek']}
-							inputProps={{
-								id: "course",
-								autofocus: true,
-								required: true
-							}}
+							suggestions={trimSuggestions(courseCodes.filter((code) => code.startsWith(data.course_code)))}
+							inputProps={{required: true}}
 						/>
 					</FormGroup>
 					<FormGroup
@@ -167,13 +173,12 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 					label="Course Name:"
 					validationError={validationErrors.courseNameErr}
 				>
-					<input
-						type="text"
-						id="course_name"
-						required
-						value={data.course_name}
-						onInput={(e) => changeData('course_name', e.currentTarget.value.toUpperCase())}
-					/>
+					<SuggestionTextInput
+							value={data.course_name}
+							onValueChange={(value) => changeData('course_name', value.toUpperCase())}
+							suggestions={trimSuggestions(courseNamesFuse.search(data.course_name).map((result) => result.item))}
+							inputProps={{required: true}}
+						/>
 				</FormGroup>
 				<FormGroup
 					label="Exam:"
