@@ -1,4 +1,4 @@
-import { IAdminDashboardQP, ISearchResult } from "./question_paper";
+import { Exam, IAdminDashboardQP, ISearchResult, Semester } from "./question_paper";
 
 export type AllowedBackendMethods = "get" | "post";
 
@@ -18,8 +18,11 @@ export type BackendResponse<T> = IOkResponse<T> | IErrorResponse;
 
 
 export interface IEndpointTypes {
-	[route: `search?${string}`]: {
-		request: null,
+	search: {
+		request: {
+			course: string;
+			exam: Exam | "";
+		},
 		response: ISearchResult[]
 	},
 	oauth: {
@@ -61,5 +64,14 @@ export interface IEndpointTypes {
 		response: {
 			username: string;
 		}
+	},
+	similar: {
+		request: {
+			course_code: string;
+			year?: number;
+			semester?: Semester;
+			exam?: Exam;
+		},
+		response: IAdminDashboardQP[];
 	}
 }
