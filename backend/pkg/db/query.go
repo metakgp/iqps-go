@@ -73,7 +73,7 @@ func (db *db) MarkPaperAsSoftDeletedAndUnApprove(qpID int, approvedBy string) er
 }
 
 func (db *db) GetQuestionPaperWithExactMatch(paper *models.QuestionPaper) ([]models.QuestionPaper, error) {
-	query := "SELECT course_code,course_name,year,exam,filelink,id,from_library,semester from iqps where course_code = @course_code"
+	query := "SELECT course_code,course_name,year,exam,filelink,id,from_library,semester from iqps where is_deleted=false and approve_status=true and course_code = @course_code"
 	params := pgx.NamedArgs{
 		"course_code": paper.CourseCode,
 	}
