@@ -9,7 +9,7 @@ import './styles/paper_edit_modal.scss';
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
 import Spinner from "../Spinner/Spinner";
-import { FormGroup, RadioGroup, NumberInput } from "./Form";
+import { FormGroup, RadioGroup, NumberInput, SuggestionTextInput } from "./Form";
 
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
@@ -80,7 +80,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 			<div className="modal" style={{ minWidth: '20%' }}>
 				<h2>OCR Details</h2>
 				{
-					awaitingOcr ? <div style={{justifyContent: 'center', display: 'flex'}}><Spinner /></div> :
+					awaitingOcr ? <div style={{ justifyContent: 'center', display: 'flex' }}><Spinner /></div> :
 						<>
 							<FormGroup label="Course Code:">
 								{ocrDetails?.course_code ?? "Unknown"}
@@ -133,12 +133,22 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						label="Course Code:"
 						validationError={validationErrors.courseCodeErr}
 					>
-						<input
+						{/* <input
 							type="text"
 							id="course_code"
 							required
 							value={data.course_code}
 							onInput={(e) => changeData('course_code', e.currentTarget.value.toUpperCase())}
+						/> */}
+						<SuggestionTextInput
+							value={data.course_code}
+							onValueChange={(value) => changeData('course_code', value.toUpperCase())}
+							suggestions={['lmao', 'kek']}
+							inputProps={{
+								id: "course",
+								autofocus: true,
+								required: true
+							}}
 						/>
 					</FormGroup>
 					<FormGroup

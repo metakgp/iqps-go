@@ -1,6 +1,7 @@
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
 
 import './styles/form.scss';
+import { useState } from 'react';
 
 interface IFormGroupProps {
 	label: string;
@@ -94,4 +95,59 @@ export function NumberInput(props: INumberInputProps) {
 			<button className="btn dec" onClick={getClickHandler(-1)}><FaChevronDown size="0.7rem" /></button>
 		</div>
 	</div>
+}
+
+interface ISuggestionTextInputProps {
+	value: string;
+	suggestions: string[];
+	onValueChange: (newValue: string) => void;
+	inputProps: React.InputHTMLAttributes<HTMLInputElement> | {};
+}
+export function SuggestionTextInput(props: ISuggestionTextInputProps) {
+	const [suggShown, setSuggShown] = useState<boolean>(false);
+	const [selectedSugg, setSelectedSugg] = useState<number>(0);
+
+	const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+		e.preventDefault();
+
+		if (selectedSugg < props.suggestions.length) {
+			props.onValueChange(props.suggestions[selectedSugg]);
+			setSuggShown(false);
+		}
+	}
+
+	const handleInput: React.FormEventHandler<HTMLInputElement> = (e) => {
+		e.preventDefault();
+		setSuggShown(true);
+		props.onValueChange(e.currentTarget.value);
+	}
+
+	return <form
+		className="sugg-text-form"
+		onSubmit={handleSubmit}
+	>
+		<input
+			{...props.inputProps}
+			type="text"
+			className="sugg-text-input"
+			value={props.value}
+			onInput={handleInput}
+			aria-autocomplete="none"
+			autoComplete="off"
+		/>
+		<div className={`suggestions ${!suggShown && 'hidden'}`}>
+			{props.suggestions.map((sugg, i) => (
+				<button
+					className={`suggestion ${i === selectedSugg ? 'selected' : ''}`}
+					onClick={(e) => {
+						e.preventDefault();
+						props.onValueChange(sugg);
+						setSuggShown(false);
+					}}
+				>
+					{sugg}
+				</button>
+			))}
+		</div>
+	</form>
 }

@@ -97,3 +97,58 @@
 		content: "▲";
 	}
 }
+
+.sugg-text-form {
+	position: relative;
+
+	.sugg-text-input {
+
+	}
+
+	.suggestions {
+		position: absolute;
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+
+		border-radius: 5px;
+		border: 2px solid rgba(white, 0.1);
+
+		&.hidden {
+			display: flex;
+		}
+
+		.suggestion {
+			width: 100%;
+			background-color: $surface-2;
+			color: $fg-color;
+			font-size: 1.05rem;
+
+			padding-top: 0.5rem;
+			padding-bottom: 0.5rem;
+
+			border: none;
+
+			&:last-child {
+				border-radius: 0 0 5px 5px;
+			}
+
+			&:first-child {
+				border-radius: 5px 5px 0 0;
+			}
+
+			&:not(:last-child) {
+				border-bottom: 1px solid rgba(white, 0.1);
+			}
+
+			&.selected {
+				color: $accent-complementary-lighter;
+			}
+
+			&:hover {
+				cursor: pointer;
+				background-color: $surface-3;
+			}
+		}
+	}
+}
