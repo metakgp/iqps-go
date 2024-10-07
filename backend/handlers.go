@@ -352,6 +352,11 @@ func HandleFileUpload(w http.ResponseWriter, r *http.Request) {
 	sendResponse(w, http.StatusAccepted, response)
 }
 
+func HandleProfile(w http.ResponseWriter, r *http.Request) {
+	approverUsername := r.Context().Value(CLAIMS_KEY).(*Claims).Username
+	sendResponse(w, http.StatusOK, map[string]string{"username": approverUsername})
+}
+
 func HandleDeletePaper(w http.ResponseWriter, r *http.Request) {
 	approverUsername := r.Context().Value(CLAIMS_KEY).(*Claims).Username
 	db := db.GetDB()
@@ -387,11 +392,12 @@ func populateDB(filename string) error {
 
 	year, _ := strconv.Atoi(qpData[2])
 	exam := qpData[3]
+	semester := qpData[4]
 	fromLibrary := false
 	fileLink := filepath.Join(config.Get().UploadedQPsPath, filename+".pdf")
-	query := "INSERT INTO iqps (course_code, course_name, year, exam, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6);"
+	query := "INSERT INTO iqps (course_code, course_name, year, exam, filelink, from_library, semester) VALUES ($1, $2, $3, $4, $5, $6. $7);"
 
-	_, err := db.Db.Exec(context.Background(), query, courseCode, courseName, year, exam, fileLink, fromLibrary)
+	_, err := db.Db.Exec(context.Background(), query, courseCode, courseName, year, exam, fileLink, fromLibrary, semester)
 	if err != nil {
 		return fmt.Errorf("failed to add qp to database: %v", err.Error())
 	}
