@@ -1,10 +1,12 @@
 import React, {
 	createContext,
 	useContext,
+	useEffect,
 	useMemo,
 	useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
+import { makeRequest } from "./backend";
 
 interface IAuthContext {
 	isAuthenticated: boolean;
@@ -46,6 +48,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		setIsAuthenticated(false);
 		navigate('/');
 	};
+
+	const checkAuth = async (jwt: string) => {
+		const response = await makeRequest('profile', 'get', null, jwt);
+		if (response.status !== 'success') {
+			localStorage.removeItem("jwt");
+			setIsAuthenticated(false);
+		}
+	}
+	useEffect(() => {
+		if (isAuthenticated) {
+			checkAuth(lsAuthJwt as string);
+		}
+	}, [])
 
 	const value = useMemo(
 		() => ({

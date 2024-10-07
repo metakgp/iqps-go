@@ -55,5 +55,11 @@ export interface IEndpointTypes {
 		response: {
 			message: string;
 		}
+	},
+	profile: {
+		request: null;
+		response: {
+			username: string;
+		}
 	}
 }
