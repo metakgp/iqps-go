@@ -83,7 +83,7 @@ func (db *db) GetQuestionPaperWithExactMatch(paper *models.QuestionPaper) ([]mod
 		params["exam"] = paper.Exam
 	}
 
-	if paper.Year != nil {
+	if paper.Year != 0 {
 		query += " and year = @year"
 		params["year"] = paper.Year
 	}

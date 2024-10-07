@@ -359,6 +359,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 func HandleFetchSimilarPapers(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
+	var err error
 	db := db.GetDB()
 
 	var parsedParams models.QuestionPaper
@@ -370,13 +371,12 @@ func HandleFetchSimilarPapers(w http.ResponseWriter, r *http.Request) {
 	}
 	parsedParams.CourseCode = queryParams.Get("course_code")
 	if queryParams.Has("year") {
-		year, err := strconv.Atoi(queryParams.Get("year"))
+		parsedParams.Year, err = strconv.Atoi(queryParams.Get("year"))
 		if err != nil {
 			sendErrorResponse(w, http.StatusBadRequest, "query parameter year has to be integer", nil)
 			config.Get().Logger.Errorf("HandleSimilarPapers: query param 'year' received a non-int value")
 			return
 		}
-		parsedParams.Year = &year
 	}
 
 	if queryParams.Has("semester") {
