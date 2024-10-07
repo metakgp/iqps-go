@@ -7,7 +7,7 @@ import { Exam, ISearchResult } from "../../types/question_paper";
 import { copyLink } from "../../utils/copyLink";
 import { makeRequest } from "../../utils/backend";
 import SearchResults from "./SearchResults";
-import { Select, SuggestionTextInput } from "../Common/Form";
+import { Select } from "../Common/Form";
 
 function CourseSearchForm() {
 	const currentURL = new URL(window.location.toString());
