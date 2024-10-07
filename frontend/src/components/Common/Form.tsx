@@ -113,6 +113,7 @@ export function SuggestionTextInput(props: ISuggestionTextInputProps) {
 		if (selectedSugg < props.suggestions.length) {
 			props.onValueChange(props.suggestions[selectedSugg]);
 			setSuggShown(false);
+			setSelectedSugg(0);
 		}
 	}
 
@@ -122,9 +123,27 @@ export function SuggestionTextInput(props: ISuggestionTextInputProps) {
 		props.onValueChange(e.currentTarget.value);
 	}
 
+	const handleKeyDown: React.KeyboardEventHandler<HTMLFormElement> = (e) => {
+		if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			setSelectedSugg((currentValue) => {
+				return Math.min(props.suggestions.length - 1, currentValue + 1);
+			})
+		} else if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			setSelectedSugg((currentValue) => {
+				return Math.max(0, currentValue - 1);
+			})
+		}
+		else if (e.key === 'Enter') {
+			handleSubmit(e);
+		}
+	}
+
 	return <form
 		className="sugg-text-form"
 		onSubmit={handleSubmit}
+		onKeyDown={handleKeyDown}
 	>
 		<input
 			{...props.inputProps}
