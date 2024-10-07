@@ -55,7 +55,7 @@ func (db *db) InsertNewPaper(qpDetails *models.QuestionPaper) (int, error) {
 }
 
 func (db *db) MarkPaperAsSoftDeletedAndUnApprove(qpID int, approvedBy string) error {
-	query := "UPDATE iqps set approve_status=false, is_deleted = true, approved_by=@approved_by where id=@qpID and is_deleted=false"
+	query := "UPDATE iqps set approve_status=false, is_deleted = true, approved_by=@approved_by where id=@qpID and is_deleted=false and approve_status=true"
 	params := pgx.NamedArgs{
 		"qpID":        qpID,
 		"approved_by": approvedBy,
