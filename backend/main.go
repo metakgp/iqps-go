@@ -28,6 +28,7 @@ func main() {
 	http.Handle("POST /approve", JWTMiddleware(http.HandlerFunc(HandleApprovePaper)))
 	http.Handle("POST /delete", JWTMiddleware(http.HandlerFunc(HandleDeletePaper)))
 	http.Handle("GET /profile", JWTMiddleware(http.HandlerFunc(HandleProfile)))
+	http.Handle("GET /similar", JWTMiddleware(http.HandlerFunc(HandleFetchSimilarPapers)))
 
 	logger := config.Get().Logger
 	c := cors.New(cors.Options{

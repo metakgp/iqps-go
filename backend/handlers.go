@@ -357,6 +357,46 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	sendResponse(w, http.StatusOK, map[string]string{"username": approverUsername})
 }
 
+func HandleFetchSimilarPapers(w http.ResponseWriter, r *http.Request) {
+	queryParams := r.URL.Query()
+	db := db.GetDB()
+
+	var parsedParams models.QuestionPaper
+	// parse Query Params
+	if !queryParams.Has("course_code") {
+		sendErrorResponse(w, http.StatusBadRequest, "query parameter course_code is mandatory", nil)
+		config.Get().Logger.Errorf("HandleSimilarPapers: query param 'course_code' not received")
+		return
+	}
+	parsedParams.CourseCode = queryParams.Get("course_code")
+	if queryParams.Has("year") {
+		year, err := strconv.Atoi(queryParams.Get("year"))
+		if err != nil {
+			sendErrorResponse(w, http.StatusBadRequest, "query parameter year has to be integer", nil)
+			config.Get().Logger.Errorf("HandleSimilarPapers: query param 'year' received a non-int value")
+			return
+		}
+		parsedParams.Year = &year
+	}
+
+	if queryParams.Has("semester") {
+		parsedParams.Semester = queryParams.Get("semester")
+	}
+
+	if queryParams.Has("exam") {
+		parsedParams.Exam = queryParams.Get("exam")
+	}
+	fmt.Print(parsedParams)
+	questionPapers, err := db.GetQuestionPaperWithExactMatch(&parsedParams)
+	if err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, "could not fetch question papers, try again later", nil)
+		config.Get().Logger.Errorf("HandleFetchSimilarPapers: Error fetching papers from db: %+v", err.Error())
+		return
+	}
+
+	sendResponse(w, http.StatusOK, questionPapers)
+}
+
 func HandleDeletePaper(w http.ResponseWriter, r *http.Request) {
 	approverUsername := r.Context().Value(CLAIMS_KEY).(*Claims).Username
 	db := db.GetDB()
