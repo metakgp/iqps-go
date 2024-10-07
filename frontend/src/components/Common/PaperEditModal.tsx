@@ -16,6 +16,7 @@ import COURSE_CODE_MAP from "../../data/courses.json";
 import { makeRequest } from "../../utils/backend";
 import { IEndpointTypes } from "../../types/backend";
 import { useAuthContext } from "../../utils/auth";
+import { QPCard } from "../AdminDashboard/QPCard";
 
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
@@ -310,7 +311,19 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				{
 					awaitingSimilarPapers ? <div style={{ justifyContent: 'center', display: 'flex' }}><Spinner /></div> :
 						<div>
-
+							{
+								similarPapers.length === 0 ? <p>No similar papers found.</p> :
+									similarPapers.map((paper, i) => <QPCard
+										onEdit={(e) => {
+											e.preventDefault();
+										}}
+										onDelete={() => {
+										}}
+										qPaper={paper}
+										key={i}
+									/>
+									)
+							}
 						</div>
 				}
 			</div>
