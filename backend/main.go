@@ -19,7 +19,6 @@ func main() {
 
 	http.HandleFunc("/health", HandleHealthCheck)
 	http.HandleFunc("/search", HandleQPSearch)
-	http.HandleFunc("/year", HandleQPYear)
 	http.HandleFunc("/library", HandleLibraryPapers)
 	http.HandleFunc("POST /upload", HandleFileUpload)
 	http.HandleFunc("POST /oauth", GhAuth)

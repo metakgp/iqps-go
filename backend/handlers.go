@@ -43,20 +43,6 @@ func HandleHealthCheck(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Yes, I'm alive!")
 }
 
-func HandleQPYear(w http.ResponseWriter, r *http.Request) {
-	db := db.GetDB()
-	result := db.Db.QueryRow(context.Background(), "SELECT MIN(year), MAX(year) FROM iqps")
-	var minYear, maxYear int
-	err := result.Scan(&minYear, &maxYear)
-	if err != nil {
-		config.Get().Logger.Info("HandleQPYear: No min and max year in database, setting to default")
-		minYear = time.Now().Year()
-		maxYear = time.Now().Year()
-	}
-
-	sendResponse(w, http.StatusOK, "range of years fetched", map[string]int{"min": minYear, "max": maxYear})
-}
-
 func HandleApprovePaper(w http.ResponseWriter, r *http.Request) {
 	approverUsername := r.Context().Value(CLAIMS_KEY).(*Claims).Username
 
@@ -399,15 +385,13 @@ func HandleFetchSimilarPapers(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
 	if queryParams.Has("semester") {
 		parsedParams.Semester = queryParams.Get("semester")
 	}
-
 	if queryParams.Has("exam") {
 		parsedParams.Exam = queryParams.Get("exam")
 	}
-	fmt.Print(parsedParams)
+
 	questionPapers, err := tx.GetQuestionPaperWithExactMatch(&parsedParams)
 	if err != nil {
 		tx.Tx.Rollback(context.Background())

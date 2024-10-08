@@ -73,7 +73,7 @@ func (db *txn) MarkPaperAsSoftDeletedAndUnApprove(qpID int, approvedBy string) e
 }
 
 func (db *txn) GetQuestionPaperWithExactMatch(paper *models.QuestionPaper) ([]models.QuestionPaper, error) {
-	query := "SELECT course_code,course_name,year,exam,filelink,id,from_library,semester from iqps where is_deleted=false and course_code = @course_code"
+	query := "SELECT course_code,course_name,year,exam,filelink,id,from_library,semester,upload_timestamp from iqps where is_deleted=false and course_code = @course_code"
 	params := pgx.NamedArgs{
 		"course_code": paper.CourseCode,
 	}
@@ -102,7 +102,7 @@ func (db *txn) GetQuestionPaperWithExactMatch(paper *models.QuestionPaper) ([]mo
 	var qps []models.QuestionPaper = make([]models.QuestionPaper, 0)
 	for rows.Next() {
 		qp := models.QuestionPaper{}
-		err := rows.Scan(&qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.ID, &qp.FromLibrary, &qp.Semester)
+		err := rows.Scan(&qp.CourseCode, &qp.CourseName, &qp.Year, &qp.Exam, &qp.FileLink, &qp.ID, &qp.FromLibrary, &qp.Semester, &qp.UploadTimestamp)
 		if err != nil {
 			config.Get().Logger.Errorf("FetchAllQuestionpapers: Error Scanning Paper in Struct, error: %+v", err.Error())
 			return nil, errors.New("unable to fetch question paper, try again later")
