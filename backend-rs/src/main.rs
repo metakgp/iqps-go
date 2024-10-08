@@ -11,7 +11,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Initialize logger
     let log_file = fs::File::create(env_vars.log_location)?;
-    tracing_subscriber::fmt().with_writer(log_file).init();
+    tracing_subscriber::fmt().with_writer(log_file).with_ansi(false).init();
 
     Ok(())
 }
