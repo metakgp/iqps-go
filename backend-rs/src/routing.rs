@@ -47,8 +47,8 @@ impl<T: Serialize> IntoResponse for BackendResponse<T> {
     }
 }
 
-pub fn get_router(env_vars: EnvVars) -> axum::Router {
-    let state = RouterState { db: (), env_vars };
+pub fn get_router(env_vars: &EnvVars) -> axum::Router {
+    let state = RouterState { db: (), env_vars: env_vars.clone() };
 
     axum::Router::new()
         .route("/healthcheck", axum::routing::get(handlers::healthcheck))
