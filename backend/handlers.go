@@ -435,7 +435,7 @@ func populateDB(filename string) error {
 	semester := qpData[4]
 	fromLibrary := false
 	fileLink := filepath.Join(config.Get().UploadedQPsPath, filename+".pdf")
-	query := "INSERT INTO iqps (course_code, course_name, year, exam, filelink, from_library, semester) VALUES ($1, $2, $3, $4, $5, $6. $7);"
+	query := "INSERT INTO iqps (course_code, course_name, year, exam, filelink, from_library, semester) VALUES ($1, $2, $3, $4, $5, $6, $7);"
 
 	_, err := db.Db.Exec(context.Background(), query, courseCode, courseName, year, exam, fileLink, fromLibrary, semester)
 	if err != nil {
