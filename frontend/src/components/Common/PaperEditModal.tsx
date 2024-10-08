@@ -286,7 +286,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 			</form>
 		</div>
 		{'filelink' in data &&
-			<div className="modal">
+			<div className="modal" style={{ minWidth: '20%' }}>
 				<h2>Similar Papers</h2>
 				{
 					awaitingSimilarPapers ? <div style={{ justifyContent: 'center', display: 'flex' }}><Spinner /></div> :
