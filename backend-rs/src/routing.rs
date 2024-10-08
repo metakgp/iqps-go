@@ -1,12 +1,17 @@
+use std::sync::Arc;
+
 use axum::{http::StatusCode, response::IntoResponse};
 use serde::Serialize;
+use tokio::sync::Mutex;
 
-use crate::env::EnvVars;
+use crate::{
+    db::{self, Database},
+    env::EnvVars,
+};
 
 #[derive(Clone)]
 struct RouterState {
-    // TODO: Implement db later
-    pub db: (),
+    pub db: Arc<Mutex<db::Database>>,
     pub env_vars: EnvVars,
 }
 
@@ -47,9 +52,9 @@ impl<T: Serialize> IntoResponse for BackendResponse<T> {
     }
 }
 
-pub fn get_router(env_vars: &EnvVars) -> axum::Router {
+pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
     let state = RouterState {
-        db: (),
+        db: Arc::new(Mutex::new(db)),
         env_vars: env_vars.clone(),
     };
 
@@ -74,7 +79,7 @@ impl IntoResponse for AppError {
 mod handlers {
     use super::{AppError, BackendResponse};
 
-    pub async fn healthcheck() -> Result< BackendResponse<()>, AppError> {
+    pub async fn healthcheck() -> Result<BackendResponse<()>, AppError> {
         Ok(BackendResponse::ok("Hello, World.".into(), ()))
     }
 }

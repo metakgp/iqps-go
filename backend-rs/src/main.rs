@@ -1,10 +1,9 @@
 use clap::Parser;
-use tracing;
 use tracing_subscriber::prelude::*;
 
+mod db;
 mod env;
 mod routing;
-mod db;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -33,11 +32,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     tracing::subscriber::set_global_default(subscriber)?;
 
-    // Server
-    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", env_vars.server_port)).await?;
-    tracing::info!("Starting server on port {}", env_vars.server_port);
-    axum::serve(listener, routing::get_router(&env_vars)).await?;
+    // Database connection
+    let database = db::Database::try_new(&env_vars).await?;
 
+    // Server
+    let listener =
+        tokio::net::TcpListener::bind(format!("0.0.0.0:{}", env_vars.server_port)).await?;
+    tracing::info!("Starting server on port {}", env_vars.server_port);
+    axum::serve(listener, routing::get_router(&env_vars, database)).await?;
 
     Ok(())
 }
