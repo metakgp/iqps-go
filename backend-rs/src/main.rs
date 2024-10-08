@@ -1,5 +1,4 @@
 use clap::Parser;
-use std::fs;
 use tracing;
 use tracing_subscriber::prelude::*;
 
@@ -11,12 +10,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let env_vars = env::EnvVars::parse().process()?;
 
     // Initialize logger
-    let log_file = fs::File::open(env_vars.log_location)?;
+    let log_file = std::fs::File::open(env_vars.log_location)?;
+    let (append_writer, _guard) = tracing_appender::non_blocking(log_file);
 
     let subscriber = tracing_subscriber::registry()
         .with(
             tracing_subscriber::fmt::layer()
-                .with_writer(log_file)
+                .with_writer(append_writer)
                 .with_ansi(false),
         )
         .with(tracing_subscriber::fmt::layer().with_writer(std::io::stdout));
