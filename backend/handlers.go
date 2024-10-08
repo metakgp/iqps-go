@@ -61,10 +61,17 @@ func HandleQPYear(w http.ResponseWriter, r *http.Request) {
 func HandleApprovePaper(w http.ResponseWriter, r *http.Request) {
 	approverUsername := r.Context().Value(CLAIMS_KEY).(*Claims).Username
 
-	db := db.GetDB()
+	tx, err := db.BeginTransaction()
+	if err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, "could not process request, try again later", nil)
+		config.Get().Logger.Errorf("HandleApprovePaper: could not start transaction: %+v", err.Error())
+		return
+	}
+
 	var qpDetails models.QuestionPaper
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&qpDetails); err != nil {
+		defer tx.Tx.Rollback(context.Background())
 		sendErrorResponse(w, http.StatusInternalServerError, "Could not find Question Paper, Try Later!", nil)
 		config.Get().Logger.Errorf("HandleApprovePaper: could not approve paper, invalid Body: %+v", err.Error())
 		return
@@ -74,8 +81,9 @@ func HandleApprovePaper(w http.ResponseWriter, r *http.Request) {
 	srcFile := filepath.Join(config.Get().StaticFilesStorageLocation, qpDetails.FileLink)
 	destFile := utils.SanitizeFileLink(filepath.Join(config.Get().StaticFilesStorageLocation, destFileLink))
 
-	err := utils.CopyFile(srcFile, destFile)
+	err = utils.CopyFile(srcFile, destFile)
 	if err != nil {
+		defer tx.Tx.Rollback(context.Background())
 		sendErrorResponse(w, http.StatusInternalServerError, "Could not move Question Paper, Try Later!", nil)
 		config.Get().Logger.Errorf("HandleApprovePaper: could not approve paper, could not move question paper: %+v", err.Error())
 		return
@@ -93,10 +101,11 @@ func HandleApprovePaper(w http.ResponseWriter, r *http.Request) {
 		ApprovedBy:    approverUsername,
 	}
 
-	id, err := db.InsertNewPaper(&newQPDetails)
+	id, err := tx.InsertNewPaper(&newQPDetails)
 	if err != nil {
 		// undelete file
 		utils.DeleteFile(destFile)
+		defer tx.Tx.Rollback(context.Background())
 		sendErrorResponse(w, http.StatusInternalServerError, "could not update file details, try again later", nil)
 		config.Get().Logger.Errorf("HandleApprovePaper: Could not approve paper: %+v", err.Error())
 		return
@@ -104,13 +113,15 @@ func HandleApprovePaper(w http.ResponseWriter, r *http.Request) {
 	// log line to help which entry was made by deleting which paper for recovery
 	config.Get().Logger.Infof("HandleApprovePaper: Id %d added against Id %d", id, qpDetails.ID)
 
-	err = db.MarkPaperAsSoftDeletedAndUnApprove(qpDetails.ID, approverUsername)
+	err = tx.MarkPaperAsSoftDeletedAndUnApprove(qpDetails.ID, approverUsername)
 	if err != nil {
+		defer tx.Tx.Rollback(context.Background())
 		utils.DeleteFile(destFile)
 		sendErrorResponse(w, http.StatusInternalServerError, "error updating paper details!", nil)
-		config.Get().Logger.Errorf("HandleApprovePaper: error soft-deleting paper: %+v PaperDetails: %d", err.Error(), qpDetails.ID)
+		config.Get().Logger.Errorf("HandleApprovePaper: error soft-deleting paper: %+v PaperDetails: %d, id: %d rolledback", err.Error(), qpDetails.ID, id)
 		return
 	}
+	defer tx.Tx.Commit(context.Background())
 	sendResponse(w, http.StatusOK, httpResp{Message: "File Approved successfully"})
 }
 
@@ -189,14 +200,21 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 }
 
 func ListAllPapers(w http.ResponseWriter, r *http.Request) {
-	db := db.GetDB()
-
-	qps, err := db.FetchAllQuestionPapers()
+	tx, err := db.BeginTransaction()
 	if err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, "could not process request, try again later", nil)
+		config.Get().Logger.Errorf("HandleApprovePaper: could not start transaction: %+v", err.Error())
+		return
+	}
+
+	qps, err := tx.FetchAllQuestionPapers()
+	if err != nil {
+		tx.Tx.Rollback(context.Background())
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
+	tx.Tx.Commit(context.Background())
 	config.Get().Logger.Info("listUnapprovedPapers: Unapproved Question paper count: ", len(qps))
 	sendResponse(w, http.StatusOK, qps)
 }
@@ -359,12 +377,17 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 func HandleFetchSimilarPapers(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
-	var err error
-	db := db.GetDB()
+	tx, err := db.BeginTransaction()
+	if err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, "could not process request, try again later", nil)
+		config.Get().Logger.Errorf("HandleApprovePaper: could not start transaction: %+v", err.Error())
+		return
+	}
 
 	var parsedParams models.QuestionPaper
 	// parse Query Params
 	if !queryParams.Has("course_code") {
+		tx.Tx.Rollback(context.Background())
 		sendErrorResponse(w, http.StatusBadRequest, "query parameter course_code is mandatory", nil)
 		config.Get().Logger.Errorf("HandleSimilarPapers: query param 'course_code' not received")
 		return
@@ -373,6 +396,7 @@ func HandleFetchSimilarPapers(w http.ResponseWriter, r *http.Request) {
 	if queryParams.Has("year") {
 		parsedParams.Year, err = strconv.Atoi(queryParams.Get("year"))
 		if err != nil {
+			tx.Tx.Rollback(context.Background())
 			sendErrorResponse(w, http.StatusBadRequest, "query parameter year has to be integer", nil)
 			config.Get().Logger.Errorf("HandleSimilarPapers: query param 'year' received a non-int value")
 			return
@@ -387,35 +411,45 @@ func HandleFetchSimilarPapers(w http.ResponseWriter, r *http.Request) {
 		parsedParams.Exam = queryParams.Get("exam")
 	}
 	fmt.Print(parsedParams)
-	questionPapers, err := db.GetQuestionPaperWithExactMatch(&parsedParams)
+	questionPapers, err := tx.GetQuestionPaperWithExactMatch(&parsedParams)
 	if err != nil {
+		tx.Tx.Rollback(context.Background())
 		sendErrorResponse(w, http.StatusInternalServerError, "could not fetch question papers, try again later", nil)
 		config.Get().Logger.Errorf("HandleFetchSimilarPapers: Error fetching papers from db: %+v", err.Error())
 		return
 	}
 
+	tx.Tx.Commit(context.Background())
 	sendResponse(w, http.StatusOK, questionPapers)
 }
 
 func HandleDeletePaper(w http.ResponseWriter, r *http.Request) {
 	approverUsername := r.Context().Value(CLAIMS_KEY).(*Claims).Username
-	db := db.GetDB()
+	tx, err := db.BeginTransaction()
+	if err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, "could not process request, try again later", nil)
+		config.Get().Logger.Errorf("HandleApprovePaper: could not start transaction: %+v", err.Error())
+		return
+	}
 	var requestBody struct {
 		Id int `json:"id"`
 	}
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&requestBody); err != nil {
+		tx.Tx.Rollback(context.Background())
 		sendErrorResponse(w, http.StatusInternalServerError, "Could not find Question Paper, Try Later!", nil)
 		config.Get().Logger.Errorf("HandleDeletePaper: could not approve paper, invalid Body: %+v", err.Error())
 		return
 	}
 
-	err := db.MarkPaperAsSoftDeletedAndUnApprove(requestBody.Id, approverUsername)
+	err = tx.MarkPaperAsSoftDeletedAndUnApprove(requestBody.Id, approverUsername)
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, "error updating paper details!", nil)
+		tx.Tx.Rollback(context.Background())
 		config.Get().Logger.Errorf("HandleDeletePaper: error soft-deleting paper: %+v PaperDetails: %d", err.Error(), requestBody.Id)
 		return
 	}
+	tx.Tx.Commit(context.Background())
 	config.Get().Logger.Infof("HandleDeletePaper: Deleted paper: %d", requestBody.Id)
 	sendResponse(w, http.StatusOK, httpResp{Message: "File Deleted successfully"})
 }

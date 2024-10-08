@@ -10,8 +10,8 @@ import (
 	"github.com/metakgp/iqps/backend/pkg/models"
 )
 
-func (db *db) FetchAllQuestionPapers() ([]models.QuestionPaper, error) {
-	rows, err := db.Db.Query(context.Background(), "SELECT course_code,course_name,year,exam,filelink,id,from_library FROM iqps ORDER BY upload_timestamp ASC")
+func (db *txn) FetchAllQuestionPapers() ([]models.QuestionPaper, error) {
+	rows, err := db.Tx.Query(context.Background(), "SELECT course_code,course_name,year,exam,filelink,id,from_library FROM iqps ORDER BY upload_timestamp ASC")
 	if err != nil {
 		config.Get().Logger.Errorf("FetchAllQuestionpapers: Could not fetch all question papers, error: %+v", err.Error())
 		return nil, errors.New("unable to fetch question paper, try again later")
@@ -33,7 +33,7 @@ func (db *db) FetchAllQuestionPapers() ([]models.QuestionPaper, error) {
 	return qps, nil
 }
 
-func (db *db) InsertNewPaper(qpDetails *models.QuestionPaper) (int, error) {
+func (db *txn) InsertNewPaper(qpDetails *models.QuestionPaper) (int, error) {
 	query := "INSERT INTO iqps (course_code, course_name, year, exam, filelink, semester, approve_status, from_library, approved_by) VALUES (@course_code, @course_name, @year, @exam, @filelink, @semester, @approve_status, @from_library, @approved_by) RETURNING id"
 	params := pgx.NamedArgs{
 		"course_code":    qpDetails.CourseCode,
@@ -47,21 +47,21 @@ func (db *db) InsertNewPaper(qpDetails *models.QuestionPaper) (int, error) {
 		"approved_by":    qpDetails.ApprovedBy,
 	}
 	var id int
-	err := db.Db.QueryRow(context.Background(), query, params).Scan(&id)
+	err := db.Tx.QueryRow(context.Background(), query, params).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
 	return id, nil
 }
 
-func (db *db) MarkPaperAsSoftDeletedAndUnApprove(qpID int, approvedBy string) error {
+func (db *txn) MarkPaperAsSoftDeletedAndUnApprove(qpID int, approvedBy string) error {
 	query := "UPDATE iqps set approve_status=false, is_deleted = true, approved_by=@approved_by where id=@qpID and is_deleted=false"
 	params := pgx.NamedArgs{
 		"qpID":        qpID,
 		"approved_by": approvedBy,
 	}
 
-	ct, err := db.Db.Exec(context.Background(), query, params)
+	ct, err := db.Tx.Exec(context.Background(), query, params)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (db *db) MarkPaperAsSoftDeletedAndUnApprove(qpID int, approvedBy string) er
 	return nil
 }
 
-func (db *db) GetQuestionPaperWithExactMatch(paper *models.QuestionPaper) ([]models.QuestionPaper, error) {
+func (db *txn) GetQuestionPaperWithExactMatch(paper *models.QuestionPaper) ([]models.QuestionPaper, error) {
 	query := "SELECT course_code,course_name,year,exam,filelink,id,from_library,semester from iqps where is_deleted=false and approve_status=true and course_code = @course_code"
 	params := pgx.NamedArgs{
 		"course_code": paper.CourseCode,
@@ -92,7 +92,7 @@ func (db *db) GetQuestionPaperWithExactMatch(paper *models.QuestionPaper) ([]mod
 		query += " and semester = @semester"
 		params["semester"] = paper.Semester
 	}
-	rows, err := db.Db.Query(context.Background(), query, params)
+	rows, err := db.Tx.Query(context.Background(), query, params)
 	if err != nil {
 		config.Get().Logger.Errorf("GetQuestionPaperWithExactMatch: Could not fetch all question papers, error: %+v", err.Error())
 		return nil, errors.New("unable to fetch question paper, try again later")

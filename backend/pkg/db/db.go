@@ -6,6 +6,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/metakgp/iqps/backend/pkg/config"
 )
@@ -17,6 +18,10 @@ var (
 
 type db struct {
 	Db *pgxpool.Pool
+}
+
+type txn struct {
+	Tx pgx.Tx
 }
 
 const init_db = `CREATE TABLE IF NOT EXISTS iqps (
@@ -73,4 +78,14 @@ func GetDB() *db {
 		}
 	}
 	return database
+}
+
+func BeginTransaction() (*txn, error) {
+	db := GetDB()
+	tx, err := db.Db.Begin(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	return &txn{Tx: tx}, nil
 }
