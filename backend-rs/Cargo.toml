@@ -1,0 +1,13 @@
+[package]
+name = "iqps-backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.7.7"
+clap = { version = "4.5.20", features = ["derive", "env"] }
+diesel = { version = "2.2.4", features = ["postgres"] }
+tokio = { version = "1.40.0", features = ["full"] }
+tracing = "0.1.40"
+tracing-appender = "0.2.3"
+tracing-subscriber = "0.3.18"
