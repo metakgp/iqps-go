@@ -294,10 +294,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 							{
 								similarPapers.length === 0 ? <p>No similar papers found.</p> :
 									similarPapers.map((paper, i) => <QPCard
-										qPaper={{
-											...paper,
-											approve_status: true
-										}}
+										qPaper={paper}
 										key={i}
 									/>
 									)
