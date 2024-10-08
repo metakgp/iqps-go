@@ -7,6 +7,8 @@ edition = "2021"
 axum = "0.7.7"
 clap = { version = "4.5.20", features = ["derive", "env"] }
 diesel = { version = "2.2.4", features = ["postgres"] }
+serde = { version = "1.0.210", features = ["serde_derive"] }
+serde_json = "1.0.128"
 tokio = { version = "1.40.0", features = ["full"] }
 tracing = "0.1.40"
 tracing-appender = "0.2.3"
