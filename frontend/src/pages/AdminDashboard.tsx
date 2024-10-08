@@ -98,8 +98,8 @@ function AdminDashboard() {
 	}, []);
 
 	const storeOcrDetails = async (paper: IAdminDashboardQP) => {
-		console.log('getting details', paper)
 		if (!ocrDetails.has(paper.id)) {
+			const toastId = toast.loading(`Running OCR for ${paper.course_name} - ${paper.course_code} (id: ${paper.id})`);
 			const response = await fetch(paper.filelink);
 
 			if (response.ok) {
@@ -107,6 +107,8 @@ function AdminDashboard() {
 				const pdfText = await extractTextFromPDF(pdfData);
 
 				setOcrDetails((currentValue) => currentValue.set(paper.id, extractDetailsFromText(pdfText)));
+				toast.dismiss(toastId);
+				toast.success(`OCR completed for ${paper.course_name} - ${paper.course_code} (id: ${paper.id})`);
 			}
 		}
 	}
