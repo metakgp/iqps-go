@@ -54,7 +54,7 @@ func HandleQPYear(w http.ResponseWriter, r *http.Request) {
 		maxYear = time.Now().Year()
 	}
 
-	sendResponse(w, http.StatusOK, map[string]int{"min": minYear, "max": maxYear})
+	sendResponse(w, http.StatusOK, "range of years fetched", map[string]int{"min": minYear, "max": maxYear})
 }
 
 func HandleApprovePaper(w http.ResponseWriter, r *http.Request) {
@@ -121,7 +121,7 @@ func HandleApprovePaper(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer tx.Tx.Commit(context.Background())
-	sendResponse(w, http.StatusOK, httpResp{Message: "File Approved successfully"})
+	sendResponse(w, http.StatusOK, "approve paper successful", map[string]interface{}{"id": id})
 }
 
 func HandleLibraryPapers(w http.ResponseWriter, r *http.Request) {
@@ -144,7 +144,7 @@ func HandleLibraryPapers(w http.ResponseWriter, r *http.Request) {
 		}
 		qps = append(qps, qp)
 	}
-	sendResponse(w, http.StatusOK, qps)
+	sendResponse(w, http.StatusOK, "list library papers", qps)
 }
 
 func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
@@ -193,7 +193,7 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	config.Get().Logger.Info("HandleQPSearch: Question paper search query:$%", course, ":$%result count:", len(qps))
-	sendResponse(w, http.StatusOK, qps)
+	sendResponse(w, http.StatusOK, "list search question papers", qps)
 }
 
 func ListAllPapers(w http.ResponseWriter, r *http.Request) {
@@ -213,7 +213,7 @@ func ListAllPapers(w http.ResponseWriter, r *http.Request) {
 
 	tx.Tx.Commit(context.Background())
 	config.Get().Logger.Info("listUnapprovedPapers: Unapproved Question paper count: ", len(qps))
-	sendResponse(w, http.StatusOK, qps)
+	sendResponse(w, http.StatusOK, "list all question papers", qps)
 }
 
 func ListUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
@@ -237,7 +237,7 @@ func ListUnapprovedPapers(w http.ResponseWriter, r *http.Request) {
 		qps = append(qps, qp)
 	}
 	config.Get().Logger.Info("listUnapprovedPapers: Unapproved Question paper count: ", len(qps))
-	sendResponse(w, http.StatusOK, qps)
+	sendResponse(w, http.StatusOK, "list unapproved question papers", qps)
 }
 
 func HandleFileUpload(w http.ResponseWriter, r *http.Request) {
@@ -364,12 +364,12 @@ func HandleFileUpload(w http.ResponseWriter, r *http.Request) {
 
 	config.Get().Logger.Info("HandleFileUpload: files successfully uploaded")
 	// return response to client
-	sendResponse(w, http.StatusAccepted, response)
+	sendResponse(w, http.StatusAccepted, "all files uploaded", response)
 }
 
 func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	approverUsername := r.Context().Value(CLAIMS_KEY).(*Claims).Username
-	sendResponse(w, http.StatusOK, map[string]string{"username": approverUsername})
+	sendResponse(w, http.StatusOK, "profile fetched successfully", map[string]string{"username": approverUsername})
 }
 
 func HandleFetchSimilarPapers(w http.ResponseWriter, r *http.Request) {
@@ -417,7 +417,7 @@ func HandleFetchSimilarPapers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tx.Tx.Commit(context.Background())
-	sendResponse(w, http.StatusOK, questionPapers)
+	sendResponse(w, http.StatusOK, "question papers fetched successfully", questionPapers)
 }
 
 func HandleDeletePaper(w http.ResponseWriter, r *http.Request) {
@@ -448,7 +448,7 @@ func HandleDeletePaper(w http.ResponseWriter, r *http.Request) {
 	}
 	tx.Tx.Commit(context.Background())
 	config.Get().Logger.Infof("HandleDeletePaper: Deleted paper: %d", requestBody.Id)
-	sendResponse(w, http.StatusOK, httpResp{Message: "File Deleted successfully"})
+	sendResponse(w, http.StatusOK, "file deleted successfully", nil)
 }
 
 func populateDB(filename string) error {
@@ -588,7 +588,7 @@ func GhAuth(w http.ResponseWriter, r *http.Request) {
 	respData.Token = tokenString
 
 	// Send the response
-	sendResponse(w, http.StatusAccepted, respData)
+	sendResponse(w, http.StatusAccepted, "authenticated successfully", respData)
 }
 
 func JWTMiddleware(handler http.Handler) http.Handler {
@@ -632,11 +632,11 @@ func JWTMiddleware(handler http.Handler) http.Handler {
 	})
 }
 
-func sendResponse(w http.ResponseWriter, code int, data interface{}) {
+func sendResponse(w http.ResponseWriter, code int, message string, data interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 
-	out, err := json.Marshal(httpResp{Status: "success", Data: data})
+	out, err := json.Marshal(httpResp{Status: "success", Data: data, Message: message})
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, "Internal Server Error", nil)
 		return
