@@ -31,6 +31,14 @@ impl<T: serde::Serialize> BackendResponse<T> {
             data,
         }
     }
+
+    pub fn error(message: String, data: T) -> Self {
+        Self {
+            status: Status::Error,
+            message,
+            data
+        }
+    }
 }
 
 impl<T: Serialize> IntoResponse for BackendResponse<T> {
