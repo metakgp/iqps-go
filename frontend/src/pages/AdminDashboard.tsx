@@ -61,7 +61,7 @@ function AdminDashboard() {
 
 		if (papers.status === 'success') {
 			setUnapprovedPapers(papers.data);
-			setOcrRequests(papers.data);
+			setOcrRequests(papers.data.slice(0, 20));
 			setNumUniqueCourseCodes(
 				// Make an array of course codes
 				papers.data.map((paper) => paper.course_code)
