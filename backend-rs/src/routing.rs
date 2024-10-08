@@ -36,7 +36,7 @@ impl<T: serde::Serialize> BackendResponse<T> {
         Self {
             status: Status::Error,
             message,
-            data
+            data,
         }
     }
 }
@@ -48,17 +48,33 @@ impl<T: Serialize> IntoResponse for BackendResponse<T> {
 }
 
 pub fn get_router(env_vars: &EnvVars) -> axum::Router {
-    let state = RouterState { db: (), env_vars: env_vars.clone() };
+    let state = RouterState {
+        db: (),
+        env_vars: env_vars.clone(),
+    };
 
     axum::Router::new()
         .route("/healthcheck", axum::routing::get(handlers::healthcheck))
         .with_state(state)
 }
 
-mod handlers {
-    use super::BackendResponse;
+pub(super) struct AppError(color_eyre::eyre::Error);
+impl IntoResponse for AppError {
+    fn into_response(self) -> axum::response::Response {
+        tracing::error!("An error occured: {}", self.0);
 
-    pub async fn healthcheck() -> BackendResponse<()> {
-        BackendResponse::ok("Hello, World.".into(), ())
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            BackendResponse::error(format!("Internal error: {}", self.0), ()),
+        )
+            .into_response()
+    }
+}
+
+mod handlers {
+    use super::{AppError, BackendResponse};
+
+    pub async fn healthcheck() -> Result< BackendResponse<()>, AppError> {
+        Ok(BackendResponse::ok("Hello, World.".into(), ()))
     }
 }
