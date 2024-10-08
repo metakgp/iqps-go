@@ -10,8 +10,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let env_vars = env::EnvVars::parse().process()?;
 
     // Initialize logger
-    let log_file = std::fs::File::open(env_vars.log_location)?;
-    let (append_writer, _guard) = tracing_appender::non_blocking(log_file);
+    let (append_writer, _guard) = tracing_appender::non_blocking(tracing_appender::rolling::never(
+        env_vars
+            .log_location
+            .parent()
+            .expect("Where do you want to store that log??"),
+        env_vars
+            .log_location
+            .file_name()
+            .expect("Do you want to store the logs in a directory?"),
+    ));
 
     let subscriber = tracing_subscriber::registry()
         .with(
@@ -22,6 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with(tracing_subscriber::fmt::layer().with_writer(std::io::stdout));
 
     tracing::subscriber::set_global_default(subscriber)?;
+    tracing::info!("Test");
 
     Ok(())
 }
