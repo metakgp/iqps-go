@@ -1,6 +1,7 @@
 use clap::Parser;
-use tracing_subscriber;
 use std::fs;
+use tracing;
+use tracing_subscriber::prelude::*;
 
 mod env;
 
@@ -10,8 +11,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let env_vars = env::EnvVars::parse().process()?;
 
     // Initialize logger
-    let log_file = fs::File::create(env_vars.log_location)?;
-    tracing_subscriber::fmt().with_writer(log_file).with_ansi(false).init();
+    let log_file = fs::File::open(env_vars.log_location)?;
+
+    let subscriber = tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::fmt::layer()
+                .with_writer(log_file)
+                .with_ansi(false),
+        )
+        .with(tracing_subscriber::fmt::layer().with_writer(std::io::stdout));
+
+    tracing::subscriber::set_global_default(subscriber)?;
 
     Ok(())
 }
