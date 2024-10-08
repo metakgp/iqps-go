@@ -77,4 +77,8 @@
 			background-color: $accent-color-darker;
 		}
 	}
+
+	&.approved {
+		background-color: rgba($approved-color-darker, 0.16);
+	}
 }

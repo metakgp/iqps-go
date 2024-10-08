@@ -8,8 +8,8 @@ import { formatBackendTimestamp } from "../../utils/backend";
 
 interface IQPCardProps {
     qPaper: IAdminDashboardQP;
-    onEdit: React.MouseEventHandler<HTMLButtonElement>;
-    onDelete: () => void;
+    onEdit?: React.MouseEventHandler<HTMLButtonElement>;
+    onDelete?: () => void;
 }
 
 export function QPCard({ qPaper, onEdit, onDelete }: IQPCardProps) {
@@ -17,36 +17,38 @@ export function QPCard({ qPaper, onEdit, onDelete }: IQPCardProps) {
     const isValid = isQPValid(qPaper);
 
     const handleDelete: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-        e.preventDefault();
+        if (onDelete !== undefined) {
+            e.preventDefault();
 
-        const first_confirmation = window.confirm(`Are you sure you want to DELETE the paper ${qPaper.course_code} - ${qPaper.course_name}?`);
+            const first_confirmation = window.confirm(`Are you sure you want to DELETE the paper ${qPaper.course_code} - ${qPaper.course_name}?`);
 
-        if (first_confirmation) {
-            let minimum_prompt_time: number = 5; // In seconds
+            if (first_confirmation) {
+                let minimum_prompt_time: number = 5; // In seconds
 
-            let num_prompts = 1;
-            let prompt_started = new Date().getTime() / 1000;
-            let confirmed = window.confirm(`Are you SURE you want to DELETE the paper ${qPaper.course_code} - ${qPaper.course_name}? (Confirm again)`);
-            let prompt_ended = new Date().getTime() / 1000;
+                let num_prompts = 1;
+                let prompt_started = new Date().getTime() / 1000;
+                let confirmed = window.confirm(`Are you SURE you want to DELETE the paper ${qPaper.course_code} - ${qPaper.course_name}? (Confirm again)`);
+                let prompt_ended = new Date().getTime() / 1000;
 
-            while (
-                (prompt_ended - prompt_started < minimum_prompt_time)
-                && confirmed
-            ) {
-                prompt_started = new Date().getTime() / 1000;
-                confirmed = window.confirm(
-                    num_prompts === 1 ? `At least take 5s to read the prompt. DO YOU WANT TO DELETE THE PAPER ${qPaper.course_code} - ${qPaper.course_name}?` :
-                        num_prompts === 2 ? `It takes longer to read a longer message. This is serious. DELETE ${qPaper.course_code} - ${qPaper.course_name}?` :
-                            `It's going to take longer each time. You put yourself in this spot. CONFIRM? (${qPaper.course_code} - ${qPaper.course_name})`
-                );
-                prompt_ended = new Date().getTime() / 1000;
+                while (
+                    (prompt_ended - prompt_started < minimum_prompt_time)
+                    && confirmed
+                ) {
+                    prompt_started = new Date().getTime() / 1000;
+                    confirmed = window.confirm(
+                        num_prompts === 1 ? `At least take 5s to read the prompt. DO YOU WANT TO DELETE THE PAPER ${qPaper.course_code} - ${qPaper.course_name}?` :
+                            num_prompts === 2 ? `It takes longer to read a longer message. This is serious. DELETE ${qPaper.course_code} - ${qPaper.course_name}?` :
+                                `It's going to take longer each time. You put yourself in this spot. CONFIRM? (${qPaper.course_code} - ${qPaper.course_name})`
+                    );
+                    prompt_ended = new Date().getTime() / 1000;
 
-                num_prompts += 1;
-                minimum_prompt_time += num_prompts;
-            }
+                    num_prompts += 1;
+                    minimum_prompt_time += num_prompts;
+                }
 
-            if (confirmed) {
-                onDelete();
+                if (confirmed) {
+                    onDelete();
+                }
             }
         }
     }
@@ -78,15 +80,21 @@ export function QPCard({ qPaper, onEdit, onDelete }: IQPCardProps) {
                     <FaFilePdf size="1.5rem" />
                 </a>
                 {!qPaper.approve_status && <>
-                    <button onClick={onEdit} className="edit-btn btn">
-                        <FaRegPenToSquare size="1.5rem" />
-                    </button>
-                    <button
-                        onClick={handleDelete}
-                        className="close-btn btn"
-                    >
-                        <FaRegTrashAlt size="1.5rem" />
-                    </button>
+                    {
+                        onEdit !== undefined &&
+                        <button onClick={onEdit} className="edit-btn btn">
+                            <FaRegPenToSquare size="1.5rem" />
+                        </button>
+                    }
+                    {
+                        onDelete !== undefined &&
+                        <button
+                            onClick={handleDelete}
+                            className="close-btn btn"
+                        >
+                            <FaRegTrashAlt size="1.5rem" />
+                        </button>
+                    }
                 </>
                 }
             </div>

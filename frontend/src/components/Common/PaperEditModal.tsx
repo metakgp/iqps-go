@@ -314,12 +314,10 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 							{
 								similarPapers.length === 0 ? <p>No similar papers found.</p> :
 									similarPapers.map((paper, i) => <QPCard
-										onEdit={(e) => {
-											e.preventDefault();
+										qPaper={{
+											...paper,
+											approve_status: true
 										}}
-										onDelete={() => {
-										}}
-										qPaper={paper}
 										key={i}
 									/>
 									)
