@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { MdCancel } from "react-icons/md";
 import Fuse from 'fuse.js';
 
-import { validate } from "../../utils/validateInput";
+import { validate, validateCourseCode, validateExam, validateSemester, validateYear } from "../../utils/validateInput";
 import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
 import { extractDetailsFromText, extractTextFromPDF, getCodeFromCourse, getCourseFromCode, IExtractedDetails } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
@@ -13,6 +13,10 @@ import Spinner from "../Spinner/Spinner";
 import { FormGroup, RadioGroup, NumberInput, SuggestionTextInput } from "./Form";
 
 import COURSE_CODE_MAP from "../../data/courses.json";
+import { makeRequest } from "../../utils/backend";
+import { IEndpointTypes } from "../../types/backend";
+import { useAuthContext } from "../../utils/auth";
+import { QPCard } from "../AdminDashboard/QPCard";
 
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
@@ -22,12 +26,17 @@ interface IPaperEditModalProps<T> {
 };
 
 function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props: IPaperEditModalProps<T>) {
+	const auth = useAuthContext();
+
 	const [data, setData] = useState(props.qPaper);
 	const [validationErrors, setValidationErrors] = useState<IErrorMessage>(validate(props.qPaper));
 	const [isDataValid, setIsDataValid] = useState<boolean>(false);
 
 	const [ocrDetails, setOcrDetails] = useState<IExtractedDetails | null>(null);
 	const [awaitingOcr, setAwaitingOcr] = useState<boolean>(false);
+
+	const [similarPapers, setSimilarPapers] = useState<IAdminDashboardQP[]>([]);
+	const [awaitingSimilarPapers, setAwaitingSimilarPapers] = useState<boolean>(false);
 
 	const changeData = <K extends keyof T>(property: K, value: T[K]) => {
 		setData((prev_data) => {
@@ -72,11 +81,43 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 		setAwaitingOcr(false);
 	}
 
-	useEffect(() => {
-		if ('filelink' in props.qPaper) {
-			getOcrData(props.qPaper.filelink);
+	if ('filelink' in props.qPaper) {
+		useEffect(() => {
+			if ('filelink' in props.qPaper) {
+				getOcrData(props.qPaper.filelink);
+			}
+		}, [])
+	}
+
+	const getSimilarPapers = async (details: IEndpointTypes['similar']['request']) => {
+		setAwaitingSimilarPapers(true);
+		const response = await makeRequest('similar', 'get', details, auth.jwt);
+
+		if (response.status === "success") {
+			setSimilarPapers(response.data);
+		} else {
+			toast.error(`Error getting similar papers: ${response.message} (${response.status_code})`);
 		}
-	}, [])
+
+		setAwaitingSimilarPapers(false);
+	};
+
+	if ('filelink' in props.qPaper) {
+		useEffect(() => {
+			if (validateCourseCode(data.course_code)) {
+				const similarityDetails: IEndpointTypes['similar']['request'] = {
+					course_code: data.course_code
+				}
+
+				if (validateYear(data.year)) similarityDetails['year'] = data.year;
+				if (validateExam(data.exam) && data.exam !== 'unknown' && data.exam !== 'ct') similarityDetails['exam'] = data.exam;
+				if (validateSemester(data.semester)) similarityDetails['semester'] = data.semester;
+
+				getSimilarPapers(similarityDetails);
+			}
+
+		}, [data.course_code, data.year, data.exam, data.semester])
+	}
 
 	const courseCodes = Object.keys(COURSE_CODE_MAP);
 	const courseNames = Object.values(COURSE_CODE_MAP);
@@ -154,7 +195,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 							value={data.course_code}
 							onValueChange={(value) => changeData('course_code', value.toUpperCase())}
 							suggestions={trimSuggestions(courseCodes.filter((code) => code.startsWith(data.course_code)))}
-							inputProps={{required: true}}
+							inputProps={{ required: true }}
 						/>
 					</FormGroup>
 					<FormGroup
@@ -174,11 +215,11 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 					validationError={validationErrors.courseNameErr}
 				>
 					<SuggestionTextInput
-							value={data.course_name}
-							onValueChange={(value) => changeData('course_name', value.toUpperCase())}
-							suggestions={trimSuggestions(courseNamesFuse.search(data.course_name).map((result) => result.item))}
-							inputProps={{required: true}}
-						/>
+						value={data.course_name}
+						onValueChange={(value) => changeData('course_name', value.toUpperCase())}
+						suggestions={trimSuggestions(courseNamesFuse.search(data.course_name).map((result) => result.item))}
+						inputProps={{ required: true }}
+					/>
 				</FormGroup>
 				<FormGroup
 					label="Exam:"
@@ -267,6 +308,24 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 		{'filelink' in data &&
 			<div className="modal">
 				<h2>Similar Papers</h2>
+				{
+					awaitingSimilarPapers ? <div style={{ justifyContent: 'center', display: 'flex' }}><Spinner /></div> :
+						<div>
+							{
+								similarPapers.length === 0 ? <p>No similar papers found.</p> :
+									similarPapers.map((paper, i) => <QPCard
+										onEdit={(e) => {
+											e.preventDefault();
+										}}
+										onDelete={() => {
+										}}
+										qPaper={paper}
+										key={i}
+									/>
+									)
+							}
+						</div>
+				}
 			</div>
 		}
 	</div>;

@@ -2,11 +2,16 @@ import { AllowedBackendMethods, BackendResponse, IEndpointTypes } from "../types
 
 export const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL;
 
-async function makeBackendRequest(
+interface IBodyTypes {
+	get: Object;
+	post: Object | FormData;
+}
+
+async function makeBackendRequest<M extends AllowedBackendMethods>(
 	endpoint: string,
-	method: AllowedBackendMethods,
+	method: M,
 	jwt: string | null,
-	body: Object | FormData | null,
+	body: IBodyTypes[M] | null
 ): Promise<Response> {
 	const headers: {
 		"Content-Type"?: string;
@@ -23,7 +28,12 @@ async function makeBackendRequest(
 
 	switch (method) {
 		case "get":
-			return await fetch(`${BACKEND_URL}/${endpoint}`, {
+			const requestURL = new URL(`${BACKEND_URL}/${endpoint}`);
+			if (body !== null) {
+				Object.entries(body).map(([key, value]) => requestURL.searchParams.set(key, value));
+			}
+
+			return await fetch(requestURL, {
 				method: "get",
 				headers,
 			});
@@ -33,6 +43,8 @@ async function makeBackendRequest(
 				headers,
 				body: body instanceof FormData ? body : JSON.stringify(body ?? {}),
 			});
+		default:
+			throw 'This should not happen';
 	}
 }
 

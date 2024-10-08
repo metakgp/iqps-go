@@ -31,7 +31,7 @@ function CourseSearchForm() {
 			params.append("exam", exam);
 
 			setAwaitingResponse(true);
-			const response = await makeRequest(`search?${params}`, 'get');
+			const response = await makeRequest('search', 'get', {course: query, exam});
 
 			if (response.status === 'success') {
 				const data: ISearchResult[] = response.data;
