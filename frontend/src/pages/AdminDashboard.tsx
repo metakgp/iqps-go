@@ -10,12 +10,16 @@ import { MdLogout } from "react-icons/md";
 import PaperEditModal from "../components/Common/PaperEditModal";
 import Spinner from "../components/Spinner/Spinner";
 import toast from "react-hot-toast";
+import { extractDetailsFromText, extractTextFromPDF, IExtractedDetails } from "../utils/autofillData";
 
 function AdminDashboard() {
 	const auth = useAuthContext();
 	const [unapprovedPapers, setUnapprovedPapers] = useState<IAdminDashboardQP[]>([]);
 	const [numUniqueCourseCodes, setNumUniqueCourseCodes] = useState<number>(0);
 	const [awaitingResponse, setAwaitingResponse] = useState<boolean>(false);
+	const [ocrDetails, setOcrDetails] = useState<Map<number, IExtractedDetails>>(new Map());
+	const [ocrRequests, setOcrRequests] = useState<IAdminDashboardQP[]>([]);
+	const [ocrLoopOn, setOcrLoopOn] = useState<boolean>(false);
 
 	const [selectedQPaper, setSelectedQPaper] =
 		useState<IAdminDashboardQP | null>(null);
@@ -57,6 +61,7 @@ function AdminDashboard() {
 
 		if (papers.status === 'success') {
 			setUnapprovedPapers(papers.data);
+			setOcrRequests(papers.data);
 			setNumUniqueCourseCodes(
 				// Make an array of course codes
 				papers.data.map((paper) => paper.course_code)
@@ -92,6 +97,34 @@ function AdminDashboard() {
 		}
 	}, []);
 
+	const storeOcrDetails = async (paper: IAdminDashboardQP) => {
+		console.log('getting details', paper)
+		if (!ocrDetails.has(paper.id)) {
+			const response = await fetch(paper.filelink);
+
+			if (response.ok) {
+				const pdfData = await response.arrayBuffer();
+				const pdfText = await extractTextFromPDF(pdfData);
+
+				setOcrDetails((currentValue) => currentValue.set(paper.id, extractDetailsFromText(pdfText)));
+			}
+		}
+	}
+
+	const ocrDetailsLoop = async () => {
+		while (ocrRequests.length > 0) {
+			await storeOcrDetails(ocrRequests.shift()!);
+		}
+
+		setOcrLoopOn(false);
+	}
+
+	useEffect(() => {
+		if (!ocrLoopOn) {
+			setOcrLoopOn(true);
+			ocrDetailsLoop();
+		}
+	}, [ocrRequests])
 
 	return auth.isAuthenticated ? <div id="admin-dashboard">
 		<Header
@@ -115,17 +148,24 @@ function AdminDashboard() {
 						<div className="side-panel">
 							<p><b>Unapproved papers</b>: {unapprovedPapers.length}</p>
 							<p><b>Unique Course Codes</b>: {numUniqueCourseCodes}</p>
+							<p><b>OCR details</b>: {ocrDetails.size} papers (loop {ocrLoopOn ? 'On' : 'Off'})</p>
 						</div>
 						<div className="papers-panel">
 							{unapprovedPapers.map((paper, i) => <QPCard
 								onEdit={(e) => {
 									e.preventDefault();
+
+									if (!ocrDetails.has(paper.id)) {
+										// If ocr doesn't exist, push to the start of the queue
+										setOcrRequests((reqs) => [paper, ...reqs]);
+									}
 									setSelectedQPaper(paper);
 								}}
 								onDelete={() => {
 									handlePaperDelete(paper);
 								}}
 								qPaper={paper}
+								hasOcr={ocrDetails.has(paper.id)}
 								key={i}
 							/>
 							)}
@@ -139,6 +179,7 @@ function AdminDashboard() {
 				onClose={() => setSelectedQPaper(null)}
 				qPaper={selectedQPaper}
 				updateQPaper={(qp) => handlePaperEdit(qp)}
+				ocrDetails={ocrDetails.get(selectedQPaper.id)}
 			/>
 		)}
 	</div> : <p>You are unauthenticated. This incident will be reported.</p>;

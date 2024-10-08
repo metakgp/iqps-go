@@ -10,9 +10,10 @@ interface IQPCardProps {
     qPaper: IAdminDashboardQP;
     onEdit?: React.MouseEventHandler<HTMLButtonElement>;
     onDelete?: () => void;
+    hasOcr?: boolean;
 }
 
-export function QPCard({ qPaper, onEdit, onDelete }: IQPCardProps) {
+export function QPCard({ qPaper, onEdit, onDelete, hasOcr }: IQPCardProps) {
     const errorMsg = validate(qPaper);
     const isValid = isQPValid(qPaper);
 
@@ -61,6 +62,7 @@ export function QPCard({ qPaper, onEdit, onDelete }: IQPCardProps) {
                     <span className="upload-timestamp">({formatBackendTimestamp(qPaper.upload_timestamp)})</span>
                 </div>
                 <div className="pills">
+                    {hasOcr && <div className="pill">OCR</div>}
                     <div className="pill">{qPaper.year}</div>
                     <div className="pill">{qPaper.exam}</div>
                     <div className="pill">{qPaper.semester}</div>

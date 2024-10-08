@@ -5,7 +5,7 @@ import Fuse from 'fuse.js';
 
 import { validate, validateCourseCode, validateExam, validateSemester, validateYear } from "../../utils/validateInput";
 import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
-import { extractDetailsFromText, extractTextFromPDF, getCodeFromCourse, getCourseFromCode, IExtractedDetails } from "../../utils/autofillData";
+import { getCodeFromCourse, getCourseFromCode, IExtractedDetails } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
@@ -23,6 +23,7 @@ interface IPaperEditModalProps<T> {
 	onClose: () => void;
 	qPaper: T;
 	updateQPaper: UpdateQPHandler<T>;
+	ocrDetails?: IExtractedDetails;
 };
 
 function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props: IPaperEditModalProps<T>) {
@@ -31,9 +32,6 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 	const [data, setData] = useState(props.qPaper);
 	const [validationErrors, setValidationErrors] = useState<IErrorMessage>(validate(props.qPaper));
 	const [isDataValid, setIsDataValid] = useState<boolean>(false);
-
-	const [ocrDetails, setOcrDetails] = useState<IExtractedDetails | null>(null);
-	const [awaitingOcr, setAwaitingOcr] = useState<boolean>(false);
 
 	const [similarPapers, setSimilarPapers] = useState<IAdminDashboardQP[]>([]);
 	const [awaitingSimilarPapers, setAwaitingSimilarPapers] = useState<boolean>(false);
@@ -67,27 +65,6 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 
 		if (auto_course_code !== null) changeData('course_code', auto_course_code);
 	}, [data.course_name]);
-
-	const getOcrData = async (fileLink: string) => {
-		setAwaitingOcr(true);
-		const response = await fetch(fileLink);
-
-		if (response.ok) {
-			const pdfData = await response.arrayBuffer();
-			const pdfText = await extractTextFromPDF(pdfData);
-
-			setOcrDetails(extractDetailsFromText(pdfText));
-		}
-		setAwaitingOcr(false);
-	}
-
-	if ('filelink' in props.qPaper) {
-		useEffect(() => {
-			if ('filelink' in props.qPaper) {
-				getOcrData(props.qPaper.filelink);
-			}
-		}, [])
-	}
 
 	const getSimilarPapers = async (details: IEndpointTypes['similar']['request']) => {
 		setAwaitingSimilarPapers(true);
@@ -138,22 +115,25 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 			<div className="modal" style={{ minWidth: '20%' }}>
 				<h2>OCR Details</h2>
 				{
-					awaitingOcr ? <div style={{ justifyContent: 'center', display: 'flex' }}><Spinner /></div> :
+					props.ocrDetails === undefined ?
+						<div style={{ justifyContent: 'center', display: 'flex' }}>
+							<Spinner />
+						</div> :
 						<>
 							<FormGroup label="Course Code:">
-								{ocrDetails?.course_code ?? "Unknown"}
+								{props.ocrDetails.course_code ?? "Unknown"}
 							</FormGroup>
 							<FormGroup label="Year:">
-								{ocrDetails?.year ?? "Unknown"}
+								{props.ocrDetails.year ?? "Unknown"}
 							</FormGroup>
 							<FormGroup label="Course Name:">
-								{getCourseFromCode(ocrDetails?.course_code ?? "")}
+								{getCourseFromCode(props.ocrDetails.course_code ?? "")}
 							</FormGroup>
 							<FormGroup label="Exam:">
-								{ocrDetails?.exam ?? "Unknown"}
+								{props.ocrDetails.exam ?? "Unknown"}
 							</FormGroup>
 							<FormGroup label="Semester:">
-								{ocrDetails?.semester ?? "Unknown"}
+								{props.ocrDetails.semester ?? "Unknown"}
 							</FormGroup>
 						</>
 				}
