@@ -1,6 +1,6 @@
-package query
+package db
 
-const QP_SEARCH_QUERY = `
+const OLD_QP_SEARCH_QUERY = `
 SELECT
   *
 FROM

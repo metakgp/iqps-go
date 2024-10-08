@@ -20,7 +20,6 @@ import (
 	"github.com/metakgp/iqps/backend/pkg/db"
 	"github.com/metakgp/iqps/backend/pkg/models"
 	"github.com/metakgp/iqps/backend/pkg/utils"
-	"github.com/metakgp/iqps/backend/query"
 )
 
 type contextKey string
@@ -149,17 +148,15 @@ func HandleLibraryPapers(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
-	db := db.GetDB()
+	dbs := db.GetDB()
 	course := r.URL.Query().Get("course")
 	if course == "" {
 		http.Error(w, "course is required", http.StatusBadRequest)
 		return
 	}
 
-	query := query.QP_SEARCH
+	query := db.QP_SEARCH
 
-	// var params []interface{}
-	// params = append(params, course)
 	params := pgx.NamedArgs{
 		"query_text": course,
 	}
@@ -172,7 +169,7 @@ func HandleQPSearch(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	rows, err := db.Db.Query(context.Background(), query, params)
+	rows, err := dbs.Db.Query(context.Background(), query, params)
 	config.Get().Logger.Debug("rows were fetched")
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error(), nil)
