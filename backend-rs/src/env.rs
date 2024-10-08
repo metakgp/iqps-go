@@ -55,13 +55,21 @@ pub struct EnvVars {
     #[arg(env, default_value = "iqps/uploaded")]
     /// The path where uploaded papers are stored temporarily, relative to the `static_file_storage_location`
     pub uploaded_qps_path: PathBuf,
+
+    // Server
+    #[arg(env, default_value = "8080")]
+    /// The port the server listens on
+    pub server_port: i32,
 }
 
 impl EnvVars {
     /// Processes the environment variables after reading.
     pub fn process(mut self) -> Result<Self, Box<dyn std::error::Error>> {
         self.static_file_storage_location = std::path::absolute(self.static_file_storage_location)?;
-        self.uploaded_qps_path = std::path::absolute(self.static_file_storage_location.join(self.uploaded_qps_path))?;
+        self.uploaded_qps_path = std::path::absolute(
+            self.static_file_storage_location
+                .join(self.uploaded_qps_path),
+        )?;
 
         self.log_location = std::path::absolute(self.log_location)?;
         Ok(self)

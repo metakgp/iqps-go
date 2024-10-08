@@ -3,6 +3,7 @@ use tracing;
 use tracing_subscriber::prelude::*;
 
 mod env;
+mod routing;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -31,6 +32,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     tracing::subscriber::set_global_default(subscriber)?;
     tracing::info!("Test");
+
+    // Server
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", env_vars.server_port)).await?;
+    axum::serve(listener, routing::get_router(env_vars)).await?;
 
     Ok(())
 }
