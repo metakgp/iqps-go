@@ -58,7 +58,7 @@ export function QPCard({ qPaper, onEdit, onDelete, hasOcr }: IQPCardProps) {
         <div className={`qp-card ${qPaper.approve_status ? 'approved' : ''}`}>
             <div className="qp-data">
                 <div className="course-name">
-                    {`${qPaper.course_code} - ${qPaper.course_name}`}
+                    {`${qPaper.course_code} - ${qPaper.course_name}`} (id: {qPaper.id})
                     <span className="upload-timestamp">({formatBackendTimestamp(qPaper.upload_timestamp)})</span>
                 </div>
                 <div className="pills">

@@ -95,7 +95,7 @@ function AdminDashboard() {
 		} else {
 			fetchUnapprovedPapers();
 		}
-	}, []);
+	}, [])
 
 	const storeOcrDetails = async (paper: IAdminDashboardQP) => {
 		if (!ocrDetails.has(paper.id)) {
@@ -114,18 +114,20 @@ function AdminDashboard() {
 	}
 
 	const ocrDetailsLoop = async () => {
-		while (ocrRequests.length > 0) {
-			await storeOcrDetails(ocrRequests.shift()!);
-		}
+		if (!ocrLoopOn) {
+			setOcrLoopOn(true);
+			const request = ocrRequests.shift();
 
-		setOcrLoopOn(false);
+			if (request) {
+				await storeOcrDetails(request);
+			}
+			setOcrRequests((reqs) => reqs.filter(req => req !== request));
+			setOcrLoopOn(false);
+		}
 	}
 
 	useEffect(() => {
-		if (!ocrLoopOn) {
-			setOcrLoopOn(true);
-			ocrDetailsLoop();
-		}
+		ocrDetailsLoop();
 	}, [ocrRequests])
 
 	return auth.isAuthenticated ? <div id="admin-dashboard">
