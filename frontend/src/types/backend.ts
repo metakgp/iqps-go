@@ -4,8 +4,9 @@ export type AllowedBackendMethods = "get" | "post";
 
 export interface IOkResponse<T> {
 	status: "success";
-	data: T;
+	messsage: string;
 	status_code: 200;
+	data: T;
 }
 
 export interface IErrorResponse {
@@ -48,16 +49,14 @@ export interface IEndpointTypes {
 	approve: {
 		request: IAdminDashboardQP,
 		response: {
-			message: string;
+			id: number;
 		}
 	},
 	delete: {
 		request: {
 			id: number;
 		},
-		response: {
-			message: string;
-		}
+		response: null;
 	},
 	profile: {
 		request: null;
