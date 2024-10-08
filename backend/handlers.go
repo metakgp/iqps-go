@@ -413,7 +413,7 @@ func HandleDeletePaper(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var requestBody struct {
-		Id int `json:"id"`
+		Id int
 	}
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&requestBody); err != nil {
