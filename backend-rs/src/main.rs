@@ -7,6 +7,9 @@ mod routing;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Read dotenv if it exists
+    dotenvy::dotenv()?;
+
     // Read environment variables
     let env_vars = env::EnvVars::parse().process()?;
 

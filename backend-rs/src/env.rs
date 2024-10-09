@@ -28,9 +28,6 @@ pub struct EnvVars {
     /// OAuth app private token
     pub gh_private_id: String,
     #[arg(env)]
-    /// JWT encryption secret (make it a long, randomized string)
-    pub jwt_secret: String,
-    #[arg(env)]
     /// Github organization name
     pub gh_org_name: String,
     #[arg(env)]
@@ -39,6 +36,9 @@ pub struct EnvVars {
     #[arg(env)]
     /// An org admin's Github token
     pub gh_org_admin_token: String,
+    #[arg(env)]
+    /// JWT encryption secret (make it a long, randomized string)
+    pub jwt_secret: String,
 
     // Other configs
     #[arg(env, default_value = "10")]
