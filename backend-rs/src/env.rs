@@ -17,6 +17,7 @@ pub struct EnvVars {
     #[arg(env)]
     /// Database username
     pub db_user: String,
+    #[arg(env)]
     /// Database password
     pub db_password: String,
     #[arg(env)]
