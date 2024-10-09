@@ -20,8 +20,9 @@ pub struct EnvVars {
     #[arg(env)]
     /// Database password
     pub db_password: String,
-    #[arg(env)]
+
     // Auth
+    #[arg(env)]
     /// OAuth app client id (public token)
     pub gh_client_id: String,
     #[arg(env)]
@@ -32,7 +33,7 @@ pub struct EnvVars {
     pub gh_org_name: String,
     #[arg(env)]
     /// Github organization team slug (this team has access to admin dashboard)
-    pub gh_org_team_slug: PathBuf,
+    pub gh_org_team_slug: String,
     #[arg(env)]
     /// An org admin's Github token
     pub gh_org_admin_token: String,
