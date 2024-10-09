@@ -3,6 +3,7 @@ use std::sync::Arc;
 use axum::{http::StatusCode, response::IntoResponse};
 use serde::Serialize;
 use tokio::sync::Mutex;
+use tower_http::trace::{self, TraceLayer};
 
 use crate::{
     db::{self, Database},
@@ -61,6 +62,11 @@ pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
     axum::Router::new()
         .route("/healthcheck", axum::routing::get(handlers::healthcheck))
         .with_state(state)
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(trace::DefaultMakeSpan::new().level(tracing::Level::INFO))
+                .on_response(trace::DefaultOnResponse::new().level(tracing::Level::INFO)),
+        )
 }
 
 pub(super) struct AppError(color_eyre::eyre::Error);
