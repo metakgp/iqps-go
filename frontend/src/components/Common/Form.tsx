@@ -1,7 +1,8 @@
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
 
 import './styles/form.scss';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import useClickOutside from '../../utils/Hooks/useClickOutside';
 
 interface IFormGroupProps {
 	label: string;
@@ -106,6 +107,10 @@ interface ISuggestionTextInputProps {
 export function SuggestionTextInput(props: ISuggestionTextInputProps) {
 	const [suggShown, setSuggShown] = useState<boolean>(false);
 	const [selectedSugg, setSelectedSugg] = useState<number>(0);
+	const suggestionRef = useRef<HTMLDivElement>(null);
+	useClickOutside(suggestionRef, () => {
+		setSuggShown(false);
+	})
 
 	const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
 		e.preventDefault();
@@ -158,7 +163,9 @@ export function SuggestionTextInput(props: ISuggestionTextInputProps) {
 			aria-autocomplete="none"
 			autoComplete="off"
 		/>
-		<div className={`suggestions ${(suggShown && props.suggestions.length > 0) ? '' : 'hidden'}`}>
+		<div
+			ref={suggestionRef}
+			className={`suggestions ${(suggShown && props.suggestions.length > 0) ? '' : 'hidden'}`}>
 			{props.suggestions.map((sugg, i) => (
 				<button
 					className={`suggestion ${i === selectedSugg ? 'selected' : ''}`}
@@ -177,3 +184,4 @@ export function SuggestionTextInput(props: ISuggestionTextInputProps) {
 		</div>
 	</form>
 }
+
