@@ -34,7 +34,7 @@ function AdminDashboard() {
 		}, auth.jwt);
 
 		if (response.status === "success") {
-			toast.success(response.data.message);
+			toast.success(response.message);
 
 			setUnapprovedPapers((papers) => {
 				const newPapers = [...papers];
@@ -79,7 +79,7 @@ function AdminDashboard() {
 		const response = await makeRequest('delete', 'post', { id: deleteQp.id }, auth.jwt);
 
 		if (response.status === "success") {
-			toast.success(response.data.message);
+			toast.success(response.message);
 
 			setUnapprovedPapers((papers) => {
 				return papers.filter((qp) => qp != deleteQp);
