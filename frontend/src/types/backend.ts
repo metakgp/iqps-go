@@ -4,7 +4,7 @@ export type AllowedBackendMethods = "get" | "post";
 
 export interface IOkResponse<T> {
 	status: "success";
-	messsage: string;
+	message: string;
 	status_code: 200;
 	data: T;
 }
