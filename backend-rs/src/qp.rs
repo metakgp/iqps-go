@@ -38,7 +38,7 @@ impl From<Semester> for String {
 pub enum Exam {
     Midsem,
     Endsem,
-    CT(usize),
+    CT(Option<usize>),
     Unknown,
 }
 
@@ -51,8 +51,12 @@ impl TryFrom<&String> for Exam {
         } else if value == "endsem" {
             Ok(Exam::Endsem)
         } else if let Some(stripped) = value.strip_prefix("ct") {
+            if stripped.is_empty() {
+                return Ok(Exam::CT(None));
+            }
+
             if let Ok(i) = stripped.parse::<usize>() {
-                Ok(Exam::CT(i))
+                Ok(Exam::CT(Some(i)))
             } else {
                 Err(eyre!("Error parsing exam: Invalid class test number."))
             }
@@ -69,8 +73,9 @@ impl From<Exam> for String {
         match value {
             Exam::Midsem => "midsem".into(),
             Exam::Endsem => "endsem".into(),
-            Exam::CT(i) => format!("ct{}", i),
             Exam::Unknown => "unknown".into(),
+            Exam::CT(None) => "ct".into(),
+            Exam::CT(Some(i)) => format!("ct{}", i),
         }
     }
 }
