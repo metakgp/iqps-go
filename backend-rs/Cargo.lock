@@ -969,6 +969,7 @@ dependencies = [
  "color-eyre",
  "dotenvy",
  "hmac",
+ "http",
  "jwt",
  "reqwest",
  "serde",

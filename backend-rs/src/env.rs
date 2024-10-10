@@ -66,6 +66,11 @@ pub struct EnvVars {
     #[arg(env, default_value = "8080")]
     /// The port the server listens on
     pub server_port: i32,
+
+    // CORS
+    #[arg(env, default_value = "https://qp.metakgp.org,http://localhost:5173")]
+    /// List of origins allowed (as a list of values separated by commas `origin1, origin2`)
+    pub cors_allowed_origins: String,
 }
 
 impl EnvVars {

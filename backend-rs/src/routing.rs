@@ -1,6 +1,10 @@
 use axum::{extract::Json, http::StatusCode, response::IntoResponse};
+use http::{HeaderValue, Method};
 use serde::Serialize;
-use tower_http::trace::{self, TraceLayer};
+use tower_http::{
+    cors::{Any, CorsLayer},
+    trace::{self, TraceLayer},
+};
 
 use crate::{
     db::{self, Database},
@@ -22,6 +26,23 @@ pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
             TraceLayer::new_for_http()
                 .make_span_with(trace::DefaultMakeSpan::new().level(tracing::Level::INFO))
                 .on_response(trace::DefaultOnResponse::new().level(tracing::Level::INFO)),
+        )
+        .layer(
+            CorsLayer::new()
+                .allow_headers(Any)
+                .allow_methods(vec![Method::GET, Method::POST, Method::OPTIONS])
+                .allow_origin(
+                    env_vars
+                        .cors_allowed_origins
+                        .split(',')
+                        .map(|origin| {
+                            origin
+                                .trim()
+                                .parse::<HeaderValue>()
+                                .expect("CORS Allowed Origins Invalid")
+                        })
+                        .collect::<Vec<HeaderValue>>(),
+                ),
         )
 }
 
