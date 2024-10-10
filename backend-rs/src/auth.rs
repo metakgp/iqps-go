@@ -76,7 +76,7 @@ pub async fn authenticate_user(
     let response = client
         .get(format!(
             "https://github.com/login/oauth/access_token?client_id={}&client_secret={}&code={}",
-            env_vars.gh_client_id, env_vars.gh_private_id, code
+            env_vars.gh_client_id, env_vars.gh_client_secret, code
         ))
         .header("Accept", "application/json")
         .send()
@@ -106,6 +106,15 @@ pub async fn authenticate_user(
         .await
         .context("Error fetching user's username.")?;
 
+    if response.status() != StatusCode::OK {
+        tracing::error!(
+            "Github OAuth error getting username: {}",
+            response.text().await?
+        );
+
+        return Err(eyre!("Github API response error.")).map_err(AppError::from);
+    }
+
     let username = serde_json::from_slice::<GithubUserResponse>(&response.bytes().await?)
         .context("Error parsing username API response.")?
         .login;
@@ -130,8 +139,18 @@ pub async fn authenticate_user(
         .await
         .context("Error getting user's team membership")?;
 
+    if response.status() != StatusCode::OK {
+        tracing::error!(
+            "Github OAuth error getting membership status: {}",
+            response.text().await?
+        );
+
+        return Err(eyre!("Github API response error.")).map_err(AppError::from);
+    }
+
     let state = serde_json::from_slice::<GithubMembershipResponse>(&response.bytes().await?)
-    .context("Error parsing membership API response.")?.state;
+        .context("Error parsing membership API response.")?
+        .state;
 
     if state != "active" {
         Ok(None)
