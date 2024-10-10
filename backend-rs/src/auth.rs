@@ -10,14 +10,14 @@ use crate::{
     routing::{self, AppError},
 };
 
-pub async fn verify_token(token: &String, env_vars: &EnvVars) -> Result<bool, routing::AppError> {
+pub async fn verify_token(token: &str, env_vars: &EnvVars) -> Result<bool, routing::AppError> {
     let jwt_key = env_vars.get_jwt_key()?;
     let claims: Result<Claims, _> = token.verify_with_key(&jwt_key);
 
     Ok(claims.is_ok())
 }
 
-async fn generate_token(username: String, env_vars: &EnvVars) -> Result<String, routing::AppError> {
+async fn generate_token(username: &str, env_vars: &EnvVars) -> Result<String, routing::AppError> {
     let jwt_key = env_vars.get_jwt_key()?;
 
     let expiration = chrono::Utc::now()
@@ -27,7 +27,10 @@ async fn generate_token(username: String, env_vars: &EnvVars) -> Result<String, 
         .unsigned_abs();
 
     let mut private_claims = BTreeMap::new();
-    private_claims.insert("username".into(), serde_json::Value::String(username));
+    private_claims.insert(
+        "username".into(),
+        serde_json::Value::String(username.into()),
+    );
 
     let claims = Claims {
         registered: RegisteredClaims {
@@ -155,6 +158,6 @@ pub async fn authenticate_user(
     if state != "active" {
         Ok(None)
     } else {
-        Ok(Some(generate_token(username, env_vars).await?))
+        Ok(Some(generate_token(&username, env_vars).await?))
     }
 }

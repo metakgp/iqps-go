@@ -18,6 +18,11 @@ pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
     };
 
     axum::Router::new()
+        .route("/unapproved", axum::routing::get(handlers::get_unapproved))
+        .route_layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            middleware::verify_jwt_middleware,
+        ))
         .route("/oauth", axum::routing::post(handlers::oauth))
         .route("/healthcheck", axum::routing::get(handlers::healthcheck))
         .route("/search", axum::routing::get(handlers::search))
@@ -56,7 +61,10 @@ mod handlers {
     use color_eyre::eyre::Ok;
     use serde::{Deserialize, Serialize};
 
-    use crate::{auth, qp};
+    use crate::{
+        auth,
+        qp::{self, AdminDashboardQP},
+    };
 
     use super::{AppError, BackendResponse, RouterState};
 
@@ -65,6 +73,18 @@ mod handlers {
     /// Healthcheck route. Returns a `Hello World.` message if healthy.
     pub async fn healthcheck() -> HandlerReturn<()> {
         Ok(BackendResponse::ok("Hello, World.".into(), ())).map_err(AppError::from)
+    }
+
+    pub async fn get_unapproved(
+        State(state): State<RouterState>,
+    ) -> HandlerReturn<Vec<AdminDashboardQP>> {
+        let papers: Vec<AdminDashboardQP> = state.db.get_unapproved_papers().await?;
+
+        Ok(BackendResponse::ok(
+            format!("Successfully fetched {} papers.", papers.len()),
+            papers,
+        ))
+        .map_err(AppError::from)
     }
 
     pub async fn search(
@@ -118,6 +138,54 @@ mod handlers {
             ))
         }
         .map_err(AppError::from)
+    }
+}
+
+mod middleware {
+    use axum::{
+        extract::{Request, State},
+        middleware::Next,
+        response::{IntoResponse, Response},
+    };
+    use http::{HeaderMap, StatusCode};
+
+    use crate::auth;
+
+    use super::{AppError, BackendResponse, RouterState};
+
+    pub async fn verify_jwt_middleware(
+        State(state): State<RouterState>,
+        headers: HeaderMap,
+        request: Request,
+        next: Next,
+    ) -> Result<Response, AppError> {
+        if let Some(auth_header) = headers.get("Authorization") {
+            if let Some(jwt) = auth_header.to_str()?.strip_prefix("Bearer ") {
+                let is_verified = auth::verify_token(jwt, &state.env_vars).await?;
+
+                if !is_verified {
+                    return Ok(BackendResponse::<()>::error(
+                        "Authorization token invalid.".into(),
+                        StatusCode::UNAUTHORIZED,
+                    )
+                    .into_response());
+                }
+            } else {
+                return Ok(BackendResponse::<()>::error(
+                    "Authorization header format invalid.".into(),
+                    StatusCode::UNAUTHORIZED,
+                )
+                .into_response());
+            }
+        } else {
+            return Ok(BackendResponse::<()>::error(
+                "Authorization header missing.".into(),
+                StatusCode::UNAUTHORIZED,
+            )
+            .into_response());
+        }
+
+        Ok(next.run(request).await)
     }
 }
 
