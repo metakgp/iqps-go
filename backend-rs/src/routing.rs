@@ -13,10 +13,28 @@ struct RouterState {
     pub env_vars: EnvVars,
 }
 
-#[derive(serde::Serialize)]
+#[derive(Clone, Copy)]
 enum Status {
     Success,
     Error,
+}
+
+impl From<Status> for String {
+    fn from(value: Status) -> Self {
+        match value {
+            Status::Success => "success".into(),
+            Status::Error => "error".into(),
+        }
+    }
+}
+
+impl Serialize for Status {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&String::from(*self))
+    }
 }
 
 /// Standard backend response format (serialized as JSON)

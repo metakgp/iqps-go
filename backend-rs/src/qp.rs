@@ -1,7 +1,7 @@
 use color_eyre::eyre::eyre;
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Clone, Copy)]
 pub enum Semester {
     Autumn,
     Spring,
@@ -28,13 +28,22 @@ impl From<Semester> for String {
     fn from(value: Semester) -> Self {
         match value {
             Semester::Autumn => "autumn".into(),
-            Semester::Spring => "semester".into(),
+            Semester::Spring => "spring".into(),
             Semester::Unknown => "unknown".into(),
         }
     }
 }
 
-#[derive(Serialize)]
+impl Serialize for Semester {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&String::from(*self))
+    }
+}
+
+#[derive(Clone, Copy)]
 pub enum Exam {
     Midsem,
     Endsem,
@@ -77,6 +86,15 @@ impl From<Exam> for String {
             Exam::CT(None) => "ct".into(),
             Exam::CT(Some(i)) => format!("ct{}", i),
         }
+    }
+}
+
+impl Serialize for Exam {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&String::from(*self))
     }
 }
 
