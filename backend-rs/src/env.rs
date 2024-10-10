@@ -1,6 +1,8 @@
 use std::path::PathBuf;
 
 use clap::Parser;
+use hmac::{digest::InvalidLength, Hmac, Mac};
+use sha2::Sha256;
 
 #[derive(Parser, Clone)]
 pub struct EnvVars {
@@ -39,7 +41,7 @@ pub struct EnvVars {
     pub gh_org_admin_token: String,
     #[arg(env)]
     /// JWT encryption secret (make it a long, randomized string)
-    pub jwt_secret: String,
+    jwt_secret: String,
 
     // Other configs
     #[arg(env, default_value = "10")]
@@ -77,5 +79,10 @@ impl EnvVars {
 
         self.log_location = std::path::absolute(self.log_location)?;
         Ok(self)
+    }
+
+    /// Returns the JWT signing key
+    pub fn get_jwt_key(&self) -> Result<Hmac<Sha256>, InvalidLength> {
+        Hmac::new_from_slice(self.jwt_secret.as_bytes())
     }
 }
