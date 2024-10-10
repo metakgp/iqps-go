@@ -37,7 +37,7 @@ pub struct EnvVars {
     /// Github organization team slug (this team has access to admin dashboard)
     pub gh_org_team_slug: String,
     #[arg(env)]
-    /// An org admin's Github token
+    /// An org admin's Github token (with the `read:org` permission)
     pub gh_org_admin_token: String,
     #[arg(env)]
     /// JWT encryption secret (make it a long, randomized string)

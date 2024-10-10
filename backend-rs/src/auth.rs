@@ -1,10 +1,14 @@
 use std::collections::BTreeMap;
 
-use color_eyre::eyre::ContextCompat;
+use color_eyre::eyre::{eyre, Context, ContextCompat};
+use http::StatusCode;
 use jwt::{Claims, RegisteredClaims, SignWithKey, VerifyWithKey};
 use serde::Deserialize;
 
-use crate::{env::EnvVars, routing};
+use crate::{
+    env::EnvVars,
+    routing::{self, AppError},
+};
 
 pub async fn verify_token(token: &String, env_vars: &EnvVars) -> Result<bool, routing::AppError> {
     let jwt_key = env_vars.get_jwt_key()?;
@@ -76,21 +80,42 @@ pub async fn authenticate_user(
         ))
         .header("Accept", "application/json")
         .send()
-        .await?;
+        .await
+        .context("Error getting access token from Github.")?;
+
+    if response.status() != StatusCode::OK {
+        tracing::error!(
+            "Github OAuth error getting access token: {}",
+            response.text().await?
+        );
+
+        return Err(eyre!("Github API response error.")).map_err(AppError::from);
+    }
 
     let access_token =
-        serde_json::from_slice::<GithubAccessTokenResponse>(&response.bytes().await?)?.access_token;
+        serde_json::from_slice::<GithubAccessTokenResponse>(&response.bytes().await?)
+            .context("Error parsing access token response.")?
+            .access_token;
 
     // Get the username of the user who made the request
     let response = client
         .get("https://api.github.com/user")
         .header("Authorization", format!("Bearer {}", access_token))
+        .header("User-Agent", "bruh") // Why is this required :ded:
         .send()
-        .await?;
+        .await
+        .context("Error fetching user's username.")?;
 
-    let username = serde_json::from_slice::<GithubUserResponse>(&response.bytes().await?)?.login;
+    let username = serde_json::from_slice::<GithubUserResponse>(&response.bytes().await?)
+        .context("Error parsing username API response.")?
+        .login;
 
     // Check the user's membership in the team
+    println!(
+        "https://api.github.com/orgs/{}/teams/{}/memberships/{}",
+        env_vars.gh_org_name, env_vars.gh_org_team_slug, username
+    );
+
     let response = client
         .get(format!(
             "https://api.github.com/orgs/{}/teams/{}/memberships/{}",
@@ -100,10 +125,13 @@ pub async fn authenticate_user(
             "Authorization",
             format!("Bearer {}", env_vars.gh_org_admin_token),
         )
+        .header("User-Agent", "bruh why is this required")
         .send()
-        .await?;
+        .await
+        .context("Error getting user's team membership")?;
 
-    let state = serde_json::from_slice::<GithubMembershipResponse>(&response.bytes().await?)?.state;
+    let state = serde_json::from_slice::<GithubMembershipResponse>(&response.bytes().await?)
+    .context("Error parsing membership API response.")?.state;
 
     if state != "active" {
         Ok(None)
