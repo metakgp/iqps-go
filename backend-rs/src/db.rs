@@ -184,6 +184,6 @@ order by
   coalesce(1.0 / (50 + partial_search.rank_ix), 0.0) * 1
   desc
 )
-  select * from result (exam = $2 OR exam = '')
+  select * from result where (exam = $2 OR exam = '')
 ";
 }
