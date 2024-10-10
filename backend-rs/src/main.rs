@@ -1,6 +1,7 @@
 use clap::Parser;
 use tracing_subscriber::prelude::*;
 
+mod auth;
 mod db;
 mod env;
 mod qp;
