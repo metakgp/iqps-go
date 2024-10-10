@@ -28,8 +28,8 @@ pub struct EnvVars {
     /// OAuth app client id (public token)
     pub gh_client_id: String,
     #[arg(env)]
-    /// OAuth app private token
-    pub gh_private_id: String,
+    /// OAuth app client secret
+    pub gh_client_secret: String,
     #[arg(env)]
     /// Github organization name
     pub gh_org_name: String,
