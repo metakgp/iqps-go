@@ -1,4 +1,3 @@
-use chrono;
 use std::collections::BTreeMap;
 
 use color_eyre::eyre::ContextCompat;
@@ -28,12 +27,12 @@ async fn generate_token(username: String, env_vars: &EnvVars) -> Result<String, 
 
     let claims = Claims {
         registered: RegisteredClaims {
-			audience: None,
-			issued_at: None,
-			issuer: None,
-			subject: None,
-			not_before: None,
-			json_web_token_id: None,
+            audience: None,
+            issued_at: None,
+            issuer: None,
+            subject: None,
+            not_before: None,
+            json_web_token_id: None,
             expiration: Some(expiration),
         },
         private: private_claims,
@@ -61,9 +60,10 @@ struct GithubMembershipResponse {
 /// 1. Uses the OAuth code to get an access token.
 /// 2. Uses the access token to get the user's username.
 /// 3. Uses the username and and a admin's access token to verify whether the user is a member of the admins github team.
+///
 /// Returns the JWT if the user is authenticated, `None` otherwise.
-async fn authenticate_user(
-    client_id: &String,
+pub async fn authenticate_user(
+    code: &String,
     env_vars: &EnvVars,
 ) -> Result<Option<String>, routing::AppError> {
     let client = reqwest::Client::new();
@@ -72,7 +72,7 @@ async fn authenticate_user(
     let response = client
         .get(format!(
             "https://github.com/login/oauth/access_token?client_id={}&client_secret={}&code={}",
-            client_id, env_vars.gh_client_id, env_vars.gh_private_id
+            env_vars.gh_client_id, env_vars.gh_private_id, code
         ))
         .header("Accept", "application/json")
         .send()
@@ -108,6 +108,6 @@ async fn authenticate_user(
     if state != "active" {
         Ok(None)
     } else {
-		Ok(Some(generate_token(username, &env_vars).await?))
+        Ok(Some(generate_token(username, env_vars).await?))
     }
 }

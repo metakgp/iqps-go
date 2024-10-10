@@ -1,4 +1,4 @@
-use axum::{http::StatusCode, response::IntoResponse};
+use axum::{extract::Json, http::StatusCode, response::IntoResponse};
 use serde::Serialize;
 use tower_http::trace::{self, TraceLayer};
 
@@ -6,6 +6,99 @@ use crate::{
     db::{self, Database},
     env::EnvVars,
 };
+
+pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
+    let state = RouterState {
+        db,
+        env_vars: env_vars.clone(),
+    };
+
+    axum::Router::new()
+        .route("/oauth", axum::routing::post(handlers::oauth))
+        .route("/healthcheck", axum::routing::get(handlers::healthcheck))
+        .route("/search", axum::routing::get(handlers::search))
+        .with_state(state)
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(trace::DefaultMakeSpan::new().level(tracing::Level::INFO))
+                .on_response(trace::DefaultOnResponse::new().level(tracing::Level::INFO)),
+        )
+}
+
+mod handlers {
+    use std::collections::HashMap;
+
+    use axum::{
+        extract::{Json, Query, State},
+        http::StatusCode,
+    };
+    use color_eyre::eyre::Ok;
+    use serde::{Deserialize, Serialize};
+
+    use crate::{auth, qp};
+
+    use super::{AppError, BackendResponse, RouterState};
+
+    type HandlerReturn<T> = Result<(StatusCode, BackendResponse<T>), AppError>;
+
+    /// Healthcheck route. Returns a `Hello World.` message if healthy.
+    pub async fn healthcheck() -> HandlerReturn<()> {
+        Ok(BackendResponse::ok("Hello, World.".into(), ())).map_err(AppError::from)
+    }
+
+    pub async fn search(
+        State(state): State<RouterState>,
+        Query(params): Query<HashMap<String, String>>,
+    ) -> HandlerReturn<Vec<qp::SearchQP>> {
+        let response = if let Some(query) = params.get("query") {
+            let exam: Option<qp::Exam> = if let Some(exam_str) = params.get("exam") {
+                Some(qp::Exam::try_from(exam_str).map_err(AppError::from)?)
+            } else {
+                None
+            };
+
+            let papers = state.db.search_papers(query, exam).await?;
+
+            Ok(BackendResponse::ok(
+                format!("Successfully fetched {} papers.", papers.len()),
+                papers,
+            ))
+        } else {
+            Ok(BackendResponse::error(
+                "`query` URL parameter is required.".into(),
+                StatusCode::BAD_REQUEST,
+            ))
+        };
+
+        response.map_err(AppError::from)
+    }
+
+    #[derive(Deserialize)]
+    pub struct OAuthReq {
+        code: String,
+    }
+    #[derive(Serialize)]
+    pub struct OAuthRes {
+        token: String,
+    }
+    pub async fn oauth(
+        State(state): State<RouterState>,
+        Json(body): Json<OAuthReq>,
+    ) -> HandlerReturn<OAuthRes> {
+        if let Some(token) = auth::authenticate_user(&body.code, &state.env_vars).await? {
+            Ok(BackendResponse::ok(
+                "Successfully authorized the user.".into(),
+                OAuthRes { token },
+            ))
+        } else {
+            Ok(BackendResponse::error(
+                "Error: User unauthorized.".into(),
+                StatusCode::UNAUTHORIZED,
+            ))
+        }
+        .map_err(AppError::from)
+    }
+}
 
 #[derive(Clone)]
 struct RouterState {
@@ -71,25 +164,8 @@ impl<T: serde::Serialize> BackendResponse<T> {
 
 impl<T: Serialize> IntoResponse for BackendResponse<T> {
     fn into_response(self) -> axum::response::Response {
-        serde_json::json!(self).to_string().into_response()
+        Json(self).into_response()
     }
-}
-
-pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
-    let state = RouterState {
-        db,
-        env_vars: env_vars.clone(),
-    };
-
-    axum::Router::new()
-        .route("/healthcheck", axum::routing::get(handlers::healthcheck))
-        .route("/search", axum::routing::get(handlers::search))
-        .with_state(state)
-        .layer(
-            TraceLayer::new_for_http()
-                .make_span_with(trace::DefaultMakeSpan::new().level(tracing::Level::INFO))
-                .on_response(trace::DefaultOnResponse::new().level(tracing::Level::INFO)),
-        )
 }
 
 pub(super) struct AppError(color_eyre::eyre::Error);
@@ -111,51 +187,5 @@ where
 {
     fn from(err: E) -> Self {
         Self(err.into())
-    }
-}
-
-mod handlers {
-    use std::collections::HashMap;
-
-    use axum::{
-        extract::{self, State},
-        http::StatusCode,
-    };
-    use color_eyre::eyre::Ok;
-
-    use crate::qp;
-
-    use super::{AppError, BackendResponse, RouterState};
-
-    /// Healthcheck route. Returns a `Hello World.` message if healthy.
-    pub async fn healthcheck() -> (StatusCode, BackendResponse<()>) {
-        BackendResponse::ok("Hello, World.".into(), ())
-    }
-
-    pub async fn search(
-        State(state): State<RouterState>,
-        extract::Query(params): extract::Query<HashMap<String, String>>,
-    ) -> Result<(StatusCode, BackendResponse<Vec<qp::SearchQP>>), AppError> {
-        let response = if let Some(query) = params.get("query") {
-            let exam: Option<qp::Exam> = if let Some(exam_str) = params.get("exam") {
-                Some(qp::Exam::try_from(exam_str).map_err(AppError::from)?)
-            } else {
-                None
-            };
-
-            let papers = state.db.search_papers(query, exam).await?;
-
-            Ok(BackendResponse::ok(
-                format!("Successfully fetched {} papers.", papers.len()),
-                papers,
-            ))
-        } else {
-            Ok(BackendResponse::error(
-                "`query` URL parameter is required.".into(),
-                StatusCode::BAD_REQUEST,
-            ))
-        };
-
-        response.map_err(AppError::from)
     }
 }
