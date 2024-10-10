@@ -8,10 +8,10 @@ pub enum Semester {
     Unknown,
 }
 
-impl TryFrom<String> for Semester {
+impl TryFrom<&String> for Semester {
     type Error = color_eyre::eyre::Error;
 
-    fn try_from(value: String) -> Result<Self, Self::Error> {
+    fn try_from(value: &String) -> Result<Self, Self::Error> {
         if value == "autumn" {
             Ok(Semester::Autumn)
         } else if value == "spring" {
@@ -42,10 +42,10 @@ pub enum Exam {
     Unknown,
 }
 
-impl TryFrom<String> for Exam {
+impl TryFrom<&String> for Exam {
     type Error = color_eyre::eyre::Error;
 
-    fn try_from(value: String) -> Result<Self, Self::Error> {
+    fn try_from(value: &String) -> Result<Self, Self::Error> {
         if value == "midsem" {
             Ok(Exam::Midsem)
         } else if value == "endsem" {

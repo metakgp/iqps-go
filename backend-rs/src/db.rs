@@ -1,3 +1,4 @@
+use queries::get_qp_search_query;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use std::time::Duration;
 
@@ -49,12 +50,13 @@ impl Database {
         query: String,
         exam: Option<Exam>,
     ) -> Result<Vec<qp::SearchQP>, sqlx::Error> {
-        let query = sqlx::query_as(queries::QP_SEARCH).bind(query);
+        let query_sql = get_qp_search_query(exam.is_some());
+        let query = sqlx::query_as(&query_sql).bind(query);
 
         let query = if let Some(exam) = exam {
             query.bind(String::from(exam))
         } else {
-            query.bind(String::from(""))
+            query
         };
 
         let papers: Vec<models::DBSearchQP> = query.fetch_all(&self.connection).await?;
@@ -107,8 +109,8 @@ mod models {
                 course_code: value.course_code,
                 course_name: value.course_name,
                 year: value.year,
-                semester: value.semester.try_into().unwrap_or(Semester::Unknown),
-                exam: value.exam.try_into().unwrap_or(qp::Exam::Unknown),
+                semester: (&value.semester).try_into().unwrap_or(Semester::Unknown),
+                exam: (&value.exam).try_into().unwrap_or(qp::Exam::Unknown),
                 upload_timestamp: value.upload_timestamp.to_string(),
                 approve_status: value.approve_status,
             }
@@ -124,8 +126,8 @@ mod models {
                 course_code: value.course_code,
                 course_name: value.course_name,
                 year: value.year,
-                semester: value.semester.try_into().unwrap_or(Semester::Unknown),
-                exam: value.exam.try_into().unwrap_or(qp::Exam::Unknown),
+                semester: (&value.semester).try_into().unwrap_or(Semester::Unknown),
+                exam: (&value.exam).try_into().unwrap_or(qp::Exam::Unknown),
             }
         }
     }
@@ -137,7 +139,7 @@ mod queries {
 
     /// Searches for papers using the given query_text (parameter `$1`). This is total voodoo by Rajiv Harlalka. The second parameter can be used to filter by exam.
     /// // TODO: @Rajiv please update this documentation to explain the voodoo.
-    pub const QP_SEARCH: &str = "
+    const QP_SEARCH: &str = "
 with fuzzy as (
     select id,
            similarity(course_code || ' ' || course_name, $1) as sim_score,
@@ -185,6 +187,15 @@ order by
   coalesce(1.0 / (50 + partial_search.rank_ix), 0.0) * 1
   desc
 )
-  select * from result where (exam = $2 OR exam = '')
-";
+  select * from result";
+
+    pub fn get_qp_search_query(exam: bool) -> String {
+        let mut query = QP_SEARCH.to_owned();
+
+        if exam {
+            query.push_str(" where (exam = $2 or exam = '')");
+        }
+
+        query
+    }
 }
