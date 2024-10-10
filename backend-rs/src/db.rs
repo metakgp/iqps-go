@@ -6,7 +6,6 @@ use crate::{
     qp::{self, Exam},
 };
 
-type Error = Box<dyn std::error::Error>;
 
 #[derive(Clone)]
 pub struct Database {
@@ -14,7 +13,7 @@ pub struct Database {
 }
 
 impl Database {
-    pub async fn try_new(env_vars: &EnvVars) -> Result<Self, Error> {
+    pub async fn try_new(env_vars: &EnvVars) -> Result<Self, sqlx::Error> {
         let database_url = format!(
             "postgres://{}:{}@{}:{}/{}",
             env_vars.db_user,
@@ -35,7 +34,7 @@ impl Database {
         })
     }
 
-    pub async fn get_unapproved_papers(&self) -> Result<Vec<qp::AdminDashboardQP>, Error> {
+    pub async fn get_unapproved_papers(&self) -> Result<Vec<qp::AdminDashboardQP>, sqlx::Error> {
         let papers: Vec<models::DBAdminDashboardQP> = sqlx::query_as(queries::GET_ALL_UNAPPROVED)
             .fetch_all(&self.connection)
             .await?;
@@ -46,7 +45,7 @@ impl Database {
             .collect())
     }
 
-    pub async fn search_papers(&self, query: String, exam: Option<Exam>) -> Result<Vec<qp::SearchQP>, Error> {
+    pub async fn search_papers(&self, query: String, exam: Option<Exam>) -> Result<Vec<qp::SearchQP>, sqlx::Error> {
         let query = sqlx::query_as(queries::QP_SEARCH).bind(query);
 
         let query = if let Some(exam) = exam {

@@ -1,3 +1,7 @@
+use color_eyre::eyre::eyre;
+use serde::Serialize;
+
+#[derive(Serialize)]
 pub enum Semester {
     Autumn,
     Spring,
@@ -5,7 +9,7 @@ pub enum Semester {
 }
 
 impl TryFrom<String> for Semester {
-    type Error = Box<dyn std::error::Error>;
+    type Error = color_eyre::eyre::Error;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         if value == "autumn" {
@@ -15,7 +19,7 @@ impl TryFrom<String> for Semester {
         } else if value == "" {
             Ok(Semester::Unknown)
         } else {
-            Err("Error parsing semester: Invalid value.".into())
+            Err(eyre!("Error parsing semester: Invalid value."))
         }
     }
 }
@@ -30,6 +34,7 @@ impl From<Semester> for String {
     }
 }
 
+#[derive(Serialize)]
 pub enum Exam {
     Midsem,
     Endsem,
@@ -38,7 +43,7 @@ pub enum Exam {
 }
 
 impl TryFrom<String> for Exam {
-    type Error = Box<dyn std::error::Error>;
+    type Error = color_eyre::eyre::Error;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         if value == "midsem" {
@@ -49,12 +54,12 @@ impl TryFrom<String> for Exam {
             if let Ok(i) = value[2..].parse::<usize>() {
                 Ok(Exam::CT(i))
             } else {
-                Err("Error parsing exam: Invalid class test number.".into())
+                Err(eyre!("Error parsing exam: Invalid class test number."))
             }
         } else if value == "" {
             Ok(Exam::Unknown)
         } else {
-            Err("Error parsing exam: Unknown exam type.".into())
+            Err(eyre!("Error parsing exam: Unknown exam type."))
         }
     }
 }
@@ -70,6 +75,7 @@ impl From<Exam> for String {
     }
 }
 
+#[derive(Serialize)]
 pub struct SearchQP {
     pub id: i32,
     pub filelink: String,
