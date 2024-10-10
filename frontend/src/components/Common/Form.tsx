@@ -107,10 +107,10 @@ interface ISuggestionTextInputProps {
 export function SuggestionTextInput(props: ISuggestionTextInputProps) {
 	const [suggShown, setSuggShown] = useState<boolean>(false);
 	const [selectedSugg, setSelectedSugg] = useState<number>(0);
-  const suggestionRef = useRef<HTMLDivElement>(null);
-  useClickOutside(suggestionRef, () => {
-    setSuggShown(false);
-  })
+	const suggestionRef = useRef<HTMLDivElement>(null);
+	useClickOutside(suggestionRef, () => {
+		setSuggShown(false);
+	})
 
 	const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
 		e.preventDefault();
@@ -164,8 +164,8 @@ export function SuggestionTextInput(props: ISuggestionTextInputProps) {
 			autoComplete="off"
 		/>
 		<div
-      ref={suggestionRef}
-      className={`suggestions ${(suggShown && props.suggestions.length > 0) ? '' : 'hidden'}`}>
+			ref={suggestionRef}
+			className={`suggestions ${(suggShown && props.suggestions.length > 0) ? '' : 'hidden'}`}>
 			{props.suggestions.map((sugg, i) => (
 				<button
 					className={`suggestion ${i === selectedSugg ? 'selected' : ''}`}
