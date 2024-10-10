@@ -1,8 +1,5 @@
-use std::sync::Arc;
-
 use axum::{http::StatusCode, response::IntoResponse};
 use serde::Serialize;
-use tokio::sync::Mutex;
 use tower_http::trace::{self, TraceLayer};
 
 use crate::{
@@ -12,7 +9,7 @@ use crate::{
 
 #[derive(Clone)]
 struct RouterState {
-    pub db: Arc<Mutex<db::Database>>,
+    pub db: db::Database,
     pub env_vars: EnvVars,
 }
 
@@ -55,7 +52,7 @@ impl<T: Serialize> IntoResponse for BackendResponse<T> {
 
 pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
     let state = RouterState {
-        db: Arc::new(Mutex::new(db)),
+        db,
         env_vars: env_vars.clone(),
     };
 

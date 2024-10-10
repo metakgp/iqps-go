@@ -1,14 +1,16 @@
-use diesel_async::{AsyncConnection, AsyncPgConnection};
+use std::time::Duration;
+
+use sqlx::{postgres::PgPoolOptions, PgPool};
 
 use crate::env::EnvVars;
 
+#[derive(Clone)]
 pub struct Database {
-    database_url: String,
-    connection: AsyncPgConnection,
+    connection: PgPool,
 }
 
 impl Database {
-    pub async fn try_new(env_vars: &EnvVars) -> Result<Self, diesel::ConnectionError> {
+    pub async fn try_new(env_vars: &EnvVars) -> Result<Self, Box<dyn std::error::Error>> {
         let database_url = format!(
             "postgres://{}:{}@{}:{}/{}",
             env_vars.db_user,
@@ -18,9 +20,14 @@ impl Database {
             env_vars.db_name
         );
 
+        let conn_pool = PgPoolOptions::new()
+            .max_connections(5)
+            .acquire_timeout(Duration::from_secs(3))
+            .connect(&database_url)
+            .await?;
+
         Ok(Self {
-            connection: AsyncPgConnection::establish(&database_url).await?,
-            database_url,
+            connection: conn_pool,
         })
     }
 }
