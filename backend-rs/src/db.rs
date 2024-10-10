@@ -47,7 +47,7 @@ impl Database {
 
     pub async fn search_papers(
         &self,
-        query: String,
+        query: &String,
         exam: Option<Exam>,
     ) -> Result<Vec<qp::SearchQP>, sqlx::Error> {
         let query_sql = get_qp_search_query(exam.is_some());

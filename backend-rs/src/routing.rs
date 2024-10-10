@@ -143,7 +143,7 @@ mod handlers {
                 None
             };
 
-            let papers = state.db.search_papers(query.clone(), exam).await?;
+            let papers = state.db.search_papers(query, exam).await?;
 
             Ok(BackendResponse::ok(
                 format!("Successfully fetched {} papers.", papers.len()),
