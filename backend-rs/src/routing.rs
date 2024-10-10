@@ -128,11 +128,11 @@ mod handlers {
             let papers = state.db.search_papers(query.clone(), exam).await?;
 
             Ok(BackendResponse::ok(
-                "Successfully fetched papers.".into(),
+                format!("Successfully fetched {} papers.", papers.len()),
                 papers,
             ))
         } else {
-            Ok(BackendResponse::<Vec<qp::SearchQP>>::error(
+            Ok(BackendResponse::error(
                 "`query` URL parameter is required.".into(),
                 StatusCode::BAD_REQUEST,
             ))

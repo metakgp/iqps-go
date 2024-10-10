@@ -3,8 +3,8 @@ use tracing_subscriber::prelude::*;
 
 mod db;
 mod env;
-mod routing;
 mod qp;
+mod routing;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

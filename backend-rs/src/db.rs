@@ -6,7 +6,6 @@ use crate::{
     qp::{self, Exam},
 };
 
-
 #[derive(Clone)]
 pub struct Database {
     connection: PgPool,
@@ -45,7 +44,11 @@ impl Database {
             .collect())
     }
 
-    pub async fn search_papers(&self, query: String, exam: Option<Exam>) -> Result<Vec<qp::SearchQP>, sqlx::Error> {
+    pub async fn search_papers(
+        &self,
+        query: String,
+        exam: Option<Exam>,
+    ) -> Result<Vec<qp::SearchQP>, sqlx::Error> {
         let query = sqlx::query_as(queries::QP_SEARCH).bind(query);
 
         let query = if let Some(exam) = exam {
@@ -56,12 +59,10 @@ impl Database {
 
         let papers: Vec<models::DBSearchQP> = query.fetch_all(&self.connection).await?;
 
-        Ok(
-            papers
+        Ok(papers
             .iter()
             .map(|qp| qp::SearchQP::from(qp.clone()))
-            .collect()
-        )
+            .collect())
     }
 }
 
@@ -69,7 +70,7 @@ mod models {
     use crate::qp::Semester;
 
     use super::qp;
-    use sqlx::prelude::FromRow;
+    use sqlx::{prelude::FromRow, types::chrono};
 
     #[derive(FromRow, Clone)]
     pub struct DBSearchQP {
@@ -93,7 +94,7 @@ mod models {
         year: i32,
         semester: String,
         exam: String,
-        upload_timestamp: String,
+        upload_timestamp: chrono::NaiveDateTime,
         approve_status: bool,
     }
 
@@ -108,7 +109,7 @@ mod models {
                 year: value.year,
                 semester: value.semester.try_into().unwrap_or(Semester::Unknown),
                 exam: value.exam.try_into().unwrap_or(qp::Exam::Unknown),
-                upload_timestamp: value.upload_timestamp,
+                upload_timestamp: value.upload_timestamp.to_string(),
                 approve_status: value.approve_status,
             }
         }

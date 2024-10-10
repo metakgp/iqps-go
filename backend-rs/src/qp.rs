@@ -16,7 +16,7 @@ impl TryFrom<String> for Semester {
             Ok(Semester::Autumn)
         } else if value == "spring" {
             Ok(Semester::Spring)
-        } else if value == "" {
+        } else if value.is_empty() {
             Ok(Semester::Unknown)
         } else {
             Err(eyre!("Error parsing semester: Invalid value."))
@@ -50,13 +50,13 @@ impl TryFrom<String> for Exam {
             Ok(Exam::Midsem)
         } else if value == "endsem" {
             Ok(Exam::Endsem)
-        } else if value.starts_with("ct") {
-            if let Ok(i) = value[2..].parse::<usize>() {
+        } else if let Some(stripped) = value.strip_prefix("ct") {
+            if let Ok(i) = stripped.parse::<usize>() {
                 Ok(Exam::CT(i))
             } else {
                 Err(eyre!("Error parsing exam: Invalid class test number."))
             }
-        } else if value == "" {
+        } else if value.is_empty() {
             Ok(Exam::Unknown)
         } else {
             Err(eyre!("Error parsing exam: Unknown exam type."))
@@ -87,6 +87,7 @@ pub struct SearchQP {
     pub exam: Exam,
 }
 
+#[derive(Serialize)]
 pub struct AdminDashboardQP {
     pub id: i32,
     pub filelink: String,
