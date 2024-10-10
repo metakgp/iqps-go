@@ -80,9 +80,17 @@ impl IntoResponse for AppError {
 }
 
 mod handlers {
+    use std::collections::HashMap;
+
+    use axum::extract;
+
     use super::{AppError, BackendResponse};
 
     pub async fn healthcheck() -> Result<BackendResponse<()>, AppError> {
         Ok(BackendResponse::ok("Hello, World.".into(), ()))
+    }
+
+    pub async fn search(extract::Query(query): extract::Query<HashMap<String, String>>) -> Result<BackendResponse<()>, AppError> {
+        Ok(BackendResponse::ok("test".into(), ()))
     }
 }
