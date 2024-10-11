@@ -27,7 +27,7 @@ pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
     axum::Router::new()
         .route("/unapproved", axum::routing::get(handlers::get_unapproved))
         .route("/profile", axum::routing::get(handlers::profile))
-        .route("/edit", axum::routing::get(handlers::edit))
+        .route("/edit", axum::routing::post(handlers::edit))
         .route_layer(axum::middleware::from_fn_with_state(
             state.clone(),
             middleware::verify_jwt_middleware,
