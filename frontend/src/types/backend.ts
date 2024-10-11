@@ -46,8 +46,16 @@ export interface IEndpointTypes {
 			description: string;
 		}[]
 	},
-	approve: {
-		request: IAdminDashboardQP,
+	edit: {
+		request: {
+			id: number,
+			course_code?: string,
+			course_name?: string,
+			year?: number,
+			semester?: string,
+			exam?: string,
+			approve_status?: boolean,
+		},
 		response: {
 			id: number;
 		}
@@ -57,7 +65,7 @@ export interface IEndpointTypes {
 			id: number;
 		},
 		response: null;
-	},
+	}
 	profile: {
 		request: null;
 		response: {
