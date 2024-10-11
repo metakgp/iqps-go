@@ -66,6 +66,14 @@ impl Database {
             .map(|qp| qp::SearchQP::from(qp.clone()))
             .collect())
     }
+
+    pub async fn get_paper_by_id(&self, id: i32) -> Result<qp::AdminDashboardQP, sqlx::Error> {
+        let query = sqlx::query_as(queries::GET_PAPER_BY_ID).bind(id);
+
+        let paper: models::DBAdminDashboardQP = query.fetch_one(&self.connection).await?;
+
+        Ok(paper.into())
+    }
 }
 
 mod models {
@@ -134,6 +142,9 @@ mod models {
 }
 
 mod queries {
+    /// Get a paper ([`crate::db::models::DBAdminDashboardQP`]) with the given id (first parameter `$1`)
+    pub const GET_PAPER_BY_ID: &str = "SELECT id, filelink, from_library, course_code, course_name, year, semester, exam, upload_timestamp, approve_status FROM iqps WHERE id = $1";
+
     /// Gets all unapproved papers ([`crate::db::models::DBAdminDashboardQP`]) from the database
     pub const GET_ALL_UNAPPROVED: &str = "SELECT id, filelink, from_library, course_code, course_name, year, semester, exam, upload_timestamp, approve_status FROM iqps WHERE approve_status = false and is_deleted=false ORDER BY upload_timestamp ASC";
 
