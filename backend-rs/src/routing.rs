@@ -80,6 +80,11 @@ mod handlers {
     ) -> HandlerReturn<Vec<AdminDashboardQP>> {
         let papers: Vec<AdminDashboardQP> = state.db.get_unapproved_papers().await?;
 
+        let papers = papers
+            .iter()
+            .map(|paper| paper.clone().with_url(&state.env_vars))
+            .collect::<Result<Vec<qp::AdminDashboardQP>, color_eyre::eyre::Error>>()?;
+
         Ok(BackendResponse::ok(
             format!("Successfully fetched {} papers.", papers.len()),
             papers,
@@ -99,6 +104,11 @@ mod handlers {
             };
 
             let papers = state.db.search_papers(query, exam).await?;
+
+            let papers = papers
+                .iter()
+                .map(|paper| paper.clone().with_url(&state.env_vars))
+                .collect::<Result<Vec<qp::SearchQP>, color_eyre::eyre::Error>>()?;
 
             Ok(BackendResponse::ok(
                 format!("Successfully fetched {} papers.", papers.len()),

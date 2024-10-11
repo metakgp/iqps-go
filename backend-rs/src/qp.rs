@@ -1,5 +1,9 @@
 use color_eyre::eyre::eyre;
+use duplicate::duplicate_item;
 use serde::Serialize;
+use url::Url;
+
+use crate::env::EnvVars;
 
 #[derive(Clone, Copy)]
 pub enum Semester {
@@ -31,15 +35,6 @@ impl From<Semester> for String {
             Semester::Spring => "spring".into(),
             Semester::Unknown => "unknown".into(),
         }
-    }
-}
-
-impl Serialize for Semester {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_str(&String::from(*self))
     }
 }
 
@@ -89,7 +84,12 @@ impl From<Exam> for String {
     }
 }
 
-impl Serialize for Exam {
+#[duplicate_item(
+    StrSerializeType;
+    [ Exam ];
+    [ Semester ];
+)]
+impl Serialize for StrSerializeType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -98,7 +98,7 @@ impl Serialize for Exam {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct SearchQP {
     pub id: i32,
     pub filelink: String,
@@ -110,7 +110,7 @@ pub struct SearchQP {
     pub exam: Exam,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct AdminDashboardQP {
     pub id: i32,
     pub filelink: String,
@@ -122,4 +122,21 @@ pub struct AdminDashboardQP {
     pub exam: Exam,
     pub upload_timestamp: String,
     pub approve_status: bool,
+}
+
+#[duplicate_item(
+    QP;
+    [ SearchQP ];
+    [ AdminDashboardQP ];
+)]
+impl QP {
+    pub fn with_url(self, env_vars: &EnvVars) -> Result<Self, color_eyre::eyre::Error> {
+        let url = Url::parse(&env_vars.static_files_url)?;
+        let url = url.join(&self.filelink)?;
+
+        Ok(Self {
+            filelink: url.to_string(),
+            ..self
+        })
+    }
 }
