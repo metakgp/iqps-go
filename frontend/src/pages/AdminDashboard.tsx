@@ -25,9 +25,6 @@ function AdminDashboard() {
 		useState<IAdminDashboardQP | null>(null);
 
 	const handlePaperEdit = async (qp: IAdminDashboardQP) => {
-		// Only approves the paper rn
-		// TODO: Allow unapproving papers as well
-
 		const response = await makeRequest('edit', 'post', {
 			...qp
 		}, auth.jwt);
@@ -41,8 +38,7 @@ function AdminDashboard() {
 				const selectedIndex = newPapers.indexOf(selectedQPaper!);
 				if (selectedIndex !== -1) {
 					newPapers[selectedIndex] = {
-						...qp,
-						approve_status: true
+						...qp
 					}
 				}
 
