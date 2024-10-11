@@ -62,6 +62,7 @@ export interface IEndpointTypes {
 		request: null;
 		response: {
 			username: string;
+			token: string;
 		}
 	},
 	similar: {
