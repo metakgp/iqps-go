@@ -1,6 +1,10 @@
+use std::sync::Arc;
+
 use axum::{extract::Json, http::StatusCode, response::IntoResponse};
 use http::{HeaderValue, Method};
+use jwt::Claims;
 use serde::Serialize;
+use tokio::sync::Mutex;
 use tower_http::{
     cors::{Any, CorsLayer},
     trace::{self, TraceLayer},
@@ -15,10 +19,12 @@ pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
     let state = RouterState {
         db,
         env_vars: env_vars.clone(),
+        auth: Arc::new(Mutex::new(None)),
     };
 
     axum::Router::new()
         .route("/unapproved", axum::routing::get(handlers::get_unapproved))
+        .route("/profile", axum::routing::get(handlers::profile))
         .route_layer(axum::middleware::from_fn_with_state(
             state.clone(),
             middleware::verify_jwt_middleware,
@@ -149,6 +155,40 @@ mod handlers {
         }
         .map_err(AppError::from)
     }
+
+    #[derive(Serialize)]
+    pub struct ProfileRes {
+        token: String,
+        username: String,
+    }
+    pub async fn profile(State(state): State<RouterState>) -> HandlerReturn<ProfileRes> {
+        let lock = state.auth.lock().await;
+
+        if let Some(auth) = lock.clone() {
+            let username = auth.claims.private.get("username");
+
+            if let Some(username) = username {
+                Ok(BackendResponse::ok(
+                    "Successfully authorized the user.".into(),
+                    ProfileRes {
+                        token: auth.jwt,
+                        username: username.to_string(),
+                    },
+                ))
+            } else {
+                Ok(BackendResponse::error(
+                    "Username not found in claims.".into(),
+                    StatusCode::UNAUTHORIZED,
+                ))
+            }
+        } else {
+            Ok(BackendResponse::error(
+                "Error: User unauthorized.".into(),
+                StatusCode::UNAUTHORIZED,
+            ))
+        }
+        .map_err(AppError::from)
+    }
 }
 
 mod middleware {
@@ -161,7 +201,7 @@ mod middleware {
 
     use crate::auth;
 
-    use super::{AppError, BackendResponse, RouterState};
+    use super::{AppError, Auth, BackendResponse, RouterState};
 
     pub async fn verify_jwt_middleware(
         State(state): State<RouterState>,
@@ -171,9 +211,16 @@ mod middleware {
     ) -> Result<Response, AppError> {
         if let Some(auth_header) = headers.get("Authorization") {
             if let Some(jwt) = auth_header.to_str()?.strip_prefix("Bearer ") {
-                let is_verified = auth::verify_token(jwt, &state.env_vars).await?;
+                let claims = auth::verify_token(jwt, &state.env_vars).await?;
 
-                if !is_verified {
+                if let Some(claims) = claims {
+                    let mut state_jwt = state.auth.lock().await;
+                    *state_jwt = Auth {
+                        jwt: jwt.to_string(),
+                        claims,
+                    }
+                    .into();
+                } else {
                     return Ok(BackendResponse::<()>::error(
                         "Authorization token invalid.".into(),
                         StatusCode::UNAUTHORIZED,
@@ -200,9 +247,15 @@ mod middleware {
 }
 
 #[derive(Clone)]
+struct Auth {
+    jwt: String,
+    claims: Claims,
+}
+#[derive(Clone)]
 struct RouterState {
     pub db: db::Database,
     pub env_vars: EnvVars,
+    pub auth: Arc<Mutex<Option<Auth>>>,
 }
 
 #[derive(Clone, Copy)]

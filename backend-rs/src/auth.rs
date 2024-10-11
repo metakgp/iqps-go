@@ -10,11 +10,18 @@ use crate::{
     routing::{self, AppError},
 };
 
-pub async fn verify_token(token: &str, env_vars: &EnvVars) -> Result<bool, routing::AppError> {
+pub async fn verify_token(
+    token: &str,
+    env_vars: &EnvVars,
+) -> Result<Option<Claims>, routing::AppError> {
     let jwt_key = env_vars.get_jwt_key()?;
     let claims: Result<Claims, _> = token.verify_with_key(&jwt_key);
 
-    Ok(claims.is_ok())
+    if let Ok(claims) = claims {
+        Ok(Some(claims))
+    } else {
+        Ok(None)
+    }
 }
 
 async fn generate_token(username: &str, env_vars: &EnvVars) -> Result<String, routing::AppError> {
