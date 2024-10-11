@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use color_eyre::eyre::eyre;
 use duplicate::duplicate_item;
 use serde::Serialize;
@@ -85,11 +87,11 @@ impl From<Exam> for String {
 }
 
 #[duplicate_item(
-    StrSerializeType;
+    ExamSem;
     [ Exam ];
     [ Semester ];
 )]
-impl Serialize for StrSerializeType {
+impl Serialize for ExamSem {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -138,5 +140,9 @@ impl QP {
             filelink: url.to_string(),
             ..self
         })
+    }
+
+    pub fn get_paper_path(&self, env_vars: &EnvVars) -> PathBuf {
+        env_vars.static_file_storage_location.join(&self.filelink)
     }
 }

@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use axum::{extract::Json, http::StatusCode, response::IntoResponse};
 use http::{HeaderValue, Method};
-use jwt::Claims;
 use serde::Serialize;
 use tokio::sync::Mutex;
 use tower_http::{
@@ -28,6 +27,7 @@ pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
     axum::Router::new()
         .route("/unapproved", axum::routing::get(handlers::get_unapproved))
         .route("/profile", axum::routing::get(handlers::profile))
+        .route("/edit", axum::routing::get(handlers::edit))
         .route_layer(axum::middleware::from_fn_with_state(
             state.clone(),
             middleware::verify_jwt_middleware,
@@ -63,7 +63,7 @@ pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
 #[derive(Clone)]
 struct Auth {
     jwt: String,
-    claims: Claims,
+    username: String,
 }
 #[derive(Clone)]
 struct RouterState {

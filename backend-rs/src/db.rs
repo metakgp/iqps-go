@@ -1,15 +1,25 @@
+use color_eyre::eyre::{eyre, ContextCompat};
 use queries::get_qp_search_query;
-use sqlx::{postgres::PgPoolOptions, PgPool};
+use sqlx::{postgres::PgPoolOptions, PgPool, Postgres, Transaction};
 use std::time::Duration;
 
 use crate::{
     env::EnvVars,
-    qp::{self, Exam},
+    qp::{self, Exam, Semester},
 };
 
 #[derive(Clone)]
 pub struct Database {
     connection: PgPool,
+}
+
+pub struct EditDetails {
+    pub course_code: String,
+    pub course_name: String,
+    pub year: i32,
+    pub semester: Semester,
+    pub exam: Exam,
+    pub approve_status: bool,
 }
 
 impl Database {
@@ -73,6 +83,76 @@ impl Database {
         let paper: models::DBAdminDashboardQP = query.fetch_one(&self.connection).await?;
 
         Ok(paper.into())
+    }
+
+    /// Edit's a paper's details.
+    ///
+    /// - If the paper is approved, the filename is also changed and it is moved to `/static_file_storage_location/uploaded_qps_path/approved/`.
+    /// - If the paper is unapproved, the file is not moved again, same goes for library papers.
+    /// - Sets the `approved_by` field to the username if approved.
+    ///
+    /// Returns the database transaction and the new filelink
+    pub async fn edit_paper<'c>(
+        &self,
+        id: i32,
+        edit_details: EditDetails,
+        newly_approved: bool,
+        username: &str,
+        env_vars: &EnvVars,
+    ) -> Result<(Transaction<'c, Postgres>, String), color_eyre::eyre::Error> {
+        let mut tx = self.connection.begin().await?;
+
+        let EditDetails {
+            course_code,
+            course_name,
+            year,
+            semester,
+            exam,
+            approve_status,
+        } = edit_details;
+
+        let semester = String::from(semester);
+        let exam = String::from(exam);
+
+        let query_sql = queries::get_edit_paper_query(newly_approved);
+        let query = sqlx::query(&query_sql)
+            .bind(id)
+            .bind(&course_code)
+            .bind(&course_name)
+            .bind(year)
+            .bind(&semester)
+            .bind(&exam)
+            .bind(approve_status);
+
+        let filelink = env_vars
+            .get_uploaded_paper_slugs()
+            .approved
+            .join(format!(
+                "{}_{}_{}_{}_{}_{}.pdf",
+                id, course_code, course_name, year, semester, exam
+            ))
+            .to_str()
+            .context("Error converting approved papers path to string.")?
+            .to_owned();
+
+        let query = if newly_approved {
+            query.bind(&filelink).bind(username)
+        } else {
+            query
+        };
+
+        let rows_affected = query.execute(&mut *tx).await?.rows_affected();
+
+        if rows_affected != 1 {
+            tx.rollback().await?;
+
+            return Err(eyre!(
+                "An invalid number of rows were changed: {}",
+                rows_affected
+            ));
+        }
+
+        Ok((tx, filelink))
     }
 }
 
@@ -144,6 +224,25 @@ mod models {
 mod queries {
     /// Get a paper ([`crate::db::models::DBAdminDashboardQP`]) with the given id (first parameter `$1`)
     pub const GET_PAPER_BY_ID: &str = "SELECT id, filelink, from_library, course_code, course_name, year, semester, exam, upload_timestamp, approve_status FROM iqps WHERE id = $1";
+
+    /// Returns a query that updates a paper's details by id ($1) (course_code, course_name, year, semester, exam, approve_status). `filelink` and `approved_by` optionally included if the edit is also used for approval.
+    ///
+    /// Query parameters:
+    /// - $1: `id`
+    /// - $2: `course_code`
+    /// - $3: `course_name`
+    /// - $4: `year`
+    /// - $5: `semester`
+    /// - $6: `exam`
+    /// - $7: `approve_status`
+    /// - $8: `filelink`
+    /// - $9: `approved_by`
+    pub fn get_edit_paper_query(approval: bool) -> String {
+        format!(
+            "UPDATE iqps set course_code=$2, course_name=$3, year=$4, semester=$5, exam=$6, approve_status=$7{} WHERE id=$1 AND is_deleted=false",
+            if approval {", filelink=$8, approved_by=$9"} else {""}
+        )
+    }
 
     /// Gets all unapproved papers ([`crate::db::models::DBAdminDashboardQP`]) from the database
     pub const GET_ALL_UNAPPROVED: &str = "SELECT id, filelink, from_library, course_code, course_name, year, semester, exam, upload_timestamp, approve_status FROM iqps WHERE approve_status = false and is_deleted=false ORDER BY upload_timestamp ASC";

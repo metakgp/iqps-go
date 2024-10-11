@@ -20,12 +20,20 @@ pub async fn verify_jwt_middleware(
             let claims = auth::verify_token(jwt, &state.env_vars).await?;
 
             if let Some(claims) = claims {
-                let mut state_jwt = state.auth.lock().await;
-                *state_jwt = Auth {
-                    jwt: jwt.to_string(),
-                    claims,
+                if let Some(username) = claims.private.get("username") {
+                    let mut state_jwt = state.auth.lock().await;
+                    *state_jwt = Auth {
+                        jwt: jwt.to_string(),
+                        username: username.to_string(),
+                    }
+                    .into();
+                } else {
+                    return Ok(BackendResponse::<()>::error(
+                        "Username not found in the claims.".into(),
+                        StatusCode::UNAUTHORIZED,
+                    )
+                    .into_response());
                 }
-                .into();
             } else {
                 return Ok(BackendResponse::<()>::error(
                     "Authorization token invalid.".into(),

@@ -58,7 +58,7 @@ pub struct EnvVars {
     #[arg(env, default_value = "/srv/static")]
     /// The path where static files are served from
     pub static_file_storage_location: PathBuf,
-    #[arg(env, default_value = "iqps/uploaded")]
+    #[arg(env, default_value = "/iqps/uploaded")]
     /// The path where uploaded papers are stored temporarily, relative to the `static_file_storage_location`
     pub uploaded_qps_path: PathBuf,
 
@@ -71,6 +71,11 @@ pub struct EnvVars {
     #[arg(env, default_value = "https://qp.metakgp.org,http://localhost:5173")]
     /// List of origins allowed (as a list of values separated by commas `origin1, origin2`)
     pub cors_allowed_origins: String,
+}
+
+pub struct UploadPaths {
+    pub unapproved: PathBuf,
+    pub approved: PathBuf,
 }
 
 impl EnvVars {
@@ -89,5 +94,23 @@ impl EnvVars {
     /// Returns the JWT signing key
     pub fn get_jwt_key(&self) -> Result<Hmac<Sha256>, InvalidLength> {
         Hmac::new_from_slice(self.jwt_secret.as_bytes())
+    }
+
+    /// Gets the paths where (unapproved, approved) uploaded papers are stored
+    pub fn get_uploaded_paper_paths(&self) -> UploadPaths {
+        let slugs = self.get_uploaded_paper_slugs();
+
+        UploadPaths {
+            unapproved: self.static_file_storage_location.join(slugs.unapproved),
+            approved: self.static_file_storage_location.join(slugs.approved),
+        }
+    }
+
+    /// Gets the slugs (relative paths stored in the db) where (unapproved, approved) uploaded papers are stored
+    pub fn get_uploaded_paper_slugs(&self) -> UploadPaths {
+        UploadPaths {
+            unapproved: self.uploaded_qps_path.join("unapproved"),
+            approved: self.uploaded_qps_path.join("approved"),
+        }
     }
 }
