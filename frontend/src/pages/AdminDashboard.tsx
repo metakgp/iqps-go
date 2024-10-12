@@ -19,6 +19,7 @@ function AdminDashboard() {
 	const [awaitingResponse, setAwaitingResponse] = useState<boolean>(false);
 	const [ocrDetails, setOcrDetails] = useState<Map<number, IExtractedDetails>>(new Map());
 	const [ocrRequests, setOcrRequests] = useState<IAdminDashboardQP[]>([]);
+	const [ocrMessage, setOcrMessage] = useState<string | null>(null);
 	const [ocrLoopOn, setOcrLoopOn] = useState<boolean>(false);
 
 	const [selectedQPaper, setSelectedQPaper] =
@@ -94,7 +95,7 @@ function AdminDashboard() {
 
 	const storeOcrDetails = async (paper: IAdminDashboardQP) => {
 		if (!ocrDetails.has(paper.id)) {
-			const toastId = toast.loading(`Running OCR for ${paper.course_name} - ${paper.course_code} (id: ${paper.id})`);
+			setOcrMessage(`Running OCR for ${paper.course_name} - ${paper.course_code} (id: ${paper.id})`);
 			const response = await fetch(paper.filelink);
 
 			if (response.ok) {
@@ -102,8 +103,6 @@ function AdminDashboard() {
 				const pdfText = await extractTextFromPDF(pdfData);
 
 				setOcrDetails((currentValue) => currentValue.set(paper.id, extractDetailsFromText(pdfText)));
-				toast.dismiss(toastId);
-				toast.success(`OCR completed for ${paper.course_name} - ${paper.course_code} (id: ${paper.id})`);
 			}
 		}
 	}
@@ -148,6 +147,7 @@ function AdminDashboard() {
 							<p><b>Unapproved papers</b>: {unapprovedPapers.length}</p>
 							<p><b>Unique Course Codes</b>: {numUniqueCourseCodes}</p>
 							<p><b>OCR details</b>: {ocrDetails.size} papers (loop {ocrLoopOn ? 'On' : 'Off'})</p>
+							{ocrMessage !== null &&<p>{ocrMessage}</p>}
 						</div>
 						<div className="papers-panel">
 							{unapprovedPapers.map((paper, i) => <QPCard

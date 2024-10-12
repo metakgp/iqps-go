@@ -5,6 +5,12 @@
 	flex-direction: column;
 	justify-items: center;
 
+	padding: 0 1rem;
+
+	.side-panel {
+		width: 20%;
+	}
+
 	.dashboard-container {
 		display: flex;
 		gap: 2rem;
