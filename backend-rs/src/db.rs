@@ -164,7 +164,7 @@ impl Database {
     // ) -> Result<(Transaction<'c, Postgres>, i32), color_eyre::eyre::Error> {
     // }
 
-    /// Sets the `is_deleted` field to true and `approve_status` to false.
+    /// Sets the `is_deleted` field to true and `approve_status` to false. Only deletes uploaded papers.
     ///
     /// Returns a boolean that represents whether a db entry was affected or not. If more than one entry was affected, an error will be thrown and the transaction will be rolled back.
     pub async fn soft_delete(&self, id: i32) -> Result<bool, color_eyre::eyre::Error> {
@@ -248,7 +248,8 @@ mod models {
 }
 
 mod queries {
-    pub const SOFT_DELETE_BY_ID: &str = "UPDATE iqps SET approve_status=false, is_deleted = true where id=$1";
+    /// Soft deletes a paper (sets `approve_status` to false and `is_deleted` to true) of an uploaded paper.
+    pub const SOFT_DELETE_BY_ID: &str = "UPDATE iqps SET approve_status=false, is_deleted = true WHERE id=$1 AND from_library = false";
 
     /// Get a paper ([`crate::db::models::DBAdminDashboardQP`]) with the given id (first parameter `$1`)
     pub const GET_PAPER_BY_ID: &str = "SELECT id, filelink, from_library, course_code, course_name, year, semester, exam, upload_timestamp, approve_status FROM iqps WHERE id = $1";

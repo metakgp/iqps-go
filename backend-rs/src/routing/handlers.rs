@@ -351,7 +351,7 @@ pub async fn delete(
         ))
     } else {
         Ok(BackendResponse::error(
-            "No paper was changed. Either the paper does not exist or is already deleted.".into(),
+            "No paper was changed. Either the paper does not exist, is a library paper (cannot be deleted), or is already deleted.".into(),
             StatusCode::BAD_REQUEST,
         ))
     }
