@@ -356,3 +356,30 @@ pub async fn delete(
         ))
     }
 }
+
+#[derive(Deserialize)]
+pub struct SimilarReq {
+    course_code: String,
+    year: Option<i32>,
+    course_name: Option<String>,
+    semester: Option<String>,
+    exam: Option<String>,
+}
+
+pub async fn similar(
+    State(state): State<RouterState>,
+    Json(body): Json<SimilarReq>,
+) -> HandlerReturn<Vec<AdminDashboardQP>> {
+    let papers = state.db.get_similar_papers(
+        body.course_code,
+        body.year,
+        body.course_name,
+        body.semester,
+        body.exam,
+    ).await?;
+
+    Ok(BackendResponse::ok(
+        format!("Found {} similar papers.", papers.len()),
+        papers,
+    ))
+}
