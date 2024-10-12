@@ -303,19 +303,20 @@ pub async fn upload(
                 };
             }
 
-            if let Some(content_type) =  file_headers.get("content-type") {
+            if let Some(content_type) = file_headers.get("content-type") {
                 if content_type != "application/pdf" {
                     return UploadStatus {
                         filename: filename.to_owned(),
                         status: Status::Error,
-                        message: "Only PDFs are supported.".into()
+                        message: "Only PDFs are supported.".into(),
                     };
                 }
             } else {
                 return UploadStatus {
                     filename: filename.to_owned(),
                     status: Status::Error,
-                    message: "`content-type` header not found. File type could not be determined.".into()
+                    message: "`content-type` header not found. File type could not be determined."
+                        .into(),
                 };
             }
 
@@ -331,4 +332,27 @@ pub async fn upload(
         format!("Successfully processed {} files", upload_statuses.len()),
         upload_statuses,
     ))
+}
+
+#[derive(Deserialize)]
+pub struct DeleteReq {
+    id: i32,
+}
+pub async fn delete(
+    State(state): State<RouterState>,
+    Json(body): Json<DeleteReq>,
+) -> HandlerReturn<()> {
+    let paper_deleted = state.db.soft_delete(body.id).await?;
+
+    if paper_deleted {
+        Ok(BackendResponse::ok(
+            "Succesfully deleted the paper.".into(),
+            (),
+        ))
+    } else {
+        Ok(BackendResponse::error(
+            "No paper was changed. Either the paper does not exist or is already deleted.".into(),
+            StatusCode::BAD_REQUEST,
+        ))
+    }
 }

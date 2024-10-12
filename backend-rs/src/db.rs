@@ -154,6 +154,32 @@ impl Database {
 
         Ok((tx, filelink))
     }
+
+    /// Adds a new upload paper's details to the database. Sets the `from_library` field to false.
+    ///
+    /// Returns the database transaction and the id of the uploaded paper
+    // pub async fn add_uploaded_paper<'c>(
+    //     &self,
+    //     file_details:
+    // ) -> Result<(Transaction<'c, Postgres>, i32), color_eyre::eyre::Error> {
+    // }
+
+    /// Sets the `is_deleted` field to true and `approve_status` to false.
+    ///
+    /// Returns a boolean that represents whether a db entry was affected or not. If more than one entry was affected, an error will be thrown and the transaction will be rolled back.
+    pub async fn soft_delete(&self, id: i32) -> Result<bool, color_eyre::eyre::Error> {
+        let mut tx = self.connection.begin().await?;
+
+        let rows_affected = sqlx::query(queries::SOFT_DELETE_BY_ID).bind(id).execute(&mut *tx).await?.rows_affected();
+
+        if rows_affected > 1 {
+            tx.rollback().await?;
+            Err(eyre!("Error: {} (> 1) papers were deleted. Rolling back.", rows_affected))
+        } else {
+            tx.commit().await?;
+            Ok(rows_affected == 1)
+        }
+    }
 }
 
 mod models {
@@ -222,6 +248,8 @@ mod models {
 }
 
 mod queries {
+    pub const SOFT_DELETE_BY_ID: &str = "UPDATE iqps SET approve_status=false, is_deleted = true where id=$1";
+
     /// Get a paper ([`crate::db::models::DBAdminDashboardQP`]) with the given id (first parameter `$1`)
     pub const GET_PAPER_BY_ID: &str = "SELECT id, filelink, from_library, course_code, course_name, year, semester, exam, upload_timestamp, approve_status FROM iqps WHERE id = $1";
 
