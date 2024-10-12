@@ -194,11 +194,11 @@ impl Database {
 
     pub async fn get_similar_papers(
         &self,
-        course_code: String,
+        course_code: &str,
         year: Option<i32>,
-        course_name: Option<String>,
-        semester: Option<String>,
-        exam: Option<String>,
+        course_name: Option<&String>,
+        semester: Option<&String>,
+        exam: Option<&String>,
     ) -> Result<Vec<AdminDashboardQP>, sqlx::Error> {
         let query_sql = queries::get_similar_papers_query(
             year.is_some(),

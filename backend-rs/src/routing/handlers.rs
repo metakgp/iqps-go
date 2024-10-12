@@ -3,6 +3,7 @@ use axum::{
     extract::{Json, Multipart},
     http::StatusCode,
 };
+use color_eyre::eyre::ContextCompat;
 use http::HeaderMap;
 use serde::Serialize;
 use tokio::fs;
@@ -357,26 +358,30 @@ pub async fn delete(
     }
 }
 
-#[derive(Deserialize)]
-pub struct SimilarReq {
-    course_code: String,
-    year: Option<i32>,
-    course_name: Option<String>,
-    semester: Option<String>,
-    exam: Option<String>,
-}
-
 pub async fn similar(
     State(state): State<RouterState>,
-    Json(body): Json<SimilarReq>,
+    Query(body): Query<HashMap<String, String>>,
 ) -> HandlerReturn<Vec<AdminDashboardQP>> {
-    let papers = state.db.get_similar_papers(
-        body.course_code,
-        body.year,
-        body.course_name,
-        body.semester,
-        body.exam,
-    ).await?;
+    if !body.contains_key("course_code") {
+        return Ok(BackendResponse::error(
+            "Error: `course_code` is required.".into(),
+            StatusCode::BAD_REQUEST,
+        ));
+    }
+
+    let papers = state
+        .db
+        .get_similar_papers(
+            body.get("course_code")
+                .context("Expected course code to be here.")?,
+            body.get("year")
+                .map(|year| year.parse::<i32>())
+                .transpose()?,
+            body.get("course_code"),
+            body.get("semester"),
+            body.get("exam"),
+        )
+        .await?;
 
     Ok(BackendResponse::ok(
         format!("Found {} similar papers.", papers.len()),

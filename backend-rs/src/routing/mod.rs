@@ -1,6 +1,10 @@
 use std::sync::Arc;
 
-use axum::{extract::{DefaultBodyLimit, Json}, http::StatusCode, response::IntoResponse};
+use axum::{
+    extract::{DefaultBodyLimit, Json},
+    http::StatusCode,
+    response::IntoResponse,
+};
 use http::{HeaderValue, Method};
 use serde::Serialize;
 use tokio::sync::Mutex;
@@ -29,7 +33,7 @@ pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
         .route("/profile", axum::routing::get(handlers::profile))
         .route("/edit", axum::routing::post(handlers::edit))
         .route("/delete", axum::routing::post(handlers::delete))
-        .route("/similar", axum::routing::post(handlers::similar))
+        .route("/similar", axum::routing::get(handlers::similar))
         .route_layer(axum::middleware::from_fn_with_state(
             state.clone(),
             middleware::verify_jwt_middleware,
