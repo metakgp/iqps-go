@@ -186,11 +186,11 @@ pub async fn edit(
         let new_filepath = state.env_vars.static_file_storage_location.join(filelink);
 
         if fs::copy(old_filepath, new_filepath).await.is_ok() {
-            // Get the new db entry
-            let new_paper = state.db.get_paper_by_id(id).await?;
-
             // Commit the transaction
             tx.commit().await?;
+
+            // Get the new db entry
+            let new_paper = state.db.get_paper_by_id(id).await?;
 
             Ok(BackendResponse::ok(
                 "Successfully updated paper details.".into(),
