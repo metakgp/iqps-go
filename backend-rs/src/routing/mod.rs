@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{extract::Json, http::StatusCode, response::IntoResponse};
+use axum::{extract::{DefaultBodyLimit, Json}, http::StatusCode, response::IntoResponse};
 use http::{HeaderValue, Method};
 use serde::Serialize;
 use tokio::sync::Mutex;
@@ -35,6 +35,9 @@ pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
         .route("/oauth", axum::routing::post(handlers::oauth))
         .route("/healthcheck", axum::routing::get(handlers::healthcheck))
         .route("/search", axum::routing::get(handlers::search))
+        .layer(DefaultBodyLimit::max(2 << 20)) // Default limit of 2 MiB
+        .route("/upload", axum::routing::post(handlers::upload))
+        .layer(DefaultBodyLimit::max(50 << 20)) // 50 MiB limit for upload endpoint
         .with_state(state)
         .layer(
             TraceLayer::new_for_http()

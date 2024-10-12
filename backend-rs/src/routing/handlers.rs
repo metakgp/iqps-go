@@ -1,4 +1,9 @@
-use axum::{extract::Json, http::StatusCode};
+use axum::{
+    body::Bytes,
+    extract::{Json, Multipart},
+    http::StatusCode,
+};
+use http::HeaderMap;
 use serde::Serialize;
 use tokio::fs;
 
@@ -13,7 +18,7 @@ use crate::{
     qp::{self, AdminDashboardQP, Exam, Semester},
 };
 
-use super::{AppError, BackendResponse, RouterState};
+use super::{AppError, BackendResponse, RouterState, Status};
 
 type HandlerReturn<T> = Result<(StatusCode, BackendResponse<T>), AppError>;
 
@@ -209,4 +214,121 @@ pub async fn edit(
             StatusCode::UNAUTHORIZED,
         ))
     }
+}
+
+#[derive(Deserialize)]
+pub struct FileDetails {
+    course_code: String,
+    course_name: String,
+    year: i32,
+    exam: String,
+    semester: String,
+    filename: String,
+}
+
+/// 10 MiB file size limit
+const FILE_SIZE_LIMIT: usize = 10 << 20;
+#[derive(Serialize)]
+pub struct UploadStatus {
+    filename: String,
+    status: Status,
+    message: String,
+}
+pub async fn upload(
+    State(state): State<RouterState>,
+    mut multipart: Multipart,
+) -> HandlerReturn<Vec<UploadStatus>> {
+    let mut files = Vec::<(HeaderMap, Bytes)>::new();
+    let mut file_details: String = "".into();
+
+    while let Some(field) = multipart.next_field().await.unwrap() {
+        let name = field.name().unwrap().to_string();
+
+        if name == "files" {
+            files.push((field.headers().clone(), field.bytes().await?));
+        } else if name == "file_details" {
+            if file_details.is_empty() {
+                file_details = field.text().await?;
+            } else {
+                return Ok(BackendResponse::error(
+                    "Error: Multiple `file_details` fields found.".into(),
+                    StatusCode::BAD_REQUEST,
+                ));
+            }
+        }
+    }
+
+    let files = files;
+    let file_details: Vec<FileDetails> = serde_json::from_str(&file_details)?;
+
+    if files.len() > state.env_vars.max_upload_limit {
+        return Ok(BackendResponse::error(
+            format!(
+                "Only upto {} files can be uploaded. Found {}.",
+                state.env_vars.max_upload_limit,
+                files.len()
+            ),
+            StatusCode::BAD_REQUEST,
+        ));
+    }
+
+    if files.len() != file_details.len() {
+        return Ok(BackendResponse::error(
+            "Error: Number of files and file details array length do not match.".into(),
+            StatusCode::BAD_REQUEST,
+        ));
+    }
+
+    let upload_statuses: Vec<UploadStatus> = files
+        .iter()
+        .zip(file_details.iter())
+        .map(|((file_headers, file_data), details)| {
+            let FileDetails {
+                course_code,
+                course_name,
+                year,
+                exam,
+                semester,
+                filename,
+            } = details;
+
+            if file_data.len() > FILE_SIZE_LIMIT {
+                return UploadStatus {
+                    filename: filename.to_owned(),
+                    status: Status::Error,
+                    message: format!(
+                        "File size too big. Only files upto {} MiB are allowed.",
+                        FILE_SIZE_LIMIT >> 20
+                    ),
+                };
+            }
+
+            if let Some(content_type) =  file_headers.get("content-type") {
+                if content_type != "application/pdf" {
+                    return UploadStatus {
+                        filename: filename.to_owned(),
+                        status: Status::Error,
+                        message: "Only PDFs are supported.".into()
+                    };
+                }
+            } else {
+                return UploadStatus {
+                    filename: filename.to_owned(),
+                    status: Status::Error,
+                    message: "`content-type` header not found. File type could not be determined.".into()
+                };
+            }
+
+            UploadStatus {
+                filename: "()".into(),
+                status: Status::Error,
+                message: "()".into(),
+            }
+        })
+        .collect::<Vec<UploadStatus>>();
+
+    Ok(BackendResponse::ok(
+        format!("Successfully processed {} files", upload_statuses.len()),
+        upload_statuses,
+    ))
 }

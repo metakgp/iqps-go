@@ -46,7 +46,7 @@ pub struct EnvVars {
     // Other configs
     #[arg(env, default_value = "10")]
     /// Maximum number of papers that can be uploaded at a time
-    pub max_upload_limit: i32,
+    pub max_upload_limit: usize,
     #[arg(env, default_value = "./log/application.log")]
     /// Location where logs are stored
     pub log_location: PathBuf,

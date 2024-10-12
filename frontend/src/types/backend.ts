@@ -42,8 +42,8 @@ export interface IEndpointTypes {
 		request: FormData,
 		response: {
 			filename: string;
-			status: string;
-			description: string;
+			status: "success" | "error";
+			message: string;
 		}[]
 	},
 	edit: {
