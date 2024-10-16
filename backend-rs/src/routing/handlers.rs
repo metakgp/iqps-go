@@ -285,18 +285,11 @@ pub async fn upload(
     let mut upload_statuses = Vec::<UploadStatus>::new();
 
     for ((file_headers, file_data), details) in files_iter {
-        let FileDetails {
-            course_code,
-            course_name,
-            year,
-            exam,
-            semester,
-            filename,
-        } = details;
+        let filename = details.filename.to_owned();
 
         if file_data.len() > FILE_SIZE_LIMIT {
             upload_statuses.push(UploadStatus {
-                filename: filename.to_owned(),
+                filename,
                 status: Status::Error,
                 message: format!(
                     "File size too big. Only files upto {} MiB are allowed.",
@@ -317,7 +310,7 @@ pub async fn upload(
             }
         } else {
             upload_statuses.push(UploadStatus {
-                filename: filename.to_owned(),
+                filename,
                 status: Status::Error,
                 message: "`content-type` header not found. File type could not be determined."
                     .into(),
@@ -332,9 +325,7 @@ pub async fn upload(
         let filelink_slug = state
             .env_vars
             .paths
-            .get_slug(&format!("{}.pdf", id), PaperCategory::Unapproved)
-            .to_string_lossy()
-            .to_string();
+            .get_slug(&format!("{}.pdf", id), PaperCategory::Unapproved);
 
         // Update the filelink in the db
         if state
@@ -344,8 +335,26 @@ pub async fn upload(
             .is_ok()
         {
             let filepath = state.env_vars.paths.get_path_from_slug(&filelink_slug);
+
             // Write the file data
-            if fs::write(filepath, file_data).await.is_ok() {
+            if fs::write(&filepath, file_data).await.is_ok() {
+                if tx.commit().await.is_ok() {
+                    upload_statuses.push(UploadStatus {
+                        filename,
+                        status: Status::Success,
+                        message: "Succesfully uploaded file.".into(),
+                    });
+                    continue;
+                } else {
+                    // Transaction commit failed, delete the file
+                    fs::remove_file(filepath).await?;
+                    upload_statuses.push(UploadStatus {
+                        filename,
+                        status: Status::Success,
+                        message: "Succesfully uploaded file.".into(),
+                    });
+                    continue;
+                }
             } else {
                 tx.rollback().await?;
             }
@@ -355,7 +364,7 @@ pub async fn upload(
             tx.rollback().await?;
 
             upload_statuses.push(UploadStatus {
-                filename: filename.to_owned(),
+                filename,
                 status: Status::Error,
                 message: "Error updating the filelink".into(),
             });
@@ -363,9 +372,9 @@ pub async fn upload(
         }
 
         upload_statuses.push(UploadStatus {
-            filename: "()".into(),
+            filename,
             status: Status::Error,
-            message: "()".into(),
+            message: "THIS SHOULD NEVER HAPPEN. REPORT IMMEDIATELY. ALSO THIS WOULDN'T HAPPEN IF RUST HAD STABLE ASYNC CLOSURES.".into(),
         });
     }
 

@@ -82,8 +82,12 @@ impl Paths {
         })
     }
 
-    pub fn get_slug(&self, filename: &str, category: PaperCategory) -> PathBuf {
-        self.path_slugs.get(category).join(filename)
+    pub fn get_slug(&self, filename: &str, category: PaperCategory) -> String {
+        self.path_slugs
+            .get(category)
+            .join(filename)
+            .to_string_lossy()
+            .to_string()
     }
 
     pub fn get_path(&self, filename: &str, dir: PaperCategory) -> PathBuf {

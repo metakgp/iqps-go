@@ -135,17 +135,13 @@ impl Database {
             .bind(&exam)
             .bind(approve_status);
 
-        let filelink = env_vars
-            .paths
-            .get_slug(
-                &format!(
-                    "{}_{}_{}_{}_{}_{}.pdf",
-                    id, course_code, course_name, year, semester, exam
-                ),
-                PaperCategory::Approved,
-            )
-            .to_string_lossy()
-            .to_string();
+        let filelink = env_vars.paths.get_slug(
+            &format!(
+                "{}_{}_{}_{}_{}_{}.pdf",
+                id, course_code, course_name, year, semester, exam
+            ),
+            PaperCategory::Approved,
+        );
 
         let query = if newly_approved {
             query.bind(&filelink).bind(username)
