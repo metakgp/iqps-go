@@ -21,7 +21,7 @@ use crate::{
 mod handlers;
 mod middleware;
 
-pub use handlers::{FileDetails, EditReq};
+pub use handlers::{EditReq, FileDetails};
 
 /// Returns the Axum router for IQPS
 pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
