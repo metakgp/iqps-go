@@ -21,7 +21,7 @@ use crate::{
 mod handlers;
 mod middleware;
 
-pub use handlers::FileDetails;
+pub use handlers::{FileDetails, EditReq};
 
 pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
     let state = RouterState {

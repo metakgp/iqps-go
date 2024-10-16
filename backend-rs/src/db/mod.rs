@@ -1,4 +1,5 @@
 use color_eyre::eyre::eyre;
+use models::DBAdminDashboardQP;
 use sqlx::{postgres::PgPoolOptions, prelude::FromRow, PgPool, Postgres, Transaction};
 use std::time::Duration;
 
@@ -6,7 +7,7 @@ use crate::{
     env::EnvVars,
     pathutils::PaperCategory,
     qp::{self, AdminDashboardQP, Exam, Semester},
-    routing::FileDetails,
+    routing::{EditReq, FileDetails},
 };
 
 mod models;
@@ -15,15 +16,6 @@ mod queries;
 #[derive(Clone)]
 pub struct Database {
     connection: PgPool,
-}
-
-pub struct EditDetails {
-    pub course_code: String,
-    pub course_name: String,
-    pub year: i32,
-    pub semester: Semester,
-    pub exam: Exam,
-    pub approve_status: bool,
 }
 
 #[derive(FromRow)]
@@ -98,69 +90,90 @@ impl Database {
 
     /// Edit's a paper's details.
     ///
-    /// - If the paper is approved, the filename is also changed and it is moved to `/static_file_storage_location/uploaded_qps_path/approved/`.
-    /// - If the paper is unapproved, the file is not moved again, same goes for library papers.
     /// - Sets the `approved_by` field to the username if approved.
+    /// - Sets the `filelink` to:
+    ///     - For library papers, remains unchanged
+    ///     - For uploaded papers, approved papers are moved to the approved directory and renamed `id_coursecode_coursename_year_semester_exam.pdf` and unapproved papers are moved to the unapproved directory and named `id.pdf`
     ///
-    /// Returns the database transaction and the new filelink
+    /// Returns the database transaction, the old filelink and the new paper details ([`crate::qp::AdminDashboardQP`])
     pub async fn edit_paper<'c>(
         &self,
-        id: i32,
-        edit_details: EditDetails,
-        newly_approved: bool,
+        edit_req: EditReq,
         username: &str,
         env_vars: &EnvVars,
-    ) -> Result<(Transaction<'c, Postgres>, String), color_eyre::eyre::Error> {
-        let mut tx = self.connection.begin().await?;
-
-        let EditDetails {
+    ) -> Result<(Transaction<'c, Postgres>, String, AdminDashboardQP), color_eyre::eyre::Error>
+    {
+        let EditReq {
+            id,
             course_code,
             course_name,
             year,
             semester,
             exam,
             approve_status,
-        } = edit_details;
+        } = edit_req;
 
-        let semester = String::from(semester);
-        let exam = String::from(exam);
+        let current_details = self.get_paper_by_id(id).await?;
 
-        let query_sql = queries::get_edit_paper_query(newly_approved);
-        let query = sqlx::query(&query_sql)
+        // Construct the final values to be inserted into the db
+        let course_code = course_code.unwrap_or(current_details.course_code);
+        let course_name = course_name.unwrap_or(current_details.course_name);
+        let year = year.unwrap_or(current_details.year);
+        let semester: String = if let Some(semester) = semester {
+            Semester::try_from(&semester)?
+        } else {
+            current_details.semester
+        }
+        .into();
+        let exam: String = if let Some(exam) = exam {
+            Exam::try_from(&exam)?
+        } else {
+            current_details.exam
+        }
+        .into();
+        let approve_status = approve_status.unwrap_or(current_details.approve_status);
+
+        // Set the new filelink
+        let old_filelink = current_details.filelink;
+        let new_filelink = if current_details.from_library {
+            old_filelink.clone()
+        } else if approve_status {
+            env_vars.paths.get_slug(
+                &format!(
+                    "{}_{}_{}_{}_{}_{}.pdf",
+                    id, course_code, course_name, year, semester, exam
+                ),
+                PaperCategory::Approved,
+            )
+        } else {
+            env_vars
+                .paths
+                .get_slug(&format!("{}.pdf", id), PaperCategory::Unapproved)
+        };
+
+        let mut tx = self.connection.begin().await?;
+
+        let query_sql = queries::get_edit_paper_query(approve_status);
+        let query = sqlx::query_as(&query_sql)
             .bind(id)
             .bind(&course_code)
             .bind(&course_name)
             .bind(year)
             .bind(&semester)
             .bind(&exam)
-            .bind(approve_status);
+            .bind(approve_status)
+            .bind(&new_filelink);
 
-        let filelink = env_vars.paths.get_slug(
-            &format!(
-                "{}_{}_{}_{}_{}_{}.pdf",
-                id, course_code, course_name, year, semester, exam
-            ),
-            PaperCategory::Approved,
-        );
-
-        let query = if newly_approved {
-            query.bind(&filelink).bind(username)
+        let query = if approve_status {
+            query.bind(username)
         } else {
             query
         };
 
-        let rows_affected = query.execute(&mut *tx).await?.rows_affected();
+        let new_qp: DBAdminDashboardQP = query.fetch_one(&mut *tx).await?;
+        let new_qp = AdminDashboardQP::from(new_qp);
 
-        if rows_affected != 1 {
-            tx.rollback().await?;
-
-            return Err(eyre!(
-                "An invalid number of rows were changed: {}",
-                rows_affected
-            ));
-        }
-
-        Ok((tx, filelink))
+        Ok((tx, old_filelink, new_qp))
     }
 
     /// Adds a new upload paper's details to the database. Sets the `from_library` field to false.

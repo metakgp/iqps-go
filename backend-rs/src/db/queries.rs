@@ -49,7 +49,9 @@ pub fn get_get_paper_by_id_query() -> String {
     )
 }
 
-/// Returns a query that updates a paper's details by id ($1) (course_code, course_name, year, semester, exam, approve_status). `filelink` and `approved_by` optionally included if the edit is also used for approval.
+/// Returns a query that updates a paper's details by id ($1) (course_code, course_name, year, semester, exam, approve_status, filelink). `approved_by` optionally included if the edit is also used for approval.
+///
+/// The query also returns all the admin dashboard qp fields of the edited paper
 ///
 /// Query parameters:
 /// - $1: `id`
@@ -63,8 +65,9 @@ pub fn get_get_paper_by_id_query() -> String {
 /// - $9: `approved_by`
 pub fn get_edit_paper_query(approval: bool) -> String {
     format!(
-		"UPDATE iqps set course_code=$2, course_name=$3, year=$4, semester=$5, exam=$6, approve_status=$7{} WHERE id=$1 AND is_deleted=false",
-		if approval {", filelink=$8, approved_by=$9"} else {""}
+		"UPDATE iqps set course_code=$2, course_name=$3, year=$4, semester=$5, exam=$6, approve_status=$7, filelink=$8{} WHERE id=$1 AND is_deleted=false RETURNING {}",
+		if approval {", approved_by=$9"} else {""},
+        ADMIN_DASHBOARD_QP_FIELDS
 	)
 }
 
