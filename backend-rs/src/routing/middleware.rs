@@ -9,6 +9,9 @@ use crate::auth;
 
 use super::{AppError, Auth, BackendResponse, RouterState};
 
+/// Verifies the JWT and authenticates a user. If the JWT is invalid, the user is sent an unauthorized status code. If the JWT is valid, the authentication is added to the state.
+///
+/// TODO: THIS IS DUM DUM, CHANGE IT, ADD THE STATE TO THE REQUEST, A SHARED AUTH MUTEX MAKES NO SENSE
 pub async fn verify_jwt_middleware(
     State(state): State<RouterState>,
     headers: HeaderMap,

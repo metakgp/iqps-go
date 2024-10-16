@@ -24,7 +24,7 @@ struct Breh {
 }
 
 impl Database {
-    pub async fn try_new(env_vars: &EnvVars) -> Result<Self, sqlx::Error> {
+    pub async fn new(env_vars: &EnvVars) -> Result<Self, sqlx::Error> {
         let database_url = format!(
             "postgres://{}:{}@{}:{}/{}",
             env_vars.db_user,
@@ -45,6 +45,7 @@ impl Database {
         })
     }
 
+    /// Fetches the list of all unapproved papers
     pub async fn get_unapproved_papers(&self) -> Result<Vec<qp::AdminDashboardQP>, sqlx::Error> {
         let query_sql = queries::get_all_unapproved_query();
         let papers: Vec<models::DBAdminDashboardQP> = sqlx::query_as(&query_sql)
@@ -57,6 +58,7 @@ impl Database {
             .collect())
     }
 
+    /// Searches for papers from a given query. Uses some voodoo black magic by @rajivharlalka
     pub async fn search_papers(
         &self,
         query: &String,
@@ -209,6 +211,7 @@ impl Database {
         }
     }
 
+    /// Returns all papers that match one or more of the specified properties exactly. `course_name` is required, other properties are optional.
     pub async fn get_similar_papers(
         &self,
         course_code: &str,

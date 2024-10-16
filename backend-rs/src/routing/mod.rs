@@ -23,6 +23,7 @@ mod middleware;
 
 pub use handlers::{FileDetails, EditReq};
 
+/// Returns the Axum router for IQPS
 pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
     let state = RouterState {
         db,

@@ -78,6 +78,7 @@ pub struct EnvVars {
     pub cors_allowed_origins: String,
 
     #[arg(skip)]
+    /// All paths must be handled using this
     pub paths: Paths,
 }
 

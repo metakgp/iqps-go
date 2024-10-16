@@ -82,6 +82,7 @@ impl Paths {
         })
     }
 
+    /// Returns the slug for a given filename and paper category (directory)
     pub fn get_slug(&self, filename: &str, category: PaperCategory) -> String {
         self.path_slugs
             .get(category)
@@ -90,14 +91,17 @@ impl Paths {
             .to_string()
     }
 
+    /// Returns the absolute system path for the specified directory and filename
     pub fn get_path(&self, filename: &str, dir: PaperCategory) -> PathBuf {
         self.system_paths.get(dir).join(filename)
     }
 
+    /// Returns the absolute system path from a given slug
     pub fn get_path_from_slug(&self, slug: &str) -> PathBuf {
         self.static_files_path.join(slug)
     }
 
+    /// Returns the static server URL for the specified directory and filename
     pub fn get_url(
         &self,
         filename: &str,
@@ -113,6 +117,7 @@ impl Paths {
         self.get_url_from_slug(&slug)
     }
 
+    /// Returns the static server URL for a given slug
     pub fn get_url_from_slug(&self, slug: &str) -> Result<String, color_eyre::eyre::Error> {
         Ok(self.static_files_url.join(slug)?.as_str().to_string())
     }

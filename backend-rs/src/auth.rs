@@ -10,6 +10,7 @@ use crate::{
     routing::{self, AppError},
 };
 
+/// Verifies whether a JWT is valid and signed with the secret key
 pub async fn verify_token(
     token: &str,
     env_vars: &EnvVars,
@@ -24,6 +25,7 @@ pub async fn verify_token(
     }
 }
 
+/// Generates a JWT with the username (for claims) and secret key
 async fn generate_token(username: &str, env_vars: &EnvVars) -> Result<String, routing::AppError> {
     let jwt_key = env_vars.get_jwt_key()?;
 

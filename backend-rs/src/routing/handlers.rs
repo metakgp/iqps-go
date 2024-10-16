@@ -28,6 +28,7 @@ pub async fn healthcheck() -> HandlerReturn<()> {
     Ok(BackendResponse::ok("Hello, World.".into(), ()))
 }
 
+/// Fetches all the unapproved papers.
 pub async fn get_unapproved(
     State(state): State<RouterState>,
 ) -> HandlerReturn<Vec<AdminDashboardQP>> {
@@ -44,6 +45,7 @@ pub async fn get_unapproved(
     ))
 }
 
+/// Searches for question papers given a query and an optional `exam` parameter.
 pub async fn search(
     State(state): State<RouterState>,
     Query(params): Query<HashMap<String, String>>,
@@ -84,6 +86,8 @@ pub struct OAuthReq {
 pub struct OAuthRes {
     token: String,
 }
+
+/// Takes a Github OAuth code and returns a JWT auth token to log in a user if authorized
 pub async fn oauth(
     State(state): State<RouterState>,
     Json(body): Json<OAuthReq>,
@@ -106,6 +110,8 @@ pub struct ProfileRes {
     token: String,
     username: String,
 }
+
+/// Returns a user's profile (the JWT and username) if authorized and the token is valid. Can be used to check if the user is logged in.
 pub async fn profile(State(state): State<RouterState>) -> HandlerReturn<ProfileRes> {
     let lock = state.auth.lock().await;
 
@@ -196,6 +202,8 @@ pub struct UploadStatus {
     status: Status,
     message: String,
 }
+
+/// Uploads question papers to the server
 pub async fn upload(
     State(state): State<RouterState>,
     mut multipart: Multipart,
@@ -348,6 +356,8 @@ pub async fn upload(
 pub struct DeleteReq {
     id: i32,
 }
+
+/// Deletes a given paper. Library papers cannot be deleted.
 pub async fn delete(
     State(state): State<RouterState>,
     Json(body): Json<DeleteReq>,
@@ -367,6 +377,7 @@ pub async fn delete(
     }
 }
 
+/// Fetches all question papers that match one or more properties specified. `course_name` is compulsory.
 pub async fn similar(
     State(state): State<RouterState>,
     Query(body): Query<HashMap<String, String>>,

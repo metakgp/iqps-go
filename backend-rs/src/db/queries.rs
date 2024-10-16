@@ -127,6 +127,9 @@ coalesce(1.0 / (50 + partial_search.rank_ix), 0.0) * 1
 desc
 )";
 
+/// Returns the query for searching question papers. It is mostly voodoo, @Rajiv please update the documentation.
+///
+/// Optionally, the `exam` argument can be used to also add a clause to match the exam field.
 pub fn get_qp_search_query(exam: bool) -> String {
     let mut query = QP_SEARCH.to_owned();
 
