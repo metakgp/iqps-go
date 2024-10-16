@@ -3,7 +3,6 @@ use std::path::PathBuf;
 use color_eyre::eyre::eyre;
 use duplicate::duplicate_item;
 use serde::Serialize;
-use url::Url;
 
 use crate::env::EnvVars;
 
@@ -133,16 +132,13 @@ pub struct AdminDashboardQP {
 )]
 impl QP {
     pub fn with_url(self, env_vars: &EnvVars) -> Result<Self, color_eyre::eyre::Error> {
-        let url = Url::parse(&env_vars.static_files_url)?;
-        let url = url.join(&self.filelink)?;
-
         Ok(Self {
-            filelink: url.to_string(),
+            filelink: env_vars.paths.get_url_from_slug(&self.filelink)?,
             ..self
         })
     }
 
     pub fn get_paper_path(&self, env_vars: &EnvVars) -> PathBuf {
-        env_vars.static_file_storage_location.join(&self.filelink)
+        env_vars.paths.get_path_from_slug(&self.filelink)
     }
 }

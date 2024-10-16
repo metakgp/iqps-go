@@ -4,6 +4,7 @@ use tracing_subscriber::prelude::*;
 mod auth;
 mod db;
 mod env;
+mod pathutils;
 mod qp;
 mod routing;
 

@@ -4,6 +4,8 @@ use clap::Parser;
 use hmac::{digest::InvalidLength, Hmac, Mac};
 use sha2::Sha256;
 
+use crate::pathutils::Paths;
+
 #[derive(Parser, Clone)]
 pub struct EnvVars {
     // Database
@@ -54,13 +56,16 @@ pub struct EnvVars {
     // Paths
     #[arg(env, default_value = "https://static.metakgp.org")]
     /// The URL of the static files server (odin's vault)
-    pub static_files_url: String,
+    static_files_url: String,
     #[arg(env, default_value = "/srv/static")]
     /// The path where static files are served from
-    pub static_file_storage_location: PathBuf,
+    static_file_storage_location: PathBuf,
     #[arg(env, default_value = "/iqps/uploaded")]
     /// The path where uploaded papers are stored temporarily, relative to the `static_file_storage_location`
-    pub uploaded_qps_path: PathBuf,
+    uploaded_qps_path: PathBuf,
+    #[arg(env, default_value = "/peqp/qp")]
+    /// The path where library papers (scrapped) are stored, relative to the `static_file_storage_location`
+    library_qps_path: PathBuf,
 
     // Server
     #[arg(env, default_value = "8080")]
@@ -71,46 +76,27 @@ pub struct EnvVars {
     #[arg(env, default_value = "https://qp.metakgp.org,http://localhost:5173")]
     /// List of origins allowed (as a list of values separated by commas `origin1, origin2`)
     pub cors_allowed_origins: String,
-}
 
-pub struct UploadPaths {
-    pub unapproved: PathBuf,
-    pub approved: PathBuf,
+    #[arg(skip)]
+    pub paths: Paths,
 }
 
 impl EnvVars {
     /// Processes the environment variables after reading.
     pub fn process(mut self) -> Result<Self, Box<dyn std::error::Error>> {
-        self.static_file_storage_location = std::path::absolute(self.static_file_storage_location)?;
-        self.uploaded_qps_path = std::path::absolute(
-            self.static_file_storage_location
-                .join(self.uploaded_qps_path),
+        self.paths = Paths::new(
+            &self.static_files_url,
+            &self.static_file_storage_location,
+            &self.uploaded_qps_path,
+            &self.library_qps_path,
         )?;
-
         self.log_location = std::path::absolute(self.log_location)?;
+
         Ok(self)
     }
 
     /// Returns the JWT signing key
     pub fn get_jwt_key(&self) -> Result<Hmac<Sha256>, InvalidLength> {
         Hmac::new_from_slice(self.jwt_secret.as_bytes())
-    }
-
-    /// Gets the paths where (unapproved, approved) uploaded papers are stored
-    pub fn get_uploaded_paper_paths(&self) -> UploadPaths {
-        let slugs = self.get_uploaded_paper_slugs();
-
-        UploadPaths {
-            unapproved: self.static_file_storage_location.join(slugs.unapproved),
-            approved: self.static_file_storage_location.join(slugs.approved),
-        }
-    }
-
-    /// Gets the slugs (relative paths stored in the db) where (unapproved, approved) uploaded papers are stored
-    pub fn get_uploaded_paper_slugs(&self) -> UploadPaths {
-        UploadPaths {
-            unapproved: self.uploaded_qps_path.join("unapproved"),
-            approved: self.uploaded_qps_path.join("approved"),
-        }
     }
 }

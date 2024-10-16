@@ -16,6 +16,7 @@ use serde::Deserialize;
 use crate::{
     auth,
     db::EditDetails,
+    pathutils::PaperCategory,
     qp::{self, AdminDashboardQP, Exam, Semester},
 };
 
@@ -189,7 +190,7 @@ pub async fn edit(
 
         // Copy the actual file
         let old_filepath = current_details.get_paper_path(&state.env_vars);
-        let new_filepath = state.env_vars.static_file_storage_location.join(filelink);
+        let new_filepath = state.env_vars.paths.get_path_from_slug(&filelink);
 
         if fs::copy(old_filepath, new_filepath).await.is_ok() {
             // Commit the transaction
@@ -219,12 +220,12 @@ pub async fn edit(
 
 #[derive(Deserialize)]
 pub struct FileDetails {
-    course_code: String,
-    course_name: String,
-    year: i32,
-    exam: String,
-    semester: String,
-    filename: String,
+    pub course_code: String,
+    pub course_name: String,
+    pub year: i32,
+    pub exam: String,
+    pub semester: String,
+    pub filename: String,
 }
 
 /// 10 MiB file size limit
@@ -280,54 +281,93 @@ pub async fn upload(
         ));
     }
 
-    let upload_statuses: Vec<UploadStatus> = files
-        .iter()
-        .zip(file_details.iter())
-        .map(|((file_headers, file_data), details)| {
-            let FileDetails {
-                course_code,
-                course_name,
-                year,
-                exam,
-                semester,
-                filename,
-            } = details;
+    let files_iter = files.iter().zip(file_details.iter());
+    let mut upload_statuses = Vec::<UploadStatus>::new();
 
-            if file_data.len() > FILE_SIZE_LIMIT {
-                return UploadStatus {
-                    filename: filename.to_owned(),
-                    status: Status::Error,
-                    message: format!(
-                        "File size too big. Only files upto {} MiB are allowed.",
-                        FILE_SIZE_LIMIT >> 20
-                    ),
-                };
-            }
+    for ((file_headers, file_data), details) in files_iter {
+        let FileDetails {
+            course_code,
+            course_name,
+            year,
+            exam,
+            semester,
+            filename,
+        } = details;
 
-            if let Some(content_type) = file_headers.get("content-type") {
-                if content_type != "application/pdf" {
-                    return UploadStatus {
-                        filename: filename.to_owned(),
-                        status: Status::Error,
-                        message: "Only PDFs are supported.".into(),
-                    };
-                }
-            } else {
-                return UploadStatus {
-                    filename: filename.to_owned(),
-                    status: Status::Error,
-                    message: "`content-type` header not found. File type could not be determined."
-                        .into(),
-                };
-            }
-
-            UploadStatus {
-                filename: "()".into(),
+        if file_data.len() > FILE_SIZE_LIMIT {
+            upload_statuses.push(UploadStatus {
+                filename: filename.to_owned(),
                 status: Status::Error,
-                message: "()".into(),
+                message: format!(
+                    "File size too big. Only files upto {} MiB are allowed.",
+                    FILE_SIZE_LIMIT >> 20
+                ),
+            });
+            continue;
+        }
+
+        if let Some(content_type) = file_headers.get("content-type") {
+            if content_type != "application/pdf" {
+                upload_statuses.push(UploadStatus {
+                    filename: filename.to_owned(),
+                    status: Status::Error,
+                    message: "Only PDFs are supported.".into(),
+                });
+                continue;
             }
-        })
-        .collect::<Vec<UploadStatus>>();
+        } else {
+            upload_statuses.push(UploadStatus {
+                filename: filename.to_owned(),
+                status: Status::Error,
+                message: "`content-type` header not found. File type could not be determined."
+                    .into(),
+            });
+            continue;
+        }
+
+        // Insert the db entry
+        let (mut tx, id) = state.db.insert_new_uploaded_qp(details).await?;
+
+        // Create the new filelink (slug)
+        let filelink_slug = state
+            .env_vars
+            .paths
+            .get_slug(&format!("{}.pdf", id), PaperCategory::Unapproved)
+            .to_string_lossy()
+            .to_string();
+
+        // Update the filelink in the db
+        if state
+            .db
+            .update_uploaded_filelink(&mut tx, id, &filelink_slug)
+            .await
+            .is_ok()
+        {
+            let filepath = state.env_vars.paths.get_path_from_slug(&filelink_slug);
+            // Write the file data
+            if fs::write(filepath, file_data).await.is_ok() {
+            } else {
+                tx.rollback().await?;
+            }
+
+            // If the write fails, rollback the transaction, else commit it.
+        } else {
+            tx.rollback().await?;
+
+            upload_statuses.push(UploadStatus {
+                filename: filename.to_owned(),
+                status: Status::Error,
+                message: "Error updating the filelink".into(),
+            });
+            continue;
+        }
+
+        upload_statuses.push(UploadStatus {
+            filename: "()".into(),
+            status: Status::Error,
+            message: "()".into(),
+        });
+    }
 
     Ok(BackendResponse::ok(
         format!("Successfully processed {} files", upload_statuses.len()),

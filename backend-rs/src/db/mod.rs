@@ -1,10 +1,12 @@
-use color_eyre::eyre::{eyre, ContextCompat};
-use sqlx::{postgres::PgPoolOptions, PgPool, Postgres, Transaction};
+use color_eyre::eyre::eyre;
+use sqlx::{postgres::PgPoolOptions, prelude::FromRow, PgPool, Postgres, Transaction};
 use std::time::Duration;
 
 use crate::{
     env::EnvVars,
+    pathutils::PaperCategory,
     qp::{self, AdminDashboardQP, Exam, Semester},
+    routing::FileDetails,
 };
 
 mod models;
@@ -22,6 +24,11 @@ pub struct EditDetails {
     pub semester: Semester,
     pub exam: Exam,
     pub approve_status: bool,
+}
+
+#[derive(FromRow)]
+struct Breh {
+    id: i32,
 }
 
 impl Database {
@@ -129,15 +136,16 @@ impl Database {
             .bind(approve_status);
 
         let filelink = env_vars
-            .get_uploaded_paper_slugs()
-            .approved
-            .join(format!(
-                "{}_{}_{}_{}_{}_{}.pdf",
-                id, course_code, course_name, year, semester, exam
-            ))
-            .to_str()
-            .context("Error converting approved papers path to string.")?
-            .to_owned();
+            .paths
+            .get_slug(
+                &format!(
+                    "{}_{}_{}_{}_{}_{}.pdf",
+                    id, course_code, course_name, year, semester, exam
+                ),
+                PaperCategory::Approved,
+            )
+            .to_string_lossy()
+            .to_string();
 
         let query = if newly_approved {
             query.bind(&filelink).bind(username)
@@ -219,5 +227,53 @@ impl Database {
             .iter()
             .map(|qp| qp::AdminDashboardQP::from(qp.clone()))
             .collect())
+    }
+
+    /// Inserts a new uploaded question paper into the database. Uses a placeholder for the filelink which should be replaced once the id is known using the [crate::db::Database::update_uploaded_filelink] function.
+    ///
+    /// Returns a tuple with the transaction and the id of the inserted paper.
+    pub async fn insert_new_uploaded_qp<'c>(
+        &self,
+        file_details: &FileDetails,
+    ) -> Result<(Transaction<'c, Postgres>, i32), color_eyre::eyre::Error> {
+        let mut tx = self.connection.begin().await?;
+
+        let FileDetails {
+            course_code,
+            course_name,
+            year,
+            exam,
+            semester,
+            ..
+        } = file_details;
+
+        let query = sqlx::query_as(queries::INSERT_NEW_QP)
+            .bind(course_code)
+            .bind(course_name)
+            .bind(year)
+            .bind(exam)
+            .bind(semester)
+            .bind("placeholder_filelink")
+            .bind(false);
+
+        let Breh { id } = query.fetch_one(&mut *tx).await?;
+
+        Ok((tx, id))
+    }
+
+    // /// Updates filelink for an uploaded question paper uploaded using the [crate::db::Database::update_uploaded_filelink] function. Takes the same transaction that the previous function used.
+    pub async fn update_uploaded_filelink<'c>(
+        &self,
+        tx: &mut Transaction<'c, Postgres>,
+        id: i32,
+        file_link: &str,
+    ) -> Result<(), color_eyre::eyre::Error> {
+        let query = sqlx::query(queries::UPDATE_FILELINK)
+            .bind(id)
+            .bind(file_link);
+
+        query.execute(&mut **tx).await?;
+
+        Ok(())
     }
 }
