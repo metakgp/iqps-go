@@ -1,5 +1,6 @@
 use std::path::{self, Path, PathBuf};
 
+use color_eyre::eyre::eyre;
 use url::Url;
 
 /// A category of papers, can also be used to represent the directory where these papers are stored
@@ -76,6 +77,17 @@ impl Paths {
             approved: path::absolute(static_file_storage_location.join(&path_slugs.approved))?,
             library: path::absolute(static_file_storage_location.join(&path_slugs.library))?,
         };
+
+        // Ensure these system paths exist
+        if !system_paths.unapproved.exists() {
+            return Err(eyre!("Path for unapproved papers does not exist: {}", system_paths.unapproved.to_string_lossy()));
+        }
+        if !system_paths.approved.exists() {
+            return Err(eyre!("Path for approved papers does not exist: {}", system_paths.approved.to_string_lossy()));
+        }
+        if !system_paths.library.exists() {
+            return Err(eyre!("Path for library papers does not exist: {}", system_paths.library.to_string_lossy()));
+        }
 
         Ok(Self {
             static_files_url: Url::parse(static_files_url)?,
