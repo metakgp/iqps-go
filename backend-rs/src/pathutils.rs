@@ -1,4 +1,4 @@
-use std::path::{self, Path, PathBuf};
+use std::{fs, path::{self, Path, PathBuf}};
 
 use color_eyre::eyre::eyre;
 use url::Url;
@@ -79,14 +79,28 @@ impl Paths {
         };
 
         // Ensure these system paths exist
-        if !system_paths.unapproved.exists() {
-            return Err(eyre!("Path for unapproved papers does not exist: {}", system_paths.unapproved.to_string_lossy()));
-        }
-        if !system_paths.approved.exists() {
-            return Err(eyre!("Path for approved papers does not exist: {}", system_paths.approved.to_string_lossy()));
+
+        // Throw error for uploaded and library paths
+        if !path::absolute(static_file_storage_location.join(uploaded_qps_relative_path))?.exists()
+        {
+            return Err(eyre!(
+                "Path for uploaded papers does not exist: {}",
+                system_paths.unapproved.to_string_lossy()
+            ));
         }
         if !system_paths.library.exists() {
-            return Err(eyre!("Path for library papers does not exist: {}", system_paths.library.to_string_lossy()));
+            return Err(eyre!(
+                "Path for library papers does not exist: {}",
+                system_paths.library.to_string_lossy()
+            ));
+        }
+
+        // Create dirs for unapproved and approved
+        if !system_paths.unapproved.exists() {
+            fs::create_dir(&system_paths.unapproved)?;
+        }
+        if !system_paths.approved.exists() {
+            fs::create_dir(&system_paths.approved)?;
         }
 
         Ok(Self {
