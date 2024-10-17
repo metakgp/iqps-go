@@ -21,7 +21,7 @@ export type BackendResponse<T> = IOkResponse<T> | IErrorResponse;
 export interface IEndpointTypes {
 	search: {
 		request: {
-			course: string;
+			query: string;
 			exam: Exam | "";
 		},
 		response: ISearchResult[]

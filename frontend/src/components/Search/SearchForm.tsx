@@ -12,7 +12,11 @@ import { Select } from "../Common/Form";
 function CourseSearchForm() {
 	const currentURL = new URL(window.location.toString());
 
-	const [query, setQuery] = useState<string>(currentURL.searchParams.get('query') ?? '');
+	const [query, setQuery] = useState<string>(
+		currentURL.searchParams.get('query') ??
+		currentURL.searchParams.get('course') ?? // `course` was previously used, keeping for backwards compatibility
+		''
+	);
 	const [exam, setExam] = useState<Exam | ''>(currentURL.searchParams.get('exam') as Exam ?? '');
 
 	const [searchResults, setSearchResults] = useState<ISearchResult[]>([]);
@@ -27,11 +31,11 @@ function CourseSearchForm() {
 			const params = new URLSearchParams();
 			if (query === '') return;
 
-			params.append("course", query);
+			params.append("query", query);
 			params.append("exam", exam);
 
 			setAwaitingResponse(true);
-			const response = await makeRequest('search', 'get', {course: query, exam});
+			const response = await makeRequest('search', 'get', { query, exam });
 
 			if (response.status === 'success') {
 				const data: ISearchResult[] = response.data;
@@ -80,7 +84,7 @@ function CourseSearchForm() {
 	return <div className="search-form">
 		<form onSubmit={handleSubmit}>
 			<div>
-				<label htmlFor="course">Course Name:</label>
+				<label htmlFor="course">Course Name or Code:</label>
 				<input ref={courseInputRef} autoFocus={true} id="course" value={query} onInput={() => setQuery(courseInputRef.current?.value ?? '')} />
 			</div>
 			<div>
@@ -88,11 +92,11 @@ function CourseSearchForm() {
 				<Select
 					id="exam"
 					options={[
-						{value: '', title: 'Mid / End Semester / Class Test'},
-						{value: 'midend', title: 'Mid / End Semester'},
-						{value: 'midsem', title: 'Mid Semester'},
-						{value: 'endsem', title: 'End Semester'},
-						{value: 'ct', title: 'Class Test'}
+						{ value: '', title: 'Mid / End Semester / Class Test' },
+						{ value: 'midend', title: 'Mid / End Semester' },
+						{ value: 'midsem', title: 'Mid Semester' },
+						{ value: 'endsem', title: 'End Semester' },
+						{ value: 'ct', title: 'Class Test' }
 					]}
 					value={exam}
 					onInput={(e) => setExam(e.currentTarget.value as Exam)}
