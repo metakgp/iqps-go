@@ -28,10 +28,14 @@ pub async fn verify_token(
 
     if let Ok(claims) = claims {
         if let Some(username) = claims.private.get("username") {
-            Ok(Auth {
-                jwt: token.to_owned(),
-                username: username.to_string(),
-            })
+            if let Some(username) = username.as_str() {
+                Ok(Auth {
+                    jwt: token.to_owned(),
+                    username: username.to_owned(),
+                })
+            } else {
+                Err(eyre!("Username is not a string."))
+            }
         } else {
             Err(eyre!("Username not in the claims."))
         }
