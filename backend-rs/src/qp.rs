@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use color_eyre::eyre::eyre;
 use duplicate::duplicate_item;
 use serde::Serialize;
@@ -136,9 +134,5 @@ impl QP {
             filelink: env_vars.paths.get_url_from_slug(&self.filelink)?,
             ..self
         })
-    }
-
-    pub fn get_paper_path(&self, env_vars: &EnvVars) -> PathBuf {
-        env_vars.paths.get_path_from_slug(&self.filelink)
     }
 }

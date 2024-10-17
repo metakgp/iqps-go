@@ -3,6 +3,7 @@ use std::path::{self, Path, PathBuf};
 use url::Url;
 
 /// A category of papers, can also be used to represent the directory where these papers are stored
+#[allow(unused)]
 pub enum PaperCategory {
     Unapproved,
     Approved,
@@ -28,6 +29,7 @@ impl PathTriad {
 }
 
 #[derive(Clone)]
+#[allow(unused)]
 pub struct Paths {
     /// URL of the static files server
     static_files_url: Url,
@@ -55,6 +57,7 @@ impl Default for Paths {
     }
 }
 
+#[allow(unused)]
 impl Paths {
     pub fn new(
         static_files_url: &str,
