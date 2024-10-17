@@ -53,7 +53,7 @@ pub async fn search(
 ) -> HandlerReturn<Vec<qp::SearchQP>> {
     let response = if let Some(query) = params.get("query") {
         let exam: Option<qp::Exam> = if let Some(exam_str) = params.get("exam") {
-            Some(qp::Exam::try_from(exam_str).map_err(AppError::from)?)
+            Some(qp::Exam::try_from(exam_str)?)
         } else {
             None
         };

@@ -32,7 +32,7 @@ impl From<Semester> for String {
         match value {
             Semester::Autumn => "autumn".into(),
             Semester::Spring => "spring".into(),
-            Semester::Unknown => "unknown".into(),
+            Semester::Unknown => "".into(),
         }
     }
 }
@@ -76,7 +76,7 @@ impl From<Exam> for String {
         match value {
             Exam::Midsem => "midsem".into(),
             Exam::Endsem => "endsem".into(),
-            Exam::Unknown => "unknown".into(),
+            Exam::Unknown => "".into(),
             Exam::CT(None) => "ct".into(),
             Exam::CT(Some(i)) => format!("ct{}", i),
         }

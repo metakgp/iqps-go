@@ -64,11 +64,14 @@ impl Database {
         query: &String,
         exam: Option<Exam>,
     ) -> Result<Vec<qp::SearchQP>, sqlx::Error> {
-        let query_sql = queries::get_qp_search_query(exam.is_some());
+        let exam_param = exam.map(String::from).unwrap_or("".into());
+        let use_exam = !exam_param.is_empty();
+
+        let query_sql = queries::get_qp_search_query(use_exam);
         let query = sqlx::query_as(&query_sql).bind(query);
 
-        let query = if let Some(exam) = exam {
-            query.bind(String::from(exam))
+        let query = if use_exam {
+            query.bind(exam_param)
         } else {
             query
         };
