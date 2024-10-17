@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use axum::{
     extract::{DefaultBodyLimit, Json},
     http::StatusCode,
@@ -7,7 +5,6 @@ use axum::{
 };
 use http::{HeaderValue, Method};
 use serde::Serialize;
-use tokio::sync::Mutex;
 use tower_http::{
     cors::{Any, CorsLayer},
     trace::{self, TraceLayer},
@@ -28,7 +25,6 @@ pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
     let state = RouterState {
         db,
         env_vars: env_vars.clone(),
-        auth: Arc::new(Mutex::new(None)),
     };
 
     axum::Router::new()
@@ -73,15 +69,9 @@ pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
 }
 
 #[derive(Clone)]
-struct Auth {
-    jwt: String,
-    username: String,
-}
-#[derive(Clone)]
 struct RouterState {
     pub db: db::Database,
     pub env_vars: EnvVars,
-    pub auth: Arc<Mutex<Option<Auth>>>,
 }
 
 #[derive(Clone, Copy)]

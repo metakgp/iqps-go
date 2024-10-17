@@ -10,18 +10,33 @@ use crate::{
     routing::{self, AppError},
 };
 
+#[derive(Clone)]
+pub struct Auth {
+    pub jwt: String,
+    pub username: String,
+}
+
 /// Verifies whether a JWT is valid and signed with the secret key
+///
+/// Returns the username and jwt in a struct
 pub async fn verify_token(
     token: &str,
     env_vars: &EnvVars,
-) -> Result<Option<Claims>, routing::AppError> {
+) -> Result<Auth, color_eyre::eyre::Error> {
     let jwt_key = env_vars.get_jwt_key()?;
     let claims: Result<Claims, _> = token.verify_with_key(&jwt_key);
 
     if let Ok(claims) = claims {
-        Ok(Some(claims))
+        if let Some(username) = claims.private.get("username") {
+            Ok(Auth {
+                jwt: token.to_owned(),
+                username: username.to_string(),
+            })
+        } else {
+            Err(eyre!("Username not in the claims."))
+        }
     } else {
-        Ok(None)
+        Err(eyre!("Claims not found on the JWT."))
     }
 }
 

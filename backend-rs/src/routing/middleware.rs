@@ -7,7 +7,7 @@ use http::{HeaderMap, StatusCode};
 
 use crate::auth;
 
-use super::{AppError, Auth, BackendResponse, RouterState};
+use super::{AppError, BackendResponse, RouterState};
 
 /// Verifies the JWT and authenticates a user. If the JWT is invalid, the user is sent an unauthorized status code. If the JWT is valid, the authentication is added to the state.
 ///
@@ -15,28 +15,16 @@ use super::{AppError, Auth, BackendResponse, RouterState};
 pub async fn verify_jwt_middleware(
     State(state): State<RouterState>,
     headers: HeaderMap,
-    request: Request,
+    mut request: Request,
     next: Next,
 ) -> Result<Response, AppError> {
     if let Some(auth_header) = headers.get("Authorization") {
         if let Some(jwt) = auth_header.to_str()?.strip_prefix("Bearer ") {
-            let claims = auth::verify_token(jwt, &state.env_vars).await?;
+            let auth = auth::verify_token(jwt, &state.env_vars).await;
 
-            if let Some(claims) = claims {
-                if let Some(username) = claims.private.get("username") {
-                    let mut state_jwt = state.auth.lock().await;
-                    *state_jwt = Auth {
-                        jwt: jwt.to_string(),
-                        username: username.to_string(),
-                    }
-                    .into();
-                } else {
-                    return Ok(BackendResponse::<()>::error(
-                        "Username not found in the claims.".into(),
-                        StatusCode::UNAUTHORIZED,
-                    )
-                    .into_response());
-                }
+            if let Ok(auth) = auth {
+                // If auth is fine, add it to the request extensions
+                request.extensions_mut().insert(auth);
             } else {
                 return Ok(BackendResponse::<()>::error(
                     "Authorization token invalid.".into(),

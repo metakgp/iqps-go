@@ -2,6 +2,7 @@ use axum::{
     body::Bytes,
     extract::{Json, Multipart},
     http::StatusCode,
+    Extension,
 };
 use color_eyre::eyre::ContextCompat;
 use http::HeaderMap;
@@ -14,7 +15,7 @@ use axum::extract::{Query, State};
 use serde::Deserialize;
 
 use crate::{
-    auth,
+    auth::{self, Auth},
     pathutils::PaperCategory,
     qp::{self, AdminDashboardQP},
 };
@@ -112,23 +113,14 @@ pub struct ProfileRes {
 }
 
 /// Returns a user's profile (the JWT and username) if authorized and the token is valid. Can be used to check if the user is logged in.
-pub async fn profile(State(state): State<RouterState>) -> HandlerReturn<ProfileRes> {
-    let lock = state.auth.lock().await;
-
-    if let Some(auth) = lock.clone() {
-        Ok(BackendResponse::ok(
-            "Successfully authorized the user.".into(),
-            ProfileRes {
-                token: auth.jwt,
-                username: auth.username,
-            },
-        ))
-    } else {
-        Ok(BackendResponse::error(
-            "Error: User unauthorized.".into(),
-            StatusCode::UNAUTHORIZED,
-        ))
-    }
+pub async fn profile(Extension(auth): Extension<Auth>) -> HandlerReturn<ProfileRes> {
+    Ok(BackendResponse::ok(
+        "Successfully authorized the user.".into(),
+        ProfileRes {
+            token: auth.jwt,
+            username: auth.username,
+        },
+    ))
 }
 
 #[derive(Deserialize)]
@@ -145,41 +137,33 @@ pub struct EditReq {
 /// Takes a JSON request body. The `id` field is required.
 /// Other optional fields can be set to change that particular value in the paper.
 pub async fn edit(
+    Extension(auth): Extension<Auth>,
     State(state): State<RouterState>,
     Json(body): Json<EditReq>,
 ) -> HandlerReturn<AdminDashboardQP> {
-    let auth = state.auth.lock().await;
+    // Edit the database entry
+    let (tx, old_filelink, new_qp) = state
+        .db
+        .edit_paper(body, &auth.username, &state.env_vars)
+        .await?;
 
-    if let Some(auth) = auth.clone() {
-        // Edit the database entry
-        let (tx, old_filelink, new_qp) = state
-            .db
-            .edit_paper(body, &auth.username, &state.env_vars)
-            .await?;
+    // Copy the actual file
+    let old_filepath = state.env_vars.paths.get_path_from_slug(&old_filelink);
+    let new_filepath = state.env_vars.paths.get_path_from_slug(&new_qp.filelink);
 
-        // Copy the actual file
-        let old_filepath = state.env_vars.paths.get_path_from_slug(&old_filelink);
-        let new_filepath = state.env_vars.paths.get_path_from_slug(&new_qp.filelink);
+    if fs::copy(old_filepath, new_filepath).await.is_ok() {
+        // Commit the transaction
+        tx.commit().await?;
 
-        if fs::copy(old_filepath, new_filepath).await.is_ok() {
-            // Commit the transaction
-            tx.commit().await?;
-
-            Ok(BackendResponse::ok(
-                "Successfully updated paper details.".into(),
-                new_qp.with_url(&state.env_vars)?,
-            ))
-        } else {
-            tx.rollback().await?;
-            Ok(BackendResponse::error(
-                "Error copying question paper file.".into(),
-                StatusCode::INTERNAL_SERVER_ERROR,
-            ))
-        }
+        Ok(BackendResponse::ok(
+            "Successfully updated paper details.".into(),
+            new_qp.with_url(&state.env_vars)?,
+        ))
     } else {
+        tx.rollback().await?;
         Ok(BackendResponse::error(
-            "Error getting authenticated user's username.".into(),
-            StatusCode::UNAUTHORIZED,
+            "Error copying question paper file.".into(),
+            StatusCode::INTERNAL_SERVER_ERROR,
         ))
     }
 }
