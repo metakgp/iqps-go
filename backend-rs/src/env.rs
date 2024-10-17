@@ -4,6 +4,8 @@ use clap::Parser;
 use hmac::{digest::InvalidLength, Hmac, Mac};
 use sha2::Sha256;
 
+use crate::pathutils::Paths;
+
 #[derive(Parser, Clone)]
 pub struct EnvVars {
     // Database
@@ -46,7 +48,7 @@ pub struct EnvVars {
     // Other configs
     #[arg(env, default_value = "10")]
     /// Maximum number of papers that can be uploaded at a time
-    pub max_upload_limit: i32,
+    pub max_upload_limit: usize,
     #[arg(env, default_value = "./log/application.log")]
     /// Location where logs are stored
     pub log_location: PathBuf,
@@ -54,13 +56,16 @@ pub struct EnvVars {
     // Paths
     #[arg(env, default_value = "https://static.metakgp.org")]
     /// The URL of the static files server (odin's vault)
-    pub static_files_url: String,
+    static_files_url: String,
     #[arg(env, default_value = "/srv/static")]
     /// The path where static files are served from
-    pub static_file_storage_location: PathBuf,
-    #[arg(env, default_value = "iqps/uploaded")]
+    static_file_storage_location: PathBuf,
+    #[arg(env, default_value = "/iqps/uploaded")]
     /// The path where uploaded papers are stored temporarily, relative to the `static_file_storage_location`
-    pub uploaded_qps_path: PathBuf,
+    uploaded_qps_path: PathBuf,
+    #[arg(env, default_value = "/peqp/qp")]
+    /// The path where library papers (scrapped) are stored, relative to the `static_file_storage_location`
+    library_qps_path: PathBuf,
 
     // Server
     #[arg(env, default_value = "8080")]
@@ -71,18 +76,23 @@ pub struct EnvVars {
     #[arg(env, default_value = "https://qp.metakgp.org,http://localhost:5173")]
     /// List of origins allowed (as a list of values separated by commas `origin1, origin2`)
     pub cors_allowed_origins: String,
+
+    #[arg(skip)]
+    /// All paths must be handled using this
+    pub paths: Paths,
 }
 
 impl EnvVars {
     /// Processes the environment variables after reading.
     pub fn process(mut self) -> Result<Self, Box<dyn std::error::Error>> {
-        self.static_file_storage_location = std::path::absolute(self.static_file_storage_location)?;
-        self.uploaded_qps_path = std::path::absolute(
-            self.static_file_storage_location
-                .join(self.uploaded_qps_path),
+        self.paths = Paths::new(
+            &self.static_files_url,
+            &self.static_file_storage_location,
+            &self.uploaded_qps_path,
+            &self.library_qps_path,
         )?;
-
         self.log_location = std::path::absolute(self.log_location)?;
+
         Ok(self)
     }
 

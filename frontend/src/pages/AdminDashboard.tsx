@@ -26,12 +26,8 @@ function AdminDashboard() {
 		useState<IAdminDashboardQP | null>(null);
 
 	const handlePaperEdit = async (qp: IAdminDashboardQP) => {
-		// Only approves the paper rn
-		// TODO: Allow unapproving papers as well
-
-		const response = await makeRequest('approve', 'post', {
-			...qp,
-			filelink: new URL(qp.filelink).pathname // TODO: PLEASE DO THIS IN THE BAKCEND AHHHH ITS CALLED FILELINK NOT FILEPATH DED
+		const response = await makeRequest('edit', 'post', {
+			...qp
 		}, auth.jwt);
 
 		if (response.status === "success") {
@@ -43,8 +39,7 @@ function AdminDashboard() {
 				const selectedIndex = newPapers.indexOf(selectedQPaper!);
 				if (selectedIndex !== -1) {
 					newPapers[selectedIndex] = {
-						...qp,
-						approve_status: true
+						...qp
 					}
 				}
 

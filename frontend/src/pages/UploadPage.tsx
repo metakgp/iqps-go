@@ -37,6 +37,15 @@ export default function UploadPage() {
             try {
                 const formData = new FormData();
                 const numPapers = qPapers.length;
+                const file_details: {
+                    course_code: string,
+                    course_name: string,
+                    year: number,
+                    exam: string,
+                    semester: string,
+                    filename: string,
+                }[] = [];
+
                 for (const qp of qPapers) {
                     const {
                         file,
@@ -49,11 +58,18 @@ export default function UploadPage() {
                     } = await sanitizeQP(qp);
 
                     formData.append("files", file, file_name);
-                    formData.append(
-                        file_name,
-                        `${course_code}_${course_name}_${year}_${exam}_${semester}`
-                    );
+
+                    file_details.push({
+                        course_code,
+                        course_name,
+                        year,
+                        exam,
+                        semester,
+                        filename: file_name
+                    })
                 }
+                formData.set("file_details", JSON.stringify(file_details));
+
                 toast(
                     `Uploading ${numPapers} file${numPapers > 1 ? "s" : ""}.`
                 );
@@ -71,7 +87,7 @@ export default function UploadPage() {
                             );
                         } else {
                             toast.error(
-                                `Failed to upload file ${result.filename}: ${result.description}`
+                                `Failed to upload file ${result.filename}: ${result.message}`
                             );
                         }
                     }
