@@ -9,7 +9,7 @@ services:
       - PGPORT=${DB_PORT}
       - PGHOST=${DB_HOST}
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 20

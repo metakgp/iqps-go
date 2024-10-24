@@ -1,14 +1,19 @@
-FROM golang:1.22.4 AS builder
+FROM rust:slim-buster AS builder
 
 WORKDIR /src
 
-COPY go.mod go.sum ./
+# Install dependencies
+RUN apt-get update
+RUN apt-get install -y build-essential musl-dev musl-tools
 
-RUN go mod download
+# Copy all files
+COPY src/ ./src
+COPY metaploy/ ./metaploy
+COPY Cargo.toml Cargo.lock .
 
-COPY . .
-
-RUN CGO_ENABLED=1 GOOS=linux go build -o ./build --tags "fts5" -a -ldflags '-linkmode external -extldflags "-static"' .
+# For static build
+RUN rustup target add x86_64-unknown-linux-musl
+RUN cargo build --target=x86_64-unknown-linux-musl --release
 
 FROM alpine:latest AS app
 
@@ -22,6 +27,6 @@ COPY metaploy/ ./
 
 RUN chmod +x ./postinstall.sh
 
-COPY --from=builder /src/build .
+COPY --from=builder /src/target/x86_64-unknown-linux-musl/release/iqps-backend .
 
-CMD ["./postinstall.sh", "./build"]
+CMD ["./postinstall.sh", "./iqps-backend"]
