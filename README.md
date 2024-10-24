@@ -60,7 +60,7 @@ IQPS was originally created by [Shubham Mishra](https://github.com/grapheo12) in
     - Make the env file by copying the template: `cp .env.template .env`
     - Fill the env variable and set `DB_HOST=localhost` for running locally for development
     - Start the DB by running `docker compose -f docker-compose.dev.yaml up -d`
-    - Start the Go backend by running `go run .`
+    - Start the Rust backend by running `cargo run .`
 3. Set up the frontend by running `pnpm install` and then `pnpm start` in the `frontend/` directory.
 4. Profit.
 
@@ -77,20 +77,38 @@ IQPS was originally created by [Shubham Mishra](https://github.com/grapheo12) in
 5. Optionally set up a Systemd service to start the wiki on startup or use this [deployment github workflow](./.github/workflows/deploy.yaml).
 
 ### Environment Variables
-Environment variables can be set using a `.env` file. Use the `.env.template` files for reference.
+Environment variables can be set using a `.env` file. Use the `.env.template` files for reference. See `backend/src/env.rs` for more documentation and types.
 
 #### Backend
-- `DB_PATH`: Path to the database file to use.
-- `STATIC_FILES_URL`: The base URL for the static files (PDFs).
-- `QPS_PATH`: The local path on the server to store question paper PDFs.
-- `DB_NAME`: The name for your database.
-- `DB_HOST`: `localhost` if using local postgres server or set your **own** database host address.
-- `DB_PORT`: `5432` if using local postgres server, or set to your **own** database port.
-- `DB_USER`: The access username for database.
-- `DB_PASSWORD`: The access password corressponding to the user.
+##### Database (Postgres)
+- `DB_NAME`: Database name
+- `DB_HOST`: Database hostname (eg: `localhost`)
+- `DB_PORT`: Database port
+- `DB_USER`: Database username
+- `DB_PASSWORD`: Database password
+
+##### Authentication
+- `GH_CLIENT_ID`: Client ID of the Github OAuth app.
+- `GH_CLIENT_SECRET`: Client secret of the Github OAuth app.
+- `GH_ORG_NAME`: The name of the Github organization of the admins.
+- `GH_ORG_TEAM_SLUG`: The URL slug of the Github org team of the admins.
+- `JWT_SECRET`: A secret key/password for JWT signing. It should be a long, random, unguessable string.
+
+##### Configuration
+- `MAX_UPLOAD_LIMIT`: Maximum number of files that can be uploaded at once.
+- `LOG_LOCATION`: The path to a local logfile.
+- `STATIC_FILES_URL`: The URL of the static files server. (eg: `https://static.metakgp.org`)
+- `STATIC_FILE_STORAGE_LOCATION`: The path to the local directory from which the static files are served.
+- `UPLOADED_QPS_PATH`: A path relative to `STATIC_FILE_STORAGE_LOCATION` where the uploaded question papers will be stored. (eg: `iqps/uploaded`)
+- `LIBRARY_QPS_PATH`: A path relative to `STATIC_FILE_STORAGE_LOCATION` where the library question papers are scraped and stored. (eg: `peqp/qp`)
+- `SERVER_PORT`: The port on which the server listens.
+- `CORS_ALLOWED_ORIGINS`: A comma (,) separated list of origins to be allowed in CORS.
 
 #### Frontend
-- `VITE_BACKEND_URL`: The IQPS backend URL. Use `http://localhost:5000` in development.
+- `VITE_BACKEND_URL`: The IQPS backend URL. Use `http://localhost:8080` in development.
+- `VITE_MAX_UPLOAD_LIMIT` The maximum number of files that can be uploaded at once. (Note: This is only a client-side limit)
+- `VITE_GH_OAUTH_CLIENT_ID` The Client ID of the Github OAuth app.
+
 
 ## Contact
 
