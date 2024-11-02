@@ -7,7 +7,6 @@ on:
     paths:
       - "backend/**"
       - ".github/workflows/docs.yaml"
-  workflow_dispatch:
 
 jobs:
   gen_docs:
@@ -24,8 +23,10 @@ jobs:
           git fetch origin
           git reset --hard 'origin/${{ github.ref_name }}'
 
-      - name: Generate Rust Docs
+      - name: Set up rust
         uses: moonrepo/setup-rust@v1
+
+      - name: Generate Rust Docs
         run: |
           pushd backend/
           cargo doc --no-deps
