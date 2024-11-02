@@ -24,6 +24,8 @@
     <a href="https://qp.metakgp.org">Website</a>
     ·
     <a href="https://github.com/metakgp/iqps-go/issues">Report Bug / Request Feature</a>
+    ·
+    <a href="https://metakgp.github.io/iqps-go/iqps_backend/">Backend Documentation</a>
   </p>
 </div>
 
