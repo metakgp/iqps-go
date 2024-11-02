@@ -1,0 +1,43 @@
+name: Generate API Documentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/docs.yaml"
+
+jobs:
+  gen_docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: docs
+
+      - name: Reset Branch
+        run: |
+          git fetch origin
+          git reset --hard 'origin/${{ github.ref_name }}'
+
+      - name: Install Rust and Dependencies
+        run: |
+          sudo apt install libwebkit2gtk-4.0-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+          rustup update stable && rustup default stable
+
+      - name: Generate Rust Docs
+        run: |
+          pushd backend/
+          cargo doc --no-deps
+          mv target/doc/ ../docs/
+          popd
+
+      - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
+        with:
+          add: 'docs -f'
+          commit: --signoff
+          message: 'docs: updated API documentation'
+          push: origin docs -f
