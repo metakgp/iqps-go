@@ -11,7 +11,9 @@ mod routing;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Read dotenv if it exists
-    dotenvy::dotenv()?;
+    if dotenvy::dotenv().is_ok() {
+        println!("Loaded an existing .env file.");
+    }
 
     // Read environment variables
     let env_vars = env::EnvVars::parse().process()?;
