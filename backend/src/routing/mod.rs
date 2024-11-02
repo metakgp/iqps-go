@@ -1,3 +1,5 @@
+//! Router, [`handlers`], [`middleware`], state, and response utils.
+
 use axum::{
     extract::{DefaultBodyLimit, Json},
     http::StatusCode,
@@ -69,12 +71,14 @@ pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
 }
 
 #[derive(Clone)]
+/// The state of the axum router, containing the environment variables and the database connection.
 struct RouterState {
     pub db: db::Database,
     pub env_vars: EnvVars,
 }
 
 #[derive(Clone, Copy)]
+/// The status of a server response
 enum Status {
     Success,
     Error,
@@ -101,12 +105,16 @@ impl Serialize for Status {
 /// Standard backend response format (serialized as JSON)
 #[derive(serde::Serialize)]
 struct BackendResponse<T: Serialize> {
+    /// Whether the operation succeeded or failed
     pub status: Status,
+    /// A message describing the state of the operation (success/failure message)
     pub message: String,
+    /// Any optional data sent (only sent if the operation was a success)
     pub data: Option<T>,
 }
 
 impl<T: serde::Serialize> BackendResponse<T> {
+    /// Creates a new success backend response with the given message and data
     pub fn ok(message: String, data: T) -> (StatusCode, Self) {
         (
             StatusCode::OK,
@@ -118,6 +126,7 @@ impl<T: serde::Serialize> BackendResponse<T> {
         )
     }
 
+    /// Creates a new error backend response with the given message, data, and an HTTP status code
     pub fn error(message: String, status_code: StatusCode) -> (StatusCode, Self) {
         (
             status_code,
@@ -136,6 +145,7 @@ impl<T: Serialize> IntoResponse for BackendResponse<T> {
     }
 }
 
+/// A struct representing the error returned by a handler. This is automatically serialized into JSON and sent as an internal server error (500) backend response. The `?` operator can be used anywhere inside a handler to do so.
 pub(super) struct AppError(color_eyre::eyre::Error);
 impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {

@@ -1,3 +1,5 @@
+//! Utils for parsing question paper details
+
 use color_eyre::eyre::eyre;
 use duplicate::duplicate_item;
 use serde::Serialize;
@@ -5,9 +7,19 @@ use serde::Serialize;
 use crate::env::EnvVars;
 
 #[derive(Clone, Copy)]
+/// Represents a semester.
+///
+/// It can be parsed from a [`String`] using the `.try_from()` function. An error will be returned if the given string has an invalid value.
+///
+/// This value can be converted back into a [`String`] using the [`From`] trait implementation.
 pub enum Semester {
+    /// Autumn semester, parsed from `autumn`
     Autumn,
+    /// Spring semester, parsed from `spring`
     Spring,
+    /// Unknown/wildcard semester, parsed from an empty string.
+    ///
+    /// Note that this is different from an invalid value and is used to represent papers for which the semester is not known. An invalid value would be `puppy` or `Hippopotomonstrosesquippedaliophobia` for example.
     Unknown,
 }
 
@@ -38,10 +50,21 @@ impl From<Semester> for String {
 }
 
 #[derive(Clone, Copy)]
+/// Represents the exam type of the paper.
+///
+/// Can be converted to and parsed from a String using the [`From`] and [`TryFrom`] trait implementations.
 pub enum Exam {
+    /// Mid-semester examination, parsed from `midsem`
     Midsem,
+    /// End-semester examination, parsed from `endsem`
     Endsem,
+    /// Class test, parsed from either `ct` or `ct` followed by a number (eg: `ct1` or `ct10`).
+    ///
+    /// The optional number represents the number of the class test (eg: class test 1 or class test 21). This will be None if the number is not known, parsed from `ct`.
     CT(Option<usize>),
+    /// Unknown class test, parsed from an empty string.
+    ///
+    /// Note that this is different from an invalid value and is used to represent papers for which the exam is not known. An invalid value would be `catto` or `metakgp` for example.
     Unknown,
 }
 
@@ -98,6 +121,7 @@ impl Serialize for ExamSem {
 }
 
 #[derive(Serialize, Clone)]
+/// The fields of a question paper sent from the search endpoint
 pub struct SearchQP {
     pub id: i32,
     pub filelink: String,
@@ -110,6 +134,9 @@ pub struct SearchQP {
 }
 
 #[derive(Serialize, Clone)]
+/// The fields of a question paper sent from the admin dashboard endpoints.
+///
+/// This includes fields such as `approve_status` and `upload_timestamp` that would only be relevant to the dashboard.
 pub struct AdminDashboardQP {
     pub id: i32,
     pub filelink: String,
@@ -129,6 +156,7 @@ pub struct AdminDashboardQP {
     [ AdminDashboardQP ];
 )]
 impl QP {
+    /// Returns the question paper with the full static files URL in the `filelink` field instead of just the slug. See the [`crate::pathutils`] module for what a slug is.
     pub fn with_url(self, env_vars: &EnvVars) -> Result<Self, color_eyre::eyre::Error> {
         Ok(Self {
             filelink: env_vars.paths.get_url_from_slug(&self.filelink)?,

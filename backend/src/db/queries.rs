@@ -1,4 +1,8 @@
-/// Query to get similar papers. Matches `course_code` ($1) always and other optional parameters
+//! SQL queries for the database.
+//!
+//! Some of these are functions that return a query that is dynamically generated based on requirements.
+
+/// Query to get similar papers. Matches `course_code` ($1) always. Other parameters are optional and can be enabled or disabled using the arguments to this function.
 pub fn get_similar_papers_query(
     year: bool,
     course_name: bool,

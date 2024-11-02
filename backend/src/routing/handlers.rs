@@ -1,3 +1,9 @@
+//! All endpoint handlers and their response types.
+//!
+//! All endpoints accept JSON or URL query parameters as the request. The response of each handler is a [`BackendResponse`] serialized as JSON and the return type of the handler function determines the schema of the data sent in the response (if successful)
+//!
+//! The request format is described
+
 use axum::{
     body::Bytes,
     extract::{Json, Multipart},
@@ -22,6 +28,7 @@ use crate::{
 
 use super::{AppError, BackendResponse, RouterState, Status};
 
+/// The return type of a handler function. T is the data type returned if the operation was a success
 type HandlerReturn<T> = Result<(StatusCode, BackendResponse<T>), AppError>;
 
 /// Healthcheck route. Returns a `Hello World.` message if healthy.
@@ -47,6 +54,10 @@ pub async fn get_unapproved(
 }
 
 /// Searches for question papers given a query and an optional `exam` parameter.
+///
+/// # Request Query Parameters
+/// * `query`: The query string to search in the question papers (searches course name or code)
+/// * `exam` (optional): A filter for the question paper by the exam field.
 pub async fn search(
     State(state): State<RouterState>,
     Query(params): Query<HashMap<String, String>>,
@@ -80,15 +91,20 @@ pub async fn search(
 }
 
 #[derive(Deserialize)]
+/// The request format for the OAuth endpoint
 pub struct OAuthReq {
     code: String,
 }
+
 #[derive(Serialize)]
+/// The response format for the OAuth endpoint
 pub struct OAuthRes {
     token: String,
 }
 
 /// Takes a Github OAuth code and returns a JWT auth token to log in a user if authorized
+///
+/// Request format - [`OAuthReq`]
 pub async fn oauth(
     State(state): State<RouterState>,
     Json(body): Json<OAuthReq>,
@@ -107,6 +123,7 @@ pub async fn oauth(
 }
 
 #[derive(Serialize)]
+/// The response format for the user profile endpoint
 pub struct ProfileRes {
     token: String,
     username: String,
@@ -124,6 +141,7 @@ pub async fn profile(Extension(auth): Extension<Auth>) -> HandlerReturn<ProfileR
 }
 
 #[derive(Deserialize)]
+/// The request format for the paper edit endpoint
 pub struct EditReq {
     pub id: i32,
     pub course_code: Option<String>,
@@ -133,9 +151,12 @@ pub struct EditReq {
     pub exam: Option<String>,
     pub approve_status: Option<bool>,
 }
+
 /// Paper edit endpoint (for admin dashboard)
 /// Takes a JSON request body. The `id` field is required.
 /// Other optional fields can be set to change that particular value in the paper.
+///
+/// Request format - [`EditReq`]
 pub async fn edit(
     Extension(auth): Extension<Auth>,
     State(state): State<RouterState>,
@@ -169,6 +190,7 @@ pub async fn edit(
 }
 
 #[derive(Deserialize)]
+/// The details for an uploaded question paper file
 pub struct FileDetails {
     pub course_code: String,
     pub course_name: String,
@@ -181,13 +203,19 @@ pub struct FileDetails {
 /// 10 MiB file size limit
 const FILE_SIZE_LIMIT: usize = 10 << 20;
 #[derive(Serialize)]
+/// The status of an uploaded question paper file
 pub struct UploadStatus {
+    /// The filename
     filename: String,
+    /// Whether the file was successfully uploaded
     status: Status,
+    /// A message describing the status
     message: String,
 }
 
 /// Uploads question papers to the server
+///
+/// Request format - Multipart form with a `file_details` field of the format [`FileDetails`]
 pub async fn upload(
     State(state): State<RouterState>,
     mut multipart: Multipart,
@@ -337,11 +365,14 @@ pub async fn upload(
 }
 
 #[derive(Deserialize)]
+/// The request format for the delete endpoint
 pub struct DeleteReq {
     id: i32,
 }
 
 /// Deletes a given paper. Library papers cannot be deleted.
+///
+/// Request format - [`DeleteReq`]
 pub async fn delete(
     State(state): State<RouterState>,
     Json(body): Json<DeleteReq>,
@@ -362,6 +393,13 @@ pub async fn delete(
 }
 
 /// Fetches all question papers that match one or more properties specified. `course_name` is compulsory.
+///
+/// # Request Query Parameters
+/// * `course_code`: The course code of the question paper. (required)
+/// * `year` (optional): The year of the question paper.
+/// * `course_name` (optional): The course name (exact).
+/// * `semester` (optional): The semester (autumn/spring)
+/// * `exam` (optional): The exam field (midsem/endsem/ct)
 pub async fn similar(
     State(state): State<RouterState>,
     Query(body): Query<HashMap<String, String>>,
@@ -381,7 +419,7 @@ pub async fn similar(
             body.get("year")
                 .map(|year| year.parse::<i32>())
                 .transpose()?,
-            body.get("course_code"),
+            body.get("course_name"),
             body.get("semester"),
             body.get("exam"),
         )

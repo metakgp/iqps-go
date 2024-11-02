@@ -1,3 +1,7 @@
+//! ### IQPS Backend
+//!
+//! The backend is divided into multiple modules. The [`routing`] module contains all the route handlers and the [`db`] module contains all database queries and models. Other modules are utilities used throughout the backend.
+
 use clap::Parser;
 use tracing_subscriber::prelude::*;
 

@@ -1,3 +1,7 @@
+//! Utils for Github OAuth integration and JWT authentication
+//!
+//! Currently this is only used in the admin dashboard and uses Github OAuth for authentication
+
 use std::collections::BTreeMap;
 
 use color_eyre::eyre::{eyre, Context, ContextCompat};
@@ -8,6 +12,7 @@ use serde::Deserialize;
 use crate::env::EnvVars;
 
 #[derive(Clone)]
+/// Struct containing the auth information of a user
 pub struct Auth {
     pub jwt: String,
     pub username: String,

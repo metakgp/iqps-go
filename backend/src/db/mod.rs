@@ -1,3 +1,5 @@
+//! Database stuff. See submodules also.
+
 use color_eyre::eyre::eyre;
 use models::DBAdminDashboardQP;
 use sqlx::{postgres::PgPoolOptions, prelude::FromRow, PgPool, Postgres, Transaction};
@@ -14,16 +16,19 @@ mod models;
 mod queries;
 
 #[derive(Clone)]
+/// The database
 pub struct Database {
     connection: PgPool,
 }
 
 #[derive(FromRow)]
+/// Needed this to use the `query_as()` function of sqlx. There is probably a better way to do this but this is my first time, sorry.
 struct Breh {
     id: i32,
 }
 
 impl Database {
+    /// Creates a new database connection given the environment variables.
     pub async fn new(env_vars: &EnvVars) -> Result<Self, sqlx::Error> {
         let database_url = format!(
             "postgres://{}:{}@{}:{}/{}",

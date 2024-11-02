@@ -1,3 +1,7 @@
+//! ### Environment Variables
+//!
+//!  Each field in the struct `EnvVars` corresponds to an environment variable. The environment variable name will be in all capitals. The default values are set using the `arg()` macro of the `clap` crate. Check the source code for the defaults.
+
 use std::path::PathBuf;
 
 use clap::Parser;

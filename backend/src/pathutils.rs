@@ -1,3 +1,6 @@
+//! Utils for parsing paths on the server and to store/retrieve paths from the database
+//! A "slug" is the part of the path common to the question paper and is stored in the database. Depending on the requirements, either a URL (eg: static.metakgp.org) or a path (/srv/static) can be prepended to the slug to get the final path to copy/serve/move the question paper to/from.
+
 use std::{fs, path::{self, Path, PathBuf}};
 
 use color_eyre::eyre::eyre;
@@ -6,20 +9,27 @@ use url::Url;
 /// A category of papers, can also be used to represent the directory where these papers are stored
 #[allow(unused)]
 pub enum PaperCategory {
+    /// Unapproved paper
     Unapproved,
+    /// Approved paper
     Approved,
+    /// Library paper (scraped using the peqp scraper)
     Library,
 }
 
 #[derive(Clone, Default)]
 /// A set of paths (absolute, relative, or even URLs) for all three categories of papers (directories)
 struct PathTriad {
+    /// Unapproved paper path
     pub unapproved: PathBuf,
+    /// Approved paper path
     pub approved: PathBuf,
+    /// Library paper path
     pub library: PathBuf,
 }
 
 impl PathTriad {
+    /// Gets the path in the triad corresponding to the given paper category.
     pub fn get(&self, category: PaperCategory) -> PathBuf {
         match category {
             PaperCategory::Approved => self.approved.to_owned(),
@@ -31,6 +41,7 @@ impl PathTriad {
 
 #[derive(Clone)]
 #[allow(unused)]
+/// Struct containing all the paths and URLs required to parse or create any question paper's slug, absolute path, or URL.
 pub struct Paths {
     /// URL of the static files server
     static_files_url: Url,
@@ -60,18 +71,28 @@ impl Default for Paths {
 
 #[allow(unused)]
 impl Paths {
+    /// Creates a new `Paths` struct
+    /// # Arguments
+    ///
+    /// * `static_files_url` - The static files server URL (eg: https://static.metakgp.org)
+    /// * `static_file_storage_location` - The path to the location on the server from which the static files are served (eg: /srv/static)
+    /// * `uploaded_qps_relative_path` - The path to the uploaded question papers, relative to the static files storage location. (eg: /iqps/uploaded)
+    /// * `library_qps_relative_path` - The path to the library question papers, relative to the static files storage location. (eg: /peqp/qp)
     pub fn new(
         static_files_url: &str,
         static_file_storage_location: &Path,
         uploaded_qps_relative_path: &Path,
         library_qps_relative_path: &Path,
     ) -> Result<Self, color_eyre::eyre::Error> {
+        // The slugs for each of the uploaded papers directories
         let path_slugs = PathTriad {
+            // Use subdirectories `/unapproved` and `/approved` inside the uploaded qps path
             unapproved: uploaded_qps_relative_path.join("unapproved"),
             approved: uploaded_qps_relative_path.join("approved"),
             library: library_qps_relative_path.to_owned(),
         };
 
+        // The absolute system paths for each of the directories
         let system_paths = PathTriad {
             unapproved: path::absolute(static_file_storage_location.join(&path_slugs.unapproved))?,
             approved: path::absolute(static_file_storage_location.join(&path_slugs.approved))?,

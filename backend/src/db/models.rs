@@ -1,9 +1,16 @@
+//! Database models.
+//!
+//! These can be (should be) converted to the structs in [`crate::qp`] for sending as a response since the struct also parses the `semester` and `exam` fields and also generates the full static files URL.
+//!
+//! Use the [`From`] trait implementations.
+
 use crate::qp::Semester;
 
 use super::qp;
 use sqlx::{prelude::FromRow, types::chrono};
 
 #[derive(FromRow, Clone)]
+/// The fields of a question paper sent to the search endpoint
 pub struct DBSearchQP {
     id: i32,
     filelink: String,
@@ -16,6 +23,7 @@ pub struct DBSearchQP {
 }
 
 #[derive(FromRow, Clone)]
+/// The fields of a question paper sent to the admin dashboard endpoint
 pub struct DBAdminDashboardQP {
     id: i32,
     filelink: String,
