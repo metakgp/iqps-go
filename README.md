@@ -13,7 +13,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/metakgp/iqps">
-    <img width="140" alt="image" src="https://raw.githubusercontent.com/metakgp/design/main/logos/logo.jpg">
+    <img width="140" alt="image" src="https://raw.githubusercontent.com/metakgp/design/main/logos/black-large.jpg">
   </a>
 
   <h3 align="center">IQPS</h3>
