@@ -1,0 +1,34 @@
+services:
+  iqps-backend:
+    image: metakgporg/iqps-backend
+    container_name: iqps-backend
+    build: .
+    restart: always
+    env_file:
+      - .env
+    networks:
+      metaploy-network:
+        aliases:
+          - iqps-backend
+      metaploy-private-network:
+    volumes:
+      - ./logs:/var/log/iqps/logs
+      - ./db:/db
+      - nginx-config-volume:/etc/nginx/sites-enabled
+      - odins-vault:/srv/static
+
+networks:
+  metaploy-network:
+    external: true
+    name: metaploy-network
+  metaploy-private-network:
+    external: true
+    name: metaploy-private-network
+
+volumes:
+  nginx-config-volume:
+    external: true
+    name: metaploy-nginx-config-volume
+  odins-vault:
+    external: true
+    name: odins-vault

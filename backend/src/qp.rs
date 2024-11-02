@@ -1,7 +1,6 @@
 use color_eyre::eyre::eyre;
 use duplicate::duplicate_item;
 use serde::Serialize;
-use url::Url;
 
 use crate::env::EnvVars;
 
@@ -33,7 +32,7 @@ impl From<Semester> for String {
         match value {
             Semester::Autumn => "autumn".into(),
             Semester::Spring => "spring".into(),
-            Semester::Unknown => "unknown".into(),
+            Semester::Unknown => "".into(),
         }
     }
 }
@@ -77,7 +76,7 @@ impl From<Exam> for String {
         match value {
             Exam::Midsem => "midsem".into(),
             Exam::Endsem => "endsem".into(),
-            Exam::Unknown => "unknown".into(),
+            Exam::Unknown => "".into(),
             Exam::CT(None) => "ct".into(),
             Exam::CT(Some(i)) => format!("ct{}", i),
         }
@@ -85,11 +84,11 @@ impl From<Exam> for String {
 }
 
 #[duplicate_item(
-    StrSerializeType;
+    ExamSem;
     [ Exam ];
     [ Semester ];
 )]
-impl Serialize for StrSerializeType {
+impl Serialize for ExamSem {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -131,11 +130,8 @@ pub struct AdminDashboardQP {
 )]
 impl QP {
     pub fn with_url(self, env_vars: &EnvVars) -> Result<Self, color_eyre::eyre::Error> {
-        let url = Url::parse(&env_vars.static_files_url)?;
-        let url = url.join(&self.filelink)?;
-
         Ok(Self {
-            filelink: url.to_string(),
+            filelink: env_vars.paths.get_url_from_slug(&self.filelink)?,
             ..self
         })
     }

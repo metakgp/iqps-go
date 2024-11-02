@@ -5,26 +5,47 @@ use http::StatusCode;
 use jwt::{Claims, RegisteredClaims, SignWithKey, VerifyWithKey};
 use serde::Deserialize;
 
-use crate::{
-    env::EnvVars,
-    routing::{self, AppError},
-};
+use crate::env::EnvVars;
 
+#[derive(Clone)]
+pub struct Auth {
+    pub jwt: String,
+    pub username: String,
+}
+
+/// Verifies whether a JWT is valid and signed with the secret key
+///
+/// Returns the username and jwt in a struct
 pub async fn verify_token(
     token: &str,
     env_vars: &EnvVars,
-) -> Result<Option<Claims>, routing::AppError> {
+) -> Result<Auth, color_eyre::eyre::Error> {
     let jwt_key = env_vars.get_jwt_key()?;
     let claims: Result<Claims, _> = token.verify_with_key(&jwt_key);
 
     if let Ok(claims) = claims {
-        Ok(Some(claims))
+        if let Some(username) = claims.private.get("username") {
+            if let Some(username) = username.as_str() {
+                Ok(Auth {
+                    jwt: token.to_owned(),
+                    username: username.to_owned(),
+                })
+            } else {
+                Err(eyre!("Username is not a string."))
+            }
+        } else {
+            Err(eyre!("Username not in the claims."))
+        }
     } else {
-        Ok(None)
+        Err(eyre!("Claims not found on the JWT."))
     }
 }
 
-async fn generate_token(username: &str, env_vars: &EnvVars) -> Result<String, routing::AppError> {
+/// Generates a JWT with the username (for claims) and secret key
+async fn generate_token(
+    username: &str,
+    env_vars: &EnvVars,
+) -> Result<String, color_eyre::eyre::Error> {
     let jwt_key = env_vars.get_jwt_key()?;
 
     let expiration = chrono::Utc::now()
@@ -79,7 +100,7 @@ struct GithubMembershipResponse {
 pub async fn authenticate_user(
     code: &String,
     env_vars: &EnvVars,
-) -> Result<Option<String>, routing::AppError> {
+) -> Result<Option<String>, color_eyre::eyre::Error> {
     let client = reqwest::Client::new();
 
     // Get the access token for authenticating other endpoints
@@ -99,7 +120,7 @@ pub async fn authenticate_user(
             response.text().await?
         );
 
-        return Err(eyre!("Github API response error.")).map_err(AppError::from);
+        return Err(eyre!("Github API response error."));
     }
 
     let access_token =
@@ -122,7 +143,7 @@ pub async fn authenticate_user(
             response.text().await?
         );
 
-        return Err(eyre!("Github API response error.")).map_err(AppError::from);
+        return Err(eyre!("Github API response error."));
     }
 
     let username = serde_json::from_slice::<GithubUserResponse>(&response.bytes().await?)
@@ -155,7 +176,7 @@ pub async fn authenticate_user(
             response.text().await?
         );
 
-        return Err(eyre!("Github API response error.")).map_err(AppError::from);
+        return Err(eyre!("Github API response error."));
     }
 
     let state = serde_json::from_slice::<GithubMembershipResponse>(&response.bytes().await?)

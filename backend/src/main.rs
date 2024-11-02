@@ -4,6 +4,7 @@ use tracing_subscriber::prelude::*;
 mod auth;
 mod db;
 mod env;
+mod pathutils;
 mod qp;
 mod routing;
 
@@ -38,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing::subscriber::set_global_default(subscriber)?;
 
     // Database connection
-    let database = db::Database::try_new(&env_vars).await?;
+    let database = db::Database::new(&env_vars).await?;
 
     // Server
     let listener =

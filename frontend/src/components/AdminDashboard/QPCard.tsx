@@ -81,13 +81,13 @@ export function QPCard({ qPaper, onEdit, onDelete, hasOcr }: IQPCardProps) {
                 >
                     <FaFilePdf size="1.5rem" />
                 </a>
+                {
+                    onEdit !== undefined &&
+                    <button onClick={onEdit} className="edit-btn btn">
+                        <FaRegPenToSquare size="1.5rem" />
+                    </button>
+                }
                 {!qPaper.approve_status && <>
-                    {
-                        onEdit !== undefined &&
-                        <button onClick={onEdit} className="edit-btn btn">
-                            <FaRegPenToSquare size="1.5rem" />
-                        </button>
-                    }
                     {
                         onDelete !== undefined &&
                         <button
