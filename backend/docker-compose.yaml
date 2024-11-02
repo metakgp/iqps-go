@@ -13,7 +13,6 @@ services:
       metaploy-private-network:
     volumes:
       - ./logs:/var/log/iqps/logs
-      - ./db:/db
       - nginx-config-volume:/etc/nginx/sites-enabled
       - odins-vault:/srv/static
 
