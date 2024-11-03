@@ -198,8 +198,8 @@ function ResultCard(result: ISearchResult) {
 		<td style={{ display: 'flex', alignItems: 'center' }}>
 			<p title={getExamTooltip(result.exam)}>
 				{result.course_name}
-				{result.course_code ? ` (${result.course_code})` : ''}
-				{auth.isAuthenticated ? ` (id: ${result.id})` : ''}
+				{result.course_code && <>&nbsp;({result.course_code})</>}
+				{auth.isAuthenticated && <>&nbsp;(id: ${result.id})</>}
 				<span className="result-card-tag">{getExamTag(result.exam)}</span>
 			</p>
 			<div className="result-card-btns">
