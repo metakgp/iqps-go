@@ -184,9 +184,17 @@ function ResultCard(result: ISearchResult) {
 				`Class Test ${exam.slice(2).length > 0 ? exam.slice(2) : '?'}`;
 	}
 
+	const formatSem = (semester: ISearchResult['semester']) => {
+		if (semester.length > 0) {
+			return semester[0].toUpperCase() + semester.slice(1)
+		} else {
+			return "Unknown";
+		}
+	}
+
 	return <tr className="result-card">
 		<td>{result.year}</td>
-		<td>{result.semester[0].toUpperCase() + result.semester.slice(1)}</td>
+		<td>{formatSem(result.semester)}</td>
 		<td style={{ display: 'flex', alignItems: 'center' }}>
 			<p title={getExamTooltip(result.exam)}>
 				{result.course_name}&nbsp;{auth.isAuthenticated ? `(id: ${result.id})` : ''}
