@@ -103,6 +103,7 @@ function SearchResults(props: ISearchResultsProps) {
 										<thead>
 											<tr>
 												<th>Year</th>
+												<th>Semester</th>
 												<th>Course Name</th>
 											</tr>
 										</thead>
@@ -185,6 +186,7 @@ function ResultCard(result: ISearchResult) {
 
 	return <tr className="result-card">
 		<td>{result.year}</td>
+		<td>{result.semester[0].toUpperCase() + result.semester.slice(1)}</td>
 		<td style={{ display: 'flex', alignItems: 'center' }}>
 			<p title={getExamTooltip(result.exam)}>
 				{result.course_name}&nbsp;{auth.isAuthenticated ? `(id: ${result.id})` : ''}
