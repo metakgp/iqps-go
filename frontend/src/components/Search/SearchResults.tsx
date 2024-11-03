@@ -168,7 +168,7 @@ function ResultCard(result: ISearchResult) {
 		// unknown - N/A
 		// midsem - MID; endsem - END
 		// ctx - CT1, CT2, etc.
-		return exam === 'unknown' ? 'N/A' :
+		return exam === '' ? 'N/A' :
 			(exam === 'midsem' || exam === 'endsem') ?
 				exam.slice(0, 3).toUpperCase() :
 				exam.toUpperCase();
@@ -178,7 +178,7 @@ function ResultCard(result: ISearchResult) {
 		// unknown - Exam Unknown
 		// midsem - Midsem; endsem - Endsem
 		// ctx - Class Test 1, Class Test 2, etc.
-		return exam === 'unknown' ? 'Exam Unknown' :
+		return exam === '' ? 'Exam Unknown' :
 			(exam === 'midsem' || exam === 'endsem') ?
 				exam[0].toUpperCase() + exam.slice(1) :
 				`Class Test ${exam.slice(2).length > 0 ? exam.slice(2) : '?'}`;

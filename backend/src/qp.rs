@@ -99,7 +99,7 @@ impl From<Exam> for String {
         match value {
             Exam::Midsem => "midsem".into(),
             Exam::Endsem => "endsem".into(),
-            Exam::Unknown => "unknown".into(),
+            Exam::Unknown => "".into(),
             Exam::CT(None) => "ct".into(),
             Exam::CT(Some(i)) => format!("ct{}", i),
         }

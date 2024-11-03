@@ -10,7 +10,7 @@ export interface IQuestionPaper {
     course_name: string;
     year: number;
     semester: Semester;
-    exam: Exam | "ct" | "unknown";
+    exam: Exam | "ct" | "";
 };
 
 export interface ISearchResult extends IQuestionPaper {

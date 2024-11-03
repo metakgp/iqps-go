@@ -87,7 +87,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				}
 
 				if (validateYear(data.year)) similarityDetails['year'] = data.year;
-				if (validateExam(data.exam) && data.exam !== 'unknown' && data.exam !== 'ct') similarityDetails['exam'] = data.exam;
+				if (validateExam(data.exam) && data.exam !== '' && data.exam !== 'ct') similarityDetails['exam'] = data.exam;
 				if (validateSemester(data.semester)) similarityDetails['semester'] = data.semester;
 
 				getSimilarPapers(similarityDetails);

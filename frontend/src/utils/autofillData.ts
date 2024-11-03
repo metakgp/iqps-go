@@ -159,7 +159,7 @@ export const autofillData = async (
 
     const course_code = filenameOrPdfFallback(filenameCourseCode, pdfCourseCode, validateCourseCode, 'Unknown Course');
     const year = filenameOrPdfFallback(filenameYear, pdfYear, validateYear, new Date().getFullYear());
-    const exam = filenameOrPdfFallback(filenameExam, pdfExam, validateExam, 'unknown');
+    const exam = filenameOrPdfFallback(filenameExam, pdfExam, validateExam, '');
     const semester = filenameOrPdfFallback(filenameSemester, pdfSemester, validateSemester, new Date().getMonth() > 7 ? "autumn" : "spring");
 
     const qpDetails: IQuestionPaper = {
