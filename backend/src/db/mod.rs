@@ -129,18 +129,16 @@ impl Database {
         let course_code = course_code.unwrap_or(current_details.course_code);
         let course_name = course_name.unwrap_or(current_details.course_name);
         let year = year.unwrap_or(current_details.year);
-        let semester: String = if let Some(semester) = semester {
-            Semester::try_from(&semester)?
-        } else {
-            current_details.semester
-        }
-        .into();
-        let exam: String = if let Some(exam) = exam {
-            Exam::try_from(&exam)?
-        } else {
-            current_details.exam
-        }
-        .into();
+        let semester: String = semester
+            .map(|sem| Semester::try_from(&sem))
+            .transpose()?
+            .unwrap_or(current_details.semester)
+            .into();
+        let exam: String = exam
+            .map(|exam| Exam::try_from(&exam))
+            .transpose()?
+            .unwrap_or(current_details.exam)
+            .into();
         let approve_status = approve_status.unwrap_or(current_details.approve_status);
 
         // Set the new filelink
