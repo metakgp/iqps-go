@@ -28,22 +28,19 @@ pub async fn verify_token(
     let jwt_key = env_vars.get_jwt_key()?;
     let claims: Result<Claims, _> = token.verify_with_key(&jwt_key);
 
-    if let Ok(claims) = claims {
-        if let Some(username) = claims.private.get("username") {
-            if let Some(username) = username.as_str() {
-                Ok(Auth {
-                    jwt: token.to_owned(),
-                    username: username.to_owned(),
-                })
-            } else {
-                Err(eyre!("Username is not a string."))
-            }
-        } else {
-            Err(eyre!("Username not in the claims."))
-        }
-    } else {
-        Err(eyre!("Claims not found on the JWT."))
-    }
+    let claims = claims.map_err(|_| eyre!("Claims not found on the JWT."))?;
+    let username = claims
+        .private
+        .get("username")
+        .ok_or(eyre!("Username not in the claims."))?;
+    let username = username
+        .as_str()
+        .ok_or(eyre!("Username is not a string."))?;
+
+    Ok(Auth {
+        jwt: token.to_owned(),
+        username: username.to_owned(),
+    })
 }
 
 /// Generates a JWT with the username (for claims) and secret key
