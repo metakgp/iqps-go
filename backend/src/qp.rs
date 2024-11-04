@@ -78,10 +78,8 @@ impl TryFrom<&String> for Exam {
             Ok(Exam::Endsem)
         } else if let Some(stripped) = value.strip_prefix("ct") {
             if stripped.is_empty() {
-                return Ok(Exam::CT(None));
-            }
-
-            if let Ok(i) = stripped.parse::<usize>() {
+                Ok(Exam::CT(None))
+            } else if let Ok(i) = stripped.parse::<usize>() {
                 Ok(Exam::CT(Some(i)))
             } else {
                 Err(eyre!("Error parsing exam: Invalid class test number."))
