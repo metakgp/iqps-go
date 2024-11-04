@@ -1,7 +1,10 @@
 //! Utils for parsing paths on the server and to store/retrieve paths from the database
 //! A "slug" is the part of the path common to the question paper and is stored in the database. Depending on the requirements, either a URL (eg: static.metakgp.org) or a path (/srv/static) can be prepended to the slug to get the final path to copy/serve/move the question paper to/from.
 
-use std::{fs, path::{self, Path, PathBuf}};
+use std::{
+    fs,
+    path::{self, Path, PathBuf},
+};
 
 use color_eyre::eyre::eyre;
 use url::Url;
