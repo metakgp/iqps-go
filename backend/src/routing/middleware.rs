@@ -25,27 +25,26 @@ pub async fn verify_jwt_middleware(
             if let Ok(auth) = auth {
                 // If auth is fine, add it to the request extensions
                 request.extensions_mut().insert(auth);
+                Ok(next.run(request).await)
             } else {
-                return Ok(BackendResponse::<()>::error(
+                Ok(BackendResponse::<()>::error(
                     "Authorization token invalid.".into(),
                     StatusCode::UNAUTHORIZED,
                 )
-                .into_response());
+                .into_response())
             }
         } else {
-            return Ok(BackendResponse::<()>::error(
+            Ok(BackendResponse::<()>::error(
                 "Authorization header format invalid.".into(),
                 StatusCode::UNAUTHORIZED,
             )
-            .into_response());
+            .into_response())
         }
     } else {
-        return Ok(BackendResponse::<()>::error(
+        Ok(BackendResponse::<()>::error(
             "Authorization header missing.".into(),
             StatusCode::UNAUTHORIZED,
         )
-        .into_response());
+        .into_response())
     }
-
-    Ok(next.run(request).await)
 }
