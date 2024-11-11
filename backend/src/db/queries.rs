@@ -128,7 +128,7 @@ pub fn get_qp_search_query(exam_filter: ExamFilter) -> (String, bool) {
     (
         format!("
             WITH filtered AS (
-                SELECT * from iqps {exam_filter}
+                SELECT * from iqps {exam_filter} ORDER BY year DESC
             ),
             fuzzy AS (
                 SELECT id,
