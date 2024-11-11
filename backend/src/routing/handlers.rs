@@ -428,7 +428,6 @@ pub async fn similar(
             body.get("year")
                 .map(|year| year.parse::<i32>())
                 .transpose()?,
-            body.get("course_name"),
             body.get("semester"),
             body.get("exam"),
         )

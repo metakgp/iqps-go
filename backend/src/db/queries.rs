@@ -5,26 +5,21 @@
 use crate::qp::Exam;
 
 /// Query to get similar papers. Matches `course_code` ($1) always. Other parameters are optional and can be enabled or disabled using the arguments to this function.
-pub fn get_similar_papers_query(
-    year: bool,
-    course_name: bool,
-    semester: bool,
-    exam: bool,
-) -> String {
+///
+/// Query parameters:
+/// `$1` - `course_code``
+/// `$2` - `year`
+/// `$3` - `semester`
+/// `$3` - `exam`
+pub fn get_similar_papers_query(year: bool, semester: bool, exam: bool) -> String {
     let mut param_num = 1;
 
     format!(
-        "SELECT {} from iqps where is_deleted=false and course_code = $1 {} {} {} {}",
+        "SELECT {} from iqps where is_deleted=false and course_code = $1 {} {} {}",
         ADMIN_DASHBOARD_QP_FIELDS,
         if year {
             param_num += 1;
             format!("AND year=${}", param_num)
-        } else {
-            "".to_string()
-        },
-        if course_name {
-            param_num += 1;
-            format!("AND course_name=${}", param_num)
         } else {
             "".to_string()
         },

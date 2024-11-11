@@ -221,20 +221,14 @@ impl Database {
         &self,
         course_code: &str,
         year: Option<i32>,
-        course_name: Option<&String>,
         semester: Option<&String>,
         exam: Option<&String>,
     ) -> Result<Vec<AdminDashboardQP>, sqlx::Error> {
-        let query_sql = queries::get_similar_papers_query(
-            year.is_some(),
-            course_name.is_some(),
-            semester.is_some(),
-            exam.is_some(),
-        );
+        let query_sql =
+            queries::get_similar_papers_query(year.is_some(), semester.is_some(), exam.is_some());
         let query = sqlx::query_as(&query_sql).bind(course_code);
 
         let query = query.bind(year);
-        let query = query.bind(course_name);
         let query = query.bind(semester);
         let query = query.bind(exam);
 
