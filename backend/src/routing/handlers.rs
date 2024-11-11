@@ -63,19 +63,32 @@ pub async fn search(
     Query(params): Query<HashMap<String, String>>,
 ) -> HandlerReturn<Vec<qp::SearchQP>> {
     let response = if let Some(query) = params.get("query") {
-        let exam = params.get("exam").map(qp::Exam::try_from).transpose()?;
+        let exam_query_str = params
+            .get("exam")
+            .map(|value| value.to_owned())
+            .unwrap_or("".into());
 
-        let papers = state.db.search_papers(query, exam).await?;
+        if let Ok(exam_filter) = (&exam_query_str).try_into() {
+            let papers = state
+                .db
+                .search_papers(query, exam_filter, exam_query_str.to_owned())
+                .await?;
 
-        let papers = papers
-            .iter()
-            .map(|paper| paper.clone().with_url(&state.env_vars))
-            .collect::<Result<Vec<qp::SearchQP>, color_eyre::eyre::Error>>()?;
+            let papers = papers
+                .iter()
+                .map(|paper| paper.clone().with_url(&state.env_vars))
+                .collect::<Result<Vec<qp::SearchQP>, color_eyre::eyre::Error>>()?;
 
-        Ok(BackendResponse::ok(
-            format!("Successfully fetched {} papers.", papers.len()),
-            papers,
-        ))
+            Ok(BackendResponse::ok(
+                format!("Successfully fetched {} papers.", papers.len()),
+                papers,
+            ))
+        } else {
+            Ok(BackendResponse::error(
+                "Invalid `exam` URL parameter.".into(),
+                StatusCode::BAD_REQUEST,
+            ))
+        }
     } else {
         Ok(BackendResponse::error(
             "`query` URL parameter is required.".into(),
