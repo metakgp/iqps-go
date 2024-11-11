@@ -10,7 +10,7 @@ use axum::{
     http::StatusCode,
     Extension,
 };
-use color_eyre::eyre::ContextCompat;
+use color_eyre::eyre::{ContextCompat, Result};
 use http::HeaderMap;
 use serde::Serialize;
 use tokio::fs;
@@ -435,6 +435,9 @@ pub async fn similar(
 
     Ok(BackendResponse::ok(
         format!("Found {} similar papers.", papers.len()),
-        papers,
+        papers
+            .iter()
+            .map(|paper| paper.to_owned().with_url(&state.env_vars))
+            .collect::<Result<Vec<AdminDashboardQP>>>()?,
     ))
 }
