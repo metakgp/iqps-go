@@ -24,7 +24,7 @@ export function QPCard({ qPaper, onEdit, onDelete, hasOcr }: IQPCardProps) {
             const first_confirmation = window.confirm(`Are you sure you want to DELETE the paper ${qPaper.course_code} - ${qPaper.course_name}?`);
 
             if (first_confirmation) {
-                let minimum_prompt_time: number = 5; // In seconds
+                let minimum_prompt_time: number = 3; // In seconds
 
                 let num_prompts = 1;
                 let prompt_started = new Date().getTime() / 1000;
