@@ -80,70 +80,63 @@ pub fn get_all_unapproved_query() -> String {
     format!("SELECT {} FROM iqps WHERE approve_status = false and is_deleted=false ORDER BY upload_timestamp ASC", ADMIN_DASHBOARD_QP_FIELDS)
 }
 
-/// Searches for papers using the given query_text (parameter `$1`). This is total voodoo by Rajiv Harlalka. The second parameter can be used to filter by exam.
-/// // TODO: @Rajiv please update this documentation to explain the voodoo.
-const QP_SEARCH: &str = "
-with fuzzy as (
-select id,
-	   similarity(course_code || ' ' || course_name, $1) as sim_score,
-	   row_number() over (order by similarity(course_code || ' ' || course_name, $1) desc) as rank_ix
-from iqps
-where (course_code || ' ' || course_name) %>> $1 AND approve_status = true
-order by rank_ix
-limit 30
-),
-full_text as (
-select
-id,
-ts_rank_cd(fts_course_details, websearch_to_tsquery($1)) as rank_score,
-row_number() over(order by ts_rank_cd(fts_course_details , websearch_to_tsquery($1)) desc) as rank_ix
-from
-iqps
-where
-fts_course_details @@ websearch_to_tsquery($1)
-AND approve_status = true
-order by rank_ix
-limit 30
-),
-partial_search as (
-select id,
-ts_rank_cd(fts_course_details , to_tsquery('simple', websearch_to_tsquery('simple', $1)::text || ':*' )) as rank_score,
-row_number() over(order by ts_rank_cd(fts_course_details , to_tsquery('simple', websearch_to_tsquery('simple', $1)::text || ':*' )) desc) as rank_ix
-from iqps where
-  fts_course_details @@ to_tsquery(
-	'simple',
-	websearch_to_tsquery('simple', $1)::text || ':*'
-  )
-  AND approve_status = true
-limit 30
-),  result as (
-select
-iqps.id,iqps.course_code, iqps.course_name, iqps.year, iqps.exam, iqps.filelink, iqps.from_library, iqps.upload_timestamp, iqps.approve_status, iqps.semester
-from
-fuzzy
-full outer join full_text on fuzzy.id = full_text.id
-full outer join partial_search on coalesce(fuzzy.id, full_text.id) = partial_search.id
-join iqps on coalesce(fuzzy.id, full_text.id, partial_search.id) = iqps.id
-order by
-coalesce(1.0 / (50 + fuzzy.rank_ix), 0.0) * 1 +
-coalesce(1.0 / (50 + full_text.rank_ix), 0.0) * 1 +
-coalesce(1.0 / (50 + partial_search.rank_ix), 0.0) * 1
-desc
-)";
-
 /// Returns the query for searching question papers. It is mostly voodoo, @Rajiv please update the documentation.
 ///
 /// Optionally, the `exam` argument can be used to also add a clause to match the exam field.
 pub fn get_qp_search_query(exam: bool) -> String {
-    let mut query = QP_SEARCH.to_owned();
+    let exam_filter = if exam {
+        "WHERE (exam = $2 OR exam = '')"
+    } else {
+        ""
+    };
 
-    query.push_str(&format!(" SELECT {} FROM result", SEARCH_QP_FIELDS));
-
-    if exam {
-        query.push_str(" WHERE (exam = $2 or exam = '')");
-    }
-
-    query
+    format!("
+        WITH filtered AS (
+            SELECT * from iqps {exam_filter}
+        ),
+        fuzzy AS (
+            SELECT id,
+            similarity(course_code || ' ' || course_name, $1) AS sim_score,
+            row_number() OVER (ORDER BY similarity(course_code || ' ' || course_name, $1) DESC) AS rank_ix
+            FROM filtered
+            WHERE (course_code || ' ' || course_name) %>> $1 AND approve_status = true
+            ORDER BY rank_ix
+            LIMIT 30
+        ),
+        full_text AS (
+            SELECT id,
+                ts_rank_cd(fts_course_details, websearch_to_tsquery($1)) AS rank_score,
+                row_number() OVER (ORDER BY ts_rank_cd(fts_course_details, websearch_to_tsquery($1)) DESC) AS rank_ix
+            FROM filtered
+            WHERE fts_course_details @@ websearch_to_tsquery($1) AND approve_status = true
+            ORDER BY rank_ix
+            LIMIT 30
+        ),
+        partial_search AS (
+            SELECT id,
+                ts_rank_cd(fts_course_details, {to_tsquery}) AS rank_score,
+                row_number() OVER (ORDER BY ts_rank_cd(fts_course_details, {to_tsquery}) DESC) as rank_ix
+            FROM filtered
+            WHERE fts_course_details @@ {to_tsquery} AND approve_status = true
+            LIMIT 30
+        ),
+        result AS (
+            SELECT {intermediate_fields}
+            FROM fuzzy
+                FULL OUTER JOIN full_text ON fuzzy.id = full_text.id
+                FULL OUTER JOIN partial_search ON coalesce(fuzzy.id, full_text.id) = partial_search.id
+                JOIN filtered ON coalesce(fuzzy.id, full_text.id, partial_search.id) = filtered.id
+            ORDER BY
+                coalesce(1.0 / (50 + fuzzy.rank_ix), 0.0) * 1 +
+                coalesce(1.0 / (50 + full_text.rank_ix), 0.0) * 1 +
+                coalesce(1.0 / (50 + partial_search.rank_ix), 0.0) * 1
+            DESC
+        ) SELECT {search_qp_fields} FROM result",
+        search_qp_fields = SEARCH_QP_FIELDS,
+        to_tsquery = "to_tsquery('simple', websearch_to_tsquery('simple', $1)::text || ':*')",
+        exam_filter = exam_filter,
+        intermediate_fields = ADMIN_DASHBOARD_QP_FIELDS.split(", ").map(|field| format!("filtered.{}", field)).collect::<Vec<String>>().join(", ")
+    )
 }
 
 /// List of fields in the [`crate::db::models::DBAdminDashboardQP`] to be used with SELECT clauses
