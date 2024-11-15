@@ -40,8 +40,8 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 	const [courseNameSuggestions, setCourseNameSuggestions] = useState<ISuggestion<[course_code: string, course_name: string]>[]>([]);
 
 	// To debounce suggestion generation (which takes time due to fuzzy search)
-	const [courseCodeSuggestionGeneratedTime, setCourseCodeSuggestionGeneratedTime] = useState<number>(0);
-	const [courseNameSuggestionGeneratedTime, setCourseNameSuggestionGeneratedTime] = useState<number>(0);
+	const [courseCodeSuggTimeout, setCourseCodeSuggTimeout] = useState<number | null>(null);
+	const [courseNameSuggTimeout, setCourseNameSuggTimeout] = useState<number | null>(null);
 
 	const changeData = <K extends keyof T>(property: K, value: T[K]) => {
 		setData((prev_data) => {
@@ -113,11 +113,15 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 		keys: ['1']
 	})
 
-	useEffect(() => {
-		const delta = new Date().getTime() - courseCodeSuggestionGeneratedTime;
+	const debounce = (prevTimeout: number | null, handler: Function) => {
+		if (prevTimeout !== null) clearTimeout(prevTimeout);
+		return setTimeout(handler, 400);
+	}
 
-		if (delta > 1000) {
-			setCourseCodeSuggestions(
+	useEffect(() => {
+		setCourseCodeSuggTimeout(debounce(
+			courseCodeSuggTimeout,
+			() => setCourseCodeSuggestions(
 				trimSuggestions(
 					courseCodes.filter((code) => code.startsWith(data.course_code))
 				)
@@ -125,16 +129,13 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						return { displayValue: code, context: null }
 					})
 			)
-
-			setCourseCodeSuggestionGeneratedTime(new Date().getTime())
-		}
+		))
 	}, [data.course_code])
 
 	useEffect(() => {
-		const delta = new Date().getTime() - courseNameSuggestionGeneratedTime;
-
-		if (delta > 2000) {
-			setCourseNameSuggestions(
+		setCourseNameSuggTimeout(debounce(
+			courseNameSuggTimeout,
+			() => setCourseNameSuggestions(
 				trimSuggestions(
 					courseNamesFuse.search(data.course_name).map((result) => result.item)
 				).map(([course_code, course_name]: [string, string]) => {
@@ -144,9 +145,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 					}
 				})
 			)
-
-			setCourseNameSuggestionGeneratedTime(new Date().getTime())
-		}
+		))
 	}, [data.course_name])
 
 	const trimSuggestions = (results: any[]) => {
