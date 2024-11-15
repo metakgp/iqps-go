@@ -36,7 +36,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 	const [similarPapers, setSimilarPapers] = useState<IAdminDashboardQP[]>([]);
 	const [awaitingSimilarPapers, setAwaitingSimilarPapers] = useState<boolean>(false);
 
-	const [courseCodeSuggestions, setCourseCodeSuggestions] = useState<ISuggestion<null>[]>([]);
+	const [courseCodeSuggestions, setCourseCodeSuggestions] = useState<ISuggestion<string>[]>([]);
 	const [courseNameSuggestions, setCourseNameSuggestions] = useState<ISuggestion<[course_code: string, course_name: string]>[]>([]);
 
 	// To debounce suggestion generation (which takes time due to fuzzy search)
@@ -68,7 +68,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				setValidationErrors(errors);
 				setIsDataValid(Object.values(errors).every((err) => err === null));
 			},
-			1000
+			400
 		))
 	}, [data]);
 
@@ -102,10 +102,9 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 		}, [data.course_code, data.year, data.exam, data.semester])
 	}
 
-	const courseCodes = Object.keys(COURSE_CODE_MAP);
-	const courseNamesMap = Object.entries(COURSE_CODE_MAP);
+	const courseCodeNameMap = Object.entries(COURSE_CODE_MAP);
 
-	const courseNamesFuse = new Fuse(courseNamesMap, {
+	const courseNamesFuse = new Fuse(courseCodeNameMap, {
 		isCaseSensitive: false,
 		minMatchCharLength: 3,
 		ignoreLocation: true,
@@ -117,10 +116,10 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 			courseCodeSuggTimeout,
 			() => setCourseCodeSuggestions(
 				trimSuggestions(
-					courseCodes.filter((code) => code.startsWith(data.course_code))
+					courseCodeNameMap.filter(([code]) => code.startsWith(data.course_code))
 				)
-					.map((code) => {
-						return { displayValue: code, context: null }
+					.map(([code, name]) => {
+						return { displayValue: code, context: name }
 					})
 			)
 		))
@@ -217,8 +216,13 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						validationError={validationErrors.courseCodeErr}
 					>
 						<SuggestionTextInput
-							value={data.course_code}
+							value={data.course_code.toLowerCase() === 'unknown course' ? '' : data.course_code}
+							placeholder={data.course_code.length > 0 ? data.course_code : 'Enter course code'}
 							onValueChange={(value) => changeData('course_code', value.toUpperCase())}
+							onSuggestionSelect={({displayValue: course_code, context: course_name}) => {
+								changeData('course_code', course_code)
+								changeData('course_name', course_name)
+							}}
 							suggestions={courseCodeSuggestions}
 							inputProps={{ required: true }}
 						/>
@@ -240,7 +244,8 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 					validationError={validationErrors.courseNameErr}
 				>
 					<SuggestionTextInput
-						value={data.course_name}
+						value={data.course_name.toLowerCase() === 'unknown course' ? '' : data.course_name}
+						placeholder={data.course_name.length > 0 ? data.course_name : 'Enter course name'}
 						onValueChange={(value) => changeData('course_name', value.toUpperCase())}
 						suggestions={courseNameSuggestions}
 						onSuggestionSelect={({ context: [course_code, course_name] }) => {

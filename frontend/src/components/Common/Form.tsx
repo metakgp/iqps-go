@@ -105,6 +105,7 @@ export interface ISuggestion<T> {
 interface ISuggestionTextInputProps<T> {
 	value: string;
 	suggestions: ISuggestion<T>[];
+	placeholder?: string;
 	onSuggestionSelect?: (sugg: ISuggestion<T>) => void;
 	onValueChange: (newValue: string) => void;
 	inputProps: React.InputHTMLAttributes<HTMLInputElement> | {};
@@ -171,6 +172,7 @@ export function SuggestionTextInput<T>(props: ISuggestionTextInputProps<T>) {
 			}}
 			aria-autocomplete="none"
 			autoComplete="off"
+			placeholder={props.placeholder}
 		/>
 		<div
 			ref={suggestionRef}
