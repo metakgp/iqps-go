@@ -98,13 +98,18 @@ export function NumberInput(props: INumberInputProps) {
 	</div>
 }
 
-interface ISuggestionTextInputProps {
+interface ISuggestion<T> {
+	displayValue: string;
+	context: T;
+}
+interface ISuggestionTextInputProps<T> {
 	value: string;
-	suggestions: string[];
+	suggestions: ISuggestion<T>[];
+	onSuggestionSelect?: (sugg: ISuggestion<T>) => void;
 	onValueChange: (newValue: string) => void;
 	inputProps: React.InputHTMLAttributes<HTMLInputElement> | {};
 }
-export function SuggestionTextInput(props: ISuggestionTextInputProps) {
+export function SuggestionTextInput<T>(props: ISuggestionTextInputProps<T>) {
 	const [suggShown, setSuggShown] = useState<boolean>(false);
 	const [selectedSugg, setSelectedSugg] = useState<number>(0);
 	const suggestionRef = useRef<HTMLDivElement>(null);
@@ -116,7 +121,11 @@ export function SuggestionTextInput(props: ISuggestionTextInputProps) {
 		e.preventDefault();
 
 		if (selectedSugg < props.suggestions.length) {
-			props.onValueChange(props.suggestions[selectedSugg]);
+			if (props.onSuggestionSelect) {
+				props.onSuggestionSelect(props.suggestions[selectedSugg]);
+			} else {
+				props.onValueChange(props.suggestions[selectedSugg].displayValue);
+			}
 			setSuggShown(false);
 			setSelectedSugg(0);
 		}
@@ -173,12 +182,16 @@ export function SuggestionTextInput(props: ISuggestionTextInputProps) {
 						e.preventDefault();
 						e.stopPropagation();
 
+						if (props.onSuggestionSelect) {
+							props.onSuggestionSelect(sugg);
+						} else {
+							props.onValueChange(sugg.displayValue);
+						}
 						setSelectedSugg(0);
-						props.onValueChange(sugg);
 						setSuggShown(false);
 					}}
 				>
-					{sugg}
+					{sugg.displayValue}
 				</button>
 			))}
 		</div>

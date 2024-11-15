@@ -97,12 +97,13 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 	}
 
 	const courseCodes = Object.keys(COURSE_CODE_MAP);
-	const courseNames = Object.values(COURSE_CODE_MAP);
+	const courseNamesMap = Object.entries(COURSE_CODE_MAP);
 
-	const courseNamesFuse = new Fuse(courseNames, {
+	const courseNamesFuse = new Fuse(courseNamesMap, {
 		isCaseSensitive: false,
 		minMatchCharLength: 3,
-		ignoreLocation: true
+		ignoreLocation: true,
+		keys: ['1']
 	})
 
 	const trimSuggestions = (results: any[]) => {
@@ -174,7 +175,14 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						<SuggestionTextInput
 							value={data.course_code}
 							onValueChange={(value) => changeData('course_code', value.toUpperCase())}
-							suggestions={trimSuggestions(courseCodes.filter((code) => code.startsWith(data.course_code)))}
+							suggestions={
+								trimSuggestions(
+									courseCodes.filter((code) => code.startsWith(data.course_code))
+								)
+								.map((code) => {
+									return { displayValue: code, context: null }
+								})
+							}
 							inputProps={{ required: true }}
 						/>
 					</FormGroup>
@@ -197,7 +205,20 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 					<SuggestionTextInput
 						value={data.course_name}
 						onValueChange={(value) => changeData('course_name', value.toUpperCase())}
-						suggestions={trimSuggestions(courseNamesFuse.search(data.course_name).map((result) => result.item))}
+						suggestions={
+							trimSuggestions(
+								courseNamesFuse.search(data.course_name).map((result) => result.item)
+							).map(([course_code, course_name]: [string, string]) => {
+								return {
+									displayValue: `${course_name} (${course_code})`,
+									context: [course_code, course_name]
+								}
+							})
+						}
+						onSuggestionSelect={({context: [course_code, course_name]}) => {
+							changeData('course_name', course_name)
+							changeData('course_code', course_code)
+						}}
 						inputProps={{ required: true }}
 					/>
 				</FormGroup>
