@@ -27,8 +27,7 @@
 			gap: 0.5rem;
 
 			.spinner {
-				width: 1rem;
-				height: 1rem;
+				width: 18px;
 			}
 
 			&:hover {
@@ -36,6 +35,16 @@
 				background-color: $accent-color-darker;
 				cursor: pointer;
 				transition: all 0.2s ease;
+			}
+
+			&:disabled {
+				background-color: $bg-disabled;
+				border-color: $bg-disabled;
+
+				&:hover {
+					background-color: $bg-disabled;
+					cursor: initial;
+				}
 			}
 		}
 

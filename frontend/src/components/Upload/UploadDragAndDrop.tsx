@@ -6,7 +6,7 @@ import './styles/upload_drag_and_drop.scss';
 interface IUploadDragAndDropProps {
 	max_upload_limit: number;
 
-	addQPapers: (newFiles: File[]) => Promise<void>;
+	addQPapers: (newFiles: File[]) => void;
 	openFileDialog: React.MouseEventHandler;
 }
 export function UploadDragAndDrop(props: IUploadDragAndDropProps) {

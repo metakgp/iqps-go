@@ -36,6 +36,19 @@
 		.error-msg {
 			padding-left: 0;
 		}
+
+		.processing-msg {
+			display: flex;
+			align-items: center;
+			gap: 0.2rem;
+			margin-top: 0;
+
+			color: $accent-color-lighter;
+
+			.spinner {
+				height: 20px;
+			}
+		}
 	}
 
 	.btn-group {
@@ -70,6 +83,14 @@
 			color: $fg-color-darker;
 		}
 
+		&:disabled {
+			color: $fg-color-disabled;
+
+			&:hover {
+				background-color: initial;
+				cursor: initial;
+			}
+		}
 	}
 
 	.pills {
