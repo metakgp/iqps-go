@@ -149,6 +149,10 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 			))
 		} else {
 			setCourseNameSuggestions([])
+			if (courseNameSuggTimeout) {
+				clearTimeout(courseNameSuggTimeout)
+				setCourseCodeSuggTimeout(null)
+			}
 		}
 	}, [data.course_name])
 
