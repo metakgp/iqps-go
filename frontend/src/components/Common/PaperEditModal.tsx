@@ -115,7 +115,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 
 	const debounce = (prevTimeout: number | null, handler: Function) => {
 		if (prevTimeout !== null) clearTimeout(prevTimeout);
-		return setTimeout(handler, 400);
+		return setTimeout(handler, 600);
 	}
 
 	useEffect(() => {
@@ -133,19 +133,23 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 	}, [data.course_code])
 
 	useEffect(() => {
-		setCourseNameSuggTimeout(debounce(
-			courseNameSuggTimeout,
-			() => setCourseNameSuggestions(
-				trimSuggestions(
-					courseNamesFuse.search(data.course_name).map((result) => result.item)
-				).map(([course_code, course_name]: [string, string]) => {
-					return {
-						displayValue: `${course_name} (${course_code})`,
-						context: [course_code, course_name]
-					}
-				})
-			)
-		))
+		if (data.course_name.length > 3) {
+			setCourseNameSuggTimeout(debounce(
+				courseNameSuggTimeout,
+				() => setCourseNameSuggestions(
+					trimSuggestions(
+						courseNamesFuse.search(data.course_name).map((result) => result.item)
+					).map(([course_code, course_name]: [string, string]) => {
+						return {
+							displayValue: `${course_name} (${course_code})`,
+							context: [course_code, course_name]
+						}
+					})
+				)
+			))
+		} else {
+			setCourseNameSuggestions([])
+		}
 	}, [data.course_name])
 
 	const trimSuggestions = (results: any[]) => {
