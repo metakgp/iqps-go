@@ -42,6 +42,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 	// To debounce suggestion generation (which takes time due to fuzzy search)
 	const [courseCodeSuggTimeout, setCourseCodeSuggTimeout] = useState<number | null>(null);
 	const [courseNameSuggTimeout, setCourseNameSuggTimeout] = useState<number | null>(null);
+	const [validityTimeout, setValidityTimeout] = useState<number | null>(null);
 
 	const changeData = <K extends keyof T>(property: K, value: T[K]) => {
 		setData((prev_data) => {
@@ -52,26 +53,24 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 		});
 	}
 
+	const debounce = (prevTimeout: number | null, handler: Function, interval = 600) => {
+		if (prevTimeout !== null) clearTimeout(prevTimeout);
+		return setTimeout(handler, interval);
+	}
+
 	// Check for data validity on change
 	useEffect(() => {
-		const errors = validate(data);
+		setValidityTimeout(debounce(
+			validityTimeout,
+			() => {
+				const errors = validate(data);
 
-		setValidationErrors(errors);
-		setIsDataValid(Object.values(errors).every((err) => err === null));
-	}, [validationErrors, isDataValid]);
-
-	// Automatically fill course name if course code changes or vice versa
-	useEffect(() => {
-		const auto_course_name = getCourseFromCode(data.course_code);
-
-		if (auto_course_name !== null) changeData('course_name', auto_course_name);
-	}, [data.course_code]);
-
-	useEffect(() => {
-		const auto_course_code = getCodeFromCourse(data.course_name);
-
-		if (auto_course_code !== null) changeData('course_code', auto_course_code);
-	}, [data.course_name]);
+				setValidationErrors(errors);
+				setIsDataValid(Object.values(errors).every((err) => err === null));
+			},
+			1000
+		))
+	}, [data]);
 
 	const getSimilarPapers = async (details: IEndpointTypes['similar']['request']) => {
 		setAwaitingSimilarPapers(true);
@@ -112,11 +111,6 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 		ignoreLocation: true,
 		keys: ['1']
 	})
-
-	const debounce = (prevTimeout: number | null, handler: Function) => {
-		if (prevTimeout !== null) clearTimeout(prevTimeout);
-		return setTimeout(handler, 600);
-	}
 
 	useEffect(() => {
 		setCourseCodeSuggTimeout(debounce(
