@@ -98,7 +98,7 @@ export function NumberInput(props: INumberInputProps) {
 	</div>
 }
 
-interface ISuggestion<T> {
+export interface ISuggestion<T> {
 	displayValue: string;
 	context: T;
 }

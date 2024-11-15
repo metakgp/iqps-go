@@ -10,7 +10,7 @@ import './styles/paper_edit_modal.scss';
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
 import Spinner from "../Spinner/Spinner";
-import { FormGroup, RadioGroup, NumberInput, SuggestionTextInput } from "./Form";
+import { FormGroup, RadioGroup, NumberInput, SuggestionTextInput, ISuggestion } from "./Form";
 
 import COURSE_CODE_MAP from "../../data/courses.json";
 import { makeRequest } from "../../utils/backend";
@@ -35,6 +35,13 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 
 	const [similarPapers, setSimilarPapers] = useState<IAdminDashboardQP[]>([]);
 	const [awaitingSimilarPapers, setAwaitingSimilarPapers] = useState<boolean>(false);
+
+	const [courseCodeSuggestions, setCourseCodeSuggestions] = useState<ISuggestion<null>[]>([]);
+	const [courseNameSuggestions, setCourseNameSuggestions] = useState<ISuggestion<[course_code: string, course_name: string]>[]>([]);
+
+	// To debounce suggestion generation (which takes time due to fuzzy search)
+	const [courseCodeSuggestionGeneratedTime, setCourseCodeSuggestionGeneratedTime] = useState<number>(0);
+	const [courseNameSuggestionGeneratedTime, setCourseNameSuggestionGeneratedTime] = useState<number>(0);
 
 	const changeData = <K extends keyof T>(property: K, value: T[K]) => {
 		setData((prev_data) => {
@@ -106,6 +113,42 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 		keys: ['1']
 	})
 
+	useEffect(() => {
+		const delta = new Date().getTime() - courseCodeSuggestionGeneratedTime;
+
+		if (delta > 1000) {
+			setCourseCodeSuggestions(
+				trimSuggestions(
+					courseCodes.filter((code) => code.startsWith(data.course_code))
+				)
+					.map((code) => {
+						return { displayValue: code, context: null }
+					})
+			)
+
+			setCourseCodeSuggestionGeneratedTime(new Date().getTime())
+		}
+	}, [data.course_code])
+
+	useEffect(() => {
+		const delta = new Date().getTime() - courseNameSuggestionGeneratedTime;
+
+		if (delta > 2000) {
+			setCourseNameSuggestions(
+				trimSuggestions(
+					courseNamesFuse.search(data.course_name).map((result) => result.item)
+				).map(([course_code, course_name]: [string, string]) => {
+					return {
+						displayValue: `${course_name} (${course_code})`,
+						context: [course_code, course_name]
+					}
+				})
+			)
+
+			setCourseNameSuggestionGeneratedTime(new Date().getTime())
+		}
+	}, [data.course_name])
+
 	const trimSuggestions = (results: any[]) => {
 		if (results.length < 2) return [];
 		else return results.slice(0, 5);
@@ -175,14 +218,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						<SuggestionTextInput
 							value={data.course_code}
 							onValueChange={(value) => changeData('course_code', value.toUpperCase())}
-							suggestions={
-								trimSuggestions(
-									courseCodes.filter((code) => code.startsWith(data.course_code))
-								)
-								.map((code) => {
-									return { displayValue: code, context: null }
-								})
-							}
+							suggestions={courseCodeSuggestions}
 							inputProps={{ required: true }}
 						/>
 					</FormGroup>
@@ -205,17 +241,8 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 					<SuggestionTextInput
 						value={data.course_name}
 						onValueChange={(value) => changeData('course_name', value.toUpperCase())}
-						suggestions={
-							trimSuggestions(
-								courseNamesFuse.search(data.course_name).map((result) => result.item)
-							).map(([course_code, course_name]: [string, string]) => {
-								return {
-									displayValue: `${course_name} (${course_code})`,
-									context: [course_code, course_name]
-								}
-							})
-						}
-						onSuggestionSelect={({context: [course_code, course_name]}) => {
+						suggestions={courseNameSuggestions}
+						onSuggestionSelect={({ context: [course_code, course_name] }) => {
 							changeData('course_name', course_name)
 							changeData('course_code', course_code)
 						}}
