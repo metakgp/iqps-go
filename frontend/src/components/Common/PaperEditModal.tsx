@@ -36,7 +36,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 	const [similarPapers, setSimilarPapers] = useState<IAdminDashboardQP[]>([]);
 	const [awaitingSimilarPapers, setAwaitingSimilarPapers] = useState<boolean>(false);
 
-	const [courseCodeSuggestions, setCourseCodeSuggestions] = useState<ISuggestion<string>[]>([]);
+	const [courseCodeSuggestions, setCourseCodeSuggestions] = useState<ISuggestion<null>[]>([]);
 	const [courseNameSuggestions, setCourseNameSuggestions] = useState<ISuggestion<[course_code: string, course_name: string]>[]>([]);
 
 	// To debounce suggestion generation (which takes time due to fuzzy search)
@@ -71,6 +71,16 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 			400
 		))
 	}, [data]);
+
+	// Automatically fill the course name if course code matches
+	useEffect(() => {
+		if (data.course_code.length === 7) {
+			if (data.course_code in COURSE_CODE_MAP) {
+				changeData('course_name', COURSE_CODE_MAP[data.course_code as keyof typeof COURSE_CODE_MAP]);
+				setCourseCodeSuggestions([]);
+			}
+		}
+	}, [data.course_code])
 
 	const getSimilarPapers = async (details: IEndpointTypes['similar']['request']) => {
 		setAwaitingSimilarPapers(true);
@@ -118,8 +128,8 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				trimSuggestions(
 					courseCodeNameMap.filter(([code]) => code.startsWith(data.course_code))
 				)
-					.map(([code, name]) => {
-						return { displayValue: code, context: name }
+					.map(([code]) => {
+						return { displayValue: code, context: null }
 					})
 			)
 		))
@@ -219,10 +229,6 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 							value={data.course_code.toLowerCase() === 'unknown course' ? '' : data.course_code}
 							placeholder={data.course_code.length > 0 ? data.course_code : 'Enter course code'}
 							onValueChange={(value) => changeData('course_code', value.toUpperCase())}
-							onSuggestionSelect={({displayValue: course_code, context: course_name}) => {
-								changeData('course_code', course_code)
-								changeData('course_name', course_name)
-							}}
 							suggestions={courseCodeSuggestions}
 							inputProps={{ required: true }}
 						/>
