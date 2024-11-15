@@ -5,7 +5,7 @@ import Fuse from 'fuse.js';
 
 import { validate, validateCourseCode, validateExam, validateSemester, validateYear } from "../../utils/validateInput";
 import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
-import { getCodeFromCourse, getCourseFromCode, IExtractedDetails } from "../../utils/autofillData";
+import { getCourseFromCode, IExtractedDetails } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
