@@ -11,23 +11,13 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 export const sanitizeQP = async (qp: IQuestionPaperFile) => {
-    const sanitizedCourseName = qp.course_name
-        .replace(/[^\w\d\_]/g, "-")
-        .replace(/\$+/g, "$");
-
     const sanitizedFilename = qp.file.name
-        .replace(/[^\w\d\_]/g, "-")
-        .replace(/\$+/g, "$");
-
-    const sanitizedExam = qp.exam
         .replace(/[^\w\d\_]/g, "-")
         .replace(/\$+/g, "$");
 
     return {
         ...qp,
-        course_name: sanitizedCourseName,
         file_name: sanitizedFilename,
-        exam: sanitizedExam,
         file: qp.file,
     };
 };
