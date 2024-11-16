@@ -353,7 +353,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						<div>
 							{
 								similarPapers.length === 0 ? <p>No similar papers found.</p> :
-									similarPapers.map((paper, i) => <QPCard
+									similarPapers.filter((paper) => paper.id !== data.id).map((paper, i) => <QPCard
 										qPaper={paper}
 										key={i}
 									/>
