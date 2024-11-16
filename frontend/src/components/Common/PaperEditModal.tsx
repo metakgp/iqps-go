@@ -82,12 +82,12 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 		}
 	}, [data.course_code])
 
-	const getSimilarPapers = async (details: IEndpointTypes['similar']['request']) => {
+	const getSimilarPapers = async (details: IEndpointTypes['similar']['request'], currentPaperId: number) => {
 		setAwaitingSimilarPapers(true);
 		const response = await makeRequest('similar', 'get', details, auth.jwt);
 
 		if (response.status === "success") {
-			setSimilarPapers(response.data);
+			setSimilarPapers(response.data.filter((paper) => paper.id !== currentPaperId));
 		} else {
 			toast.error(`Error getting similar papers: ${response.message} (${response.status_code})`);
 		}
@@ -106,7 +106,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				if (validateExam(data.exam) && data.exam !== '' && data.exam !== 'ct') similarityDetails['exam'] = data.exam;
 				if (validateSemester(data.semester)) similarityDetails['semester'] = data.semester;
 
-				getSimilarPapers(similarityDetails);
+				getSimilarPapers(similarityDetails, 'id' in data ? data.id : -1);
 			}
 
 		}, [data.course_code, data.year, data.exam, data.semester])
@@ -353,7 +353,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						<div>
 							{
 								similarPapers.length === 0 ? <p>No similar papers found.</p> :
-									similarPapers.filter((paper) => paper.id !== data.id).map((paper, i) => <QPCard
+									similarPapers.map((paper, i) => <QPCard
 										qPaper={paper}
 										key={i}
 									/>
