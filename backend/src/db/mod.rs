@@ -8,7 +8,7 @@ use std::time::Duration;
 
 use crate::{
     env::EnvVars,
-    pathutils::PaperCategory,
+    pathutils::{PaperCategory, Paths},
     qp::{self, AdminDashboardQP, Exam, Semester},
     routing::{EditReq, FileDetails},
 };
@@ -147,8 +147,11 @@ impl Database {
         } else if approve_status {
             env_vars.paths.get_slug(
                 &format!(
-                    "{}_{}_{}_{}_{}_{}.pdf",
-                    id, course_code, course_name, year, semester, exam
+                    "{}.pdf",
+                    Paths::sanitize_path(&format!(
+                        "{}_{}_{}_{}_{}_{}",
+                        id, course_code, course_name, year, semester, exam
+                    ))
                 ),
                 PaperCategory::Approved,
             )

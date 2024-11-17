@@ -181,6 +181,8 @@ pub async fn edit(
     let old_filepath = state.env_vars.paths.get_path_from_slug(&old_filelink);
     let new_filepath = state.env_vars.paths.get_path_from_slug(&new_qp.filelink);
 
+    println!("{}, {}", new_filepath.to_string_lossy(), old_filepath.to_string_lossy());
+
     if fs::copy(old_filepath, new_filepath).await.is_ok() {
         // Commit the transaction
         tx.commit().await?;

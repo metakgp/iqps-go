@@ -174,4 +174,19 @@ impl Paths {
     pub fn get_url_from_slug(&self, slug: &str) -> Result<String, color_eyre::eyre::Error> {
         Ok(self.static_files_url.join(slug)?.as_str().to_string())
     }
+
+    /// Removes any non-alphanumeric character and replaces whitespaces with `-`
+    /// Also replaces `/` with `-` and multiple spaces or hyphens will be replaced with a single one
+    pub fn sanitize_path(path: &str) -> String {
+        path.replace('/', "-") // Replace specific characters with a `-`
+            .replace('-', " ") // Convert any series of spaces and hyphens to just spaces
+            .split_whitespace() // Split at whitespaces to later replace all whitespaces with `-`
+            .map(|part| {
+                part.chars()
+                    .filter(|&character| character.is_alphanumeric() || character == '-' || character == '_') // Remove any character that is not a `-` or alphanumeric
+                    .collect::<String>()
+            })
+            .collect::<Vec<String>>()
+            .join("-") // Join the parts with `-`
+    }
 }
