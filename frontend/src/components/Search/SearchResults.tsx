@@ -103,7 +103,7 @@ function SearchResults(props: ISearchResultsProps) {
 										<thead>
 											<tr>
 												<th>Year</th>
-												<th>Semester</th>
+												<th>Exam</th>
 												<th>Course Name</th>
 											</tr>
 										</thead>
@@ -164,43 +164,43 @@ function ResultsFilter(props: IResultsFilterProps) {
 function ResultCard(result: ISearchResult) {
 	const auth = useAuthContext();
 
-	const getExamTag = (exam: ISearchResult['exam']) => {
-		// unknown - N/A
+	const getSemTag = (sem: ISearchResult['semester']) => {
+		// empty string - N/A
 		// midsem - MID; endsem - END
 		// ctx - CT1, CT2, etc.
-		return exam === '' ? 'N/A' :
-			(exam === 'midsem' || exam === 'endsem') ?
-				exam.slice(0, 3).toUpperCase() :
-				exam.toUpperCase();
+		return sem === '' ? 'N/A' :
+			(sem === 'autumn' || sem === 'spring') ?
+				sem.slice(0, 3).toUpperCase() :
+				sem;
 	}
 
-	const getExamTooltip = (exam: ISearchResult['exam']) => {
-		// unknown - Exam Unknown
+	const getSemesterTooltip = (semester: ISearchResult['semester']) => {
+		if (semester.length > 0) {
+			return semester[0].toUpperCase() + semester.slice(1) + ' Semester'
+		} else {
+			return "Unknown Semester";
+		}
+	}
+
+	const formatExam = (exam: ISearchResult['exam']) => {
+		// empty string - Unknown
 		// midsem - Midsem; endsem - Endsem
 		// ctx - Class Test 1, Class Test 2, etc.
-		return exam === '' ? 'Exam Unknown' :
+		return exam === '' ? 'Unknown' :
 			(exam === 'midsem' || exam === 'endsem') ?
 				exam[0].toUpperCase() + exam.slice(1) :
 				`Class Test ${exam.slice(2).length > 0 ? exam.slice(2) : '?'}`;
 	}
 
-	const formatSem = (semester: ISearchResult['semester']) => {
-		if (semester.length > 0) {
-			return semester[0].toUpperCase() + semester.slice(1)
-		} else {
-			return "Unknown";
-		}
-	}
-
 	return <tr className="result-card">
 		<td>{result.year}</td>
-		<td>{formatSem(result.semester)}</td>
+		<td>{formatExam(result.exam)}</td>
 		<td style={{ display: 'flex', alignItems: 'center' }}>
-			<p title={getExamTooltip(result.exam)}>
+			<p title={getSemesterTooltip(result.semester)}>
 				{result.course_name}
 				{result.course_code && <>&nbsp;({result.course_code})</>}
 				{auth.isAuthenticated && <>&nbsp;(id: {result.id})</>}
-				<span className="result-card-tag">{getExamTag(result.exam)}</span>
+				<span className="result-card-tag">{getSemTag(result.semester)}</span>
 			</p>
 			<div className="result-card-btns">
 				<a

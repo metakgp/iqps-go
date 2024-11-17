@@ -297,7 +297,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 							{ label: 'Autumn Semester', value: 'autumn' },
 							{ label: 'Spring Semester', value: 'spring' }
 						]}
-						value={data.semester}
+						value={data.semester as Semester}
 						onSelect={(value: Semester) => changeData('semester', value)}
 					/>
 				</FormGroup>

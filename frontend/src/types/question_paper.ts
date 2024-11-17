@@ -9,7 +9,7 @@ export interface IQuestionPaper {
     course_code: string;
     course_name: string;
     year: number;
-    semester: Semester;
+    semester: Semester | "";
     exam: Exam | "ct" | "";
 };
 

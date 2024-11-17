@@ -77,7 +77,7 @@ export interface IEndpointTypes {
 		request: {
 			course_code: string;
 			year?: number;
-			semester?: Semester;
+			semester?: Semester | '';
 			exam?: Exam;
 		},
 		response: IAdminDashboardQP[];
