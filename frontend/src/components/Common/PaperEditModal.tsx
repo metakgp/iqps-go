@@ -355,7 +355,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						disabled={!isDataValid}
 						className="save-btn"
 					>
-						{'approve_status' in data ? 'Edit Details' : 'Save'}
+						{'approve_status' in data ? 'Update Details' : 'Save'}
 					</button>
 
 					{
