@@ -201,7 +201,7 @@ function AdminDashboard() {
 						null
 				}
 				qPaper={unapprovedPapers[selectedQPaperIndex]}
-				updateQPaper={() => handlePaperEdit(unapprovedPapers[selectedQPaperIndex])}
+				updateQPaper={(qp) => handlePaperEdit(qp)}
 				ocrDetails={ocrDetails.get(unapprovedPapers[selectedQPaperIndex].id)}
 			/>
 		)}
