@@ -64,6 +64,10 @@
 				padding: 0.5rem 1.5rem;
 				border-radius: 1rem;
 
+				display: flex;
+				gap: 5px;
+				align-items: center;
+
 				&.cancel-btn {
 					background-color: $rejected-color;
 
@@ -73,15 +77,27 @@
 				}
 
 				&.save-btn {
+					background-color: $approved-color;
+
+					&:hover {
+						background-color: $approved-color-darker;
+					}
+				}
+
+				&.next-btn, &.prev-btn {
 					background-color: $accent-color;
 
 					&:hover {
 						background-color: $accent-color-darker;
 					}
+				}
 
-					&.disabled {
-						background-color: $bg-disabled;
-					}
+				&.prev-btn {
+					margin-right: auto;
+				}
+
+				&:disabled {
+					background-color: $bg-disabled !important;
 				}
 			}
 		}

@@ -8,7 +8,7 @@ import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } 
 import { getCourseFromCode, IExtractedDetails } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
 import { IoMdCheckmarkCircle } from "react-icons/io";
-import { FaFilePdf } from "react-icons/fa6";
+import { FaArrowLeft, FaArrowRight, FaFilePdf } from "react-icons/fa6";
 import Spinner from "../Spinner/Spinner";
 import { FormGroup, RadioGroup, NumberInput, SuggestionTextInput, ISuggestion } from "./Form";
 
@@ -21,6 +21,8 @@ import { QPCard } from "../AdminDashboard/QPCard";
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
 	onClose: () => void;
+	selectPrev?: (() => void) | null;
+	selectNext?: (() => void) | null;
 	qPaper: T;
 	updateQPaper: UpdateQPHandler<T>;
 	ocrDetails?: IExtractedDetails;
@@ -319,6 +321,20 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				}
 
 				<div className="control-group">
+					{
+						props.selectPrev !== undefined &&
+						<button
+							onClick={(e) => {
+								e.preventDefault();
+								props.selectPrev!();
+							}}
+							className="prev-btn"
+							disabled={props.selectPrev === null}
+						>
+							<FaArrowLeft /> Previous
+						</button>
+					}
+
 					<button
 						onClick={(e) => {
 							e.preventDefault();
@@ -338,30 +354,46 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 							props.onClose();
 						}}
 						disabled={!isDataValid}
-						className={`save-btn ${!isDataValid ? 'disabled' : ''}`}
+						className="save-btn"
 					>
 						{'approve_status' in data ? 'Edit Details' : 'Save'}
 					</button>
+
+					{
+						props.selectNext !== undefined &&
+						<button
+							onClick={(e) => {
+								e.preventDefault();
+								props.selectNext!();
+							}}
+							className="next-btn"
+							disabled={props.selectNext === null}
+						>
+							Next <FaArrowRight />
+						</button>
+					}
 				</div>
 			</form>
 		</div>
 		{'filelink' in data &&
-			<div className="modal" style={{ minWidth: '20%' }}>
-				<h2>Similar Papers</h2>
-				{
-					awaitingSimilarPapers ? <div style={{ justifyContent: 'center', display: 'flex' }}><Spinner /></div> :
-						<div>
-							{
-								similarPapers.length === 0 ? <p>No similar papers found.</p> :
-									similarPapers.map((paper, i) => <QPCard
-										qPaper={paper}
-										key={i}
-									/>
-									)
-							}
-						</div>
-				}
-			</div>
+			<>
+				<div className="modal" style={{ minWidth: '20%' }}>
+					<h2>Similar Papers</h2>
+					{
+						awaitingSimilarPapers ? <div style={{ justifyContent: 'center', display: 'flex' }}><Spinner /></div> :
+							<div>
+								{
+									similarPapers.length === 0 ? <p>No similar papers found.</p> :
+										similarPapers.map((paper, i) => <QPCard
+											qPaper={paper}
+											key={i}
+										/>
+										)
+								}
+							</div>
+					}
+				</div>
+			</>
 		}
 	</div>;
 }

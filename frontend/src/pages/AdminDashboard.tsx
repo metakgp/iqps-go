@@ -22,8 +22,8 @@ function AdminDashboard() {
 	const [ocrMessage, setOcrMessage] = useState<string | null>(null);
 	const [ocrLoopOn, setOcrLoopOn] = useState<boolean>(false);
 
-	const [selectedQPaper, setSelectedQPaper] =
-		useState<IAdminDashboardQP | null>(null);
+	const [selectedQPaperIndex, setSelectedQPaperIndex] =
+		useState<number | null>(null);
 
 	const handlePaperEdit = async (qp: IAdminDashboardQP) => {
 		const response = await makeRequest('edit', 'post', {
@@ -36,9 +36,8 @@ function AdminDashboard() {
 			setUnapprovedPapers((papers) => {
 				const newPapers = [...papers];
 
-				const selectedIndex = newPapers.indexOf(selectedQPaper!);
-				if (selectedIndex !== -1) {
-					newPapers[selectedIndex] = {
+				if (selectedQPaperIndex !== null) {
+					newPapers[selectedQPaperIndex] = {
 						...qp
 					}
 				}
@@ -152,7 +151,7 @@ function AdminDashboard() {
 							<p><b>Unapproved papers</b>: {unapprovedPapers.length}</p>
 							<p><b>Unique Course Codes</b>: {numUniqueCourseCodes}</p>
 							<p><b>OCR details</b>: {ocrDetails.size} papers (loop {ocrLoopOn ? 'On' : 'Off'})</p>
-							{ocrMessage !== null &&<p>{ocrMessage}</p>}
+							{ocrMessage !== null && <p>{ocrMessage}</p>}
 						</div>
 						<div className="papers-panel">
 							{unapprovedPapers.map((paper, i) => <QPCard
@@ -163,7 +162,7 @@ function AdminDashboard() {
 										// If ocr doesn't exist, push to the start of the queue
 										setOcrRequests((reqs) => [paper, ...reqs]);
 									}
-									setSelectedQPaper(paper);
+									setSelectedQPaperIndex(i);
 								}}
 								onDelete={() => {
 									handlePaperDelete(paper);
@@ -178,12 +177,32 @@ function AdminDashboard() {
 			}
 		</div>
 
-		{selectedQPaper !== null && (
+		{selectedQPaperIndex !== null && (
 			<PaperEditModal
-				onClose={() => setSelectedQPaper(null)}
-				qPaper={selectedQPaper}
-				updateQPaper={(qp) => handlePaperEdit(qp)}
-				ocrDetails={ocrDetails.get(selectedQPaper.id)}
+				onClose={() => setSelectedQPaperIndex(null)}
+				selectNext={
+					(
+						selectedQPaperIndex < (unapprovedPapers.length - 1)
+					) ?
+						() => {
+							setSelectedQPaperIndex(
+								selectedQPaperIndex + 1
+							)
+						} :
+						null
+				}
+				selectPrev={
+					(
+						selectedQPaperIndex > 0
+					) ?
+						() => {
+							setSelectedQPaperIndex(selectedQPaperIndex - 1)
+						} :
+						null
+				}
+				qPaper={unapprovedPapers[selectedQPaperIndex]}
+				updateQPaper={() => handlePaperEdit(unapprovedPapers[selectedQPaperIndex])}
+				ocrDetails={ocrDetails.get(unapprovedPapers[selectedQPaperIndex].id)}
 			/>
 		)}
 	</div> : <p>You are unauthenticated. This incident will be reported.</p>;
