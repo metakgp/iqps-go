@@ -99,10 +99,15 @@ function AdminDashboard() {
 			const response = await fetch(paper.filelink);
 
 			if (response.ok) {
-				const pdfData = await response.arrayBuffer();
-				const pdfText = await extractTextFromPDF(pdfData);
+				try {
+					const pdfData = await response.arrayBuffer();
+					const pdfText = await extractTextFromPDF(pdfData);
 
-				setOcrDetails((currentValue) => currentValue.set(paper.id, extractDetailsFromText(pdfText)));
+					setOcrDetails((currentValue) => currentValue.set(paper.id, extractDetailsFromText(pdfText)));
+				}
+				catch (e) {
+					toast.error(`OCR failed for id:${paper.id}. Error: ${e}`);
+				}
 			}
 		}
 	}
