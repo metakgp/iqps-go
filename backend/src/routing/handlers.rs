@@ -181,7 +181,7 @@ pub async fn edit(
     let old_filepath = state.env_vars.paths.get_path_from_slug(&old_filelink);
     let new_filepath = state.env_vars.paths.get_path_from_slug(&new_qp.filelink);
 
-    if old_filepath.canonicalize()? != new_filepath.canonicalize()? {
+    if old_filepath != new_filepath {
         if let Err(e) = fs::copy(old_filepath, new_filepath).await {
             tracing::error!("Error copying file: {}", e);
 
