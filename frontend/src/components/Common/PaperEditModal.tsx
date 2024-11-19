@@ -308,15 +308,14 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 					'approve_status' in data &&
 
 					<FormGroup label="Approval Status:">
-						<button
-							className={`btn approve-btn ${data.approve_status ? 'approved' : 'unapproved'}`}
-							onClick={(e) => {
-								e.preventDefault();
-								changeData('approve_status' as keyof T, !data.approve_status as T[keyof T]);
-							}}
-						>
-							{data.approve_status ? <IoMdCheckmarkCircle /> : <MdCancel size="1.1rem" />} {data.approve_status ? 'APPROVED' : 'UNAPPROVED'}
-						</button>
+						<RadioGroup
+							value={data.approve_status}
+							options={[
+								{ label: 'Approved', value: true },
+								{ label: 'Unapproved', value: false }
+							]}
+							onSelect={(value) => changeData('approve_status' as keyof T, value  as T[keyof T])}
+						/>
 					</FormGroup>
 				}
 
