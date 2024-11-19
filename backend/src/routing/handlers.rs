@@ -181,21 +181,28 @@ pub async fn edit(
     let old_filepath = state.env_vars.paths.get_path_from_slug(&old_filelink);
     let new_filepath = state.env_vars.paths.get_path_from_slug(&new_qp.filelink);
 
-    println!("{}, {}", new_filepath.to_string_lossy(), old_filepath.to_string_lossy());
+    if old_filepath.canonicalize()? != new_filepath.canonicalize()? {
+        if let Err(e) = fs::copy(old_filepath, new_filepath).await {
+            tracing::error!("Error copying file: {}", e);
 
-    if fs::copy(old_filepath, new_filepath).await.is_ok() {
-        // Commit the transaction
-        tx.commit().await?;
+            tx.rollback().await?;
+            Ok(BackendResponse::error(
+                "Error copying question paper file.".into(),
+                StatusCode::INTERNAL_SERVER_ERROR,
+            ))
+        } else {
+            // Commit the transaction
+            tx.commit().await?;
 
+            Ok(BackendResponse::ok(
+                "Successfully updated paper details.".into(),
+                new_qp.with_url(&state.env_vars)?,
+            ))
+        }
+    } else {
         Ok(BackendResponse::ok(
             "Successfully updated paper details.".into(),
             new_qp.with_url(&state.env_vars)?,
-        ))
-    } else {
-        tx.rollback().await?;
-        Ok(BackendResponse::error(
-            "Error copying question paper file.".into(),
-            StatusCode::INTERNAL_SERVER_ERROR,
         ))
     }
 }
