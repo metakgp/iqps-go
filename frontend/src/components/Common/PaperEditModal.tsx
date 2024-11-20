@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { MdCancel } from "react-icons/md";
 import Fuse from 'fuse.js';
 
 import { validate, validateCourseCode, validateExam, validateSemester, validateYear } from "../../utils/validateInput";
 import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
 import { getCourseFromCode, IExtractedDetails } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
-import { IoMdCheckmarkCircle } from "react-icons/io";
 import { FaArrowLeft, FaArrowRight, FaFilePdf } from "react-icons/fa6";
 import Spinner from "../Spinner/Spinner";
 import { FormGroup, RadioGroup, NumberInput, SuggestionTextInput, ISuggestion } from "./Form";
