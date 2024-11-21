@@ -124,9 +124,9 @@ function AdminDashboard() {
 		}
 	}
 
-	useEffect(() => {
-		ocrDetailsLoop();
-	}, [ocrRequests])
+	// useEffect(() => {
+	// 	ocrDetailsLoop();
+	// }, [ocrRequests])
 
 	return auth.isAuthenticated ? <div id="admin-dashboard">
 		<Header

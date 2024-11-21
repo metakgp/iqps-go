@@ -4,7 +4,7 @@ import Fuse from 'fuse.js';
 
 import { validate, validateCourseCode, validateExam, validateSemester, validateYear } from "../../utils/validateInput";
 import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
-import { getCourseFromCode, IExtractedDetails } from "../../utils/autofillData";
+import { IExtractedDetails } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
 import { FaArrowLeft, FaArrowRight, FaFilePdf } from "react-icons/fa6";
 import Spinner from "../Spinner/Spinner";
@@ -170,8 +170,10 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 
 	return <div className="modal-overlay">
 		{'filelink' in data &&
-			<div className="modal" style={{ minWidth: '20%' }}>
-				<h2>OCR Details</h2>
+			<div className="modal qp-preview" style={{ minWidth: '20%' }}>
+				<h2>Preview</h2>
+				<embed src={data.filelink} />
+				{/* <h2>OCR Details</h2>
 				{
 					props.ocrDetails === undefined ?
 						<div style={{ justifyContent: 'center', display: 'flex' }}>
@@ -194,7 +196,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 								{props.ocrDetails.semester ?? "Unknown"}
 							</FormGroup>
 						</>
-				}
+				} */}
 			</div>
 		}
 		<div className="modal">
