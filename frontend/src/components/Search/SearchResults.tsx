@@ -193,13 +193,18 @@ function ResultCard(result: ISearchResult) {
 				`Class Test ${exam.slice(2).length > 0 ? exam.slice(2) : '?'}`;
 	}
 
+	const getTitle = () => {
+		let title = `${result.course_name}`;
+
+		if (result.course_code) title += ` (${result.course_code})`;
+		if (auth.isAuthenticated) title += ` (id: ${result.id})`;
+
+		return title;
+	}
+
 	return <div className="result-card">
 		<p className="result-card-info">
-			<p className="result-card-title">
-				{result.course_name}
-				{result.course_code && <>&nbsp;({result.course_code})</>}
-				{auth.isAuthenticated && <>&nbsp;(id: {result.id})</>}
-			</p>
+			<p className="result-card-title">{getTitle()}</p>
 			<div className="result-card-tags">
 				<span className="result-card-tag">{result.year}</span>
 				<span className="result-card-tag" title={getExamTooltip(result.exam)}>{getExamTag(result.exam)}</span>
