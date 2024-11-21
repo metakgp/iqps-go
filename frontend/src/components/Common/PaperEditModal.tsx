@@ -72,6 +72,10 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 		))
 	}, [data]);
 
+	useEffect(() => {
+		setData(props.qPaper);
+	}, [props.qPaper])
+
 	// Automatically fill the course name if course code matches
 	useEffect(() => {
 		if (data.course_code.length === 7) {
