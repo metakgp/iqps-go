@@ -348,7 +348,6 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 								toast.success("File details updated successfully");
 							}
 							props.updateQPaper(data);
-							props.onClose();
 						}}
 						disabled={!isDataValid}
 						className="save-btn"

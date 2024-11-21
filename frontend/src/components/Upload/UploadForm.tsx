@@ -103,6 +103,7 @@ export function UploadForm(props: IUploadFormProps) {
 			else return qp;
 		});
 		setQPapers(updateData);
+		setSelectedQPaper(null);
 	};
 
 	const onUpload: MouseEventHandler = async (e) => {
