@@ -99,18 +99,9 @@ function SearchResults(props: ISearchResultsProps) {
 						{
 							displayedResults.length > 0 ? (
 								<>
-									<table className="search-results-table">
-										<thead>
-											<tr>
-												<th>Year</th>
-												<th>Exam</th>
-												<th>Course Name</th>
-											</tr>
-										</thead>
-										<tbody>
-											{displayedResults.map((result, i) => <ResultCard key={i} {...result} />)}
-										</tbody>
-									</table>
+									<div className="search-results">
+										{displayedResults.map((result, i) => <ResultCard key={i} {...result} />)}
+									</div>
 								</>
 							) : <p>No results.</p>
 						}
@@ -164,7 +155,7 @@ function ResultsFilter(props: IResultsFilterProps) {
 function ResultCard(result: ISearchResult) {
 	const auth = useAuthContext();
 
-	const getSemTag = (sem: ISearchResult['semester']) => {
+	const getSemesterTag = (sem: ISearchResult['semester']) => {
 		// empty string - N/A
 		// midsem - MID; endsem - END
 		// ctx - CT1, CT2, etc.
@@ -182,7 +173,17 @@ function ResultCard(result: ISearchResult) {
 		}
 	}
 
-	const formatExam = (exam: ISearchResult['exam']) => {
+	const getExamTag = (exam: ISearchResult['exam']) => {
+		// empty string - Unknown
+		// midsem - Midsem; endsem - Endsem
+		// ctx - Class Test 1, Class Test 2, etc.
+		return exam === '' ? 'Unknown' :
+			(exam === 'midsem' || exam === 'endsem') ?
+				exam.slice(0, 3).toUpperCase() :
+				exam.toUpperCase();
+	}
+
+	const getExamTooltip = (exam: ISearchResult['exam']) => {
 		// empty string - Unknown
 		// midsem - Midsem; endsem - Endsem
 		// ctx - Class Test 1, Class Test 2, etc.
@@ -192,36 +193,38 @@ function ResultCard(result: ISearchResult) {
 				`Class Test ${exam.slice(2).length > 0 ? exam.slice(2) : '?'}`;
 	}
 
-	return <tr className="result-card">
-		<td>{result.year}</td>
-		<td>{formatExam(result.exam)}</td>
-		<td style={{ display: 'flex', alignItems: 'center' }}>
-			<p title={getSemesterTooltip(result.semester)}>
+	return <div className="result-card">
+		<p className="result-card-info">
+			<p className="result-card-title">
 				{result.course_name}
 				{result.course_code && <>&nbsp;({result.course_code})</>}
 				{auth.isAuthenticated && <>&nbsp;(id: {result.id})</>}
-				<span className="result-card-tag">{getSemTag(result.semester)}</span>
 			</p>
-			<div className="result-card-btns">
-				<a
-					className="result-card-btn icon-btn"
-					href={result.filelink}
-					title="Open PDF"
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					<FaFilePdf size="1.2rem" />
-				</a>
-				<button
-					className="result-card-btn icon-btn"
-					title="Share PDF"
-					onClick={(e) => copyLink(e, result.filelink)}
-				>
-					<IoLink size="1.2rem" />
-				</button>
+			<div className="result-card-tags">
+				<span className="result-card-tag">{result.year}</span>
+				<span className="result-card-tag" title={getExamTooltip(result.exam)}>{getExamTag(result.exam)}</span>
+				<span className="result-card-tag" title={getSemesterTooltip(result.semester)}>{getSemesterTag(result.semester)}</span>
 			</div>
-		</td>
-	</tr>;
+		</p>
+		<div className="result-card-btns">
+			<a
+				className="result-card-btn icon-btn"
+				href={result.filelink}
+				title="Open PDF"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				<FaFilePdf size="1.2rem" />
+			</a>
+			<button
+				className="result-card-btn icon-btn"
+				title="Share PDF"
+				onClick={(e) => copyLink(e, result.filelink)}
+			>
+				<IoLink size="1.2rem" />
+			</button>
+		</div>
+	</div>;
 }
 
 export default SearchResults;

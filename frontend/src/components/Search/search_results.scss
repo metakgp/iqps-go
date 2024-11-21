@@ -32,83 +32,72 @@
 		}
 	}
 
-	.search-results-table {
+	.search-results {
 		width: 100%;
 		border-collapse: collapse;
 
-		tr {
-			width: fit-content;
-		}
-
-		tbody tr {
-			border: 1px solid transparent;
+		.result-card {
+			padding: 0.6rem 1rem;
+			margin-bottom: 1rem;
 			border-radius: 8px;
+			margin: 0;
+
+			display: flex;
+			gap: 0.5rem;
 
 			&:nth-of-type(odd) {
 				background-color: $surface-2;
 			}
-		}
 
-		th,
-		td {
-			padding: 0.5rem 1rem 0.5rem 1rem;
-		}
-
-		th {
-			text-align: left;
-		}
-	}
-
-	.result-card {
-		padding: 15px;
-		margin-bottom: 1rem;
-		border-radius: 8px;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-		.result-card-btns {
-			margin-left: auto;
-			display: flex;
-			gap: 5px;
-
-			.result-card-btn {
-				background-color: $accent-color-darker;
-				color: $fg-color-darker;
-				font-weight: bold;
-
+			.result-card-info {
 				margin: 0;
-				padding: 8px 8px;
-				border-radius: 5px;
+				display: flex;
+				flex-direction: column;
+				gap: 0.5rem;
 
-				&:hover {
-					background-color: $accent-color-darkerer;
+				.result-card-title {
+					margin: 0;
+					text-wrap: wrap;
 				}
 			}
-		}
 
-		.result-card-tag {
-			border: 1px solid $accent-color;
-			font-weight: bold;
-			font-size: 0.85rem;
+			.result-card-tags {
+				display: flex;
+				gap: 5px;
+			}
 
-			border-radius: 5px;
-			padding: 2px 7px;
+			.result-card-btns {
+				margin-left: auto;
+				display: flex;
+				align-items: center;
+				gap: 5px;
 
-			margin-left: 5px;
-			margin-right: 5px;
+				.result-card-btn {
+					background-color: $accent-color-darker;
+					color: $fg-color-darker;
+					font-weight: bold;
 
-			user-select: none;
-		}
+					margin: 0;
+					padding: 8px 8px;
+					border-radius: 5px;
 
-		h3 {
-			margin-top: 0;
-		}
+					height: fit-content;
 
-		p {
-			margin: 5px 0;
+					&:hover {
+						background-color: $accent-color-darkerer;
+					}
+				}
+			}
 
-			&.course-name,
-			&.course-code {
+			.result-card-tag {
+				border: 1px solid $accent-color;
 				font-weight: bold;
+				font-size: 0.85rem;
+
+				border-radius: 5px;
+				padding: 2px 7px;
+
+				user-select: none;
 			}
 		}
 	}
