@@ -15,6 +15,7 @@ import { makeRequest } from "../../utils/backend";
 import { IEndpointTypes } from "../../types/backend";
 import { useAuthContext } from "../../utils/auth";
 import { QPCard } from "../AdminDashboard/QPCard";
+import { IoClose } from "react-icons/io5";
 
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
@@ -200,6 +201,15 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 			</div>
 		}
 		<div className="modal">
+			<button
+				className="close-btn"
+				onClick={(e) => {
+					e.preventDefault();
+					props.onClose();
+				}}
+			>
+				<IoClose size="1.4rem" />
+			</button>
 			<form>
 				<h2>Edit Course Details</h2>
 				{'file' in data &&
@@ -318,7 +328,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 								{ label: 'Approved', value: true },
 								{ label: 'Unapproved', value: false }
 							]}
-							onSelect={(value) => changeData('approve_status' as keyof T, value  as T[keyof T])}
+							onSelect={(value) => changeData('approve_status' as keyof T, value as T[keyof T])}
 						/>
 					</FormGroup>
 				}
@@ -334,19 +344,21 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 							className="prev-btn"
 							disabled={props.selectPrev === null}
 						>
-							<FaArrowLeft /> Previous
+							<FaArrowLeft />
 						</button>
 					}
 
-					<button
-						onClick={(e) => {
-							e.preventDefault();
-							props.onClose();
-						}}
-						className="cancel-btn"
-					>
-						Cancel
-					</button>
+					{!('filelink' in data) &&
+						<button
+							onClick={(e) => {
+								e.preventDefault();
+								props.onClose();
+							}}
+							className="cancel-btn"
+						>
+							Cancel
+						</button>
+					}
 					<button
 						onClick={(e) => {
 							e.preventDefault();
@@ -371,7 +383,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 							className="next-btn"
 							disabled={props.selectNext === null}
 						>
-							Next <FaArrowRight />
+							<FaArrowRight />
 						</button>
 					}
 				</div>

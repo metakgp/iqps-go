@@ -25,8 +25,30 @@
 			align-items: center;
 		}
 
+		.close-btn {
+			padding: 4px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			border-radius: 50%;
+			border: none;
+			outline: none;
+
+			position: absolute;
+
+			color: $fg-color;
+			background-color: $surface-2;
+			outline: 1px solid rgba($surface-3, 0.8);
+
+			&:hover {
+				background-color: $surface-3;
+			}
+		}
+
 		h2 {
 			text-align: center;
+			margin-top: 0;
 		}
 
 		label {
@@ -61,7 +83,7 @@
 				border: none;
 				box-shadow: none;
 				color: white;
-				padding: 0.5rem 1.5rem;
+				padding: 0.5rem 1rem;
 				border-radius: 1rem;
 
 				display: flex;
