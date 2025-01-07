@@ -322,14 +322,26 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 					'approve_status' in data &&
 
 					<FormGroup label="Approval Status:">
-						<RadioGroup
-							value={data.approve_status}
-							options={[
-								{ label: 'Approved', value: true },
-								{ label: 'Unapproved', value: false }
-							]}
-							onSelect={(value) => changeData('approve_status' as keyof T, value as T[keyof T])}
-						/>
+						<div className="approve-status">
+							<button
+								className="approve-btn"
+								disabled={data.approve_status}
+								onClick={(e) => {
+									e.preventDefault();
+									changeData('approve_status' as keyof T, true as T[keyof T]);
+								}}
+							>Approved
+							</button>
+							<button
+								className="unapprove-btn"
+								disabled={!data.approve_status}
+								onClick={(e) => {
+									e.preventDefault();
+									changeData('approve_status' as keyof T, false as T[keyof T]);
+								}}
+							>Unapproved
+							</button>
+						</div>
 					</FormGroup>
 				}
 
@@ -389,7 +401,8 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				</div>
 			</form>
 		</div>
-		{'filelink' in data &&
+		{
+			'filelink' in data &&
 			<>
 				<div className="modal" style={{ minWidth: '20%' }}>
 					<h2>Similar Papers</h2>
@@ -409,7 +422,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				</div>
 			</>
 		}
-	</div>;
+	</div >;
 }
 
 export default PaperEditModal;
