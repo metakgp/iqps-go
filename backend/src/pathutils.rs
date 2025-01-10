@@ -183,7 +183,9 @@ impl Paths {
             .split_whitespace() // Split at whitespaces to later replace all whitespaces with `-`
             .map(|part| {
                 part.chars()
-                    .filter(|&character| character.is_alphanumeric() || character == '-' || character == '_') // Remove any character that is not a `-` or alphanumeric
+                    .filter(|&character| {
+                        character.is_alphanumeric() || character == '-' || character == '_'
+                    }) // Remove any character that is not a `-` or alphanumeric
                     .collect::<String>()
             })
             .collect::<Vec<String>>()
