@@ -4,6 +4,24 @@
 
 use crate::qp::Exam;
 
+/// Database initialization query. Not used by the backend directly.
+#[allow(dead_code)]
+const INIT_DB: &str = "
+CREATE TABLE IF NOT EXISTS iqps (
+	id integer primary key GENERATED ALWAYS AS identity,
+	course_code TEXT NOT NULL DEFAULT '',
+	course_name TEXT NOT NULL,
+	year INTEGER NOT NULL,
+    exam TEXT,
+    filelink TEXT NOT NULL,
+    from_library BOOLEAN DEFAULT FALSE,
+    upload_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    approve_status BOOLEAN DEFAULT FALSE,
+    fts_course_details tsvector GENERATED ALWAYS AS (to_tsvector('english', course_code || ' ' || course_name)) stored
+);
+CREATE INDEX IF NOT EXISTS iqps_fts ON iqps USING gin (fts_course_details);
+CREATE INDEX IF NOT EXISTS idx_course_name_trgm ON iqps USING gin (course_name gin_trgm_ops);";
+
 /// Query to get similar papers. Matches `course_code` ($1) always. Other parameters are optional and can be enabled or disabled using the arguments to this function.
 ///
 /// Query parameters:
