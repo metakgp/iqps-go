@@ -20,6 +20,7 @@ pub struct DBBaseQP {
     year: i32,
     semester: String,
     exam: String,
+    note: String,
 }
 
 #[derive(FromRow, Clone)]
@@ -52,6 +53,7 @@ impl From<DBBaseQP> for qp::BaseQP {
             year: value.year,
             semester: (&value.semester).try_into().unwrap_or(Semester::Unknown),
             exam: (&value.exam).try_into().unwrap_or(qp::Exam::Unknown),
+            note: value.note,
         }
     }
 }

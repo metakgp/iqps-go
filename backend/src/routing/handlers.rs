@@ -158,6 +158,7 @@ pub struct EditReq {
     pub year: Option<i32>,
     pub semester: Option<String>,
     pub exam: Option<String>,
+    pub note: Option<String>,
     pub approve_status: Option<bool>,
 }
 

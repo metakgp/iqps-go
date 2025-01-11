@@ -10,9 +10,10 @@ const INIT_DB: &str = "
 CREATE TABLE IF NOT EXISTS iqps (
 	id integer primary key GENERATED ALWAYS AS identity,
 	course_code TEXT NOT NULL DEFAULT '',
-	course_name TEXT NOT NULL,
+	course_name TEXT NOT NULL DEFAULT '',
 	year INTEGER NOT NULL,
-    exam TEXT,
+    exam TEXT NOT NULL DEFAULT '',
+    note TEXT NOT NULL DEFAULT '',
     filelink TEXT NOT NULL,
     from_library BOOLEAN DEFAULT FALSE,
     upload_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -68,7 +69,7 @@ pub fn get_get_paper_by_id_query() -> String {
     )
 }
 
-/// Returns a query that updates a paper's details by id ($1) (course_code, course_name, year, semester, exam, approve_status, filelink). `approved_by` optionally included if the edit is also used for approval.
+/// Returns a query that updates a paper's details by id ($1) (course_code, course_name, year, semester, exam, note, approve_status, filelink). `approved_by` optionally included if the edit is also used for approval.
 ///
 /// The query also returns all the admin dashboard qp fields of the edited paper
 ///
@@ -79,13 +80,14 @@ pub fn get_get_paper_by_id_query() -> String {
 /// - $4: `year`
 /// - $5: `semester`
 /// - $6: `exam`
-/// - $7: `approve_status`
-/// - $8: `filelink`
-/// - $9: `approved_by`
+/// - $7: `note`
+/// - $8: `approve_status`
+/// - $9: `filelink`
+/// - $10: `approved_by`
 pub fn get_edit_paper_query(approval: bool) -> String {
     format!(
-		"UPDATE iqps set course_code=$2, course_name=$3, year=$4, semester=$5, exam=$6, approve_status=$7, filelink=$8{} WHERE id=$1 AND is_deleted=false RETURNING {}",
-		if approval {", approved_by=$9"} else {""},
+		"UPDATE iqps set course_code=$2, course_name=$3, year=$4, semester=$5, exam=$6, note=$7, approve_status=$8, filelink=$9{} WHERE id=$1 AND is_deleted=false RETURNING {}",
+		if approval {", approved_by=$10"} else {""},
         ADMIN_DASHBOARD_QP_FIELDS
 	)
 }
@@ -191,15 +193,15 @@ pub fn get_qp_search_query(exam_filter: ExamFilter) -> (String, bool) {
 }
 
 /// List of fields in the [`crate::db::models::DBAdminDashboardQP`] to be used with SELECT clauses
-pub const ADMIN_DASHBOARD_QP_FIELDS: &str = "id, filelink, from_library, course_code, course_name, year, semester, exam, upload_timestamp, approve_status";
+pub const ADMIN_DASHBOARD_QP_FIELDS: &str = "id, filelink, from_library, course_code, course_name, year, semester, exam, note, upload_timestamp, approve_status";
 
 /// List of fields in the [`crate::db::models::DBSearchQP`] to be used with SELECT clauses
 pub const SEARCH_QP_FIELDS: &str =
-    "id, filelink, from_library, course_code, course_name, year, semester, exam";
+    "id, filelink, from_library, course_code, course_name, year, semester, exam, note";
 
 /// Insert a newly uploaded file in the db (and return the id)
-/// Parameters in the following order: `course_code`, `course_name`, `year`, `exam`, `semester`, `filelink`, `from_library`
-pub const INSERT_NEW_QP: &str = "INSERT INTO iqps (course_code, course_name, year, exam, semester, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id";
+/// Parameters in the following order: `course_code`, `course_name`, `year`, `exam`, `semester`, `note`, `filelink`, `from_library`
+pub const INSERT_NEW_QP: &str = "INSERT INTO iqps (course_code, course_name, year, exam, semester, note, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id";
 
 /// Updates the filelink ($2) of a paper with the given id ($1). Used to update the filelink after a paper is uploaded.
 pub const UPDATE_FILELINK: &str = "UPDATE iqps SET filelink=$2 WHERE id=$1";

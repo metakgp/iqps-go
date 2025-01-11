@@ -105,11 +105,11 @@ impl From<Exam> for String {
 }
 
 #[duplicate_item(
-    ExamSem;
+    Serializable;
     [ Exam ];
     [ Semester ];
 )]
-impl Serialize for ExamSem {
+impl Serialize for Serializable {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -134,6 +134,7 @@ pub struct BaseQP {
     pub year: i32,
     pub semester: Semester,
     pub exam: Exam,
+    pub note: String,
 }
 
 #[derive(Serialize, Clone)]

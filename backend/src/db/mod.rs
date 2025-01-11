@@ -120,6 +120,7 @@ impl Database {
             semester,
             exam,
             approve_status,
+            note,
         } = edit_req;
 
         let current_details = self.get_paper_by_id(id).await?;
@@ -171,6 +172,7 @@ impl Database {
             .bind(year)
             .bind(&semester)
             .bind(&exam)
+            .bind(&note)
             .bind(approve_status)
             .bind(&new_filelink);
 
