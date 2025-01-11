@@ -66,6 +66,7 @@ export function QPCard({ qPaper, onEdit, onDelete, hasOcr }: IQPCardProps) {
                     <div className="pill">{qPaper.year}</div>
                     <div className="pill">{qPaper.exam}</div>
                     <div className="pill">{qPaper.semester}</div>
+                    {qPaper.note !== "" && <div className="pill">{qPaper.note}</div>}
                 </div>
                 {!isValid &&
                     <p className="error-msg">{Object.values(errorMsg).filter((msg) => msg !== null).join(', ')}</p>
