@@ -23,7 +23,7 @@ use serde::Deserialize;
 use crate::{
     auth::{self, Auth},
     pathutils::PaperCategory,
-    qp::{self, AdminDashboardQP},
+    qp::{self, AdminDashboardQP, WithUrl},
 };
 
 use super::{AppError, BackendResponse, RouterState, Status};
@@ -61,7 +61,7 @@ pub async fn get_unapproved(
 pub async fn search(
     State(state): State<RouterState>,
     Query(params): Query<HashMap<String, String>>,
-) -> HandlerReturn<Vec<qp::SearchQP>> {
+) -> HandlerReturn<Vec<qp::BaseQP>> {
     let response = if let Some(query) = params.get("query") {
         let exam_query_str = params
             .get("exam")
@@ -77,7 +77,7 @@ pub async fn search(
             let papers = papers
                 .iter()
                 .map(|paper| paper.clone().with_url(&state.env_vars))
-                .collect::<Result<Vec<qp::SearchQP>, color_eyre::eyre::Error>>()?;
+                .collect::<Result<Vec<qp::BaseQP>, color_eyre::eyre::Error>>()?;
 
             Ok(BackendResponse::ok(
                 format!("Successfully fetched {} papers.", papers.len()),
@@ -179,7 +179,7 @@ pub async fn edit(
 
     // Copy the actual file
     let old_filepath = state.env_vars.paths.get_path_from_slug(&old_filelink);
-    let new_filepath = state.env_vars.paths.get_path_from_slug(&new_qp.filelink);
+    let new_filepath = state.env_vars.paths.get_path_from_slug(&new_qp.qp.filelink);
 
     if old_filepath != new_filepath {
         if let Err(e) = fs::copy(old_filepath, new_filepath).await {
