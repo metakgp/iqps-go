@@ -70,7 +70,7 @@ impl Database {
         query: &str,
         exam_filter: ExamFilter,
         exam_filter_str: String,
-    ) -> Result<Vec<qp::SearchQP>, sqlx::Error> {
+    ) -> Result<Vec<qp::BaseQP>, sqlx::Error> {
         let (query_sql, use_exam_arg) = queries::get_qp_search_query(exam_filter);
         let query = sqlx::query_as(&query_sql).bind(query);
 
@@ -80,11 +80,11 @@ impl Database {
             query
         };
 
-        let papers: Vec<models::DBSearchQP> = query.fetch_all(&self.connection).await?;
+        let papers: Vec<models::DBBaseQP> = query.fetch_all(&self.connection).await?;
 
         Ok(papers
             .iter()
-            .map(|qp| qp::SearchQP::from(qp.clone()))
+            .map(|qp| qp::BaseQP::from(qp.clone()))
             .collect())
     }
 
@@ -125,24 +125,24 @@ impl Database {
         let current_details = self.get_paper_by_id(id).await?;
 
         // Construct the final values to be inserted into the db
-        let course_code = course_code.unwrap_or(current_details.course_code);
-        let course_name = course_name.unwrap_or(current_details.course_name);
-        let year = year.unwrap_or(current_details.year);
+        let course_code = course_code.unwrap_or(current_details.qp.course_code);
+        let course_name = course_name.unwrap_or(current_details.qp.course_name);
+        let year = year.unwrap_or(current_details.qp.year);
         let semester: String = semester
             .map(|sem| Semester::try_from(&sem))
             .transpose()?
-            .unwrap_or(current_details.semester)
+            .unwrap_or(current_details.qp.semester)
             .into();
         let exam: String = exam
             .map(|exam| Exam::try_from(&exam))
             .transpose()?
-            .unwrap_or(current_details.exam)
+            .unwrap_or(current_details.qp.exam)
             .into();
         let approve_status = approve_status.unwrap_or(current_details.approve_status);
 
         // Set the new filelink
-        let old_filelink = current_details.filelink;
-        let new_filelink = if current_details.from_library {
+        let old_filelink = current_details.qp.filelink;
+        let new_filelink = if current_details.qp.from_library {
             old_filelink.clone()
         } else if approve_status {
             env_vars.paths.get_slug(
@@ -186,9 +186,9 @@ impl Database {
         Ok((tx, old_filelink, new_qp))
     }
 
-    /// Adds a new upload paper's details to the database. Sets the `from_library` field to false.
-    ///
-    /// Returns the database transaction and the id of the uploaded paper
+    // /// Adds a new upload paper's details to the database. Sets the `from_library` field to false.
+    // ///
+    // /// Returns the database transaction and the id of the uploaded paper
     // pub async fn add_uploaded_paper<'c>(
     //     &self,
     //     file_details:
@@ -276,9 +276,9 @@ impl Database {
     }
 
     // /// Updates filelink for an uploaded question paper uploaded using the [crate::db::Database::update_uploaded_filelink] function. Takes the same transaction that the previous function used.
-    pub async fn update_uploaded_filelink<'c>(
+    pub async fn update_uploaded_filelink(
         &self,
-        tx: &mut Transaction<'c, Postgres>,
+        tx: &mut Transaction<'_, Postgres>,
         id: i32,
         file_link: &str,
     ) -> Result<(), color_eyre::eyre::Error> {

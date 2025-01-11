@@ -118,9 +118,14 @@ impl Serialize for ExamSem {
     }
 }
 
+pub trait WithUrl: Sized {
+    /// Returns the question paper with the full static files URL in the `filelink` field instead of just the slug. See the [`crate::pathutils`] module for what a slug is.
+    fn with_url(self, env_vars: &EnvVars) -> Result<Self, color_eyre::eyre::Error>;
+}
+
 #[derive(Serialize, Clone)]
 /// The fields of a question paper sent from the search endpoint
-pub struct SearchQP {
+pub struct BaseQP {
     pub id: i32,
     pub filelink: String,
     pub from_library: bool,
@@ -136,28 +141,25 @@ pub struct SearchQP {
 ///
 /// This includes fields such as `approve_status` and `upload_timestamp` that would only be relevant to the dashboard.
 pub struct AdminDashboardQP {
-    pub id: i32,
-    pub filelink: String,
-    pub from_library: bool,
-    pub course_code: String,
-    pub course_name: String,
-    pub year: i32,
-    pub semester: Semester,
-    pub exam: Exam,
+    #[serde(flatten)]
+    pub qp: BaseQP,
     pub upload_timestamp: String,
     pub approve_status: bool,
 }
 
-#[duplicate_item(
-    QP;
-    [ SearchQP ];
-    [ AdminDashboardQP ];
-)]
-impl QP {
-    /// Returns the question paper with the full static files URL in the `filelink` field instead of just the slug. See the [`crate::pathutils`] module for what a slug is.
-    pub fn with_url(self, env_vars: &EnvVars) -> Result<Self, color_eyre::eyre::Error> {
+impl WithUrl for BaseQP {
+    fn with_url(self, env_vars: &EnvVars) -> Result<Self, color_eyre::eyre::Error> {
         Ok(Self {
             filelink: env_vars.paths.get_url_from_slug(&self.filelink)?,
+            ..self
+        })
+    }
+}
+
+impl WithUrl for AdminDashboardQP {
+    fn with_url(self, env_vars: &EnvVars) -> Result<Self, color_eyre::eyre::Error> {
+        Ok(Self {
+            qp: self.qp.with_url(env_vars)?,
             ..self
         })
     }
