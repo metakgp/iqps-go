@@ -39,7 +39,8 @@ export function UploadForm(props: IUploadFormProps) {
 						course_name: '',
 						year: 1984,
 						semester: 'autumn',
-						exam: 'ct'
+						exam: 'ct',
+						note: ''
 					}
 				}
 			})

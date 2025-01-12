@@ -158,6 +158,7 @@ export const autofillData = async (
         exam,
         semester,
         course_name: getCourseFromCode(course_code) ?? "Unknown Course",
+        note: '', // TODO: OCR FOR SUPPLEMENTARY AND MULTIPLE SLOTS
     };
 
     return qpDetails;
