@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS iqps (
 	course_name TEXT NOT NULL DEFAULT '',
 	year INTEGER NOT NULL,
     exam TEXT NOT NULL DEFAULT '',
+    semester TEXT NOT NULL DEFAULT '',
     note TEXT NOT NULL DEFAULT '',
     filelink TEXT NOT NULL,
     from_library BOOLEAN DEFAULT FALSE,
