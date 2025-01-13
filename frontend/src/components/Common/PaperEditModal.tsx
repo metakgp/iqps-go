@@ -6,7 +6,7 @@ import { validate, validateCourseCode, validateExam, validateSemester, validateY
 import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
 import { IExtractedDetails } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
-import { FaArrowLeft, FaArrowRight, FaBan, FaCalendar, FaFilePdf } from "react-icons/fa6";
+import { FaArrowLeft, FaArrowRight, FaBan, FaFilePdf } from "react-icons/fa6";
 import Spinner from "../Spinner/Spinner";
 import { FormGroup, RadioGroup, NumberInput, SuggestionTextInput, ISuggestion } from "./Form";
 
@@ -323,33 +323,52 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 					validationError={null}
 				>
 					<div className="additional-note">
-						<button
-							className={`note-option ${data.note === '' ? 'enabled' : ''}`}
-							onClick={(e) => {
-								e.preventDefault();
-								changeData('note', '');
-							}}
-						>
-							<FaBan />	None
-						</button>
-						<button
-							className={`note-option ${data.note === 'Supplementary' ? 'enabled' : ''}`}
-							onClick={(e) => {
-								e.preventDefault();
-								changeData('note', 'Supplementary');
-							}}
-						>
-							<FaSync /> Supplementary Exam
-						</button>
-						<button
-							className={`note-option ${data.note.match(/^Slot [A-Z]$/) !== null ? 'enabled' : ''}`}
-							onClick={(e) => {
-								e.preventDefault();
-								changeData('note', 'Slot A');
-							}}
-						>
-							<FaCalendarAlt /> Multiple Slots
-						</button>
+						<div className="note-options">
+							<button
+								className={`note-option none ${data.note === '' ? 'enabled' : ''}`}
+								onClick={(e) => {
+									e.preventDefault();
+									changeData('note', '');
+								}}
+							>
+								<FaBan />	None
+							</button>
+							<button
+								className={`note-option ${data.note === 'Supplementary' ? 'enabled' : ''}`}
+								onClick={(e) => {
+									e.preventDefault();
+									changeData('note', 'Supplementary');
+								}}
+							>
+								<FaSync /> Supplementary Exam
+							</button>
+							<button
+								className={`note-option ${data.note.match(/^Slot [A-Z]$/) !== null ? 'enabled' : ''}`}
+								onClick={(e) => {
+									e.preventDefault();
+									changeData('note', 'Slot A');
+								}}
+							>
+								<FaCalendarAlt /> Multiple Slots
+							</button>
+						</div>
+						<div className="note-customize">
+							{
+								data.note.match(/^Slot [A-Z]$/) &&
+								<div className="slot-choose">
+									<label>Slot:</label>
+									<NumberInput
+										alphabetical={true}
+										value={data.note.charCodeAt(data.note.length - 1)}
+										setValue={(value) => {
+											console.log('changing', value, String.fromCharCode(value))
+											changeData('note', `Slot ${String.fromCharCode(value)}`)
+										}
+										}
+									/>
+								</div>
+							}
+						</div>
 					</div>
 				</FormGroup>
 

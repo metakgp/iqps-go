@@ -71,25 +71,45 @@ export function Select(props: ISelectProps) {
 
 interface INumberInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 	value: number;
+	// Displays letters A-Z instead of numbers and restricts the value to their ASCII character codes
+	alphabetical?: boolean;
 	setValue: (x: number) => void;
 }
 export function NumberInput(props: INumberInputProps) {
+	const clampAlphabet = (num: number) => {
+		return Math.max('A'.charCodeAt(0), Math.min('Z'.charCodeAt(0), num));
+	}
+
+	const alphabeticalInput = props.alphabetical ?? false;
+
 	const getClickHandler = (change: number) => {
 		return (e: React.MouseEvent<HTMLButtonElement>) => {
 			e.preventDefault();
-			const newValue = props.value + change;
+			let newValue = props.value + change;
+
+			if (alphabeticalInput) newValue = clampAlphabet(newValue);
+
 			props.setValue(isNaN(newValue) ? 1 : newValue);
 		}
 	}
 
 	return <div className="number-input">
 		<input
-			type="number"
+			{...props}
+			type={alphabeticalInput ? 'text' : 'number'}
+			value={alphabeticalInput ? String.fromCharCode(props.value) : props.value}
 			onChange={(e) => {
 				e.preventDefault();
-				props.setValue(parseInt(e.target.value));
+
+				if (alphabeticalInput) {
+					const charCode = e.target.value.toUpperCase().charCodeAt(0);
+
+					props.setValue(isNaN(charCode) ? 'A'.charCodeAt(0) : clampAlphabet(charCode));
+				}
+				else {
+					props.setValue(parseInt(e.target.value));
+				}
 			}}
-			{...props}
 		/>
 		<div className="number-input-controls">
 			<button className="btn inc" onClick={getClickHandler(1)}><FaChevronUp size="0.7rem" /></button>
