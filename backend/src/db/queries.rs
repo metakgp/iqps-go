@@ -203,7 +203,7 @@ pub const SEARCH_QP_FIELDS: &str =
 
 /// Insert a newly uploaded file in the db (and return the id)
 /// Parameters in the following order: `course_code`, `course_name`, `year`, `exam`, `semester`, `note`, `filelink`, `from_library`
-pub const INSERT_NEW_QP: &str = "INSERT INTO iqps (course_code, course_name, year, exam, semester, note, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id";
+pub const INSERT_NEW_QP: &str = "INSERT INTO iqps (course_code, course_name, year, exam, semester, note, filelink, from_library) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id";
 
 /// Updates the filelink ($2) of a paper with the given id ($1). Used to update the filelink after a paper is uploaded.
 pub const UPDATE_FILELINK: &str = "UPDATE iqps SET filelink=$2 WHERE id=$1";

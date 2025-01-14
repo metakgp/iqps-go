@@ -54,6 +54,7 @@ export interface IEndpointTypes {
 			year?: number,
 			semester?: string,
 			exam?: string,
+			note?: string,
 			approve_status?: boolean,
 		},
 		response: {

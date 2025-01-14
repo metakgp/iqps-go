@@ -217,6 +217,7 @@ pub struct FileDetails {
     pub exam: String,
     pub semester: String,
     pub filename: String,
+    pub note: String,
 }
 
 /// 10 MiB file size limit

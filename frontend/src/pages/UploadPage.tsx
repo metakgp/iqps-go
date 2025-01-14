@@ -43,6 +43,7 @@ export default function UploadPage() {
                     year: number,
                     exam: string,
                     semester: string,
+                    note: string,
                     filename: string,
                 }[] = [];
 
@@ -54,6 +55,7 @@ export default function UploadPage() {
                         year,
                         exam,
                         semester,
+                        note,
                         file_name,
                     } = await sanitizeQP(qp);
 
@@ -65,6 +67,7 @@ export default function UploadPage() {
                         year,
                         exam,
                         semester,
+                        note,
                         filename: file_name
                     })
                 }

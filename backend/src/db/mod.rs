@@ -260,6 +260,7 @@ impl Database {
             year,
             exam,
             semester,
+            note,
             ..
         } = file_details;
 
@@ -269,6 +270,7 @@ impl Database {
             .bind(year)
             .bind(exam)
             .bind(semester)
+            .bind(note)
             .bind("placeholder_filelink")
             .bind(false);
 
