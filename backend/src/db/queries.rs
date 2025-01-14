@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS iqps (
     fts_course_details tsvector GENERATED ALWAYS AS (to_tsvector('english', course_code || ' ' || course_name)) stored
 );
 CREATE INDEX IF NOT EXISTS iqps_fts ON iqps USING gin (fts_course_details);
+CREATE EXTENSION pg_trgm;
 CREATE INDEX IF NOT EXISTS idx_course_name_trgm ON iqps USING gin (course_name gin_trgm_ops);";
 
 /// Query to get similar papers. Matches `course_code` ($1) always. Other parameters are optional and can be enabled or disabled using the arguments to this function.
