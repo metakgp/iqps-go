@@ -355,7 +355,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						<div className="note-customize">
 							{
 								data.note.match(/^Slot [A-Z]$/) &&
-								<div className="slot-choose">
+								<div>
 									<label>Slot:</label>
 									<NumberInput
 										alphabetical={true}
@@ -365,6 +365,18 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 											changeData('note', `Slot ${String.fromCharCode(value)}`)
 										}
 										}
+									/>
+								</div>
+							}
+							{
+								'approve_status' in data &&
+								<div>
+									<label>Custom Note:</label>
+									<SuggestionTextInput
+										placeholder="Custom Note"
+										value={data.note}
+										onValueChange={(value) => changeData('note', value)}
+										suggestions={[]}
 									/>
 								</div>
 							}

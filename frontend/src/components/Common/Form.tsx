@@ -128,7 +128,7 @@ interface ISuggestionTextInputProps<T> {
 	placeholder?: string;
 	onSuggestionSelect?: (sugg: ISuggestion<T>) => void;
 	onValueChange: (newValue: string) => void;
-	inputProps: React.InputHTMLAttributes<HTMLInputElement> | {};
+	inputProps?: React.InputHTMLAttributes<HTMLInputElement> | {};
 }
 export function SuggestionTextInput<T>(props: ISuggestionTextInputProps<T>) {
 	const [suggShown, setSuggShown] = useState<boolean>(false);
@@ -181,7 +181,7 @@ export function SuggestionTextInput<T>(props: ISuggestionTextInputProps<T>) {
 		onKeyDown={handleKeyDown}
 	>
 		<input
-			{...props.inputProps}
+			{...(props.inputProps ?? {})}
 			type="text"
 			className="sugg-text-input"
 			value={props.value}
