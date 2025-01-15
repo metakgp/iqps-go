@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS iqps (
     from_library BOOLEAN DEFAULT FALSE,
     upload_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     approve_status BOOLEAN DEFAULT FALSE,
+    is_deleted BOOLEAN DEFAULT FALSE,
     fts_course_details tsvector GENERATED ALWAYS AS (to_tsvector('english', course_code || ' ' || course_name)) stored
 );
 CREATE INDEX IF NOT EXISTS iqps_fts ON iqps USING gin (fts_course_details);
