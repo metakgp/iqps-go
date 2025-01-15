@@ -58,11 +58,13 @@
 				background-color: $bg-disabled;
 				font-size: 1rem;
 
-				&:hover, &:disabled {
+				&:hover,
+				&:disabled {
 					&.approve-btn {
 						background-color: $approved-color;
 						color: $fg-inverse;
 					}
+
 					&.unapprove-btn {
 						background-color: $rejected-color;
 					}
@@ -70,6 +72,58 @@
 
 				&:hover:not(:disabled) {
 					cursor: pointer;
+				}
+			}
+		}
+
+		.additional-note {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+
+			.note-options {
+				display: flex;
+				gap: 0.5rem;
+
+				.note-option {
+					padding: 0.6rem 0.6rem;
+					border-radius: 5px;
+					border: none;
+					color: $fg-color;
+					background-color: $surface-2;
+					font-size: 1rem;
+
+					display: flex;
+					align-items: center;
+					gap: 10px;
+
+					user-select: none;
+
+					&:hover:not(.enabled) {
+						cursor: pointer;
+						background-color: $surface-3;
+					}
+
+					&.enabled {
+						border-color: $accent-color-darker;
+						background-color: $accent-color-darker;
+
+						&.none {
+							background-color: $bg-disabled;
+						}
+					}
+				}
+			}
+
+			.note-customize {
+				display: flex;
+				flex-direction: column;
+				gap: 0.5rem;
+
+				div {
+					display: flex;
+					gap: 0.5rem;
+					align-items: center;
 				}
 			}
 		}
@@ -134,7 +188,8 @@
 					}
 				}
 
-				&.next-btn, &.prev-btn {
+				&.next-btn,
+				&.prev-btn {
 					background-color: $accent-color;
 
 					&:hover {

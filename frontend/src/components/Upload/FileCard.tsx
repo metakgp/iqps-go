@@ -29,6 +29,7 @@ export function FileCard({ file: { qp: qPaper, ocr }, removeQPaper, edit, invali
                             <div className="pill">{qPaper.year}</div>
                             <div className="pill">{qPaper.exam}</div>
                             <div className="pill">{qPaper.semester}</div>
+                            {qPaper.note !== "" && <div className="pill">{qPaper.note}</div>}
                         </div>
                         {invalidDetails &&
                             <p className="error-msg">Invalid course details</p>

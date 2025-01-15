@@ -208,6 +208,7 @@ function ResultCard(result: ISearchResult) {
 				<span className="result-card-tag">{result.year}</span>
 				<span className="result-card-tag" title={getExamTooltip(result.exam)}>{getExamTag(result.exam)}</span>
 				<span className="result-card-tag" title={getSemesterTooltip(result.semester)}>{getSemesterTag(result.semester)}</span>
+				{result.note !== "" && <span className="result-card-tag">{result.note}</span>}
 				{auth.isAuthenticated && <span className="result-card-tag">id: {result.id}</span>}
 			</div>
 		</p>

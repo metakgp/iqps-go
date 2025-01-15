@@ -44,7 +44,8 @@ export interface IExtractedDetails {
     course_code: string | null,
     year: number | null,
     exam: Exam | 'ct' | null,
-    semester: Semester | null
+    semester: Semester | null,
+    note: string | null,
 }
 
 export function extractDetailsFromText(text: string): IExtractedDetails {
@@ -79,11 +80,21 @@ export function extractDetailsFromText(text: string): IExtractedDetails {
     const semesterMatch = lines.match(/[^\w]*(spring|autumn)[^\w]*/i);
     const semester = semesterMatch ? semesterMatch[1].toLowerCase() as Semester : null;
 
+    let note = null;
+    if (lines.toLowerCase().includes('supplementary')) note = 'Supplementary';
+    else {
+        const slotMatch = lines.match(/[^\w]*slot\s+([a-z])[^\w]*/i);
+        if (slotMatch) {
+            note = `Slot ${slotMatch[1].toUpperCase()}`;
+        }
+    }
+
     return {
         course_code: courseCode,
         year,
         exam: examType,
-        semester
+        semester,
+        note
     };
 }
 
@@ -112,8 +123,7 @@ async function getAutofillDataFromPDF(file: File): Promise<IExtractedDetails> {
         const pdfData = await file.arrayBuffer();
         const text = await extractTextFromPDF(pdfData);
 
-        const { course_code, year, exam, semester } = extractDetailsFromText(text);
-        return { course_code, year, exam, semester };
+        return extractDetailsFromText(text);
     } catch (e) {
         console.log("Error extracting details from PDF: ", e);
 
@@ -121,7 +131,8 @@ async function getAutofillDataFromPDF(file: File): Promise<IExtractedDetails> {
             course_code: null,
             year: null,
             exam: null,
-            semester: null
+            semester: null,
+            note: null
         }
     }
 }
@@ -130,10 +141,10 @@ export const autofillData = async (
     filename: string, file: File,
 ): Promise<IQuestionPaper> => {
     // Try to extract details from the PDF
-    const { course_code: pdfCourseCode, year: pdfYear, exam: pdfExam, semester: pdfSemester } = await getAutofillDataFromPDF(file);
+    const { course_code: pdfCourseCode, year: pdfYear, exam: pdfExam, semester: pdfSemester, note: pdfNote } = await getAutofillDataFromPDF(file);
     // Try to extract details from the filename
     const dotIndex = filename.lastIndexOf("."); // Split the filename at the last `.`, ie, remove the extension
-    const { course_code: filenameCourseCode, year: filenameYear, exam: filenameExam, semester: filenameSemester } = extractDetailsFromText(filename.substring(0, dotIndex));
+    const { course_code: filenameCourseCode, year: filenameYear, exam: filenameExam, semester: filenameSemester, note: filenameNote } = extractDetailsFromText(filename.substring(0, dotIndex));
 
     const filenameOrPdfFallback = <T>(
         filenameData: T | null,
@@ -151,6 +162,7 @@ export const autofillData = async (
     const year = filenameOrPdfFallback(filenameYear, pdfYear, validateYear, new Date().getFullYear());
     const exam = filenameOrPdfFallback(filenameExam, pdfExam, validateExam, '');
     const semester = filenameOrPdfFallback(filenameSemester, pdfSemester, validateSemester, new Date().getMonth() > 7 ? "autumn" : "spring");
+    const note = filenameOrPdfFallback(filenameNote, pdfNote, (note) => note !== null, '');
 
     const qpDetails: IQuestionPaper = {
         course_code,
@@ -158,6 +170,7 @@ export const autofillData = async (
         exam,
         semester,
         course_name: getCourseFromCode(course_code) ?? "Unknown Course",
+        note,
     };
 
     return qpDetails;

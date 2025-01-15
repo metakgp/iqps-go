@@ -6,7 +6,7 @@ import { validate, validateCourseCode, validateExam, validateSemester, validateY
 import { Exam, IAdminDashboardQP, IErrorMessage, IQuestionPaperFile, Semester } from "../../types/question_paper";
 import { IExtractedDetails } from "../../utils/autofillData";
 import './styles/paper_edit_modal.scss';
-import { FaArrowLeft, FaArrowRight, FaFilePdf } from "react-icons/fa6";
+import { FaArrowLeft, FaArrowRight, FaBan, FaFilePdf } from "react-icons/fa6";
 import Spinner from "../Spinner/Spinner";
 import { FormGroup, RadioGroup, NumberInput, SuggestionTextInput, ISuggestion } from "./Form";
 
@@ -16,6 +16,7 @@ import { IEndpointTypes } from "../../types/backend";
 import { useAuthContext } from "../../utils/auth";
 import { QPCard } from "../AdminDashboard/QPCard";
 import { IoClose } from "react-icons/io5";
+import { FaCalendarAlt, FaSync } from "react-icons/fa";
 
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
@@ -316,6 +317,71 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						value={data.semester as Semester}
 						onSelect={(value: Semester) => changeData('semester', value)}
 					/>
+				</FormGroup>
+				<FormGroup
+					label="Additional Note:"
+					validationError={null}
+				>
+					<div className="additional-note">
+						<div className="note-options">
+							<button
+								className={`note-option none ${data.note === '' ? 'enabled' : ''}`}
+								onClick={(e) => {
+									e.preventDefault();
+									changeData('note', '');
+								}}
+							>
+								<FaBan />	None
+							</button>
+							<button
+								className={`note-option ${data.note === 'Supplementary' ? 'enabled' : ''}`}
+								onClick={(e) => {
+									e.preventDefault();
+									changeData('note', 'Supplementary');
+								}}
+							>
+								<FaSync /> Supplementary Exam
+							</button>
+							<button
+								className={`note-option ${data.note.match(/^Slot [A-Z]$/) !== null ? 'enabled' : ''}`}
+								onClick={(e) => {
+									e.preventDefault();
+									changeData('note', 'Slot A');
+								}}
+							>
+								<FaCalendarAlt /> Multiple Slots
+							</button>
+						</div>
+						<div className="note-customize">
+							{
+								data.note.match(/^Slot [A-Z]$/) &&
+								<div>
+									<label>Slot:</label>
+									<NumberInput
+										alphabetical={true}
+										value={data.note.charCodeAt(data.note.length - 1)}
+										setValue={(value) => {
+											console.log('changing', value, String.fromCharCode(value))
+											changeData('note', `Slot ${String.fromCharCode(value)}`)
+										}
+										}
+									/>
+								</div>
+							}
+							{
+								'approve_status' in data &&
+								<div>
+									<label>Custom Note:</label>
+									<SuggestionTextInput
+										placeholder="Custom Note"
+										value={data.note}
+										onValueChange={(value) => changeData('note', value)}
+										suggestions={[]}
+									/>
+								</div>
+							}
+						</div>
+					</div>
 				</FormGroup>
 
 				{
