@@ -76,7 +76,7 @@ IQPS was originally created by [Shubham Mishra](https://github.com/grapheo12) in
 3. Initialise the database:
    - Run `docker ps` to list the containers and view the container ID of the database.
    - Open a shell in the docker container by running `docker exec -it <docker-container-id> bash`.
-   - Connect to the database by running `psql -U <username> -d <database>`. (Values should match those set in the `.env` file)
+   - Connect to the database by running `psql -U ${POSTGRES_USER} -d ${POSTGRES_NAME}`.
    - Run the queries in `INIT_DB` in [`backend/src/db/queries.rs`](./backend/src/db/queries.rs) to initialise the database.
 
 ### Authentication
@@ -91,7 +91,9 @@ IQPS uses GitHub OAuth for authentication to the `/admin` page. To set up authen
 
 #### OAuth Flow
 
-On visiting `/admin`, if the user is not logged in, they get redirected to the GitHub OAuth page. After the user logs in, GitHub redirects them back to our `/oauth` endpoint with a code. The backend then uses this code to fetch an access token and username. The user details are then checked against the allowed admins (if they are in the `GH_ORG_NAME` org, or if they are `GH_ADMIN_USERNAME`). If the user is an admin, then a JWT token is generated with the user's username and sent back to the frontend. The frontend then stores this token in local storage and sends it with every request to the backend. The backend verifies this token and allows access to admin functions.
+- Github OAuth documentation: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps
+
+On visiting `/admin`, if the user is not logged in, they get redirected to the GitHub OAuth page. After the user logs in, GitHub redirects them back to our `/oauth` endpoint with a code. The backend then uses this code to fetch an access token and username. The username is then checked against the allowed admins. If so, a JWT token is generated with the user's username and sent back to the frontend. The frontend then stores this token in local storage and sends it with every request to the backend. The backend verifies this token and allows access to admin functions.
 
 ### Crawler
 
@@ -129,10 +131,8 @@ Environment variables can be set using a `.env` file. Use the `.env.template` fi
 - `GH_ORG_NAME`: The name of the Github organization of the admins.
 - `GH_ORG_TEAM_SLUG`: The URL slug of the Github org team of the admins.
 - `GH_ORG_ADMIN_TOKEN`: Github token of organization admin (with `read:org` scope).
-- `GH_ADMIN_USERNAME`: The Github username of the admin.
+- `GH_ADMIN_USERNAMES`: Comma separated list of Github usernames of the admins. (other than the org members)
 - `JWT_SECRET`: A secret key/password for JWT signing. It should be a long, random, unguessable string.
-
-Either set all of `GH_ORG_NAME`, `GH_ORG_TEAM_SLUG` and `GH_ORG_ADMIN_TOKEN` for organization-based authentication or set `GH_ADMIN_USERNAME` for user-based authentication.
 
 ##### Configuration
 

@@ -152,8 +152,12 @@ pub async fn authenticate_user(
         .context("Error parsing username API response.")?
         .login;
 
-    // Simple user-based authentication
-    if username == env_vars.gh_admin_username {
+    // Check if the user is in the admin list
+    if env_vars
+        .gh_admin_usernames
+        .split(",")
+        .any(|x| x == username)
+    {
         return Ok(Some(generate_token(&username, env_vars).await?));
     }
 
