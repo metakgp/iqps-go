@@ -71,10 +71,25 @@ IQPS was originally created by [Shubham Mishra](https://github.com/grapheo12) in
 
 ### Database
 
+To initialise the database for the first time:
+
 1. Set environment variables for Postgres in the `.env` file.
 2. Start the database by running `docker compose -f docker-compose.dev.yaml up -d`.
 3. Initialise the database:
    - Open a shell in the docker container by running `docker compose -f docker-compose.dev.yaml exec database-dev bash`.
+   - Connect to the database by running `psql -U $POSTGRES_USER -d $POSTGRES_NAME`.
+   - Run the queries in `INIT_DB` in [`backend/src/db/queries.rs`](./backend/src/db/queries.rs) to initialise the database.
+
+To run the pre-initialised database:
+
+1. Start the database by running `docker compose -f docker-compose.dev.yaml up -d`.
+
+For Production:
+
+1. Set environment variables for Postgres in the `.env` file.
+2. Start the database by running `docker compose -f docker-compose.yaml up -d`.
+3. Initialise the database:
+   - Open a shell in the docker container by running `docker compose -f docker-compose.yaml exec iqps-backend bash`.
    - Connect to the database by running `psql -U $POSTGRES_USER -d $POSTGRES_NAME`.
    - Run the queries in `INIT_DB` in [`backend/src/db/queries.rs`](./backend/src/db/queries.rs) to initialise the database.
 
@@ -88,11 +103,21 @@ IQPS uses GitHub OAuth for authentication to the `/admin` page. To set up authen
    - Once created, generate a client secret. Copy the client ID and secret into the `.env` file.
 2. Set the Authentication environment variables in the `.env` file.
 
+For Production:
+
+1. Create a new OAuth app on GitHub. (Should be from the same GitHub account as the organization)
+   - Go to https://github.com/settings/developers and create a new OAuth app.
+   - Set the Homepage URL to `<prod-url>` and Authorization callback URL to `<prod-url>/oauth`.
+   - Once created, generate a client secret. Add the client ID and secret to environment variables.
+2. Set the Authentication environment variables.
+
 #### OAuth Flow
 
 - Github OAuth documentation: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps
 
 On visiting `/admin`, if the user is not logged in, they get redirected to the GitHub OAuth page. After the user logs in, GitHub redirects them back to our `/oauth` endpoint with a code. The backend then uses this code to fetch an access token and username. The username is then checked against the allowed admins. If so, a JWT token is generated with the user's username and sent back to the frontend. The frontend then stores this token in local storage and sends it with every request to the backend. The backend verifies this token and allows access to admin functions.
+
+A user is considered as an admin if they are a part of the team `GH_ORG_TEAM_SLUG` in `GH_ORG_NAME`, or if their username is in the `GH_ADMIN_USERNAMES` list.
 
 ### Crawler
 
@@ -130,7 +155,7 @@ Environment variables can be set using a `.env` file. Use the `.env.template` fi
 - `GH_ORG_NAME`: The name of the Github organization of the admins.
 - `GH_ORG_TEAM_SLUG`: The URL slug of the Github org team of the admins.
 - `GH_ORG_ADMIN_TOKEN`: Github token of organization admin (with `read:org` scope).
-- `GH_ADMIN_USERNAMES`: Comma separated list of Github usernames of the admins. (other than the org members)
+- `GH_ADMIN_USERNAMES`: Comma separated list of Github usernames of the admins. (other than the org team members)
 - `JWT_SECRET`: A secret key/password for JWT signing. It should be a long, random, unguessable string.
 
 ##### Configuration

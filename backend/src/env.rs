@@ -46,7 +46,7 @@ pub struct EnvVars {
     /// An org admin's Github token (with the `read:org` permission)
     pub gh_org_admin_token: String,
     #[arg(env)]
-    /// The usernames of the admins (additional to org admins, comma separated)
+    /// The usernames of the admins (additional to org team members, comma separated)
     pub gh_admin_usernames: String,
     #[arg(env)]
     /// JWT encryption secret (make it a long, randomized string)
