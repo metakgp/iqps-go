@@ -63,7 +63,7 @@ IQPS was originally created by [Shubham Mishra](https://github.com/grapheo12) in
 2. For starting the backend:
    - Change directory to backend `cd backend`
    - Make the env file by copying the template: `cp .env.template .env`
-   - Fill the env variables and set `DB_HOST=localhost` for running locally for development (see [Environment Variables](#environment-variables))
+   - Fill the env variables and set `DB_HOST=localhost` for running locally for development (see [Environment Variables](#environment-variables)). Make sure to create corresponding folders for `STATIC_FILE_STORAGE_LOCATION`, `UPLOADED_QPS_PATH`, and `LIBRARY_QPS_PATH`.
    - Set up the database (see [Database](#database))
    - Start the Rust backend by running `cargo run .`
 3. Set up the frontend by running `pnpm install` and then `pnpm start` in the `frontend/` directory.
