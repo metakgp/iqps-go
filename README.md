@@ -77,7 +77,7 @@ To initialise the database for the first time:
 2. Start the database by running `docker compose -f docker-compose.dev.yaml up -d`.
 3. Initialise the database:
    - Open a shell in the docker container by running `docker compose -f docker-compose.dev.yaml exec database-dev bash`.
-   - Connect to the database by running `psql -U $POSTGRES_USER -d $POSTGRES_NAME`.
+   - Connect to the database by running `psql -U $POSTGRES_USER -d $POSTGRES_DB`.
    - Run the queries in `INIT_DB` in [`backend/src/db/queries.rs`](./backend/src/db/queries.rs) to initialise the database.
 
 To run the pre-initialised database:
@@ -90,7 +90,7 @@ For Production:
 2. Start the database by running `docker compose -f docker-compose.yaml up -d`.
 3. Initialise the database:
    - Open a shell in the docker container by running `docker compose -f docker-compose.yaml exec iqps-backend bash`.
-   - Connect to the database by running `psql -U $POSTGRES_USER -d $POSTGRES_NAME`.
+   - Connect to the database by running `psql -U $POSTGRES_USER -d $POSTGRES_DB`.
    - Run the queries in `INIT_DB` in [`backend/src/db/queries.rs`](./backend/src/db/queries.rs) to initialise the database.
 
 ### Authentication
