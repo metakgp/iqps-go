@@ -96,7 +96,7 @@ struct GithubMembershipResponse {
 /// Takes a Github OAuth code and creates a JWT authentication token for the user
 /// 1. Uses the OAuth code to get an access token.
 /// 2. Uses the access token to get the user's username.
-/// 3. Uses the username and and a admin's access token to verify whether the user is a member of the admins github team.
+/// 3. Uses the username and an admin's access token to verify whether the user is a member of the admins github team, or the admin themselves.
 ///
 /// Returns the JWT if the user is authenticated, `None` otherwise.
 pub async fn authenticate_user(
@@ -151,6 +151,15 @@ pub async fn authenticate_user(
     let username = serde_json::from_slice::<GithubUserResponse>(&response.bytes().await?)
         .context("Error parsing username API response.")?
         .login;
+
+    // Check if the user is in the admin list
+    if env_vars
+        .gh_admin_usernames
+        .split(",")
+        .any(|x| x == username)
+    {
+        return Ok(Some(generate_token(&username, env_vars).await?));
+    }
 
     // Check the user's membership in the team
     println!(

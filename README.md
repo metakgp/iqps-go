@@ -36,6 +36,7 @@
 - [About The Project](#about-the-project)
 - [Development](#development)
 - [Deployment](#deployment)
+  - [Backend](#backend)
   - [Environment Variables](#environment-variables)
 - [Contact](#contact)
   - [Maintainer(s)](#maintainers)
@@ -45,6 +46,7 @@
 </details>
 
 ## About The Project
+
 <div align="center">
   <img width="60%" alt="image" src="./frontend/public/banner.png">
 </div>
@@ -56,21 +58,75 @@ IQPS was originally created by [Shubham Mishra](https://github.com/grapheo12) in
 > Currently in active development. Get involved at our [Slack](https://slack.metakgp.org/).
 
 ## Development
+
 1. Clone this repository.
 2. For starting the backend:
-    - Change directory to backend `cd backend`
-    - Make the env file by copying the template: `cp .env.template .env`
-    - Fill the env variable and set `DB_HOST=localhost` for running locally for development
-    - Start the DB by running `docker compose -f docker-compose.dev.yaml up -d`
-    - Start the Rust backend by running `cargo run .`
+   - Change directory to backend `cd backend`
+   - Make the env file by copying the template: `cp .env.template .env`
+   - Fill the env variables and set `DB_HOST=localhost` for running locally for development (see [Environment Variables](#environment-variables)). Make sure to create corresponding folders for `STATIC_FILE_STORAGE_LOCATION`, `UPLOADED_QPS_PATH`, and `LIBRARY_QPS_PATH`.
+   - Set up the database (see [Database](#database))
+   - Start the Rust backend by running `cargo run .`
 3. Set up the frontend by running `pnpm install` and then `pnpm start` in the `frontend/` directory.
 4. Profit.
 
+### Database
+
+To initialise the database for the first time:
+
+1. Set environment variables for Postgres in the `.env` file.
+2. Start the database by running `docker compose -f docker-compose.dev.yaml up -d`.
+3. Initialise the database:
+   - Open a shell in the docker container by running `docker compose -f docker-compose.dev.yaml exec database-dev bash`.
+   - Connect to the database by running `psql -U $POSTGRES_USER -d $POSTGRES_DB`.
+   - Run the queries in `INIT_DB` in [`backend/src/db/queries.rs`](./backend/src/db/queries.rs) to initialise the database.
+
+To run the pre-initialised database:
+
+1. Start the database by running `docker compose -f docker-compose.dev.yaml up -d`.
+
+For Production:
+
+1. Set environment variables for Postgres in the `.env` file.
+2. Start the database by running `docker compose -f docker-compose.yaml up -d`.
+3. Initialise the database:
+   - Open a shell in the docker container by running `docker compose -f docker-compose.yaml exec iqps-backend bash`.
+   - Connect to the database by running `psql -U $POSTGRES_USER -d $POSTGRES_DB`.
+   - Run the queries in `INIT_DB` in [`backend/src/db/queries.rs`](./backend/src/db/queries.rs) to initialise the database.
+
+### Authentication
+
+IQPS uses GitHub OAuth for authentication to the `/admin` page. To set up authentication:
+
+1. Create a new OAuth app on GitHub.
+   - Go to https://github.com/settings/developers and create a new OAuth app.
+   - Set the Homepage URL to `http://localhost:5173` and Authorization callback URL to `http://localhost:5173/oauth`.
+   - Once created, generate a client secret. Copy the client ID and secret into the `.env` file.
+2. Set the Authentication environment variables in the `.env` file.
+
+For Production:
+
+1. Create a new OAuth app on GitHub. (Should be from the same GitHub account as the organization)
+   - Go to https://github.com/settings/developers and create a new OAuth app.
+   - Set the Homepage URL to `<prod-url>` and Authorization callback URL to `<prod-url>/oauth`.
+   - Once created, generate a client secret. Add the client ID and secret to environment variables.
+2. Set the Authentication environment variables.
+
+#### OAuth Flow
+
+- Github OAuth documentation: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps
+
+On visiting `/admin`, if the user is not logged in, they get redirected to the GitHub OAuth page. After the user logs in, GitHub redirects them back to our `/oauth` endpoint with a code. The backend then uses this code to fetch an access token and username. The username is then checked against the allowed admins. If so, a JWT token is generated with the user's username and sent back to the frontend. The frontend then stores this token in local storage and sends it with every request to the backend. The backend verifies this token and allows access to admin functions.
+
+A user is considered as an admin if they are a part of the team `GH_ORG_TEAM_SLUG` in `GH_ORG_NAME`, or if their username is in the `GH_ADMIN_USERNAMES` list.
+
 ### Crawler
+
 [WIP: Steps to locally set up crawler]
 
 ## Deployment
+
 ### Backend
+
 0. Set up [MetaPloy](https://github.com/metakgp/metaploy) **for production**.
 1. Clone this repository at a convenient location such as `/deployments`.
 2. `cd backend/`
@@ -79,10 +135,13 @@ IQPS was originally created by [Shubham Mishra](https://github.com/grapheo12) in
 5. Optionally set up a Systemd service to start the wiki on startup or use this [deployment github workflow](./.github/workflows/deploy.yaml).
 
 ### Environment Variables
+
 Environment variables can be set using a `.env` file. Use the `.env.template` files for reference. See `backend/src/env.rs` for more documentation and types.
 
 #### Backend
+
 ##### Database (Postgres)
+
 - `DB_NAME`: Database name
 - `DB_HOST`: Database hostname (eg: `localhost`)
 - `DB_PORT`: Database port
@@ -90,13 +149,17 @@ Environment variables can be set using a `.env` file. Use the `.env.template` fi
 - `DB_PASSWORD`: Database password
 
 ##### Authentication
+
 - `GH_CLIENT_ID`: Client ID of the Github OAuth app.
 - `GH_CLIENT_SECRET`: Client secret of the Github OAuth app.
 - `GH_ORG_NAME`: The name of the Github organization of the admins.
 - `GH_ORG_TEAM_SLUG`: The URL slug of the Github org team of the admins.
+- `GH_ORG_ADMIN_TOKEN`: Github token of organization admin (with `read:org` scope).
+- `GH_ADMIN_USERNAMES`: Comma separated list of Github usernames of the admins. (other than the org team members)
 - `JWT_SECRET`: A secret key/password for JWT signing. It should be a long, random, unguessable string.
 
 ##### Configuration
+
 - `MAX_UPLOAD_LIMIT`: Maximum number of files that can be uploaded at once.
 - `LOG_LOCATION`: The path to a local logfile.
 - `STATIC_FILES_URL`: The URL of the static files server. (eg: `https://static.metakgp.org`)
@@ -107,10 +170,10 @@ Environment variables can be set using a `.env` file. Use the `.env.template` fi
 - `CORS_ALLOWED_ORIGINS`: A comma (,) separated list of origins to be allowed in CORS.
 
 #### Frontend
+
 - `VITE_BACKEND_URL`: The IQPS backend URL. Use `http://localhost:8080` in development.
 - `VITE_MAX_UPLOAD_LIMIT` The maximum number of files that can be uploaded at once. (Note: This is only a client-side limit)
 - `VITE_GH_OAUTH_CLIENT_ID` The Client ID of the Github OAuth app.
-
 
 ## Contact
 
