@@ -34,6 +34,12 @@ pub struct EnvVars {
     /// OAuth app client id (public token)
     pub gh_client_id: String,
     #[arg(env)]
+    /// An org admin's Github token (with the `read:org` permission)
+    pub gh_org_admin_token: String,
+    #[arg(env)]
+    /// JWT encryption secret (make it a long, randomized string)
+    jwt_secret: String,
+    #[arg(env)]
     /// OAuth app client secret
     pub gh_client_secret: String,
     #[arg(env, default_value = "")]
@@ -42,15 +48,9 @@ pub struct EnvVars {
     #[arg(env, default_value = "")]
     /// Github organization team slug (this team has access to admin dashboard)
     pub gh_org_team_slug: String,
-    #[arg(env)]
-    /// An org admin's Github token (with the `read:org` permission)
-    pub gh_org_admin_token: String,
     #[arg(env, default_value = "")]
     /// The usernames of the admins (additional to org team members, comma separated)
     pub gh_admin_usernames: String,
-    #[arg(env)]
-    /// JWT encryption secret (make it a long, randomized string)
-    jwt_secret: String,
 
     // Other configs
     #[arg(env, default_value = "10")]
