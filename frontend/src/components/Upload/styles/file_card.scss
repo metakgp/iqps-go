@@ -66,17 +66,17 @@
 		padding: 0.5rem;
 		border-radius: 10px;
 		border: none;
-		background: $surface-2;
+		background: inherit;
 		box-shadow: none;
 		height: fit-content;
 
 		&:hover {
 			cursor: pointer;
-			background-color: $surface-3;
+			background-color: $surface-2;
 		}
 
 		&:active {
-			background-color: $surface-3;
+			background-color: $surface-2;
 		}
 
 		&.close-btn {
@@ -84,14 +84,14 @@
 		}
 
 		&.edit-btn {
-			color: $fg-color-darker;
+			color: $accent-complementary;
 		}
 
 		&:disabled {
 			color: $fg-color-disabled;
 
 			&:hover {
-				background-color: $surface-2;
+				background-color: initial;
 				cursor: initial;
 			}
 		}

@@ -165,8 +165,8 @@
 				border: none;
 				box-shadow: none;
 				color: white;
-				padding: 0.5rem 1rem;
-				border-radius: 1rem;
+				padding: 10px 15px;
+				border-radius: 5px;
 
 				display: flex;
 				gap: 5px;
@@ -181,10 +181,10 @@
 				}
 
 				&.save-btn {
-					background-color: $approved-color;
+					background-color: $approved-color-darker;
 
 					&:hover {
-						background-color: $approved-color-darker;
+						background-color: $approved-color-darkerer;
 					}
 				}
 

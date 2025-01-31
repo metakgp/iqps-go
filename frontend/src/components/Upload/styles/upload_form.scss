@@ -10,17 +10,17 @@
 		gap: 1rem;
 
 		button {
-			background-color: rgba($accent-color-darker, 0.5);
+			background-color: $accent-color-darker;
 			color: $fg-color;
 
 			font-size: 1.1rem;
 			font-weight: bold;
 
 			margin-top: 1rem;
-			padding: 0.25rem 1rem;
+			padding: 10px 15px;
 
-			border-radius: 1rem;
-			border: 2px solid $accent-color-darker;
+			border-radius: 5px;
+			border: none;
 
 			display: flex;
 			align-items: center;
@@ -32,7 +32,7 @@
 
 			&:hover {
 				color: $fg-color;
-				background-color: $accent-color-darker;
+				background-color: $accent-color-darkerer;
 				cursor: pointer;
 				transition: all 0.2s ease;
 			}
@@ -49,11 +49,11 @@
 		}
 
 		.upload-btn {
-			border-color: $approved-color-darker;
-			background-color: rgba($approved-color-darker, 0.4);
+			border: none;
+			background-color: $approved-color-darker;
 
 			&:hover {
-				background-color: $approved-color-darker;
+				background-color: $approved-color-darkerer;
 			}
 		}
 	}
