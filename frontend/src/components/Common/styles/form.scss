@@ -114,7 +114,7 @@
 		border: 2px solid rgba(white, 0.1);
 
 		&.hidden {
-			display: none;
+			display: none !important;
 		}
 
 		.suggestion {
