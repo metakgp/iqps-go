@@ -16,7 +16,7 @@ import { IEndpointTypes } from "../../types/backend";
 import { useAuthContext } from "../../utils/auth";
 import { QPCard } from "../AdminDashboard/QPCard";
 import { IoClose } from "react-icons/io5";
-import { FaCalendarAlt, FaSync } from "react-icons/fa";
+import { FaCalendarAlt, FaRegTrashAlt, FaSync } from "react-icons/fa";
 
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
@@ -26,6 +26,7 @@ interface IPaperEditModalProps<T> {
 	qPaper: T;
 	updateQPaper: UpdateQPHandler<T>;
 	ocrDetails?: IExtractedDetails;
+	onDelete?: React.MouseEventHandler<HTMLButtonElement>;
 };
 
 function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props: IPaperEditModalProps<T>) {
@@ -437,6 +438,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 							Cancel
 						</button>
 					}
+
 					<button
 						onClick={(e) => {
 							e.preventDefault();
@@ -450,6 +452,15 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 					>
 						{'approve_status' in data ? 'Update Details' : 'Save'}
 					</button>
+
+					{props.onDelete !== undefined &&
+						<button
+							onClick={props.onDelete}
+							className="cancel-btn"
+						>
+							Delete <FaRegTrashAlt />
+						</button>
+					}
 
 					{
 						props.selectNext !== undefined &&

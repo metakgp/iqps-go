@@ -1,5 +1,34 @@
 @import "../../styles/variables";
 
+.delete-toast {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+
+	p {
+		margin: 0;
+	}
+
+	button {
+		padding: 5px;
+		border-radius: 5px;
+		border: none;
+		display: flex;
+		gap: 5px;
+		align-items: center;
+		font-size: 1rem;
+
+		height: fit-content;
+
+		color: $fg-color;
+		background-color: $approved-color-darker;
+
+		&:hover {
+			background-color: $approved-color-darkerer;
+		}
+	}
+}
+
 #admin-dashboard {
 	display: flex;
 	flex-direction: column;
