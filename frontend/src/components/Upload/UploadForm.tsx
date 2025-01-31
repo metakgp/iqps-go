@@ -26,6 +26,7 @@ export function UploadForm(props: IUploadFormProps) {
 		useState<IQuestionPaperFile | null>(null);
 	const [ocrLoopOn, setOcrLoopOn] = useState<boolean>(false);
 	const [processingComplete, setProcessingComplete] = useState<boolean>(false);
+	const [currentOcrPaper, setCurrentOcrPaper] = useState<UploadFileData | null>(null);
 
 	const addQPapers = (newFiles: File[]) => {
 		setQPapers((prevQPs) => {
@@ -66,7 +67,8 @@ export function UploadForm(props: IUploadFormProps) {
 			const request = ocrRequests.shift();
 
 			if (request) {
-				let data = await autofillData(request.qp.file.name, request.qp.file);
+				setCurrentOcrPaper(request);
+				const data = await autofillData(request.qp.file.name, request.qp.file);
 
 				setQPapers((currentPapers) => {
 					return currentPapers.map(
@@ -80,6 +82,7 @@ export function UploadForm(props: IUploadFormProps) {
 					)
 				});
 
+				setCurrentOcrPaper(null);
 				setOcrLoopOn(false);
 			}
 		}
@@ -96,7 +99,7 @@ export function UploadForm(props: IUploadFormProps) {
 	};
 
 	const updateQPaper = (updated: IQuestionPaperFile) => {
-		let updateData = qPapers.map((qp) => {
+		const updateData = qPapers.map((qp) => {
 			if (qp.qp.file.name == updated.file.name) return {
 				ocr: qp.ocr,
 				qp: updated,
@@ -145,6 +148,7 @@ export function UploadForm(props: IUploadFormProps) {
 									removeQPaper={removeQPaper}
 									edit={setSelectedQPaper}
 									invalidDetails={file.ocr && !isQPValid(file.qp)}
+									runningOcr={currentOcrPaper === file}
 								/>
 							</div>
 						)}

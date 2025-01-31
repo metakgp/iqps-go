@@ -10,9 +10,10 @@ export interface IFileCardProps {
     removeQPaper: (filename: string) => void;
     edit: (qp: IQuestionPaperFile) => void;
     invalidDetails: boolean;
+    runningOcr: boolean;
 };
 
-export function FileCard({ file: { qp: qPaper, ocr }, removeQPaper, edit, invalidDetails }: IFileCardProps) {
+export function FileCard({ file: { qp: qPaper, ocr }, removeQPaper, edit, invalidDetails, runningOcr }: IFileCardProps) {
     return (
         <div className="file-card">
             <div className="file-card-icon">
@@ -35,7 +36,7 @@ export function FileCard({ file: { qp: qPaper, ocr }, removeQPaper, edit, invali
                             <p className="error-msg">Invalid course details</p>
                         }
                     </> :
-                        <p className="processing-msg">Processing file <Spinner /></p>
+                        <p className="processing-msg">{runningOcr ? "Processing file" : "Waiting to process file"} <Spinner /></p>
                 }
 
             </div>
