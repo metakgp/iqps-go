@@ -90,7 +90,7 @@ export function UploadForm(props: IUploadFormProps) {
 
 	useEffect(() => {
 		ocrDetailsLoop();
-	}, [qPapers])
+	}, [qPapers, setCurrentOcrPaper])
 
 	const removeQPaper = (filename: string) => {
 		setQPapers((prevQPs) =>

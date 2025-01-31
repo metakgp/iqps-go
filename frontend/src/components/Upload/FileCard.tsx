@@ -43,6 +43,7 @@ export function FileCard({ file: { qp: qPaper, ocr }, removeQPaper, edit, invali
             <div className="btn-group">
                 <button
                     onClick={() => removeQPaper(qPaper.file.name)}
+                    disabled={runningOcr}
                     className="close-btn btn"
                 >
                     <FaRegTrashAlt size="1.5rem" />
