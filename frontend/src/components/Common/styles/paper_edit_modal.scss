@@ -215,6 +215,53 @@
 				width: 100%;
 				height: 90%;
 			}
+
+			.title {
+				width: 100%;
+				margin-bottom: 1rem;
+
+				display: flex;
+				justify-content: center;
+				align-items: center;
+
+				h2 {
+					margin: 0;
+					width: 100%;
+					height: fit-content;
+					align-items: center;
+				}
+
+				.fullscreen-btn {
+					border: none;
+					border-radius: 5px;
+					padding: 2px;
+
+					color: $fg-color;
+					background-color: $surface-2;
+					font-size: 2rem;
+
+					display: flex;
+
+					&:hover {
+						background-color: $surface-3;
+						cursor: pointer;
+					}
+				}
+			}
+
+			&.full-screen {
+				z-index: 500;
+				position: fixed;
+
+				width: 100%;
+				max-width: 100%;
+				height: 100%;
+
+				embed {
+					width: 100%;
+					height: 100%;
+				}
+			}
 		}
 	}
 

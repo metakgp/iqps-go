@@ -17,6 +17,7 @@ import { useAuthContext } from "../../utils/auth";
 import { QPCard } from "../AdminDashboard/QPCard";
 import { IoClose } from "react-icons/io5";
 import { FaCalendarAlt, FaRegTrashAlt, FaSync } from "react-icons/fa";
+import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
 
 type UpdateQPHandler<T> = (qp: T) => void;
 interface IPaperEditModalProps<T> {
@@ -46,6 +47,8 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 	const [courseCodeSuggTimeout, setCourseCodeSuggTimeout] = useState<number | null>(null);
 	const [courseNameSuggTimeout, setCourseNameSuggTimeout] = useState<number | null>(null);
 	const [validityTimeout, setValidityTimeout] = useState<number | null>(null);
+
+	const [isPreviewFullScreen, setIsPreviewFullScreen] = useState(false);
 
 	const changeData = <K extends keyof T>(property: K, value: T[K]) => {
 		setData((prev_data) => {
@@ -173,9 +176,15 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 
 	return <div className="modal-overlay">
 		{'filelink' in data &&
-			<div className="modal qp-preview" style={{ minWidth: '20%' }}>
-				<h2>Preview</h2>
-				<embed src={data.filelink} />
+			<div className={`modal qp-preview ${isPreviewFullScreen ? 'full-screen' : ''}`} style={{ minWidth: '20%' }}>
+				<div className="title">
+					<h2>Preview</h2>
+					<button className="fullscreen-btn" onClick={(e) => {
+						e.preventDefault();
+						setIsPreviewFullScreen(!isPreviewFullScreen);
+					}}>{isPreviewFullScreen ? <AiOutlineFullscreenExit /> : <AiOutlineFullscreen />}</button>
+				</div>
+				<embed src={'https://static.metakgp.org/iqps/uploaded/unapproved/10173.pdf'} />
 				{/* <h2>OCR Details</h2>
 				{
 					props.ocrDetails === undefined ?
