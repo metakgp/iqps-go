@@ -2,6 +2,10 @@
 
 .file-card {
 	display: flex;
+	align-items: center;
+	padding: 0.8rem 1.5rem;
+	border-radius: 8px;
+	background: $surface-1;
 
 	.file-card-icon {
 		margin-right: 0.5rem;
@@ -62,17 +66,17 @@
 		padding: 0.5rem;
 		border-radius: 10px;
 		border: none;
-		background: none;
+		background: $surface-2;
 		box-shadow: none;
 		height: fit-content;
 
 		&:hover {
 			cursor: pointer;
-			background-color: $surface-1;
+			background-color: $surface-3;
 		}
 
 		&:active {
-			background-color: $surface-2;
+			background-color: $surface-3;
 		}
 
 		&.close-btn {
@@ -87,7 +91,7 @@
 			color: $fg-color-disabled;
 
 			&:hover {
-				background-color: initial;
+				background-color: $surface-2;
 				cursor: initial;
 			}
 		}
