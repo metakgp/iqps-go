@@ -184,7 +184,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 						setIsPreviewFullScreen(!isPreviewFullScreen);
 					}}>{isPreviewFullScreen ? <AiOutlineFullscreenExit /> : <AiOutlineFullscreen />}</button>
 				</div>
-				<embed src={'https://static.metakgp.org/iqps/uploaded/unapproved/10173.pdf'} />
+				<embed src={data.filelink} />
 				{/* <h2>OCR Details</h2>
 				{
 					props.ocrDetails === undefined ?
