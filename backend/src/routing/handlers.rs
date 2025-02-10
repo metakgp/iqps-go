@@ -201,6 +201,8 @@ pub async fn edit(
             ))
         }
     } else {
+        // Commit the transaction
+        tx.commit().await?;
         Ok(BackendResponse::ok(
             "Successfully updated paper details.".into(),
             new_qp.with_url(&state.env_vars)?,
