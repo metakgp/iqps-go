@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["FILE_SIZE_LIMIT"],"fn":["delete","edit","get_unapproved","healthcheck","oauth","profile","search","similar","upload"],"struct":["DeleteReq","EditReq","FileDetails","OAuthReq","OAuthRes","ProfileRes","UploadStatus"],"type":["HandlerReturn"]};
