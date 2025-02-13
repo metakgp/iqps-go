@@ -1,12 +1,14 @@
 package main
 
 import (
-	"encoding/csv"
+	"archive/tar"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -15,26 +17,17 @@ import (
 )
 
 type QuestionPaper struct {
-	ID          int    `json:"id"`
-	CourseCode  string `json:"course_code"`
-	CourseName  string `json:"course_name"`
-	Year        int    `json:"year"`
-	Exam        string `json:"exam"`
-	FileLink    string `json:"filelink"`
-	FromLibrary bool   `json:"from_library"`
+	CourseCode    string `json:"course_code"`
+	Filename      string `json:"filename"`
+	Name          string `json:"course_name"`
+	Year          int    `json:"year"`
+	ExamType      string `json:"exam"`
+	Semester      string `json:"semester"`
+	Url           string `json:"url"`
+	ApproveStatus bool   `json:"approve_status"`
 }
 
-type qpRaw struct {
-	CourseCode string `json:"course_code"`
-	Filename   string `json:"filename"`
-	Name       string `json:"name"`
-	Year       int    `json:"year"`
-	ExamType   string `json:"exam_type"`
-	Semester   string `json:"semester"`
-	Url        string `json:"url"`
-}
-
-func downloadFile(new_qp qpRaw) {
+func downloadFile(new_qp QuestionPaper) {
 	res, err := http.Get(new_qp.Url)
 	if err != nil {
 		fmt.Println(err)
@@ -60,12 +53,74 @@ func downloadFile(new_qp qpRaw) {
 	defer file.Close()
 }
 
+func createTarball() {
+	srcDir := "./qp"
+	tarPath := "./qp.tar.gz"
+
+	tarFile, err := os.Create(tarPath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer tarFile.Close()
+
+	gzipWriter := gzip.NewWriter(tarFile)
+	defer gzipWriter.Close()
+	tarWriter := tar.NewWriter(gzipWriter)
+	defer tarWriter.Close()
+
+	err = filepath.Walk(srcDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		parts := strings.Split(info.Name(), ".")
+		if len(parts) > 1 && parts[len(parts)-1] == "pdf" {
+
+			header, err := tar.FileInfoHeader(info, info.Name())
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+
+			header.Name = strings.TrimPrefix(path, srcDir)
+			if err := tarWriter.WriteHeader(header); err != nil {
+				fmt.Println(err)
+				return err
+			}
+
+			file, err := os.Open(path)
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+			defer file.Close()
+
+			if _, err := io.Copy(tarWriter, file); err != nil {
+				fmt.Println(err)
+				return err
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		fmt.Println(err)
+	} else {
+
+		fmt.Println("Tarball created successfully")
+	}
+}
+
 func sanitizeFilename(s string) string {
 	// replaces all spaces with _
 	return strings.ReplaceAll(s, "%20", "_")
 }
 
 func main() {
+	YEAR := 2024
+
 	c := colly.NewCollector(
 		colly.AllowedDomains("10.18.24.75"),
 		colly.MaxDepth(9),
@@ -90,17 +145,7 @@ func main() {
 		return
 	}
 
-	// res, err := http.Get("https://iqps-server.metakgp.org/library")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// defer res.Body.Close()
-
-	var existing_qp []QuestionPaper
-	// json.NewDecoder(res.Body).Decode(&existing_qp)
-
-	var new_qp []qpRaw
-
+	var new_qp []QuestionPaper
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		if e.Text == "Parent Directory" || e.Text == "Name" || e.Text == "Last modified" || e.Text == "Size" || e.Text == "Description" {
 			return
@@ -118,9 +163,9 @@ func main() {
 			year, _ = strconv.Atoi(temp[4])
 			details := strings.ToLower(temp[5])
 			if strings.Contains(details, "mid") {
-				exam_type = "mid"
+				exam_type = "midsem"
 			} else if strings.Contains(details, "end") {
-				exam_type = "end"
+				exam_type = "endsem"
 			} else {
 				exam_type = ""
 			}
@@ -132,7 +177,7 @@ func main() {
 				sem = ""
 			}
 
-			// as per 16/09/2024, filenames in library are of the form course-code_course-name_extra-details,
+			// filenames in library are of the form course-code_course-name_extra-details,
 			// extracting course_code from the filename since course_code is a mandatory field
 			pattern := `\b\w{2}\d{5}\b`
 			re := regexp.MustCompile(pattern)
@@ -160,79 +205,69 @@ func main() {
 				name = ""
 			}
 
-			for i := range existing_qp {
-				if existing_qp[i].CourseCode == course_code && existing_qp[i].Year == year && existing_qp[i].Exam == exam_type {
-					return
-				}
-			}
-
 			if courses[course_code] != nil {
 				name = courses[course_code].(string)
 			}
+			is_approved := true
+			// add the paper as unapproved if course_code or name is missing
+			if course_code == "" || name == "" {
+				is_approved = false
+				if course_code == "" {
+					course_code = "UNKNOWN"
+				}
+				if name == "" {
+					name = "UNKNOWN"
+				}
+			}
 
-			new_qp = append(new_qp, qpRaw{course_code, sanitizeFilename(strings.Join(temp[4:], "_")), name, year, exam_type, sem, file_url})
+			new_qp = append(new_qp, QuestionPaper{course_code, sanitizeFilename(strings.Join(temp[4:], "_")), name, year, exam_type, sem, file_url, is_approved})
 		}
 
 		c.Visit(e.Request.AbsoluteURL(link))
 	})
 
-	c.Visit("http://10.18.24.75/peqp/2024")
+	c.Visit(fmt.Sprintf("http://10.18.24.75/peqp/%d", YEAR))
 	c.Wait()
 
-	file, err := os.Create("qp.csv")
+	file, err := os.Create("qp.json")
 	if err != nil {
-		fmt.Println("Error creating CSV file:", err)
+		fmt.Println("Error creating JSON file:", err)
 		return
 	}
 	defer file.Close()
 
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-
-	header := []string{"course_code", "course_name", "year", "exam", "semester", "filelink", "from_library", "approve_status"}
-	if err := writer.Write(header); err != nil {
-		fmt.Println("Error writing header to CSV:", err)
+	jsonBytes, err := json.Marshal(new_qp)
+	if err != nil {
+		fmt.Println("Error encoding JSON:", err)
 		return
 	}
+	_, err = file.Write(jsonBytes)
+	if err != nil {
+		fmt.Println("Error writing to file:", err)
+		return
+	}
+	fmt.Println("JSON file created successfully")
 
-	for i := range new_qp {
-		var exam_type string
-		if new_qp[i].ExamType != "" {
-			exam_type = new_qp[i].ExamType + "sem"
-		}
-
-		var is_approved string
-		if new_qp[i].CourseCode == "" || new_qp[i].Name == "" {
-			is_approved = "false"
-			if new_qp[i].CourseCode == "" {
-				new_qp[i].CourseCode = "UNKNOWN"
+	// delete all pdf files in the qp directory
+	files, err := os.ReadDir("./qp")
+	if err != nil {
+		fmt.Println("Error reading directory:", err)
+		return
+	}
+	for _, file := range files {
+		if strings.Contains(file.Name(), ".pdf") {
+			err = os.Remove("./qp/" + file.Name())
+			if err != nil {
+				fmt.Println("Error deleting file:", err)
+				return
 			}
-			if new_qp[i].Name == "" {
-				new_qp[i].Name = "UNKNOWN"
-			}
-		} else {
-			is_approved = "true"
-		}
-
-		row := []string{
-			new_qp[i].CourseCode,
-			new_qp[i].Name,
-			fmt.Sprint(new_qp[i].Year),
-			exam_type,
-			new_qp[i].Semester,
-			"peqp/qp/" + new_qp[i].Filename,
-			"true",
-			is_approved,
-		}
-		if err := writer.Write(row); err != nil {
-			fmt.Println("Error writing row to CSV:", err)
-			return
 		}
 	}
-	fmt.Println("CSV file created successfully")
 
 	for i := range new_qp {
 		fmt.Printf("%d/%d: Downloading %s\n", i+1, len(new_qp), new_qp[i].Name)
 		downloadFile(new_qp[i])
 	}
+
+	createTarball()
 }
