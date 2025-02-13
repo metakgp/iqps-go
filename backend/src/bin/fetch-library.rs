@@ -65,7 +65,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         let (mut tx, id) = database.insert_new_library_qp(&qp).await?;
-        let file_name = format!("{}_{}.pdf", id, qp.filename);
+        let file_name = format!("{}_{}", id, qp.filename);
 
         let file_link_slug = env_vars.paths.get_slug(&file_name, PaperCategory::Library);
 
