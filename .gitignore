@@ -6,8 +6,8 @@ iqps.db
 
 crawler/cache
 crawler/qp/*.pdf
-qp.csv
-qp.tar.xz
+qp.json
+qp.tar.gz
 
 go.work.sum
 

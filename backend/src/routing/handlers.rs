@@ -332,7 +332,7 @@ pub async fn upload(
         // Update the filelink in the db
         if state
             .db
-            .update_uploaded_filelink(&mut tx, id, &filelink_slug)
+            .update_filelink(&mut tx, id, &filelink_slug)
             .await
             .is_ok()
         {
