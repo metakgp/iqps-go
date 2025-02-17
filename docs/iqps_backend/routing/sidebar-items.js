@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Status"],"fn":["get_router"],"mod":["handlers","middleware"],"struct":["AppError","BackendResponse","RouterState"]};

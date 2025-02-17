@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["authenticate_user","generate_token","verify_token"],"struct":["Auth","GithubAccessTokenResponse","GithubMembershipResponse","GithubUserResponse"]};
