@@ -12,6 +12,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/gocolly/colly"
 )
@@ -121,6 +123,8 @@ func sanitizeFilename(s string) string {
 func main() {
 	YEAR := 2024
 
+	start := time.Now()
+
 	c := colly.NewCollector(
 		colly.AllowedDomains("10.18.24.75"),
 		colly.MaxDepth(9),
@@ -229,6 +233,8 @@ func main() {
 	c.Visit(fmt.Sprintf("http://10.18.24.75/peqp/%d", YEAR))
 	c.Wait()
 
+	t1 := time.Now()
+
 	file, err := os.Create("qp.json")
 	if err != nil {
 		fmt.Println("Error creating JSON file:", err)
@@ -264,10 +270,45 @@ func main() {
 		}
 	}
 
-	for i := range new_qp {
-		fmt.Printf("%d/%d: Downloading %s\n", i+1, len(new_qp), new_qp[i].Name)
-		downloadFile(new_qp[i])
+	t2 := time.Now()
+
+	// for i := range new_qp {
+	// 	fmt.Printf("%d/%d: Downloading %s\n", i+1, len(new_qp), new_qp[i].Name)
+	// 	downloadFile(new_qp[i])
+	// }
+
+	const goroutines = 1
+	jobs := make(chan QuestionPaper, len(new_qp))
+	var wg sync.WaitGroup
+
+	for w := 1; w <= goroutines; w++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for job := range jobs {
+				downloadFile(job)
+			}
+		}()
 	}
 
+	for _, qp := range new_qp {
+		jobs <- qp
+	}
+	close(jobs)
+	wg.Wait()
+
+	t3 := time.Now()
+
 	createTarball()
+
+	t4 := time.Now()
+
+	fmt.Println("Time taken:")
+	fmt.Println("Load courses.json, scraping library site:", t1.Sub(start))
+	fmt.Println("Create JSON file, clear qps folder:", t2.Sub(t1))
+	fmt.Println("Download all question papers:", t3.Sub(t2))
+	fmt.Println("Create tarball:", t4.Sub(t3))
+	fmt.Println("---------------------------------")
+	fmt.Println("Total time taken:", t4.Sub(start))
+
 }
