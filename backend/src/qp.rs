@@ -2,6 +2,7 @@
 
 use color_eyre::eyre::eyre;
 use duplicate::duplicate_item;
+use serde::Deserialize;
 use serde::Serialize;
 
 use crate::env::EnvVars;
@@ -121,6 +122,18 @@ impl Serialize for Serializable {
 pub trait WithUrl: Sized {
     /// Returns the question paper with the full static files URL in the `filelink` field instead of just the slug. See the [`crate::pathutils`] module for what a slug is.
     fn with_url(self, env_vars: &EnvVars) -> Result<Self, color_eyre::eyre::Error>;
+}
+
+#[derive(Deserialize)]
+/// The details for a question paper in the library
+pub struct LibraryQP {
+    pub course_code: String,
+    pub course_name: String,
+    pub year: i32,
+    pub exam: String,
+    pub semester: String,
+    pub filename: String,
+    pub approve_status: bool,
 }
 
 #[derive(Serialize, Clone)]
