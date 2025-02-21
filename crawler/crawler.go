@@ -225,9 +225,9 @@ func main() {
 			}
 
 			new_qp = append(new_qp, QuestionPaper{course_code, sanitizeFilename(strings.Join(temp[4:], "_")), name, year, exam_type, sem, file_url, is_approved})
+		} else {
+			c.Visit(e.Request.AbsoluteURL(link))
 		}
-
-		c.Visit(e.Request.AbsoluteURL(link))
 	})
 
 	c.Visit(fmt.Sprintf("http://10.18.24.75/peqp/%d", YEAR))
@@ -277,7 +277,7 @@ func main() {
 	// 	downloadFile(new_qp[i])
 	// }
 
-	const goroutines = 1
+	const goroutines = 10
 	jobs := make(chan QuestionPaper, len(new_qp))
 	var wg sync.WaitGroup
 
