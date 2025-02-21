@@ -2,8 +2,10 @@ package main
 
 import (
 	"archive/tar"
+	"bufio"
 	"compress/gzip"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,7 +15,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/gocolly/colly"
 )
@@ -66,7 +67,9 @@ func createTarball() {
 	}
 	defer tarFile.Close()
 
-	gzipWriter := gzip.NewWriter(tarFile)
+	bufWriter := bufio.NewWriter(tarFile)
+	defer bufWriter.Flush()
+	gzipWriter := gzip.NewWriter(bufWriter)
 	defer gzipWriter.Close()
 	tarWriter := tar.NewWriter(gzipWriter)
 	defer tarWriter.Close()
@@ -79,7 +82,6 @@ func createTarball() {
 
 		parts := strings.Split(info.Name(), ".")
 		if len(parts) > 1 && parts[len(parts)-1] == "pdf" {
-
 			header, err := tar.FileInfoHeader(info, info.Name())
 			if err != nil {
 				fmt.Println(err)
@@ -110,7 +112,6 @@ func createTarball() {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-
 		fmt.Println("Tarball created successfully")
 	}
 }
@@ -121,9 +122,14 @@ func sanitizeFilename(s string) string {
 }
 
 func main() {
-	YEAR := 2024
+	YEAR := flag.Int("year", 2024, "Year of the question papers")
+	SEM := flag.String("sem", "both", "Semester of the question papers") // autumn, spring, both
+	flag.Parse()
 
-	start := time.Now()
+	if *SEM != "autumn" && *SEM != "spring" && *SEM != "both" {
+		fmt.Println("Invalid semester, please enter `autumn`, `spring` or `both`")
+		return
+	}
 
 	c := colly.NewCollector(
 		colly.AllowedDomains("10.18.24.75"),
@@ -162,6 +168,7 @@ func main() {
 		var sem string
 
 		if strings.Contains(file_url, ".pdf") {
+			// url: /peqp/2024/End-Spring/[Department]/[CourseCode]_[CourseName]_ES_2024.pdf (as of 2024)
 			temp := strings.Split(file_url, "/")
 			name = temp[len(temp)-1]
 			year, _ = strconv.Atoi(temp[4])
@@ -181,6 +188,10 @@ func main() {
 				sem = ""
 			}
 
+			if sem != *SEM && *SEM != "both" {
+				return
+			}
+
 			// filenames in library are of the form course-code_course-name_extra-details,
 			// extracting course_code from the filename since course_code is a mandatory field
 			pattern := `\b\w{2}\d{5}\b`
@@ -193,8 +204,8 @@ func main() {
 				course_code = name_split[0]
 				name_split = name_split[1:]
 			}
-			// strip off extra details from the end of the filename
-			if len(name_split) > 0 && name_split[len(name_split)-1] == "2024" {
+			// strip off extra details from the end of the filename (_ES_2024)
+			if len(name_split) > 0 && name_split[len(name_split)-1] == strconv.Itoa(year) {
 				name_split = name_split[:len(name_split)-1]
 			}
 			types := []string{"EA", "MA", "ES", "MS"}
@@ -214,7 +225,7 @@ func main() {
 			}
 			is_approved := true
 			// add the paper as unapproved if course_code or name is missing
-			if course_code == "" || name == "" {
+			if course_code == "" || name == "" || exam_type == "" || sem == "" {
 				is_approved = false
 				if course_code == "" {
 					course_code = "UNKNOWN"
@@ -226,14 +237,13 @@ func main() {
 
 			new_qp = append(new_qp, QuestionPaper{course_code, sanitizeFilename(strings.Join(temp[4:], "_")), name, year, exam_type, sem, file_url, is_approved})
 		} else {
+			// visit non-pdf links
 			c.Visit(e.Request.AbsoluteURL(link))
 		}
 	})
 
-	c.Visit(fmt.Sprintf("http://10.18.24.75/peqp/%d", YEAR))
+	c.Visit(fmt.Sprintf("http://10.18.24.75/peqp/%d", *YEAR))
 	c.Wait()
-
-	t1 := time.Now()
 
 	file, err := os.Create("qp.json")
 	if err != nil {
@@ -270,14 +280,7 @@ func main() {
 		}
 	}
 
-	t2 := time.Now()
-
-	// for i := range new_qp {
-	// 	fmt.Printf("%d/%d: Downloading %s\n", i+1, len(new_qp), new_qp[i].Name)
-	// 	downloadFile(new_qp[i])
-	// }
-
-	const goroutines = 10
+	const goroutines = 50
 	jobs := make(chan QuestionPaper, len(new_qp))
 	var wg sync.WaitGroup
 
@@ -297,18 +300,5 @@ func main() {
 	close(jobs)
 	wg.Wait()
 
-	t3 := time.Now()
-
 	createTarball()
-
-	t4 := time.Now()
-
-	fmt.Println("Time taken:")
-	fmt.Println("Load courses.json, scraping library site:", t1.Sub(start))
-	fmt.Println("Create JSON file, clear qps folder:", t2.Sub(t1))
-	fmt.Println("Download all question papers:", t3.Sub(t2))
-	fmt.Println("Create tarball:", t4.Sub(t3))
-	fmt.Println("---------------------------------")
-	fmt.Println("Total time taken:", t4.Sub(start))
-
 }
