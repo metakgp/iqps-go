@@ -49,18 +49,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let sem_to_str = |sem: &qp::Semester| -> String { (*sem).into() };
         let exam_to_str = |exam: &qp::Exam| -> String { (*exam).into() };
 
-        if let Some(similar) = similar_papers.iter().find(|&p| {
-            p.qp.course_code == qp.course_code
-                && p.qp.year == qp.year
-                && sem_to_str(&p.qp.semester) == qp.semester
-                && exam_to_str(&p.qp.exam) == qp.exam
-        }) {
-            if similar.qp.from_library {
-                // paper already exists in db from library
-                continue;
-            } else {
-                // paper exists in db from user uploads
-                qp.approve_status = false;
+        if qp.approve_status {
+            if let Some(similar) = similar_papers.iter().find(|&p| {
+                p.qp.course_code == qp.course_code
+                    && p.qp.year == qp.year
+                    && sem_to_str(&p.qp.semester) == qp.semester
+                    && exam_to_str(&p.qp.exam) == qp.exam
+            }) {
+                if similar.qp.from_library {
+                    // paper already exists in db from library
+                    println!("Skipping paper: {}", qp.filename);
+                    println!("Reason: Paper already exists in the library.");
+                    continue;
+                } else {
+                    // paper exists in db from user uploads
+                    qp.approve_status = false;
+                }
             }
         }
 

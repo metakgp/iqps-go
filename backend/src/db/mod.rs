@@ -279,6 +279,7 @@ impl Database {
         Ok((tx, id))
     }
 
+    #[allow(unused)]
     /// Inserts a new library question paper into the database. Uses a placeholder for the filelink which should be replaced once the id is known using the [crate::db::Database::update_filelink] function.
     ///
     /// Returns a tuple with the transaction and the id of the inserted paper.

@@ -132,6 +132,7 @@ pub struct LibraryQP {
     pub year: i32,
     pub exam: String,
     pub semester: String,
+    #[allow(dead_code)]
     pub filename: String,
     pub approve_status: bool,
 }
