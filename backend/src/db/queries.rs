@@ -122,7 +122,7 @@ impl TryFrom<&String> for ExamFilter {
     }
 }
 
-/// Returns the query for searching question papers. It is mostly voodoo, @Rajiv please update the documentation.
+/// Returns the query for searching question papers. It is mostly voodoo, see [blog post](https://rajivharlalka.in/posts/iqps-search-development/).
 ///
 /// Optionally, the `exam` argument can be used to also add a clause to match the exam field.
 ///
