@@ -12,17 +12,6 @@ use tar::Archive;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let dir = "pdfs";
-    clean_dir(dir)?;
-    extract_tar_gz("qp.tar.gz", dir)?;
-
-    let json_path = "qp.json";
-    let file = fs::File::open(json_path).expect("Failed to open JSON file");
-    let reader = BufReader::new(file);
-
-    let qps: Vec<qp::LibraryQP> =
-        serde_json::from_reader(reader).expect("Failed to parse JSON file");
-
     if dotenvy::dotenv().is_ok() {
         println!("Loaded an existing .env file.");
     }
@@ -34,7 +23,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await
         .expect("Failed to connect to database");
 
-    let mut errored = false;
+    let dir = "/tmp/pdfs";
+    clean_dir(dir)?;
+    extract_tar_gz("qp.tar.gz", dir)?;
+
+    let file = fs::File::open("qp.json").expect("Failed to open JSON file");
+    let reader = BufReader::new(file);
+
+    let qps: Vec<qp::LibraryQP> =
+        serde_json::from_reader(reader).expect("Failed to parse JSON file");
 
     for mut qp in qps {
         let similar_papers = database
@@ -84,21 +81,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 eprintln!("Failed to copy file: {}", e);
 
                 tx.rollback().await?;
-                errored = true;
+
                 break;
             } else {
                 tx.commit().await?;
+                println!("Successfully uploaded paper: {}", qp.filename);
             }
         } else {
             eprintln!("Failed to update filelink");
             tx.rollback().await?;
-            errored = true;
             break;
         }
-    }
-
-    if !errored {
-        println!("Successfully uploaded all papers");
     }
 
     Ok(())

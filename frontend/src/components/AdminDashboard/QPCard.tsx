@@ -51,7 +51,7 @@ export function QPCard({ qPaper, onEdit, onDelete, hasOcr }: IQPCardProps) {
                         <FaRegPenToSquare size="1.5rem" />
                     </button>
                 }
-                {!qPaper.approve_status && !qPaper.from_library && <>
+                {!qPaper.approve_status && <>
                     {
                         onDelete !== undefined &&
                         <button
