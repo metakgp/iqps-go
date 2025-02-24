@@ -227,9 +227,7 @@ func main() {
 			// add the paper as unapproved if course_code or name is missing
 			if course_code == "" || name == "" || exam_type == "" || sem == "" {
 				is_approved = false
-				if course_code == "" {
-					course_code = "UNKNOWN"
-				}
+
 				if name == "" {
 					name = "UNKNOWN"
 				}

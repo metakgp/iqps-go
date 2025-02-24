@@ -6,8 +6,12 @@ use iqps_backend::db;
 use iqps_backend::env;
 use iqps_backend::pathutils::PaperCategory;
 use iqps_backend::qp;
+use sha2::Digest;
+use sha2::Sha256;
 use std::fs;
+use std::fs::File;
 use std::io::BufReader;
+use std::io::Read;
 use tar::Archive;
 
 #[tokio::main]
@@ -34,6 +38,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         serde_json::from_reader(reader).expect("Failed to parse JSON file");
 
     for mut qp in qps {
+        let file_path = format!("{}/qp/{}", dir, qp.filename);
+        let hash = hash_file(&file_path).expect("Failed to hash file");
+
         let similar_papers = database
             .get_similar_papers(
                 &qp.course_code,
@@ -43,21 +50,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             )
             .await?;
 
-        let sem_to_str = |sem: &qp::Semester| -> String { (*sem).into() };
-        let exam_to_str = |exam: &qp::Exam| -> String { (*exam).into() };
-
         if qp.approve_status {
-            if let Some(similar) = similar_papers.iter().find(|&p| {
-                p.qp.course_code == qp.course_code
-                    && p.qp.year == qp.year
-                    && sem_to_str(&p.qp.semester) == qp.semester
-                    && exam_to_str(&p.qp.exam) == qp.exam
-            }) {
+            if let Some(similar) = similar_papers.iter().next() {
+                // todo: what if there are multiple similar papers?
                 if similar.qp.from_library {
-                    // paper already exists in db from library
-                    println!("Skipping paper: {}", qp.filename);
-                    println!("Reason: Paper already exists in the library.");
-                    continue;
+                    // check pdf hash
+                    let other_path = env_vars.paths.get_path_from_slug(&similar.qp.filelink);
+
+                    let other_hash =
+                        hash_file(&other_path.to_str().unwrap()).expect("Failed to hash file");
+                    if hash == other_hash {
+                        // paper already exists in db
+                        continue;
+                    } else {
+                        // wrong metadata, or different pdf of same paper
+                        qp.approve_status = false;
+                    }
                 } else {
                     // paper exists in db from user uploads
                     qp.approve_status = false;
@@ -75,9 +83,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .await
             .is_ok()
         {
-            let filepath = env_vars.paths.get_path_from_slug(&file_link_slug);
+            let new_path = env_vars.paths.get_path_from_slug(&file_link_slug);
 
-            if let Err(e) = fs::copy(format!("{}/qp/{}", dir, qp.filename), filepath) {
+            if let Err(e) = fs::copy(file_path, new_path) {
                 eprintln!("Failed to copy file: {}", e);
 
                 tx.rollback().await?;
@@ -95,6 +103,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
+}
+
+fn hash_file(path: &str) -> std::io::Result<Vec<u8>> {
+    let mut file = BufReader::new(File::open(path)?);
+    let mut hasher = Sha256::new();
+    let mut buffer = [0; 8192];
+
+    loop {
+        let bytes_read = file.read(&mut buffer)?;
+        if bytes_read == 0 {
+            break;
+        }
+        hasher.update(&buffer[..bytes_read]);
+    }
+
+    Ok(hasher.finalize().to_vec())
 }
 
 fn clean_dir(dir: &str) -> std::io::Result<()> {
