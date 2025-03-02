@@ -2,7 +2,6 @@
 
 use color_eyre::eyre::eyre;
 use models::DBAdminDashboardQP;
-pub use queries::ExamFilter;
 use sqlx::{postgres::PgPoolOptions, prelude::FromRow, PgPool, Postgres, Transaction};
 use std::time::Duration;
 
@@ -68,17 +67,10 @@ impl Database {
     pub async fn search_papers(
         &self,
         query: &str,
-        exam_filter: ExamFilter,
-        exam_filter_str: String,
+        exam_filter: Vec<Exam>,
     ) -> Result<Vec<qp::BaseQP>, sqlx::Error> {
-        let (query_sql, use_exam_arg) = queries::get_qp_search_query(exam_filter);
+        let query_sql = queries::get_qp_search_query(exam_filter);
         let query = sqlx::query_as(&query_sql).bind(query);
-
-        let query = if use_exam_arg {
-            query.bind(exam_filter_str)
-        } else {
-            query
-        };
 
         let papers: Vec<models::DBBaseQP> = query.fetch_all(&self.connection).await?;
 
