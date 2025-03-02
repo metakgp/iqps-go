@@ -128,7 +128,7 @@ A user is considered as an admin if they are a part of the team `GH_ORG_TEAM_SLU
 
 1. Change directory to `crawler/` and run `go mod tidy`.
 2. Run the crawler by running `go run crawler.go`. (Make sure you are connected to the campus network)
-3. This will generate a `qp.json` file and a `qp.tar.gz` file. Transfer these files to the server's `backend/` folder.
+3. This will generate a `qp.tar.gz` file. Transfer this file to the server's `backend/` folder.
 4. In the backend, run `cargo run --bin import-papers` to import the data into the database. (Make sure the database is set up and running)
 
 ## Deployment
