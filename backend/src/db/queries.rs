@@ -190,3 +190,7 @@ pub const INSERT_NEW_QP: &str = "INSERT INTO iqps (course_code, course_name, yea
 
 /// Updates the filelink ($2) of a paper with the given id ($1). Used to update the filelink after a paper is uploaded.
 pub const UPDATE_FILELINK: &str = "UPDATE iqps SET filelink=$2 WHERE id=$1";
+
+/// Insert a library pqper in the db
+/// Parameters in the following order: `course_code`, `course_name`, `year`, `exam`, `semester`, `note`, `filelink`, `approve_status`
+pub const INSERT_NEW_LIBRARY_QP: &str = "INSERT INTO iqps (course_code, course_name, year, exam, semester, note, filelink, from_library, approve_status) VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8) RETURNING id";

@@ -35,6 +35,10 @@
 
 - [About The Project](#about-the-project)
 - [Development](#development)
+  - [Database](#database)
+  - [Authentication](#authentication)
+    - [OAuth Flow](#oauth-flow)
+  - [Crawler](#crawler)
 - [Deployment](#deployment)
   - [Backend](#backend)
   - [Environment Variables](#environment-variables)
@@ -67,7 +71,8 @@ IQPS was originally created by [Shubham Mishra](https://github.com/grapheo12) in
    - Set up the database (see [Database](#database))
    - Start the Rust backend by running `cargo run .`
 3. Set up the frontend by running `pnpm install` and then `pnpm start` in the `frontend/` directory.
-4. Profit.
+4. (Optional) Set up an http file server for serving static files from the `STATIC_FILE_STORAGE_LOCATION` directory. (eg: `python3 -m http.server 8081`) The host of this server should be set in the `.env` file as `STATIC_FILES_URL`.
+5. Profit.
 
 ### Database
 
@@ -121,7 +126,10 @@ A user is considered as an admin if they are a part of the team `GH_ORG_TEAM_SLU
 
 ### Crawler
 
-[WIP: Steps to locally set up crawler]
+1. Change directory to `crawler/` and run `go mod tidy`.
+2. Run the crawler by running `go run crawler.go`. (Make sure you are connected to the campus network)
+3. This will generate a `qp.tar.gz` file. Transfer this file to the server's `backend/` folder.
+4. In the backend, run `cargo run --bin import-papers` to import the data into the database. (Make sure the database is set up and running)
 
 ## Deployment
 
