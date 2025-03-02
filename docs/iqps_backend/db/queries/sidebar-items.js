@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["ADMIN_DASHBOARD_QP_FIELDS","INIT_DB","INSERT_NEW_QP","SEARCH_QP_FIELDS","SOFT_DELETE_BY_ID","UPDATE_FILELINK"],"fn":["get_all_unapproved_query","get_edit_paper_query","get_get_paper_by_id_query","get_qp_search_query","get_similar_papers_query"]};
