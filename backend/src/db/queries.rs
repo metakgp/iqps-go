@@ -103,11 +103,10 @@ pub fn get_all_unapproved_query() -> String {
 
 /// Returns the query for searching question papers. It is mostly voodoo, see [blog post](https://rajivharlalka.in/posts/iqps-search-development/).
 ///
-/// Optionally, the `exam` argument can be used to also add a clause to match the exam field.
+/// The `exam_filter` argument is a vector of exam types to filter. Pass empty vector to disable the filter.
 ///
 /// Query parameters:
 /// $1 - Search query
-/// $2 - Exam filter string (can be midsem, endsem, midend, or ct)
 ///
 /// Returns the query and a boolean representing whether the second argument is required
 pub fn get_qp_search_query(exam_filter: Vec<Exam>) -> String {

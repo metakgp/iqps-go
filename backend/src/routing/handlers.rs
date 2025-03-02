@@ -57,7 +57,7 @@ pub async fn get_unapproved(
 ///
 /// # Request Query Parameters
 /// * `query`: The query string to search in the question papers (searches course name or code)
-/// * `exam` (optional): A filter for the question paper by the exam field.
+/// * `exam` (optional): A comma-separated string of exam types to filter. Leave empty to match any exam.
 pub async fn search(
     State(state): State<RouterState>,
     Query(params): Query<HashMap<String, String>>,
