@@ -22,7 +22,7 @@ export interface IEndpointTypes {
 	search: {
 		request: {
 			query: string;
-			exam: Exam | "";
+			exam: string;
 		},
 		response: ISearchResult[]
 	},

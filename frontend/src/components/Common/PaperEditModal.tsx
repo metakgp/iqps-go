@@ -396,7 +396,6 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 
 				{
 					'approve_status' in data &&
-
 					<FormGroup label="Approval Status:">
 						<div className="approve-status">
 							<button

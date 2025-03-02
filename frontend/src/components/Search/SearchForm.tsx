@@ -7,7 +7,7 @@ import { Exam, ISearchResult } from "../../types/question_paper";
 import { copyLink } from "../../utils/copyLink";
 import { makeRequest } from "../../utils/backend";
 import SearchResults from "./SearchResults";
-import { Select } from "../Common/Form";
+import { CheckboxGroup } from "../Common/Form";
 
 function CourseSearchForm() {
 	const currentURL = new URL(window.location.toString());
@@ -17,7 +17,10 @@ function CourseSearchForm() {
 		currentURL.searchParams.get('course') ?? // `course` was previously used, keeping for backwards compatibility
 		''
 	);
-	const [exam, setExam] = useState<Exam | ''>(currentURL.searchParams.get('exam') as Exam ?? '');
+	const [examFilter, setExamFilter] = useState<Exam[]>(
+		(currentURL.searchParams.get('exam') ?? 'midsem,endsem,ct')
+			.split(',') as Exam[]
+	);
 
 	const [searchResults, setSearchResults] = useState<ISearchResult[]>([]);
 	const [success, setSuccess] = useState<boolean>(false);
@@ -28,14 +31,10 @@ function CourseSearchForm() {
 
 	const fetchResults = async () => {
 		if (!awaitingResponse) {
-			const params = new URLSearchParams();
 			if (query === '') return;
 
-			params.append("query", query);
-			params.append("exam", exam);
-
 			setAwaitingResponse(true);
-			const response = await makeRequest('search', 'get', { query, exam });
+			const response = await makeRequest('search', 'get', { query, exam: examFilter.join(',') });
 
 			if (response.status === 'success') {
 				const data: ISearchResult[] = response.data;
@@ -69,7 +68,7 @@ function CourseSearchForm() {
 		// Add the query to the URL
 		const url = new URL(window.location.toString());
 		url.searchParams.set('query', query);
-		url.searchParams.set('exam', exam);
+		url.searchParams.set('exam', examFilter.join(','));
 
 		window.history.replaceState(window.history.state, "", url);
 	}
@@ -87,19 +86,19 @@ function CourseSearchForm() {
 				<label htmlFor="course">Course Name or Code:</label>
 				<input ref={courseInputRef} autoFocus={true} id="course" value={query} onInput={() => setQuery(courseInputRef.current?.value ?? '')} />
 			</div>
-			<div>
+			<div className="exam-checkbox-group">
 				<label htmlFor="exam">Exam:</label>
-				<Select
-					id="exam"
+				<CheckboxGroup<Exam>
+					values={examFilter}
 					options={[
-						{ value: '', title: 'Mid / End Semester / Class Test' },
-						{ value: 'midend', title: 'Mid / End Semester' },
-						{ value: 'midsem', title: 'Mid Semester' },
-						{ value: 'endsem', title: 'End Semester' },
-						{ value: 'ct', title: 'Class Test' }
+						{label: 'Midsem', value: 'midsem'},
+						{label: 'Endsem', value: 'endsem'},
+						{label: 'Class Test', value: 'ct'},
 					]}
-					value={exam}
-					onInput={(e) => setExam(e.currentTarget.value as Exam)}
+					onSelect={(value, checked) => setExamFilter((currentValues) => {
+						if (checked) return [...currentValues, value];
+						else return currentValues.filter((val) => val !== value);
+					})}
 				/>
 			</div>
 			<div className="search-form-btns">

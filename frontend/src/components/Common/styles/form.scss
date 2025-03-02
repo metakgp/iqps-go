@@ -28,6 +28,31 @@
 	}
 }
 
+.checkbox-group {
+	display: flex;
+	align-items: center;
+	justify-content: start;
+	gap: 1rem;
+	font-weight: normal;
+	margin-bottom: 0;
+	padding-left: 0.4rem;
+
+	input {
+		margin: 0 5px 0 0;
+		width: fit-content;
+		height: 1rem;
+		width: 1rem;
+		padding: 0;
+	}
+
+	label {
+		display: flex;
+		align-items: center;
+		font-size: 1rem;
+		margin: 0;
+	}
+}
+
 .number-input {
 	display: flex;
 	gap: 0.3rem;
