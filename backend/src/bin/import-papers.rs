@@ -2,17 +2,14 @@
 
 use clap::Parser;
 use flate2::read::GzDecoder;
-use iqps_backend::db;
-use iqps_backend::env;
 use iqps_backend::pathutils::PaperCategory;
-use iqps_backend::qp;
-use sha2::Digest;
-use sha2::Sha256;
-use std::fs;
-use std::fs::File;
-use std::io::BufReader;
-use std::io::Read;
+use iqps_backend::{db, env, qp};
+use sha2::{Digest, Sha256};
+use std::fs::{self, File};
+use std::io::{self, BufReader, Read, Write};
+use std::path::Path;
 use tar::Archive;
+use tempfile::tempdir;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -27,18 +24,37 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await
         .expect("Failed to connect to database");
 
-    let dir = "/tmp/pdfs";
-    clean_dir(dir)?;
-    extract_tar_gz("qp.tar.gz", dir)?;
+    let dir = tempdir()?;
+    let dir_path = dir.path();
+    extract_tar_gz("qp.tar.gz", dir_path)?;
 
-    let file = fs::File::open("qp.json").expect("Failed to open JSON file");
+    let file = fs::File::open(dir_path.join("qp.json")).expect("Failed to open JSON file");
     let reader = BufReader::new(file);
 
     let qps: Vec<qp::LibraryQP> =
         serde_json::from_reader(reader).expect("Failed to parse JSON file");
 
+    print!("This will add {} new papers. Continue? [Y/n] ", qps.len());
+    io::stdout().flush().unwrap();
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read input");
+    match input.trim().to_lowercase().as_str() {
+        "y" | "" => {}
+        "n" => {
+            return Ok(());
+        }
+        _ => {
+            eprintln!("Invalid input");
+            return Ok(());
+        }
+    }
+
+    println!("Uploading papers to database...");
+
     for mut qp in qps {
-        let file_path = format!("{}/qp/{}", dir, qp.filename);
+        let file_path = dir_path.join(format!("qp/{}", qp.filename));
         let hash = hash_file(&file_path).expect("Failed to hash file");
 
         let similar_papers = database
@@ -56,11 +72,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if similar.qp.from_library {
                     // check pdf hash
                     let other_path = env_vars.paths.get_path_from_slug(&similar.qp.filelink);
-
-                    let other_hash =
-                        hash_file(&other_path.to_str().unwrap()).expect("Failed to hash file");
+                    let other_hash = hash_file(&other_path).expect("Failed to hash file");
                     if hash == other_hash {
                         // paper already exists in db
+                        println!("Skipping paper (already exists): {}", qp.filename);
                         continue;
                     } else {
                         // wrong metadata, or different pdf of same paper
@@ -87,7 +102,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             if let Err(e) = fs::copy(file_path, new_path) {
                 eprintln!("Failed to copy file: {}", e);
-
                 tx.rollback().await?;
 
                 break;
@@ -102,10 +116,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+    println!("Finished uploading papers to database.");
+    dir.close()?;
+
     Ok(())
 }
 
-fn hash_file(path: &str) -> std::io::Result<Vec<u8>> {
+fn hash_file(path: &Path) -> std::io::Result<Vec<u8>> {
     let mut file = BufReader::new(File::open(path)?);
     let mut hasher = Sha256::new();
     let mut buffer = [0; 8192];
@@ -121,25 +138,7 @@ fn hash_file(path: &str) -> std::io::Result<Vec<u8>> {
     Ok(hasher.finalize().to_vec())
 }
 
-fn clean_dir(dir: &str) -> std::io::Result<()> {
-    if !std::path::Path::new(dir).exists() {
-        std::fs::create_dir_all(dir)?;
-    } else {
-        let dir = std::fs::read_dir(dir)?;
-        for entry in dir {
-            let entry = entry?;
-            let path = entry.path();
-            if path.is_dir() {
-                std::fs::remove_dir_all(path)?;
-            } else {
-                std::fs::remove_file(path)?;
-            }
-        }
-    }
-    Ok(())
-}
-
-fn extract_tar_gz(file_path: &str, output_dir: &str) -> std::io::Result<()> {
+fn extract_tar_gz(file_path: &str, output_dir: &Path) -> std::io::Result<()> {
     let file =
         fs::File::open(file_path).expect(format!("Failed to open file: {}", file_path).as_str());
     let buf_reader = BufReader::new(file);

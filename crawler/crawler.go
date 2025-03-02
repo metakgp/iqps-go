@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gocolly/colly"
 )
@@ -74,6 +75,35 @@ func createTarball() {
 	tarWriter := tar.NewWriter(gzipWriter)
 	defer tarWriter.Close()
 
+	// add qp.json
+	jsonFile := "./qp.json"
+	info, err := os.Stat(jsonFile)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	header, err := tar.FileInfoHeader(info, info.Name())
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	header.Name = info.Name()
+	if err := tarWriter.WriteHeader(header); err != nil {
+		fmt.Println(err)
+		return
+	}
+	file, err := os.Open(jsonFile)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+	if _, err := io.Copy(tarWriter, file); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// add pdf files
 	err = filepath.Walk(srcDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			fmt.Println(err)
@@ -111,9 +141,10 @@ func createTarball() {
 	})
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		fmt.Println("Tarball created successfully")
+		return
 	}
+
+	fmt.Println("Tarball created successfully")
 }
 
 func sanitizeFilename(s string) string {
@@ -121,9 +152,12 @@ func sanitizeFilename(s string) string {
 	return strings.ReplaceAll(s, "%20", "_")
 }
 
+const URL = "http://10.18.24.75/peqp"
+
 func main() {
-	YEAR := flag.Int("year", 2024, "Year of the question papers")
+	YEAR := flag.Int("year", time.Now().Year(), "Year of the question papers")
 	SEM := flag.String("sem", "both", "Semester of the question papers") // autumn, spring, both
+	ROUTINES := flag.Int("routines", 50, "Number of goroutines to use for downloading")
 	flag.Parse()
 
 	if *SEM != "autumn" && *SEM != "spring" && *SEM != "both" {
@@ -194,12 +228,11 @@ func main() {
 
 			// filenames in library are of the form course-code_course-name_extra-details,
 			// extracting course_code from the filename since course_code is a mandatory field
-			pattern := `\b\w{2}\d{5}\b`
-			re := regexp.MustCompile(pattern)
+			courseCodeRe := regexp.MustCompile(`\b\w{2}\d{5}\b`)
 			course_code := ""
 			name_split := strings.Split(name[:len(name)-4], "_")
 
-			if len(name_split[0]) == 7 && re.MatchString(name_split[0]) {
+			if len(name_split[0]) == 7 && courseCodeRe.MatchString(name_split[0]) {
 				// what to do if there are multiple course codes in the filename?
 				course_code = name_split[0]
 				name_split = name_split[1:]
@@ -240,8 +273,15 @@ func main() {
 		}
 	})
 
-	c.Visit(fmt.Sprintf("http://10.18.24.75/peqp/%d", *YEAR))
+	fmt.Printf("Fetching question papers for %d (%s sem)\n", *YEAR, *SEM)
+
+	c.Visit(fmt.Sprintf("%s/%d", URL, *YEAR))
 	c.Wait()
+
+	if len(new_qp) == 0 {
+		fmt.Println("No question papers found (use -year flag to specify year)")
+		return
+	}
 
 	file, err := os.Create("qp.json")
 	if err != nil {
@@ -278,11 +318,10 @@ func main() {
 		}
 	}
 
-	const goroutines = 50
 	jobs := make(chan QuestionPaper, len(new_qp))
 	var wg sync.WaitGroup
 
-	for w := 1; w <= goroutines; w++ {
+	for w := 1; w <= *ROUTINES; w++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
