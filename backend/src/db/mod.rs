@@ -144,7 +144,7 @@ impl Database {
         // Set the new filelink
         let old_filelink = current_details.qp.filelink;
         let new_filelink = if current_details.qp.from_library {
-            old_filelink.clone()
+            old_filelink.clone() // TODO use consistent format
         } else if approve_status {
             env_vars.paths.get_slug(
                 &format!(

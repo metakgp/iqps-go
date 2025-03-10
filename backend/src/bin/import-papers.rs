@@ -4,7 +4,9 @@ use clap::Parser;
 use flate2::read::GzDecoder;
 use iqps_backend::pathutils::PaperCategory;
 use iqps_backend::{db, env, qp};
+use log::{info, warn};
 use sha2::{Digest, Sha256};
+use simplelog::CombinedLogger;
 use std::fs::{self, File};
 use std::io::{self, BufReader, Read, Write};
 use std::path::Path;
@@ -53,8 +55,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Uploading papers to database...");
 
+    let timestamp = chrono::Local::now().format("%Y-%m-%d_%H-%M-%S").to_string();
+    let log_filename = format!("peqp_import_{}.log", timestamp);
+
+    let log_file = fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&log_filename)
+        .expect("Failed to open log file");
+
+    CombinedLogger::init(vec![simplelog::WriteLogger::new(
+        simplelog::LevelFilter::Info,
+        simplelog::Config::default(),
+        log_file,
+    )])
+    .expect("Failed to initialize logger");
+
     for mut qp in qps {
-        let file_path = dir_path.join(format!("qp/{}", qp.filename));
+        let file_path = dir_path.join(format!("qp/{}", qp.filename)); // TODO use consistent format
         let hash = hash_file(&file_path).expect("Failed to hash file");
 
         let similar_papers = database
@@ -75,7 +93,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     let other_hash = hash_file(&other_path).expect("Failed to hash file");
                     if hash == other_hash {
                         // paper already exists in db
-                        println!("Skipping paper (already exists): {}", qp.filename);
+                        info!("Skipping paper (already exists): {}", qp.filename);
                         continue;
                     } else {
                         // wrong metadata, or different pdf of same paper
@@ -101,16 +119,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let new_path = env_vars.paths.get_path_from_slug(&file_link_slug);
 
             if let Err(e) = fs::copy(file_path, new_path) {
-                eprintln!("Failed to copy file: {}", e);
+                warn!("Failed to copy file: {}", e);
                 tx.rollback().await?;
 
                 break;
             } else {
                 tx.commit().await?;
-                println!("Successfully uploaded paper: {}", qp.filename);
+                info!("Successfully uploaded paper: {}", qp.filename);
             }
         } else {
-            eprintln!("Failed to update filelink");
+            warn!("Failed to update filelink");
             tx.rollback().await?;
             break;
         }
