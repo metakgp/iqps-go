@@ -207,7 +207,7 @@ func main() {
 			name = temp[len(temp)-1]
 			year, _ = strconv.Atoi(temp[4])
 			details := strings.ToLower(temp[5])
-			if strings.Contains(details, "mid") {
+			if strings.Contains(details, "mid") { // TODO fix 'if-else hell'
 				exam_type = "midsem"
 			} else if strings.Contains(details, "end") {
 				exam_type = "endsem"

@@ -4,14 +4,14 @@ use clap::Parser;
 use flate2::read::GzDecoder;
 use iqps_backend::pathutils::PaperCategory;
 use iqps_backend::{db, env, qp};
-use log::{info, warn};
 use sha2::{Digest, Sha256};
-use simplelog::CombinedLogger;
 use std::fs::{self, File};
 use std::io::{self, BufReader, Read, Write};
 use std::path::Path;
 use tar::Archive;
 use tempfile::tempdir;
+use tracing::{info, warn};
+use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -58,18 +58,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let timestamp = chrono::Local::now().format("%Y-%m-%d_%H-%M-%S").to_string();
     let log_filename = format!("peqp_import_{}.log", timestamp);
 
-    let log_file = fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&log_filename)
-        .expect("Failed to open log file");
+    let log_file = File::create(&log_filename).expect("Failed to create log file");
 
-    CombinedLogger::init(vec![simplelog::WriteLogger::new(
-        simplelog::LevelFilter::Info,
-        simplelog::Config::default(),
-        log_file,
-    )])
-    .expect("Failed to initialize logger");
+    let subscriber = tracing_subscriber::registry()
+        .with(
+            fmt::layer()
+                .with_writer(log_file)
+                .with_ansi(false)
+                .with_level(true),
+        )
+        .init();
+
+    tracing::subscriber::set_global_default(subscriber)?;
 
     for mut qp in qps {
         let file_path = dir_path.join(format!("qp/{}", qp.filename)); // TODO use consistent format
