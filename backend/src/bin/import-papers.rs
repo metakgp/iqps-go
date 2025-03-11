@@ -60,7 +60,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let log_file = File::create(&log_filename).expect("Failed to create log file");
 
-    let subscriber = tracing_subscriber::registry()
+    tracing_subscriber::registry()
         .with(
             fmt::layer()
                 .with_writer(log_file)
@@ -68,8 +68,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .with_level(true),
         )
         .init();
-
-    tracing::subscriber::set_global_default(subscriber)?;
 
     for mut qp in qps {
         let file_path = dir_path.join(format!("qp/{}", qp.filename)); // TODO use consistent format
