@@ -83,7 +83,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .await?;
 
         if qp.approve_status {
-            if let Some(similar) = similar_papers.iter().next() {
+            if let Some(similar) = similar_papers.first() {
                 // todo: what if there are multiple similar papers?
                 if similar.qp.from_library {
                     // check pdf hash
@@ -155,13 +155,10 @@ fn hash_file(path: &Path) -> std::io::Result<Vec<u8>> {
 }
 
 fn extract_tar_gz(file_path: &str, output_dir: &Path) -> std::io::Result<()> {
-    let file =
-        fs::File::open(file_path).expect(format!("Failed to open file: {}", file_path).as_str());
+    let file = fs::File::open(file_path)?;
     let buf_reader = BufReader::new(file);
     let decoder = GzDecoder::new(buf_reader);
     let mut archive = Archive::new(decoder);
-    archive
-        .unpack(output_dir)
-        .expect("Failed to unpack tar.gz file");
+    archive.unpack(output_dir)?;
     Ok(())
 }

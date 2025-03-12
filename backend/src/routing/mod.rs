@@ -152,7 +152,7 @@ impl IntoResponse for AppError {
         tracing::error!("An error occured: {}", self.0);
 
         BackendResponse::<()>::error(
-            format!("An internal server error occured. Please try again later."),
+            "An internal server error occured. Please try again later.".to_string(),
             StatusCode::INTERNAL_SERVER_ERROR,
         )
         .into_response()
