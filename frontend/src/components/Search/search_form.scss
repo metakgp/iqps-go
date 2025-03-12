@@ -6,9 +6,20 @@
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	margin-bottom: 20px;
 
+	.exam-checkbox-group {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+
+		label {
+			margin: 0;
+		}
+	}
+
 	.search-form-btns {
 		display: flex;
 		gap: 1rem;
+		margin-top: 1rem;
 	}
 
 	label {

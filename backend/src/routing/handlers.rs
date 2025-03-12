@@ -23,7 +23,7 @@ use serde::Deserialize;
 use crate::{
     auth::{self, Auth},
     pathutils::PaperCategory,
-    qp::{self, AdminDashboardQP, WithUrl},
+    qp::{self, AdminDashboardQP, Exam, WithUrl},
 };
 
 use super::{AppError, BackendResponse, RouterState, Status};
@@ -57,7 +57,7 @@ pub async fn get_unapproved(
 ///
 /// # Request Query Parameters
 /// * `query`: The query string to search in the question papers (searches course name or code)
-/// * `exam` (optional): A filter for the question paper by the exam field.
+/// * `exam` (optional): A comma-separated string of exam types to filter. Leave empty to match any exam.
 pub async fn search(
     State(state): State<RouterState>,
     Query(params): Query<HashMap<String, String>>,
@@ -68,11 +68,13 @@ pub async fn search(
             .map(|value| value.to_owned())
             .unwrap_or("".into());
 
-        if let Ok(exam_filter) = (&exam_query_str).try_into() {
-            let papers = state
-                .db
-                .search_papers(query, exam_filter, exam_query_str.to_owned())
-                .await?;
+        if let Ok(exam_filter) = exam_query_str
+            .split(',')
+            .filter(|val| !val.trim().is_empty())
+            .map(|val| Exam::try_from(&val.to_owned()))
+            .collect::<Result<Vec<Exam>, _>>()
+        {
+            let papers = state.db.search_papers(query, exam_filter).await?;
 
             let papers = papers
                 .iter()

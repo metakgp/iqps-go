@@ -48,6 +48,32 @@ export function RadioGroup<T>(props: IRadioGroupProps<T>) {
 	</div>
 }
 
+interface ICheckboxGroupProps<T> {
+	values: T[];
+	options: {
+		label: string;
+		value: T;
+	}[];
+	onSelect: (value: T, checked: boolean) => void;
+}
+export function CheckboxGroup<T>(props: ICheckboxGroupProps<T>) {
+	return <div className="checkbox-group">
+		{
+			props.options.map(({ label, value }, i) => {
+				return <label key={i}>
+					<input
+						type="checkbox"
+						checked={props.values.includes(value)}
+						onChange={(e) => props.onSelect(value, e.currentTarget.checked)}
+					/>
+					{label}
+				</label>
+			})
+		}
+	</div>
+}
+
+
 interface ISelectProps {
 	value: React.SelectHTMLAttributes<HTMLSelectElement>['value'];
 	onInput: React.FormEventHandler<HTMLSelectElement>;
@@ -219,4 +245,3 @@ export function SuggestionTextInput<T>(props: ISuggestionTextInputProps<T>) {
 		</div>
 	</form>
 }
-

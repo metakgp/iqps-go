@@ -2,7 +2,7 @@
  * - If the paper is a major examination, `midsem` or `endsem` is to be used.
  * - For class tests, the format `ctx` where x is the number of the class test should be used.
  */
-export type Exam = "midsem" | "endsem" | `ct${number}`;
+export type Exam = "midsem" | "endsem" | `ct${number}` | 'ct';
 export type Semester = "spring" | "autumn";
 
 export interface IQuestionPaper {

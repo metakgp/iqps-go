@@ -101,51 +101,34 @@ pub fn get_all_unapproved_query() -> String {
     format!("SELECT {} FROM iqps WHERE approve_status = false and is_deleted=false ORDER BY upload_timestamp ASC", ADMIN_DASHBOARD_QP_FIELDS)
 }
 
-/// An enum representing the exam filter for the search query
-pub enum ExamFilter {
-    Exam(Exam), // Match an exact exam or use `ct` substring match
-    Any,        // Match anything
-    MidEnd,     // Midsem or endsem
-}
-
-impl TryFrom<&String> for ExamFilter {
-    type Error = color_eyre::eyre::Error;
-
-    fn try_from(value: &String) -> Result<Self, Self::Error> {
-        if value.is_empty() {
-            Ok(ExamFilter::Any)
-        } else if value == "midend" {
-            Ok(ExamFilter::MidEnd)
-        } else {
-            Ok(ExamFilter::Exam(Exam::try_from(value)?))
-        }
-    }
-}
-
 /// Returns the query for searching question papers. It is mostly voodoo, see [blog post](https://rajivharlalka.in/posts/iqps-search-development/).
 ///
-/// Optionally, the `exam` argument can be used to also add a clause to match the exam field.
+/// The `exam_filter` argument is a vector of exam types to filter. Pass empty vector to disable the filter.
 ///
 /// Query parameters:
 /// $1 - Search query
-/// $2 - Exam filter string (can be midsem, endsem, midend, or ct)
 ///
 /// Returns the query and a boolean representing whether the second argument is required
-pub fn get_qp_search_query(exam_filter: ExamFilter) -> (String, bool) {
-    let (exam_filter, use_exam_arg) = match exam_filter {
-        ExamFilter::Any => ("", false),
-        ExamFilter::MidEnd => (
-            "WHERE (exam = 'midsem' OR exam = 'endsem' OR exam = '')",
-            false,
-        ),
-        ExamFilter::Exam(exam) => match exam {
-            Exam::CT(_) => ("WHERE (exam LIKE 'ct%' OR exam = '')", false),
-            _ => ("WHERE (exam = $2 OR exam = '')", true),
-        },
+pub fn get_qp_search_query(exam_filter: Vec<Exam>) -> String {
+    let exam_filter_clause = exam_filter
+        .iter()
+        .map(|&exam| {
+            if let Exam::CT(_) = exam {
+                "exam LIKE 'ct%'".into()
+            } else {
+                format!("exam = '{}'", String::from(exam))
+            }
+        })
+        .collect::<Vec<String>>()
+        .join(" OR ");
+
+    let exam_clause_str = if exam_filter_clause.is_empty() {
+        "".into()
+    } else {
+        format!("WHERE ({} OR exam = '')", exam_filter_clause)
     };
 
-    (
-        format!("
+    format!("
             WITH filtered AS (
                 SELECT * from iqps {exam_filter} ORDER BY year DESC
             ),
@@ -189,11 +172,9 @@ pub fn get_qp_search_query(exam_filter: ExamFilter) -> (String, bool) {
             ) SELECT {search_qp_fields} FROM result",
             search_qp_fields = SEARCH_QP_FIELDS,
             to_tsquery = "to_tsquery('simple', websearch_to_tsquery('simple', $1)::text || ':*')",
-            exam_filter = exam_filter,
+            exam_filter = exam_clause_str,
             intermediate_fields = ADMIN_DASHBOARD_QP_FIELDS.split(", ").map(|field| format!("filtered.{}", field)).collect::<Vec<String>>().join(", ")
-        ),
-        use_exam_arg
-    )
+        )
 }
 
 /// List of fields in the [`crate::db::models::DBAdminDashboardQP`] to be used with SELECT clauses
