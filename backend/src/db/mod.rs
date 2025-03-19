@@ -8,7 +8,7 @@ use std::time::Duration;
 use crate::{
     env::EnvVars,
     pathutils::{PaperCategory, Paths},
-    qp::{self, AdminDashboardQP, Exam, Semester},
+    qp::{self, AdminDashboardQP, Exam, LibraryQP, Semester},
     routing::{EditReq, FileDetails},
 };
 
@@ -136,7 +136,7 @@ impl Database {
         // Set the new filelink
         let old_filelink = current_details.qp.filelink;
         let new_filelink = if current_details.qp.from_library {
-            old_filelink.clone()
+            old_filelink.clone() // TODO use consistent format
         } else if approve_status {
             env_vars.paths.get_slug(
                 &format!(
@@ -237,7 +237,7 @@ impl Database {
             .collect())
     }
 
-    /// Inserts a new uploaded question paper into the database. Uses a placeholder for the filelink which should be replaced once the id is known using the [crate::db::Database::update_uploaded_filelink] function.
+    /// Inserts a new uploaded question paper into the database. Uses a placeholder for the filelink which should be replaced once the id is known using the [crate::db::Database::update_filelink] function.
     ///
     /// Returns a tuple with the transaction and the id of the inserted paper.
     pub async fn insert_new_uploaded_qp<'c>(
@@ -271,8 +271,43 @@ impl Database {
         Ok((tx, id))
     }
 
-    // /// Updates filelink for an uploaded question paper uploaded using the [crate::db::Database::update_uploaded_filelink] function. Takes the same transaction that the previous function used.
-    pub async fn update_uploaded_filelink(
+    #[allow(unused)]
+    /// Inserts a new library question paper into the database. Uses a placeholder for the filelink which should be replaced once the id is known using the [crate::db::Database::update_filelink] function.
+    ///
+    /// Returns a tuple with the transaction and the id of the inserted paper.
+    pub async fn insert_new_library_qp<'c>(
+        &self,
+        paper: &LibraryQP,
+    ) -> Result<(Transaction<'c, Postgres>, i32), color_eyre::eyre::Error> {
+        let mut tx = self.connection.begin().await?;
+
+        let LibraryQP {
+            course_code,
+            course_name,
+            year,
+            exam,
+            semester,
+            approve_status,
+            ..
+        } = paper;
+
+        let query = sqlx::query_as(queries::INSERT_NEW_LIBRARY_QP)
+            .bind(course_code)
+            .bind(course_name)
+            .bind(year)
+            .bind(exam)
+            .bind(semester)
+            .bind("")
+            .bind("placeholder_filelink")
+            .bind(approve_status);
+
+        let Breh { id } = query.fetch_one(&mut *tx).await?;
+
+        Ok((tx, id))
+    }
+
+    /// Updates filelink for an uploaded question paper uploaded using the [crate::db::Database::insert_new_uploaded_qp] or [crate::db::Database::insert_new_library_qp] function. Takes the same transaction that the previous function used.
+    pub async fn update_filelink(
         &self,
         tx: &mut Transaction<'_, Postgres>,
         id: i32,

@@ -2,6 +2,7 @@
 name = "iqps-backend"
 version = "0.1.0"
 edition = "2021"
+default-run = "iqps-backend"
 
 [dependencies]
 axum = { version = "0.7.7", features = ["multipart"] }
@@ -10,6 +11,7 @@ clap = { version = "4.5.20", features = ["derive", "env"] }
 color-eyre = "0.6.3"
 dotenvy = "0.15.7"
 duplicate = "2.0.0"
+flate2 = "1.0"
 hmac = "0.12.1"
 http = "1.1.0"
 jwt = "0.16.0"
@@ -18,6 +20,8 @@ serde = { version = "1.0.210", features = ["serde_derive"] }
 serde_json = "1.0.128"
 sha2 = "0.10.8"
 sqlx = { version = "0.8.2", features = ["postgres", "runtime-tokio", "chrono"] }
+tar = "0.4"
+tempfile = "3.17.1"
 tokio = { version = "1.40.0", features = ["full"] }
 tower-http = { version = "0.6.1", features = ["cors", "trace"] }
 tracing = "0.1.40"
