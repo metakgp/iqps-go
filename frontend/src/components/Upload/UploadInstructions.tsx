@@ -16,9 +16,12 @@ export function UploadInstructions() {
 				</p>
 			</div>
 			<div className="instruction-section">
-				<h3>How to Upload</h3>
-				<p>Click "Choose File" to select your PDF.</p>
-				<p>Click "Upload" to submit.</p>
+				<h3>Year Convention</h3>
+				<p>The year the exam was conducted is displayed in the paper details.</p>
+				<p>This prevents any ambiguity as only the year is mentioned in some papers.</p>
+				<p>
+					<strong>Example: </strong> Spring 2024-2025 exam is conducted in the year 2025 so the year will be 2025, but for autumn it will be 2024.
+				</p>
 			</div>
 			<h3>NOTE: The uploaded paper will be searchable only after manual review process first. Please wait for a few days and do not re-upload.</h3>
 		</div>
