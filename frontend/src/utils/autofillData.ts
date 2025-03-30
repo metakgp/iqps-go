@@ -63,9 +63,6 @@ export function extractDetailsFromText(text: string): IExtractedDetails {
             )
     );
 
-    const yearMatch = lines.match(/([^\d]|^)(2\d{3})([^\d]|$)/); // Someone change this in the year 3000
-    const year = yearMatch ? Number(yearMatch[2]) : null;
-
     const examTypeMatch = lines.match(/[^\w]*(Mid|End|Class Test)[^\w]*/i);
     const examTypeMatchStr = examTypeMatch ? examTypeMatch[1].toLowerCase() : null;
     const examType = <IExtractedDetails['exam']>(
@@ -79,6 +76,16 @@ export function extractDetailsFromText(text: string): IExtractedDetails {
 
     const semesterMatch = lines.match(/[^\w]*(spring|autumn)[^\w]*/i);
     const semester = semesterMatch ? semesterMatch[1].toLowerCase() as Semester : null;
+
+	let year: number | null = null;
+
+	if (semester === null) { // Matches any string of the format 2xxx (matches any year)
+    	const yearMatch = lines.match(/([^\d]|^)(2\d{3})([^\d]|$)/); // Someone change this in the year 3000
+     	year = yearMatch ? Number(yearMatch[0]) : null;
+    } else { // If semester is known, match any string of the format 2xxx-2xxx and select the first or second based on semester
+    	const yearMatch = lines.match(/([^\d]|^)(2[\d]{3})-(2[\d]{3})([^\d]|$)/) // Someone change this in the year 3000
+		year = yearMatch ? Number(yearMatch[semester === 'autumn' ? 2 : 3]) : null;
+    }
 
     let note = null;
     if (lines.toLowerCase().includes('supplementary')) note = 'Supplementary';
