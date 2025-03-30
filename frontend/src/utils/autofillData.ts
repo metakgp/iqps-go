@@ -77,14 +77,26 @@ export function extractDetailsFromText(text: string): IExtractedDetails {
     const semesterMatch = lines.match(/[^\w]*(spring|autumn)[^\w]*/i);
     const semester = semesterMatch ? semesterMatch[1].toLowerCase() as Semester : null;
 
-	let year: number | null = null;
+    let year: number | null = null;
 
-	if (semester === null) { // Matches any string of the format 2xxx (matches any year)
-    	const yearMatch = lines.match(/([^\d]|^)(2\d{3})([^\d]|$)/); // Someone change this in the year 3000
-     	year = yearMatch ? Number(yearMatch[0]) : null;
-    } else { // If semester is known, match any string of the format 2xxx-2xxx and select the first or second based on semester
-    	const yearMatch = lines.match(/([^\d]|^)(2[\d]{3})-(2[\d]{3})([^\d]|$)/) // Someone change this in the year 3000
-		year = yearMatch ? Number(yearMatch[semester === 'autumn' ? 2 : 3]) : null;
+    if (semester === null) {
+        // Matches any string of the format 2xxx (matches any year)
+        const yearMatch = lines.match(/([^\d]|^)(2\d{3})([^\d]|$)/); // Someone change this in the year 3000
+        year = yearMatch ? Number(yearMatch[0]) : null;
+    } else {
+        // If semester is known, match any string of the format 2xxx-2xxx or 2xxx-xx and select the first or second based on semester
+        const yearMatch = lines.match(/([^\d]|^)(2[\d]{3})-(2[\d]{3}|[\d]{2})([^\d]|$)/) // Someone change this in the year 3000
+
+        if (yearMatch) {
+            if (semester === 'autumn') year = Number(yearMatch[2]);
+            else {
+                year = Number(
+                    yearMatch[3].length === 4 ?
+                    yearMatch[3] :
+                    (yearMatch[2].slice(0, 2) + yearMatch[3])
+                );
+            }
+        } else year = null;
     }
 
     let note = null;
