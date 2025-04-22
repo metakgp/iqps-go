@@ -140,7 +140,7 @@ A user is considered as an admin if they are a part of the team `GH_ORG_TEAM_SLU
 2. `cd backend/`
 3. Set the appropriate **production** [environment variables](#environment-variables) in the `.env` file.
 4. Run `docker compose up` to start the backend.
-5. Optionally set up a Systemd service to start the wiki on startup or use this [deployment github workflow](./.github/workflows/deploy.yaml).
+5. Optionally set up a Systemd service to start IQPS on startup or use this [deployment github workflow](./.github/workflows/deploy.yaml).
 
 ### Environment Variables
 
