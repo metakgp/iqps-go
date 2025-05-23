@@ -15,6 +15,11 @@ services:
       - ./logs:/var/log/iqps/logs
       - nginx-config-volume:/etc/nginx/sites-enabled
       - odins-vault:/srv/static
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
 
 networks:
   metaploy-network:
