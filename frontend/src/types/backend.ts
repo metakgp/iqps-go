@@ -56,6 +56,7 @@ export interface IEndpointTypes {
 			exam?: string,
 			note?: string,
 			approve_status?: boolean,
+			replace: number[]
 		},
 		response: {
 			id: number;
