@@ -120,7 +120,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				getSimilarPapers(similarityDetails, 'id' in data ? data.id : -1);
 			}
 
-		}, [data.course_code, data.year, data.exam, data.semester])
+		}, [data.course_code, data.year, data.exam, data.semester, data.id])
 	}
 
 	const courseCodeNameMap = Object.entries(COURSE_CODE_MAP);
