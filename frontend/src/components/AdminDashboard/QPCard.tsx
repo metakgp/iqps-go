@@ -1,21 +1,25 @@
 import { FaRegTrashAlt } from "react-icons/fa";
 import { IAdminDashboardQP } from "../../types/question_paper";
 import { isQPValid, validate } from "../../utils/validateInput";
-import { FaFilePdf, FaRegPenToSquare } from "react-icons/fa6";
-
+import { FaFilePdf, FaRegPenToSquare, FaRegSquareCheck, FaRegSquare } from "react-icons/fa6";
 import "./styles/qp_card.scss";
 import { formatBackendTimestamp } from "../../utils/backend";
+import { useState } from "react";
 
 interface IQPCardProps {
     qPaper: IAdminDashboardQP;
     onEdit?: React.MouseEventHandler<HTMLButtonElement>;
     onDelete?: React.MouseEventHandler<HTMLButtonElement>;
+    onSelect?: React.MouseEventHandler<HTMLDivElement>;
+    onUnselect?: React.MouseEventHandler<HTMLDivElement>;
     hasOcr?: boolean;
 }
 
-export function QPCard({ qPaper, onEdit, onDelete, hasOcr }: IQPCardProps) {
+export function QPCard({ qPaper, onEdit, onDelete, hasOcr, onSelect, onUnselect }: IQPCardProps) {
     const errorMsg = validate(qPaper);
     const isValid = isQPValid(qPaper);
+
+    const [selected, setSelected] = useState<boolean>(false);
 
     return (
         <div className={`qp-card ${qPaper.approve_status ? 'approved' : ''}`}>
@@ -62,6 +66,26 @@ export function QPCard({ qPaper, onEdit, onDelete, hasOcr }: IQPCardProps) {
                         </button>
                     }
                 </>
+                }
+
+                {
+                    onSelect !== undefined && onUnselect !== undefined &&
+                    <div
+                        className={`select-btn btn ${selected ? 'selected' : ''}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (selected) {
+                                setSelected(false);
+                                onUnselect(e);
+                            } else {
+                                setSelected(true);
+                                onSelect(e);
+                            }
+                        }}
+                        title={"Replace Paper"}
+                    >
+                        {selected ? <FaRegSquareCheck size="1.5rem" /> : <FaRegSquare size="1.5rem" />}
+                    </div>
                 }
             </div>
         </div>

@@ -19,7 +19,7 @@ import { IoClose } from "react-icons/io5";
 import { FaCalendarAlt, FaRegTrashAlt, FaSync } from "react-icons/fa";
 import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
 
-type UpdateQPHandler<T> = (qp: T) => void;
+type UpdateQPHandler<T> = (qp: T, replace: number[]) => void;
 interface IPaperEditModalProps<T> {
 	onClose: () => void;
 	selectPrev?: (() => void) | null;
@@ -39,6 +39,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 
 	const [similarPapers, setSimilarPapers] = useState<IAdminDashboardQP[]>([]);
 	const [awaitingSimilarPapers, setAwaitingSimilarPapers] = useState<boolean>(false);
+	const [replacingPapers, setReplacingPapers] = useState<IAdminDashboardQP[]>([]);
 
 	const [courseCodeSuggestions, setCourseCodeSuggestions] = useState<ISuggestion<null>[]>([]);
 	const [courseNameSuggestions, setCourseNameSuggestions] = useState<ISuggestion<[course_code: string, course_name: string]>[]>([]);
@@ -453,7 +454,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 							if (!('approve_status' in data)) {
 								toast.success("File details updated successfully");
 							}
-							props.updateQPaper(data);
+							props.updateQPaper(data, replacingPapers.map(x => x.id));
 						}}
 						disabled={!isDataValid}
 						className="save-btn"
@@ -499,6 +500,14 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 										similarPapers.map((paper, i) => <QPCard
 											qPaper={paper}
 											key={i}
+											onSelect={() => {
+												if (!replacingPapers.some((p) => p.id === paper.id)) {
+													setReplacingPapers((prev) => [...prev, paper]);
+												}
+											}}
+											onUnselect={() => {
+												setReplacingPapers((prev) => prev.filter((p) => p.id !== paper.id));
+											}}
 										/>
 										)
 								}
