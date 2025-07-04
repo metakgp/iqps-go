@@ -68,7 +68,7 @@ export function QPCard({ qPaper, onEdit, onDelete, hasOcr, onToggle }: IQPCardPr
                 }
 
                 {
-                    onSelect !== undefined && onUnselect !== undefined &&
+                    onToggle !== undefined &&
                     <div
                         className={`select-btn btn ${selected ? 'selected' : ''}`}
                         onClick={(e) => {
