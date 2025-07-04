@@ -10,12 +10,11 @@ interface IQPCardProps {
     qPaper: IAdminDashboardQP;
     onEdit?: React.MouseEventHandler<HTMLButtonElement>;
     onDelete?: React.MouseEventHandler<HTMLButtonElement>;
-    onSelect?: React.MouseEventHandler<HTMLDivElement>;
-    onUnselect?: React.MouseEventHandler<HTMLDivElement>;
+    onToggle?: (prev: boolean, event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
     hasOcr?: boolean;
 }
 
-export function QPCard({ qPaper, onEdit, onDelete, hasOcr, onSelect, onUnselect }: IQPCardProps) {
+export function QPCard({ qPaper, onEdit, onDelete, hasOcr, onToggle }: IQPCardProps) {
     const errorMsg = validate(qPaper);
     const isValid = isQPValid(qPaper);
 
@@ -74,13 +73,8 @@ export function QPCard({ qPaper, onEdit, onDelete, hasOcr, onSelect, onUnselect 
                         className={`select-btn btn ${selected ? 'selected' : ''}`}
                         onClick={(e) => {
                             e.stopPropagation();
-                            if (selected) {
-                                setSelected(false);
-                                onUnselect(e);
-                            } else {
-                                setSelected(true);
-                                onSelect(e);
-                            }
+                            setSelected(!selected);
+                            onToggle(selected, e);
                         }}
                         title={"Replace Paper"}
                     >

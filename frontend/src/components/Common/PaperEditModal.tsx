@@ -500,13 +500,14 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 										similarPapers.map((paper, i) => <QPCard
 											qPaper={paper}
 											key={i}
-											onSelect={() => {
-												if (!replacingPapers.some((p) => p.id === paper.id)) {
-													setReplacingPapers((prev) => [...prev, paper]);
-												}
-											}}
-											onUnselect={() => {
-												setReplacingPapers((prev) => prev.filter((p) => p.id !== paper.id));
+											onToggle={(selected) => {
+											  if (!selected) { // select
+  												if (!replacingPapers.some((p) => p.id === paper.id)) {
+  													setReplacingPapers((prev) => [...prev, paper]);
+  												}
+												} else { // unselect
+  												setReplacingPapers((prev) => prev.filter((p) => p.id !== paper.id));
+  											}
 											}}
 										/>
 										)
