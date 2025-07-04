@@ -162,6 +162,7 @@ pub struct EditReq {
     pub exam: Option<String>,
     pub note: Option<String>,
     pub approve_status: Option<bool>,
+    pub replace: Vec<i32>,
 }
 
 /// Paper edit endpoint (for admin dashboard)
