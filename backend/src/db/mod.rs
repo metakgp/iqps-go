@@ -181,7 +181,7 @@ impl Database {
 
         // Delete the replaced papers
         for replace_id in replace {
-            let rows_affected = sqlx::query(queries::SOFT_DELETE_BY_ID)
+            let rows_affected = sqlx::query(queries::SOFT_DELETE_ANY_BY_ID)
                 .bind(replace_id)
                 .execute(&mut *tx)
                 .await?

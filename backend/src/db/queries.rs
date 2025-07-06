@@ -65,6 +65,10 @@ pub fn get_similar_papers_query(year: bool, semester: bool, exam: bool) -> Strin
 pub const SOFT_DELETE_BY_ID: &str =
     "UPDATE iqps SET approve_status=false, is_deleted = true WHERE id=$1 AND from_library = false";
 
+/// Soft deletes a paper (sets `approve_status` to false and `is_deleted` to true) of any paper.
+pub const SOFT_DELETE_ANY_BY_ID: &str =
+    "UPDATE iqps SET approve_status=false, is_deleted = true WHERE id=$1";
+
 /// Get a paper ([`crate::db::models::DBAdminDashboardQP`]) with the given id (first parameter `$1`)
 pub fn get_get_paper_by_id_query() -> String {
     format!(
