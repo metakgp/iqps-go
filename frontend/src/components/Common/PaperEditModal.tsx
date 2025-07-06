@@ -495,6 +495,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 					{
 						awaitingSimilarPapers ? <div style={{ justifyContent: 'center', display: 'flex' }}><Spinner /></div> :
 							<div>
+							  {similarPapers.length > 0 && <p style={{margin: "0 0 4px 0"}}>Select papers to replace.</p>}
 								{
 									similarPapers.length === 0 ? <p>No similar papers found.</p> :
 										similarPapers.map((paper, i) => <QPCard
@@ -509,8 +510,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
   												setReplacingPapers((prev) => prev.filter((p) => p.id !== paper.id));
   											}
 											}}
-										/>
-										)
+										/>)
 								}
 							</div>
 					}
