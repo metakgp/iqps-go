@@ -95,6 +95,7 @@ impl Database {
     /// - Sets the `filelink` to:
     ///     - For library papers, remains unchanged
     ///     - For uploaded papers, approved papers are moved to the approved directory and renamed `id_coursecode_coursename_year_semester_exam.pdf` and unapproved papers are moved to the unapproved directory and named `id.pdf`
+    /// - Deletes `replace` papers from the database.
     ///
     /// Returns the database transaction, the old filelink and the new paper details ([`crate::qp::AdminDashboardQP`])
     pub async fn edit_paper<'c>(
@@ -113,6 +114,7 @@ impl Database {
             exam,
             approve_status,
             note,
+            replace,
         } = edit_req;
 
         let current_details = self.get_paper_by_id(id).await?;
@@ -176,6 +178,23 @@ impl Database {
 
         let new_qp: DBAdminDashboardQP = query.fetch_one(&mut *tx).await?;
         let new_qp = AdminDashboardQP::from(new_qp);
+
+        // Delete the replaced papers
+        for replace_id in replace {
+            let rows_affected = sqlx::query(queries::SOFT_DELETE_ANY_BY_ID)
+                .bind(replace_id)
+                .execute(&mut *tx)
+                .await?
+                .rows_affected();
+
+            if rows_affected > 1 {
+                tx.rollback().await?;
+                return Err(eyre!(
+                    "Error: {} (> 1) papers were deleted. Rolling back.",
+                    rows_affected
+                ));
+            }
+        }
 
         Ok((tx, old_filelink, new_qp))
     }

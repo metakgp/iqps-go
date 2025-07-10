@@ -35,12 +35,13 @@ function AdminDashboard() {
 		number | null
 	>(null);
 
-	const handlePaperEdit = async (qp: IAdminDashboardQP) => {
+	const handlePaperEdit = async (qp: IAdminDashboardQP, replace: number[]) => {
 		const response = await makeRequest(
 			"edit",
 			"post",
 			{
 				...qp,
+				replace,
 			},
 			auth.jwt,
 		);
@@ -281,7 +282,7 @@ function AdminDashboard() {
 							: null
 					}
 					qPaper={unapprovedPapers[selectedQPaperIndex]}
-					updateQPaper={(qp) => handlePaperEdit(qp)}
+					updateQPaper={(qp, replace) => handlePaperEdit(qp, replace)}
 					ocrDetails={ocrDetails.get(
 						unapprovedPapers[selectedQPaperIndex].id,
 					)}
