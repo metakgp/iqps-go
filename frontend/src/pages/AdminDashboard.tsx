@@ -17,6 +17,14 @@ import {
 } from "../utils/autofillData";
 import { FaX } from "react-icons/fa6";
 
+type SelectedPaper = {
+	type: "unapproved";
+	index: number;
+} | {
+	type: "external";
+	data: IAdminDashboardQP;
+}
+
 function AdminDashboard() {
 	const auth = useAuthContext();
 	const [unapprovedPapers, setUnapprovedPapers] = useState<
@@ -31,8 +39,8 @@ function AdminDashboard() {
 	const [ocrMessage, setOcrMessage] = useState<string | null>(null);
 	const [ocrLoopOn, setOcrLoopOn] = useState<boolean>(false);
 
-	const [selectedQPaperIndex, setSelectedQPaperIndex] = useState<
-		number | null
+	const [selectedQPaper, setSelectedQPaper] = useState<
+		SelectedPaper | null
 	>(null);
 
 	const handlePaperEdit = async (qp: IAdminDashboardQP, replace: number[]) => {
