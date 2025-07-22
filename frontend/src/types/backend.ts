@@ -38,6 +38,10 @@ export interface IEndpointTypes {
 		request: null,
 		response: IAdminDashboardQP[]
 	},
+	details: {
+		request: { id: number },
+		response: IAdminDashboardQP
+	},
 	upload: {
 		request: FormData,
 		response: {

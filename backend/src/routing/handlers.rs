@@ -54,6 +54,33 @@ pub async fn get_unapproved(
     ))
 }
 
+/// Fetches a paper by id.
+pub async fn get_paper_details(
+    State(state): State<RouterState>,
+    Query(params): Query<HashMap<String, String>>,
+) -> HandlerReturn<AdminDashboardQP> {
+    if let Some(id) = params.get("id") {
+        if let Ok(id) = id.parse::<i32>() {
+            let paper = state.db.get_paper_by_id(id).await?;
+            let paper_with_url = paper.with_url(&state.env_vars)?;
+            Ok(BackendResponse::ok(
+                "Successfully fetched the paper.".into(),
+                paper_with_url,
+            ))
+        } else {
+            Ok(BackendResponse::error(
+                "Invalid `id` URL parameter.".into(),
+                StatusCode::BAD_REQUEST,
+            ))
+        }
+    } else {
+        Ok(BackendResponse::error(
+            "`id` URL parameter is required.".into(),
+            StatusCode::BAD_REQUEST,
+        ))
+    }
+}
+
 /// Searches for question papers given a query and an optional `exam` parameter.
 ///
 /// # Request Query Parameters

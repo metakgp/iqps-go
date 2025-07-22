@@ -4,7 +4,7 @@ import { copyLink } from '../../utils/copyLink';
 import Spinner from '../Spinner/Spinner';
 import './search_results.scss';
 import { IoLink } from 'react-icons/io5';
-import { FaFilePdf } from 'react-icons/fa6';
+import { FaFilePdf, FaRegPenToSquare } from 'react-icons/fa6';
 import { Select } from '../Common/Form';
 import { useAuthContext } from '../../utils/auth';
 
@@ -213,6 +213,15 @@ function ResultCard(result: ISearchResult) {
 			</div>
 		</p>
 		<div className="result-card-btns">
+			{auth.isAuthenticated && <a
+				className="result-card-btn icon-btn"
+				href={`/admin?edit=${result.id}`}
+				title="Edit PDF"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				<FaRegPenToSquare size="1.2rem" />
+			</a>}
 			<a
 				className="result-card-btn icon-btn"
 				href={result.filelink}
