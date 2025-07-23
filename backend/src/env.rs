@@ -51,6 +51,9 @@ pub struct EnvVars {
     #[arg(env, default_value = "")]
     /// The usernames of the admins (additional to org team members, comma separated)
     pub gh_admin_usernames: String,
+    #[arg(env, default_value = "")]
+    /// URL of Slack webhook for sending notifications
+    pub slack_webhook_url: String, 
 
     // Other configs
     #[arg(env, default_value = "10")]

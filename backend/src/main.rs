@@ -11,6 +11,7 @@ mod env;
 mod pathutils;
 mod qp;
 mod routing;
+mod slack;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
