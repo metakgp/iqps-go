@@ -3,7 +3,6 @@ import { OAUTH_LOGIN_URL, useAuthContext } from "../utils/auth";
 import { makeRequest } from "../utils/backend";
 import { IAdminDashboardQP } from "../types/question_paper";
 import { Header } from "../components/Common/Common";
-import { useSearchParams } from "react-router-dom";
 
 import "./styles/admin_dashboard.scss";
 import { QPCard } from "../components/AdminDashboard/QPCard";
@@ -12,11 +11,12 @@ import PaperEditModal from "../components/Common/PaperEditModal";
 import Spinner from "../components/Spinner/Spinner";
 import toast from "react-hot-toast";
 import {
-  extractDetailsFromText,
-  extractTextFromPDF,
-  IExtractedDetails,
+	extractDetailsFromText,
+	extractTextFromPDF,
+	IExtractedDetails,
 } from "../utils/autofillData";
 import { FaX } from "react-icons/fa6";
+import { useSearchParams } from "react-router-dom";
 
 type SelectedPaper =
   | {
@@ -29,20 +29,20 @@ type SelectedPaper =
     };
 
 function AdminDashboard() {
-  const auth = useAuthContext();
-  const [unapprovedPapers, setUnapprovedPapers] = useState<IAdminDashboardQP[]>(
-    []
-  );
-  const [numUniqueCourseCodes, setNumUniqueCourseCodes] = useState<number>(0);
-  const [awaitingResponse, setAwaitingResponse] = useState<boolean>(false);
-  const [ocrDetails, setOcrDetails] = useState<Map<number, IExtractedDetails>>(
-    new Map()
-  );
-  const [ocrRequests, setOcrRequests] = useState<IAdminDashboardQP[]>([]);
-  const [ocrMessage, setOcrMessage] = useState<string | null>(null);
-  const [ocrLoopOn, setOcrLoopOn] = useState<boolean>(false);
+	const auth = useAuthContext();
+	const [unapprovedPapers, setUnapprovedPapers] = useState<
+		IAdminDashboardQP[]
+	>([]);
+	const [numUniqueCourseCodes, setNumUniqueCourseCodes] = useState<number>(0);
+	const [awaitingResponse, setAwaitingResponse] = useState<boolean>(false);
+	const [ocrDetails, setOcrDetails] = useState<
+		Map<number, IExtractedDetails>
+	>(new Map());
+	const [ocrRequests, setOcrRequests] = useState<IAdminDashboardQP[]>([]);
+	const [ocrMessage, setOcrMessage] = useState<string | null>(null);
+	const [ocrLoopOn, setOcrLoopOn] = useState<boolean>(false);
 
-  const [selectedQPaper, setSelectedQPaper] = useState<SelectedPaper | null>(
+	const [selectedQPaper, setSelectedQPaper] = useState<SelectedPaper | null>(
     null
   );
 
@@ -55,62 +55,62 @@ function AdminDashboard() {
       ? unapprovedPapers[selectedQPaper.index]
       : selectedQPaper.data;
 
-  const handlePaperEdit = async (qp: IAdminDashboardQP, replace: number[]) => {
-    const response = await makeRequest(
-      "edit",
-      "post",
-      {
-        ...qp,
-        replace,
-      },
-      auth.jwt
-    );
+	const handlePaperEdit = async (qp: IAdminDashboardQP, replace: number[]) => {
+		const response = await makeRequest(
+			"edit",
+			"post",
+			{
+				...qp,
+				replace,
+			},
+			auth.jwt,
+		);
 
-    if (response.status === "success") {
-      toast.success(response.message);
+		if (response.status === "success") {
+			toast.success(response.message);
 
-      setUnapprovedPapers((papers) => {
-        const newPapers = [...papers];
+			setUnapprovedPapers((papers) => {
+				const newPapers = [...papers];
 
-        if (selectedQPaper && selectedQPaper.type === "unapproved") {
-          newPapers[selectedQPaper.index] = {
-            ...qp,
-          };
-        } else {
-          return papers;
-        }
+				if (selectedQPaper && selectedQPaper.type === "unapproved") {
+					newPapers[selectedQPaper.index] = {
+						...qp,
+					};
+				} else {
+					return papers;
+				}
 
-        return newPapers;
-      });
-    } else {
-      toast.error(
-        `Approve error: ${response.message} (${response.status_code})`
-      );
-    }
-  };
+				return newPapers;
+			});
+		} else {
+			toast.error(
+				`Approve error: ${response.message} (${response.status_code})`,
+			);
+		}
+	};
 
-  const fetchUnapprovedPapers = async () => {
-    setAwaitingResponse(true);
-    const papers = await makeRequest("unapproved", "get", null, auth.jwt);
+	const fetchUnapprovedPapers = async () => {
+		setAwaitingResponse(true);
+		const papers = await makeRequest("unapproved", "get", null, auth.jwt);
 
-    if (papers.status === "success") {
-      setUnapprovedPapers(papers.data);
-      setOcrRequests(papers.data.slice(0, 20));
-      setNumUniqueCourseCodes(
-        // Make an array of course codes
-        papers.data
-          .map((paper) => paper.course_code)
-          .filter(
-            // Keep unqiue values
-            (code, i, arr) => arr.indexOf(code) === i
-          ).length
-      );
-    }
+		if (papers.status === "success") {
+			setUnapprovedPapers(papers.data);
+			setOcrRequests(papers.data.slice(0, 20));
+			setNumUniqueCourseCodes(
+				// Make an array of course codes
+				papers.data
+					.map((paper) => paper.course_code)
+					.filter(
+						// Keep unqiue values
+						(code, i, arr) => arr.indexOf(code) === i,
+					).length,
+			);
+		}
 
-    setAwaitingResponse(false);
-  };
+		setAwaitingResponse(false);
+	};
 
-  const fetchPaper = async (id: number) => {
+	const fetchPaper = async (id: number) => {
     setAwaitingResponse(true);
     const response = await makeRequest("details", "get", { id }, auth.jwt);
 
@@ -131,200 +131,204 @@ function AdminDashboard() {
     }
   };
 
-  const handlePaperDelete = async (deleteQp: IAdminDashboardQP) => {
-    const deleteInterval = 8;
-    let toastId: string | null = null;
 
-    const deleteTimeout = setTimeout(async () => {
-      const response = await makeRequest(
-        "delete",
-        "post",
-        { id: deleteQp.id },
-        auth.jwt
-      );
+	const handlePaperDelete = async (deleteQp: IAdminDashboardQP) => {
+		const deleteInterval = 8;
+		let toastId: string | null = null;
 
-      if (response.status === "success") {
-        if (toastId !== null)
-          toast.success(`${response.message} (id: ${deleteQp.id})`, {
-            id: toastId,
-          });
+		const deleteTimeout = setTimeout(async () => {
+			const response = await makeRequest(
+				"delete",
+				"post",
+				{ id: deleteQp.id },
+				auth.jwt,
+			);
 
-        setUnapprovedPapers((papers) => {
-          return papers.filter((qp) => qp != deleteQp);
-        });
-      } else {
-        if (toastId !== null)
-          toast.error(
-            `Delete error: ${response.message} (${response.status_code})`,
-            { id: toastId }
-          );
-      }
-    }, deleteInterval * 1000);
+			if (response.status === "success") {
+				if (toastId !== null)
+					toast.success(`${response.message} (id: ${deleteQp.id})`, { id: toastId });
 
-    const onAbort = () => {
-      clearTimeout(deleteTimeout);
+				setUnapprovedPapers((papers) => {
+					return papers.filter((qp) => qp != deleteQp);
+				});
+			} else {
+				if (toastId !== null)
+					toast.error(
+						`Delete error: ${response.message} (${response.status_code})`,
+						{ id: toastId },
+					);
+			}
+		}, deleteInterval * 1000);
 
-      if (toastId !== null) {
-        toast.success(`Aborted paper deletion (id: ${deleteQp.id})`, {
-          id: toastId,
-        });
-        toastId = null;
-      }
-    };
+		const onAbort = () => {
+			clearTimeout(deleteTimeout);
 
-    toastId = toast.loading(
-      <div className="delete-toast">
-        <p>
-          Deleting paper {deleteQp.course_name} (id: {deleteQp.id}) in{" "}
-          {deleteInterval}s.
-        </p>
-        <button onClick={onAbort}>
-          <FaX />
-          Cancel
-        </button>
-      </div>,
-      { duration: (deleteInterval + 1) * 1000 }
-    );
-  };
+			if (toastId !== null) {
+				toast.success(`Aborted paper deletion (id: ${deleteQp.id})`, {
+					id: toastId,
+				});
+				toastId = null;
+			}
+		};
 
-  useEffect(() => {
-    const id = +(searchParams.get("edit") || -1);
-    if (id && !Number.isNaN(id) && id > 0) {
-      const paper = unapprovedPapers.find((qp) => qp.id === id);
+		toastId = toast.loading(
+			<div className="delete-toast">
+				<p>
+					Deleting paper {deleteQp.course_name} (id: {deleteQp.id}) in {deleteInterval}s.
+				</p>
+				<button onClick={onAbort}><FaX />Cancel</button>
+			</div>,
+			{ duration: (deleteInterval + 1) * 1000 },
+		);
+	};
 
-      if (paper) {
-        setSelectedQPaper({
-          type: "unapproved",
-          index: unapprovedPapers.indexOf(paper),
-        });
-      } else {
-        fetchPaper(id);
-      }
-    } else if (searchParams.get("edit")) {
-      toast.error(`Invalid id (${searchParams.get("edit")}).`);
-      setSearchParams({});
-    }
-  }, [searchParams, unapprovedPapers]);
+		useEffect(() => {
+			const id = +(searchParams.get("edit") || -1);
+			if (id && !Number.isNaN(id) && id > 0) {
+				const paper = unapprovedPapers.find((qp) => qp.id === id);
+	
+				if (paper) {
+					setSelectedQPaper({
+						type: "unapproved",
+						index: unapprovedPapers.indexOf(paper),
+					});
+				} else {
+					fetchPaper(id);
+				}
+			} else if (searchParams.get("edit")) {
+				toast.error(`Invalid id (${searchParams.get("edit")}).`);
+				setSearchParams({});
+			}
+		}, [searchParams, unapprovedPapers]);
+	
+		const openUnapproved = (index: number | null) => {
+			if (index === null) {
+				setSelectedQPaper(null);
+				setSearchParams({});
+				return;
+			}
+	
+			const paper = unapprovedPapers[index];
+			setSearchParams({ edit: paper.id.toString() });
+		};
+	
 
-  const openUnapproved = (index: number | null) => {
-    if (index === null) {
-      setSelectedQPaper(null);
-      setSearchParams({});
-      return;
-    }
+	useEffect(() => {
+		if (!auth.isAuthenticated) {
+			window.location.assign(OAUTH_LOGIN_URL);
+		} else {
+			fetchUnapprovedPapers();
+		}
+	}, []);
 
-    const paper = unapprovedPapers[index];
-    setSearchParams({ edit: paper.id.toString() });
-  };
+	const storeOcrDetails = async (paper: IAdminDashboardQP) => {
+		if (!ocrDetails.has(paper.id)) {
+			setOcrMessage(
+				`Running OCR for ${paper.course_name} - ${paper.course_code} (id: ${paper.id})`,
+			);
+			const response = await fetch(paper.filelink);
 
-  useEffect(() => {
-    if (!auth.isAuthenticated) {
-      window.location.assign(OAUTH_LOGIN_URL);
-    } else {
-      fetchUnapprovedPapers();
-    }
-  }, []);
+			if (response.ok) {
+				try {
+					const pdfData = await response.arrayBuffer();
+					const pdfText = await extractTextFromPDF(pdfData);
 
-  const storeOcrDetails = async (paper: IAdminDashboardQP) => {
-    if (!ocrDetails.has(paper.id)) {
-      setOcrMessage(
-        `Running OCR for ${paper.course_name} - ${paper.course_code} (id: ${paper.id})`
-      );
-      const response = await fetch(paper.filelink);
+					setOcrDetails((currentValue) =>
+						currentValue.set(
+							paper.id,
+							extractDetailsFromText(pdfText),
+						),
+					);
+				} catch (e) {
+					toast.error(`OCR failed for id:${paper.id}. Error: ${e}`);
+				}
+			}
+		}
+	};
 
-      if (response.ok) {
-        try {
-          const pdfData = await response.arrayBuffer();
-          const pdfText = await extractTextFromPDF(pdfData);
+	const ocrDetailsLoop = async () => {
+		if (!ocrLoopOn) {
+			setOcrLoopOn(true);
+			const request = ocrRequests.shift();
 
-          setOcrDetails((currentValue) =>
-            currentValue.set(paper.id, extractDetailsFromText(pdfText))
-          );
-        } catch (e) {
-          toast.error(`OCR failed for id:${paper.id}. Error: ${e}`);
-        }
-      }
-    }
-  };
+			if (request) {
+				await storeOcrDetails(request);
+			}
+			setOcrRequests((reqs) => reqs.filter((req) => req !== request));
+			setOcrLoopOn(false);
+		}
+	};
 
-  const ocrDetailsLoop = async () => {
-    if (!ocrLoopOn) {
-      setOcrLoopOn(true);
-      const request = ocrRequests.shift();
+	// useEffect(() => {
+	// 	ocrDetailsLoop();
+	// }, [ocrRequests])
 
-      if (request) {
-        await storeOcrDetails(request);
-      }
-      setOcrRequests((reqs) => reqs.filter((req) => req !== request));
-      setOcrLoopOn(false);
-    }
-  };
+	return auth.isAuthenticated ? (
+		<div id="admin-dashboard">
+			<Header
+				title="Admin Dashboard"
+				subtitle="Top secret documents - to be approved inside n-sided polygon shaped buildings only."
+				link={{
+					onClick: (e) => {
+						e.preventDefault();
+						auth.logout();
+					},
+					text: "Want to destroy the paper trail?",
+					button_text: "Logout",
+					icon: MdLogout,
+				}}
+			/>
 
-  // useEffect(() => {
-  // 	ocrDetailsLoop();
-  // }, [ocrRequests])
+			<div className="dashboard-container">
+				{awaitingResponse ? (
+					<Spinner />
+				) : (
+					<>
+						<div className="side-panel">
+							<p>
+								<b>Unapproved papers</b>:{" "}
+								{unapprovedPapers.length}
+							</p>
+							<p>
+								<b>Unique Course Codes</b>:{" "}
+								{numUniqueCourseCodes}
+							</p>
+							<p>
+								<b>OCR details</b>: {ocrDetails.size} papers
+								(loop {ocrLoopOn ? "On" : "Off"})
+							</p>
+							{ocrMessage !== null && <p>{ocrMessage}</p>}
+						</div>
+						<div className="papers-panel">
+							{unapprovedPapers.map((paper, i) => (
+								<QPCard
+									onEdit={(e) => {
+										e.preventDefault();
 
-  return auth.isAuthenticated ? (
-    <div id="admin-dashboard">
-      <Header
-        title="Admin Dashboard"
-        subtitle="Top secret documents - to be approved inside n-sided polygon shaped buildings only."
-        link={{
-          onClick: (e) => {
-            e.preventDefault();
-            auth.logout();
-          },
-          text: "Want to destroy the paper trail?",
-          button_text: "Logout",
-          icon: MdLogout,
-        }}
-      />
+										if (!ocrDetails.has(paper.id)) {
+											// If ocr doesn't exist, push to the start of the queue
+											setOcrRequests((reqs) => [
+												paper,
+												...reqs,
+											]);
+										}
+										openUnapproved(i);
+									}}
+									onDelete={(e) => {
+										e.preventDefault();
+										handlePaperDelete(paper);
+									}}
+									qPaper={paper}
+									hasOcr={ocrDetails.has(paper.id)}
+									key={i}
+								/>
+							))}
+						</div>
+					</>
+				)}
+			</div>
 
-      <div className="dashboard-container">
-        {awaitingResponse ? (
-          <Spinner />
-        ) : (
-          <>
-            <div className="side-panel">
-              <p>
-                <b>Unapproved papers</b>: {unapprovedPapers.length}
-              </p>
-              <p>
-                <b>Unique Course Codes</b>: {numUniqueCourseCodes}
-              </p>
-              <p>
-                <b>OCR details</b>: {ocrDetails.size} papers (loop{" "}
-                {ocrLoopOn ? "On" : "Off"})
-              </p>
-              {ocrMessage !== null && <p>{ocrMessage}</p>}
-            </div>
-            <div className="papers-panel">
-              {unapprovedPapers.map((paper, i) => (
-                <QPCard
-                  onEdit={(e) => {
-                    e.preventDefault();
-
-                    if (!ocrDetails.has(paper.id)) {
-                      // If ocr doesn't exist, push to the start of the queue
-                      setOcrRequests((reqs) => [paper, ...reqs]);
-                    }
-                    openUnapproved(i);
-                  }}
-                  onDelete={(e) => {
-                    e.preventDefault();
-                    handlePaperDelete(paper);
-                  }}
-                  qPaper={paper}
-                  hasOcr={ocrDetails.has(paper.id)}
-                  key={i}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      {paperRef && selectedQPaper != null && (
+			{paperRef && selectedQPaper != null && (
         <PaperEditModal
           onClose={() => openUnapproved(null)}
           onDelete={(e) => {
@@ -352,10 +356,10 @@ function AdminDashboard() {
           editPaper={(id) => setSearchParams({ edit: id.toString() })}
         />
       )}
-    </div>
-  ) : (
-    <p>You are unauthenticated. This incident will be reported.</p>
-  );
+		</div>
+	) : (
+		<p>You are unauthenticated. This incident will be reported.</p>
+	);
 }
 
 export default AdminDashboard;
