@@ -384,7 +384,7 @@ pub async fn upload(
         });
     }
 
-    let unapproved_count = state.db.get_unapproved_papers().await?.len();
+    let unapproved_count = state.db.get_unapproved_papers_count().await?;
 
     let _ = send_slack_message(
         &state.env_vars.slack_webhook_url,

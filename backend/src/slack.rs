@@ -7,7 +7,7 @@ use http::StatusCode;
 pub async fn send_slack_message(
     webhook_url: &str,
     count: usize,
-    unapproved: usize,
+    unapproved: i64,
 ) -> Result<(), color_eyre::eyre::Error> {
     if webhook_url.is_empty() {
         return Ok(());
