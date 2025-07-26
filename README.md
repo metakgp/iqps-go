@@ -168,6 +168,7 @@ Environment variables can be set using a `.env` file. Use the `.env.template` fi
 
 ##### Configuration
 
+- `SLACK_WEBHOOK_URL`: URL of Slack webhook for sending notifications (ignored if empty).
 - `MAX_UPLOAD_LIMIT`: Maximum number of files that can be uploaded at once.
 - `LOG_LOCATION`: The path to a local logfile.
 - `STATIC_FILES_URL`: The URL of the static files server. (eg: `https://static.metakgp.org`)

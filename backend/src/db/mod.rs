@@ -63,6 +63,17 @@ impl Database {
             .collect())
     }
 
+    /// Returns the number of unapproved papers
+    pub async fn get_unapproved_papers_count(
+        &self,
+    ) -> Result<i64, sqlx::Error> {
+        let count: (i64,) = sqlx::query_as(queries::GET_UNAPPROVED_COUNT)
+            .fetch_one(&self.connection)
+            .await?;
+
+        Ok(count.0)
+    }
+
     /// Searches for papers from a given query. Uses some voodoo black magic by @rajivharlalka
     pub async fn search_papers(
         &self,

@@ -24,6 +24,7 @@ use crate::{
     auth::{self, Auth},
     pathutils::PaperCategory,
     qp::{self, AdminDashboardQP, Exam, WithUrl},
+    slack::send_slack_message,
 };
 
 use super::{AppError, BackendResponse, RouterState, Status};
@@ -382,6 +383,15 @@ pub async fn upload(
             message: "THIS SHOULD NEVER HAPPEN. REPORT IMMEDIATELY. ALSO THIS WOULDN'T HAPPEN IF RUST HAD STABLE ASYNC CLOSURES.".into(),
         });
     }
+
+    let unapproved_count = state.db.get_unapproved_papers_count().await?;
+
+    let _ = send_slack_message(
+        &state.env_vars.slack_webhook_url,
+        upload_statuses.len(),
+        unapproved_count,
+    )
+    .await;
 
     Ok(BackendResponse::ok(
         format!("Successfully processed {} files", upload_statuses.len()),

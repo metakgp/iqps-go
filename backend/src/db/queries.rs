@@ -105,6 +105,10 @@ pub fn get_all_unapproved_query() -> String {
     format!("SELECT {} FROM iqps WHERE approve_status = false and is_deleted=false ORDER BY upload_timestamp ASC", ADMIN_DASHBOARD_QP_FIELDS)
 }
 
+/// Gets the count of unapproved papers in the database
+pub const GET_UNAPPROVED_COUNT: &str =
+    "SELECT COUNT(*) FROM iqps WHERE approve_status = false AND is_deleted = false";
+
 /// Returns the query for searching question papers. It is mostly voodoo, see [blog post](https://rajivharlalka.in/posts/iqps-search-development/).
 ///
 /// The `exam_filter` argument is a vector of exam types to filter. Pass empty vector to disable the filter.
