@@ -1,4 +1,4 @@
-FROM rust:slim-buster AS builder
+FROM rust:slim-bookworm AS builder
 
 WORKDIR /src
 
