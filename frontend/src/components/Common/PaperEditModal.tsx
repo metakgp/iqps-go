@@ -28,6 +28,7 @@ interface IPaperEditModalProps<T> {
 	updateQPaper: UpdateQPHandler<T>;
 	ocrDetails?: IExtractedDetails;
 	onDelete?: React.MouseEventHandler<HTMLButtonElement>;
+	editPaper?: (id: number) => void;
 };
 
 function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props: IPaperEditModalProps<T>) {
@@ -510,6 +511,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
   												setReplacingPapers((prev) => prev.filter((p) => p.id !== paper.id));
   											}
 											}}
+											onEdit={props.editPaper && (() => props.editPaper?.(paper.id))}
 										/>)
 								}
 							</div>

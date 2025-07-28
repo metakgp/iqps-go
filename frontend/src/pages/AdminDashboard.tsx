@@ -16,6 +16,17 @@ import {
 	IExtractedDetails,
 } from "../utils/autofillData";
 import { FaX } from "react-icons/fa6";
+import { useSearchParams } from "react-router-dom";
+
+type SelectedPaper =
+  | {
+      type: "unapproved";
+      index: number;
+    }
+  | {
+      type: "external";
+      data: IAdminDashboardQP;
+    };
 
 function AdminDashboard() {
 	const auth = useAuthContext();
@@ -31,9 +42,18 @@ function AdminDashboard() {
 	const [ocrMessage, setOcrMessage] = useState<string | null>(null);
 	const [ocrLoopOn, setOcrLoopOn] = useState<boolean>(false);
 
-	const [selectedQPaperIndex, setSelectedQPaperIndex] = useState<
-		number | null
-	>(null);
+	const [selectedQPaper, setSelectedQPaper] = useState<SelectedPaper | null>(
+    null
+  );
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const paperRef =
+    selectedQPaper === null
+      ? null
+      : selectedQPaper.type === "unapproved"
+      ? unapprovedPapers[selectedQPaper.index]
+      : selectedQPaper.data;
 
 	const handlePaperEdit = async (qp: IAdminDashboardQP, replace: number[]) => {
 		const response = await makeRequest(
@@ -52,10 +72,12 @@ function AdminDashboard() {
 			setUnapprovedPapers((papers) => {
 				const newPapers = [...papers];
 
-				if (selectedQPaperIndex !== null) {
-					newPapers[selectedQPaperIndex] = {
+				if (selectedQPaper && selectedQPaper.type === "unapproved") {
+					newPapers[selectedQPaper.index] = {
 						...qp,
 					};
+				} else {
+					return papers;
 				}
 
 				return newPapers;
@@ -69,7 +91,6 @@ function AdminDashboard() {
 
 	const fetchUnapprovedPapers = async () => {
 		setAwaitingResponse(true);
-		// TODO: Show all uploaded papers or only unapproved based on user toggle
 		const papers = await makeRequest("unapproved", "get", null, auth.jwt);
 
 		if (papers.status === "success") {
@@ -88,6 +109,28 @@ function AdminDashboard() {
 
 		setAwaitingResponse(false);
 	};
+
+	const fetchPaper = async (id: number) => {
+    setAwaitingResponse(true);
+    const response = await makeRequest("details", "get", { id }, auth.jwt);
+
+    if (response.status === "success") {
+      setSelectedQPaper({
+        type: "external",
+        data: response.data,
+      });
+    }
+
+    setAwaitingResponse(false);
+
+    if (response.status === "error") {
+      toast.error(
+        `Could not fetch details for paper with id:${id}`
+      );
+      setSearchParams({});
+    }
+  };
+
 
 	const handlePaperDelete = async (deleteQp: IAdminDashboardQP) => {
 		const deleteInterval = 8;
@@ -138,6 +181,37 @@ function AdminDashboard() {
 			{ duration: (deleteInterval + 1) * 1000 },
 		);
 	};
+
+		useEffect(() => {
+			const id = +(searchParams.get("edit") || -1);
+			if (id && !Number.isNaN(id) && id > 0) {
+				const paper = unapprovedPapers.find((qp) => qp.id === id);
+	
+				if (paper) {
+					setSelectedQPaper({
+						type: "unapproved",
+						index: unapprovedPapers.indexOf(paper),
+					});
+				} else {
+					fetchPaper(id);
+				}
+			} else if (searchParams.get("edit")) {
+				toast.error(`Invalid id (${searchParams.get("edit")}).`);
+				setSearchParams({});
+			}
+		}, [searchParams, unapprovedPapers]);
+	
+		const openUnapproved = (index: number | null) => {
+			if (index === null) {
+				setSelectedQPaper(null);
+				setSearchParams({});
+				return;
+			}
+	
+			const paper = unapprovedPapers[index];
+			setSearchParams({ edit: paper.id.toString() });
+		};
+	
 
 	useEffect(() => {
 		if (!auth.isAuthenticated) {
@@ -238,7 +312,7 @@ function AdminDashboard() {
 												...reqs,
 											]);
 										}
-										setSelectedQPaperIndex(i);
+										openUnapproved(i);
 									}}
 									onDelete={(e) => {
 										e.preventDefault();
@@ -254,40 +328,34 @@ function AdminDashboard() {
 				)}
 			</div>
 
-			{selectedQPaperIndex !== null && (
-				<PaperEditModal
-					onClose={() => setSelectedQPaperIndex(null)}
-					onDelete={(e) => {
-						e.preventDefault();
-						handlePaperDelete(
-							unapprovedPapers[selectedQPaperIndex],
-						);
-					}}
-					selectNext={
-						selectedQPaperIndex < unapprovedPapers.length - 1
-							? () => {
-									setSelectedQPaperIndex(
-										selectedQPaperIndex + 1,
-									);
-								}
-							: null
-					}
-					selectPrev={
-						selectedQPaperIndex > 0
-							? () => {
-									setSelectedQPaperIndex(
-										selectedQPaperIndex - 1,
-									);
-								}
-							: null
-					}
-					qPaper={unapprovedPapers[selectedQPaperIndex]}
-					updateQPaper={(qp, replace) => handlePaperEdit(qp, replace)}
-					ocrDetails={ocrDetails.get(
-						unapprovedPapers[selectedQPaperIndex].id,
-					)}
-				/>
-			)}
+			{paperRef && selectedQPaper != null && (
+        <PaperEditModal
+          onClose={() => openUnapproved(null)}
+          onDelete={(e) => {
+            e.preventDefault();
+            handlePaperDelete(paperRef);
+          }}
+          selectNext={
+            selectedQPaper.type === "unapproved" &&
+            selectedQPaper.index < unapprovedPapers.length - 1
+              ? () => {
+                  openUnapproved(selectedQPaper.index + 1);
+                }
+              : null
+          }
+          selectPrev={
+            selectedQPaper.type === "unapproved" && selectedQPaper.index > 0
+              ? () => {
+                  openUnapproved(selectedQPaper.index - 1);
+                }
+              : null
+          }
+          qPaper={paperRef}
+          updateQPaper={(qp, replace) => handlePaperEdit(qp, replace)}
+          ocrDetails={ocrDetails.get(paperRef.id)}
+          editPaper={(id) => setSearchParams({ edit: id.toString() })}
+        />
+      )}
 		</div>
 	) : (
 		<p>You are unauthenticated. This incident will be reported.</p>
