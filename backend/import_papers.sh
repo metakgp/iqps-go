@@ -7,17 +7,13 @@ if [[ $# -ne 1 ]]; then
 fi
 
 ARCHIVE_PATH="$1"
-BASENAME="$(basename "$ARCHIVE_PATH")"
-DEST_PATH="/tmp/$BASENAME"
 SERVICE="iqps-backend"
+DEST_PATH="/app/qp.tar.gz"
 
-echo "Copying '$ARCHIVE_PATH' to service '$SERVICE'..."
+echo "📦 Copying '$ARCHIVE_PATH' to '$SERVICE'..."
 docker compose cp "$ARCHIVE_PATH" "$SERVICE":"$DEST_PATH"
 
-echo "Running import-papers on '$DEST_PATH'..."
-docker compose exec "$SERVICE" ./import-papers "$DEST_PATH"
+echo "⚙️ Running import-papers..."
+docker compose exec "$SERVICE" ./import-papers
 
-echo "Cleaning up temporary file in container..."
-docker compose exec "$SERVICE" rm -f "$DEST_PATH"
-
-echo "Done!"
+echo "✅ Done!"
