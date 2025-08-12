@@ -59,7 +59,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let timestamp = chrono::Local::now().format("%Y-%m-%d_%H-%M-%S").to_string();
     let log_filename = format!("peqp_import_{}.log", timestamp);
 
-    let log_file = File::create(&log_filename).expect("Failed to create log file");
+    let log_path = env_vars
+        .log_location
+        .parent()
+        .expect("Where do you want to store that log??")
+        .join(&log_filename);
+
+    let log_file = File::create(&log_path).expect("Failed to create log file");
 
     tracing_subscriber::registry()
         .with(
