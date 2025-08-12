@@ -3,25 +3,14 @@
 use color_eyre::eyre;
 use http::StatusCode;
 
-/// Sends a notification to the Slack channel whenever a new paper is uploaded.
+/// Sends a notification to the Slack channel.
 pub async fn send_slack_message(
     webhook_url: &str,
-    count: usize,
-    unapproved: i64,
+    message: &str,
 ) -> Result<(), color_eyre::eyre::Error> {
     if webhook_url.is_empty() {
         return Ok(());
     }
-
-    let message = format!(
-        "🔔 {} uploaded to IQPS!\n\n<https://qp.metakgp.org/admin|Review> | Total Unapproved papers: *{}*",
-        if count == 1 {
-            "A new paper was".into()
-        } else {
-            format!("{} new papers were", count)
-        },
-        unapproved
-    );
 
     let client = reqwest::Client::new();
     let response = client

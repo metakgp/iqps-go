@@ -411,12 +411,21 @@ pub async fn upload(
         });
     }
 
-    let unapproved_count = state.db.get_unapproved_papers_count().await?;
+    let total_count = state.db.get_unapproved_papers_count().await?;
+    let count = upload_statuses.len();
+    let message = format!(
+        "🔔 {} uploaded to IQPS!\n\n<https://qp.metakgp.org/admin|Review> | Total Unapproved papers: *{}*",
+        if count == 1 {
+            "A new paper was".into()
+        } else {
+            format!("{} new papers were", count)
+        },
+        total_count
+    );
 
     let _ = send_slack_message(
         &state.env_vars.slack_webhook_url,
-        upload_statuses.len(),
-        unapproved_count,
+        &message,
     )
     .await;
 
