@@ -10,10 +10,10 @@ ARCHIVE_PATH="$1"
 SERVICE="iqps-backend"
 DEST_PATH="/app/qp.tar.gz"
 
-echo "📦 Copying '$ARCHIVE_PATH' to '$SERVICE'..."
+echo "Copying '$ARCHIVE_PATH' to '$SERVICE'..."
 docker compose cp "$ARCHIVE_PATH" "$SERVICE":"$DEST_PATH"
 
-echo "⚙️ Running import-papers..."
+echo "Running import-papers..."
 docker compose exec "$SERVICE" ./import-papers
 
-echo "✅ Done!"
+echo "Done!"
