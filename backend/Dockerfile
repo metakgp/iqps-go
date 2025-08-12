@@ -28,5 +28,6 @@ COPY metaploy/ ./
 RUN chmod +x ./postinstall.sh
 
 COPY --from=builder /src/target/x86_64-unknown-linux-musl/release/iqps-backend .
+COPY --from=builder /src/target/x86_64-unknown-linux-musl/release/import-papers .
 
 CMD ["./postinstall.sh", "./iqps-backend"]
