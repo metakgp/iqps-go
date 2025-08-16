@@ -3,7 +3,7 @@
 use clap::Parser;
 use flate2::read::GzDecoder;
 use iqps_backend::pathutils::PaperCategory;
-use iqps_backend::{db, env, qp};
+use iqps_backend::{db, env, qp, slack};
 use sha2::{Digest, Sha256};
 use std::fs::{self, File};
 use std::io::{self, BufReader, Read, Write};
@@ -35,8 +35,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let qps: Vec<qp::LibraryQP> =
         serde_json::from_reader(reader).expect("Failed to parse JSON file");
+    let count = qps.len();
 
-    print!("This will add {} new papers. Continue? [Y/n] ", qps.len());
+    print!("This will add {} new papers. Continue? [Y/n] ", count);
     io::stdout().flush().unwrap();
     let mut input = String::new();
     io::stdin()
@@ -58,7 +59,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let timestamp = chrono::Local::now().format("%Y-%m-%d_%H-%M-%S").to_string();
     let log_filename = format!("peqp_import_{}.log", timestamp);
 
-    let log_file = File::create(&log_filename).expect("Failed to create log file");
+    let log_path = env_vars
+        .log_location
+        .parent()
+        .expect("Where do you want to store that log??")
+        .join(&log_filename);
+
+    let log_file = File::create(&log_path).expect("Failed to create log file");
 
     tracing_subscriber::registry()
         .with(
@@ -131,9 +138,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             break;
         }
     }
-
+    
     println!("Finished uploading papers to database.");
     dir.close()?;
+
+    let message = format!(
+      "{} papers have been imported into IQPS!",
+      count,
+    );
+
+    let _ = slack::send_slack_message(
+      &env_vars.slack_webhook_url,
+      &message,
+    ).await;
 
     Ok(())
 }
