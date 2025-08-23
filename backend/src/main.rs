@@ -24,7 +24,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let env_vars = env::EnvVars::parse().process()?;
 
     // Initialize logger
-    let (append_writer, _guard) = tracing_appender::non_blocking(tracing_appender::rolling::never(
+    let (append_writer, _guard) = tracing_appender::non_blocking(tracing_appender::rolling::daily(
         env_vars
             .log_location
             .parent()
