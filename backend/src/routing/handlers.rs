@@ -54,6 +54,21 @@ pub async fn get_unapproved(
     ))
 }
 
+/// Gets all papers which have been soft-deleted.
+pub async fn get_trash(State(state): State<RouterState>) -> HandlerReturn<Vec<AdminDashboardQP>> {
+    let papers: Vec<AdminDashboardQP> = state.db.get_soft_deleted_papers().await?;
+
+    let papers = papers
+        .iter()
+        .map(|paper| paper.clone().with_url(&state.env_vars))
+        .collect::<Result<Vec<qp::AdminDashboardQP>, color_eyre::eyre::Error>>()?;
+
+    Ok(BackendResponse::ok(
+        format!("Successfully fetched {} papers.", papers.len()),
+        papers,
+    ))
+}
+
 /// Fetches a paper by id.
 pub async fn get_paper_details(
     State(state): State<RouterState>,
@@ -423,11 +438,7 @@ pub async fn upload(
         total_count
     );
 
-    let _ = send_slack_message(
-        &state.env_vars.slack_webhook_url,
-        &message,
-    )
-    .await;
+    let _ = send_slack_message(&state.env_vars.slack_webhook_url, &message).await;
 
     Ok(BackendResponse::ok(
         format!("Successfully processed {} files", upload_statuses.len()),
@@ -458,6 +469,44 @@ pub async fn delete(
     } else {
         Ok(BackendResponse::error(
             "No paper was changed. Either the paper does not exist, is a library paper (cannot be deleted), or is already deleted.".into(),
+            StatusCode::BAD_REQUEST,
+        ))
+    }
+}
+
+#[derive(Deserialize)]
+/// The request format for the hard delete endpoint
+pub struct HardDeleteReq {
+    ids: Vec<i32>,
+}
+
+/// Hard deletes papers from a list of ids.
+///
+/// Request format - [`HardDeleteReq`]
+pub async fn hard_delete(
+    State(state): State<RouterState>,
+    Json(body): Json<HardDeleteReq>,
+) -> HandlerReturn<()> {
+    let mut deleted_count = 0;
+    for id in body.ids {
+        let paper = state.db.get_paper_by_id(id).await;
+        if let Ok(paper) = paper {
+            let file_path = state.env_vars.paths.get_path_from_slug(&paper.qp.filelink);
+            let _ = fs::remove_file(&file_path).await;
+            if let Ok(true) = state.db.hard_delete(id).await {
+                deleted_count += 1;
+            }
+        }
+    }
+
+    if deleted_count > 0 {
+        Ok(BackendResponse::ok(
+            format!("Successfully hard deleted {} papers.", deleted_count),
+            (),
+        ))
+    } else {
+        Ok(BackendResponse::error(
+            "No papers were deleted. Either the papers do not exist, are library papers, or are already deleted.".into(),
             StatusCode::BAD_REQUEST,
         ))
     }

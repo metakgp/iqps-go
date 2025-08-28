@@ -3,6 +3,7 @@ import SearchPage from "./pages/SearchPage";
 import UploadPage from "./pages/UploadPage";
 import OAuthPage from "./pages/OAuthPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import TrashPage from "./pages/TrashPage";
 import { AuthProvider } from "./utils/auth";
 import { Footer } from "./components/Common/Common";
 import { Toaster } from "react-hot-toast";
@@ -28,6 +29,10 @@ function App() {
             <Route
               path="/admin"
               element={<AdminDashboard />}
+            />
+            <Route
+              path="/admin/trash"
+              element={<TrashPage />}
             />
           </Routes>
         </AuthProvider>

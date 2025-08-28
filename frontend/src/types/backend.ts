@@ -38,6 +38,10 @@ export interface IEndpointTypes {
 		request: null,
 		response: IAdminDashboardQP[]
 	},
+	trash: {
+		request: null,
+		response: IAdminDashboardQP[]
+	},
 	details: {
 		request: { id: number },
 		response: IAdminDashboardQP
@@ -71,6 +75,12 @@ export interface IEndpointTypes {
 			id: number;
 		},
 		response: null;
+	}
+	harddelete: {
+	    request: {
+	        ids: number[];
+	    },
+	    response: null;
 	}
 	profile: {
 		request: null;
