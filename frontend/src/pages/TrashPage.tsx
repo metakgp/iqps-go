@@ -49,7 +49,7 @@ function TrashPage() {
 					toast.success(`${response.message}`, {id: toastId});
 
 				setTrashPapers((papers) => {
-					return papers.filter((qp) => !selectedIds.includes(qp.id));
+					return papers.filter((qp) => response.data.filter(p => p.status === "success" && p.id == qp.id).length === 0);
 				});
 				setSelectedIds([]);
 				setAllSelected(false);

@@ -77,10 +77,14 @@ export interface IEndpointTypes {
 		response: null;
 	}
 	harddelete: {
-	    request: {
-	        ids: number[];
-	    },
-	    response: null;
+		request: {
+			ids: number[];
+		},
+		response: {
+			id: number;
+			status: "success" | "error";
+			message: string;
+		}[];
 	}
 	profile: {
 		request: null;
