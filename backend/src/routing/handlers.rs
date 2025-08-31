@@ -480,36 +480,60 @@ pub struct HardDeleteReq {
     ids: Vec<i32>,
 }
 
+#[derive(Serialize)]
+/// The status of a paper to be deleted
+pub struct DeleteStatus {
+    id: i32,
+    status: Status,
+    message: String
+}
+
 /// Hard deletes papers from a list of ids.
 ///
 /// Request format - [`HardDeleteReq`]
 pub async fn hard_delete(
     State(state): State<RouterState>,
     Json(body): Json<HardDeleteReq>,
-) -> HandlerReturn<()> {
+) -> HandlerReturn<Vec<DeleteStatus>> {
+    let mut delete_statuses = Vec::<DeleteStatus>::new();
     let mut deleted_count = 0;
     for id in body.ids {
-        let paper = state.db.get_paper_by_id(id).await;
-        if let Ok(paper) = paper {
-            let file_path = state.env_vars.paths.get_path_from_slug(&paper.qp.filelink);
-            let _ = fs::remove_file(&file_path).await;
-            if let Ok(true) = state.db.hard_delete(id).await {
-                deleted_count += 1;
+        if let Ok(paper) = state.db.get_paper_by_id(id).await {
+            let tx = state.db.hard_delete(id).await?;
+            let filepath = state.env_vars.paths.get_path_from_slug(&paper.qp.filelink);
+            if fs::remove_file(&filepath).await.is_ok() {
+                if tx.commit().await.is_ok() {
+                    delete_statuses.push(DeleteStatus {
+                        id,
+                        status: Status::Success,
+                        message: "Successfully hard deleted the paper.".into(),
+                    });
+                    deleted_count += 1;
+                } else {
+                    delete_statuses.push(DeleteStatus {
+                        id,
+                        status: Status::Error,
+                        message: "Error committing the transaction.".into(),
+                    });
+                }
+            } else {
+                tx.rollback().await?;
+                delete_statuses.push(DeleteStatus {
+                    id,
+                    status: Status::Error,
+                    message: "Failed to delete file.".into(),
+                });
             }
         }
     }
 
-    if deleted_count > 0 {
-        Ok(BackendResponse::ok(
-            format!("Successfully hard deleted {} papers.", deleted_count),
-            (),
-        ))
+    let message = if deleted_count > 0 {
+        format!("Successfully hard deleted {} papers.", deleted_count)
     } else {
-        Ok(BackendResponse::error(
-            "No papers were deleted. Either the papers do not exist, are library papers, or are already deleted.".into(),
-            StatusCode::BAD_REQUEST,
-        ))
-    }
+        "No papers were deleted.".into()
+    };
+
+    Ok(BackendResponse::ok(message, delete_statuses))
 }
 
 /// Fetches all question papers that match one or more properties specified. `course_name` is compulsory.

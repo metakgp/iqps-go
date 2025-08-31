@@ -255,7 +255,7 @@ impl Database {
     }
 
     /// Permanently deletes a paper from the database
-    pub async fn hard_delete(&self, id: i32) -> Result<bool, color_eyre::eyre::Error> {
+    pub async fn hard_delete(&self, id: i32) -> Result<Transaction<'_, Postgres>, color_eyre::eyre::Error> {
         let mut tx = self.connection.begin().await?;
         let rows_affected = sqlx::query(queries::HARD_DELETE_BY_ID)
             .bind(id)
@@ -264,14 +264,15 @@ impl Database {
             .rows_affected();
         if rows_affected > 1 {
             tx.rollback().await?;
-            Err(eyre!(
+            return Err(eyre!(
                 "Error: {} (> 1) papers were deleted. Rolling back.",
                 rows_affected
             ))
-        } else { 
-            tx.commit().await?;
-            Ok(rows_affected == 1)
+        } else if rows_affected < 1 {
+            tx.rollback().await?;
+            return Err(eyre!("Error: No papers were deleted."))
         }
+        Ok(tx)
     }
 
     /// Returns all papers that match one or more of the specified properties exactly. `course_name` is required, other properties are optional.
