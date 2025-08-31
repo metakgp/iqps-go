@@ -3,6 +3,7 @@
 //! The backend is divided into multiple modules. The [`routing`] module contains all the route handlers and the [`db`] module contains all database queries and models. Other modules are utilities used throughout the backend.
 
 use clap::Parser;
+use tracing_appender::rolling::{RollingFileAppender, Rotation};
 use tracing_subscriber::prelude::*;
 
 mod auth;
@@ -24,16 +25,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let env_vars = env::EnvVars::parse().process()?;
 
     // Initialize logger
-    let (append_writer, _guard) = tracing_appender::non_blocking(tracing_appender::rolling::never(
-        env_vars
-            .log_location
-            .parent()
-            .expect("Where do you want to store that log??"),
-        env_vars
-            .log_location
-            .file_name()
-            .expect("Do you want to store the logs in a directory?"),
-    ));
+    let (append_writer, _guard) = tracing_appender::non_blocking(
+        RollingFileAppender::builder()
+            .rotation(Rotation::DAILY)
+            .max_log_files(2) // Keep the last 2 days of logs
+            .filename_prefix(
+                env_vars
+                    .log_location
+                    .file_name()
+                    .expect("Do you want to store the logs in a directory?")
+                    .to_str()
+                    .expect("Error converting log filename to string"),
+            )
+            .build(
+                env_vars
+                    .log_location
+                    .parent()
+                    .expect("Where do you want to store that log??"),
+            )?,
+    );
 
     let subscriber = tracing_subscriber::registry()
         .with(
