@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import SearchPage from "./pages/SearchPage";
 import UploadPage from "./pages/UploadPage";
 import OAuthPage from "./pages/OAuthPage";
+import AdminLayout from "./pages/AdminLayout";
 import AdminDashboard from "./pages/AdminDashboard";
 import TrashPage from "./pages/TrashPage";
 import { AuthProvider } from "./utils/auth";
@@ -26,14 +27,16 @@ function App() {
               path="/oauth"
               element={<OAuthPage />}
             />
-            <Route
-              path="/admin"
-              element={<AdminDashboard />}
-            />
-            <Route
-              path="/admin/trash"
-              element={<TrashPage />}
-            />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route
+                index
+                element={<AdminDashboard />}
+              />
+              <Route
+                path="trash"
+                element={<TrashPage />}
+              />
+            </Route>
           </Routes>
         </AuthProvider>
         <Footer />

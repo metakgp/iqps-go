@@ -95,29 +95,11 @@ function TrashPage() {
 	
 
 	useEffect(() => {
-		if (!auth.isAuthenticated) {
-			window.location.assign(OAUTH_LOGIN_URL);
-		} else {
-			fetchTrashedPapers();
-		}
+		fetchTrashedPapers();
 	}, []);
 
-	return auth.isAuthenticated ? (
-		<div id="admin-dashboard">
-			<Header
-				title="Admin Dashboard"
-				subtitle="Top secret documents - to be approved inside n-sided polygon shaped buildings only."
-				link={{
-					onClick: (e) => {
-						e.preventDefault();
-						auth.logout();
-					},
-					text: "Want to destroy the paper trail?",
-					button_text: "Logout",
-					icon: MdLogout,
-				}}
-			/>
-
+	return (
+		<div id="trash-page">
 			<div className="dashboard-container">
 				{awaitingResponse ? (
 					<Spinner />
@@ -194,8 +176,6 @@ function TrashPage() {
 				)}
 			</div>
 		</div>
-	) : (
-		<p>You are unauthenticated. This incident will be reported.</p>
 	);
 }
 

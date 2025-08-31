@@ -29,7 +29,7 @@
 	}
 }
 
-#admin-dashboard {
+#trash-page {
 	display: flex;
 	flex-direction: column;
 	justify-items: center;
@@ -109,6 +109,7 @@
 		color: inherit;
 		font-family: inherit;
 		font-size: inherit;
+		cursor: pointer;
 
 		&.icon-btn {
 			display: flex;
@@ -120,6 +121,10 @@
 			background-color: $accent-color-darker;
 			padding: 0.5rem;
 			border-radius: 10px;
+	
+			&:hover {
+				background-color: $accent-color;
+			}
 		}
 	}
 }
