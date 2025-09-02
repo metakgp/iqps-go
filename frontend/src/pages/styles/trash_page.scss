@@ -1,0 +1,130 @@
+@import "../../styles/variables";
+
+.delete-toast {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+
+	p {
+		margin: 0;
+	}
+
+	button {
+		padding: 5px;
+		border-radius: 5px;
+		border: none;
+		display: flex;
+		gap: 5px;
+		align-items: center;
+		font-size: 1rem;
+
+		height: fit-content;
+
+		color: $fg-color;
+		background-color: $approved-color-darker;
+
+		&:hover {
+			background-color: $approved-color-darkerer;
+		}
+	}
+}
+
+#trash-page {
+	display: flex;
+	flex-direction: column;
+	justify-items: center;
+
+	padding: 0 1rem;
+
+	.side-panel {
+		width: 20%;
+	}
+
+	.dashboard-container {
+		display: flex;
+		gap: 2rem;
+		justify-content: space-around;
+
+		.papers-panel {
+			width: 80%;
+			display: flex;
+			flex-direction: column;
+			gap: 0.2rem;
+
+			.qp-card:nth-child(odd) {
+				background-color: $surface-1;
+			}
+
+			.qp-card.approved {
+				background-color: rgba($approved-color-darker, 0.16);
+			}
+		}
+	}
+
+  
+	.pills {
+		display: flex;
+		gap: 0.5rem;
+
+		.pill {
+			padding: 0.25rem 0.5rem;
+			border-radius: 0.5rem;
+			font-size: 0.8rem;
+			font-weight: bold;
+			color: white;
+			background-color: $accent-color-darker;
+		}
+	}
+
+  .papers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+
+    .trash-paper {
+      display: flex;
+      align-items: center;
+      gap: 0.3em;
+    }
+  }
+
+	.actions {
+		display: flex;
+		align-items: center;
+		gap: 1em;
+		margin-bottom: 1em;
+
+		.select-all {
+			display: flex;
+			align-items: center;
+			gap: 0.3em;
+		}
+	}	
+	
+	.btn {
+		border: none;
+		background: none;
+		box-shadow: none;
+		height: fit-content;
+		color: inherit;
+		font-family: inherit;
+		font-size: inherit;
+		cursor: pointer;
+
+		&.icon-btn {
+			display: flex;
+			gap: 0.3em;
+			align-items: center;
+		}
+
+		&.filled {
+			background-color: $accent-color-darker;
+			padding: 0.5rem;
+			border-radius: 10px;
+	
+			&:hover {
+				background-color: $accent-color;
+			}
+		}
+	}
+}

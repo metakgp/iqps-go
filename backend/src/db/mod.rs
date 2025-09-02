@@ -64,9 +64,7 @@ impl Database {
     }
 
     /// Returns the number of unapproved papers
-    pub async fn get_unapproved_papers_count(
-        &self,
-    ) -> Result<i64, sqlx::Error> {
+    pub async fn get_unapproved_papers_count(&self) -> Result<i64, sqlx::Error> {
         let count: (i64,) = sqlx::query_as(queries::GET_UNAPPROVED_COUNT)
             .fetch_one(&self.connection)
             .await?;
@@ -241,6 +239,40 @@ impl Database {
             tx.commit().await?;
             Ok(rows_affected == 1)
         }
+    }
+
+    /// Gets all soft-deleted papers from the database
+    pub async fn get_soft_deleted_papers(&self) -> Result<Vec<AdminDashboardQP>, sqlx::Error> {
+        let query_sql = queries::get_get_soft_deleted_papers_query();
+        let papers: Vec<models::DBAdminDashboardQP> = sqlx::query_as(&query_sql)
+            .fetch_all(&self.connection)
+            .await?;
+
+        Ok(papers
+            .iter()
+            .map(|qp| qp::AdminDashboardQP::from(qp.clone()))
+            .collect())
+    }
+
+    /// Permanently deletes a paper from the database
+    pub async fn hard_delete(&self, id: i32) -> Result<Transaction<'_, Postgres>, color_eyre::eyre::Error> {
+        let mut tx = self.connection.begin().await?;
+        let rows_affected = sqlx::query(queries::HARD_DELETE_BY_ID)
+            .bind(id)
+            .execute(&mut *tx)
+            .await?
+            .rows_affected();
+        if rows_affected > 1 {
+            tx.rollback().await?;
+            return Err(eyre!(
+                "Error: {} (> 1) papers were deleted. Rolling back.",
+                rows_affected
+            ))
+        } else if rows_affected < 1 {
+            tx.rollback().await?;
+            return Err(eyre!("Error: No papers were deleted."))
+        }
+        Ok(tx)
     }
 
     /// Returns all papers that match one or more of the specified properties exactly. `course_name` is required, other properties are optional.

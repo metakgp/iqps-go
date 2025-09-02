@@ -214,11 +214,7 @@ function AdminDashboard() {
 	
 
 	useEffect(() => {
-		if (!auth.isAuthenticated) {
-			window.location.assign(OAUTH_LOGIN_URL);
-		} else {
 			fetchUnapprovedPapers();
-		}
 	}, []);
 
 	const storeOcrDetails = async (paper: IAdminDashboardQP) => {
@@ -263,22 +259,8 @@ function AdminDashboard() {
 	// 	ocrDetailsLoop();
 	// }, [ocrRequests])
 
-	return auth.isAuthenticated ? (
-		<div id="admin-dashboard">
-			<Header
-				title="Admin Dashboard"
-				subtitle="Top secret documents - to be approved inside n-sided polygon shaped buildings only."
-				link={{
-					onClick: (e) => {
-						e.preventDefault();
-						auth.logout();
-					},
-					text: "Want to destroy the paper trail?",
-					button_text: "Logout",
-					icon: MdLogout,
-				}}
-			/>
-
+	return (
+		<>
 			<div className="dashboard-container">
 				{awaitingResponse ? (
 					<Spinner />
@@ -356,9 +338,7 @@ function AdminDashboard() {
           editPaper={(id) => setSearchParams({ edit: id.toString() })}
         />
       )}
-		</div>
-	) : (
-		<p>You are unauthenticated. This incident will be reported.</p>
+		</>
 	);
 }
 

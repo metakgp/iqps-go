@@ -69,6 +69,15 @@ pub const SOFT_DELETE_BY_ID: &str =
 pub const SOFT_DELETE_ANY_BY_ID: &str =
     "UPDATE iqps SET approve_status=false, is_deleted = true WHERE id=$1";
 
+/// Hard deletes a paper (removes it from the database)
+pub const HARD_DELETE_BY_ID: &str =
+    "DELETE FROM iqps WHERE id=$1";
+
+/// Gets all soft-deleted papers ([`crate::db::models::DBAdminDashboardQP`]) from the database
+pub fn get_get_soft_deleted_papers_query() -> String {
+    format!("SELECT {} FROM iqps WHERE is_deleted=true", ADMIN_DASHBOARD_QP_FIELDS)
+}
+
 /// Get a paper ([`crate::db::models::DBAdminDashboardQP`]) with the given id (first parameter `$1`)
 pub fn get_get_paper_by_id_query() -> String {
     format!(
