@@ -223,7 +223,7 @@ impl Database {
     pub async fn soft_delete(&self, id: i32) -> Result<bool, color_eyre::eyre::Error> {
         let mut tx = self.connection.begin().await?;
 
-        let rows_affected = sqlx::query(queries::SOFT_DELETE_BY_ID)
+        let rows_affected = sqlx::query(queries::SOFT_DELETE_ANY_BY_ID)
             .bind(id)
             .execute(&mut *tx)
             .await?
@@ -255,7 +255,10 @@ impl Database {
     }
 
     /// Permanently deletes a paper from the database
-    pub async fn hard_delete(&self, id: i32) -> Result<Transaction<'_, Postgres>, color_eyre::eyre::Error> {
+    pub async fn hard_delete(
+        &self,
+        id: i32,
+    ) -> Result<Transaction<'_, Postgres>, color_eyre::eyre::Error> {
         let mut tx = self.connection.begin().await?;
         let rows_affected = sqlx::query(queries::HARD_DELETE_BY_ID)
             .bind(id)
@@ -267,10 +270,10 @@ impl Database {
             return Err(eyre!(
                 "Error: {} (> 1) papers were deleted. Rolling back.",
                 rows_affected
-            ))
+            ));
         } else if rows_affected < 1 {
             tx.rollback().await?;
-            return Err(eyre!("Error: No papers were deleted."))
+            return Err(eyre!("Error: No papers were deleted."));
         }
         Ok(tx)
     }
