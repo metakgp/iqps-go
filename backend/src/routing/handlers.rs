@@ -452,7 +452,7 @@ pub struct DeleteReq {
     id: i32,
 }
 
-/// Deletes a given paper. Library papers cannot be deleted.
+/// (Soft) Deletes a given paper.
 ///
 /// Request format - [`DeleteReq`]
 pub async fn delete(
@@ -468,7 +468,7 @@ pub async fn delete(
         ))
     } else {
         Ok(BackendResponse::error(
-            "No paper was changed. Either the paper does not exist, is a library paper (cannot be deleted), or is already deleted.".into(),
+            "No paper was changed. Either the paper does not exist, or is already deleted.".into(),
             StatusCode::BAD_REQUEST,
         ))
     }
@@ -485,7 +485,7 @@ pub struct HardDeleteReq {
 pub struct DeleteStatus {
     id: i32,
     status: Status,
-    message: String
+    message: String,
 }
 
 /// Hard deletes papers from a list of ids.
