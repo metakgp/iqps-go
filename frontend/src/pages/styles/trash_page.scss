@@ -44,6 +44,7 @@
 		display: flex;
 		gap: 2rem;
 		justify-content: space-around;
+		margin-bottom: 20px;
 
 		.papers-panel {
 			width: 80%;
@@ -84,7 +85,7 @@
     .trash-paper {
       display: flex;
       align-items: center;
-      gap: 0.3em;
+      gap: 0.5em;
     }
   }
 
@@ -113,7 +114,7 @@
 
 		&.icon-btn {
 			display: flex;
-			gap: 0.3em;
+			gap: 0.5em;
 			align-items: center;
 		}
 
