@@ -157,14 +157,14 @@ function TrashPage() {
 														{paper.course_code ? `(${paper.course_code})` : ""}
 													</div>
 													<div className="pills">
-														<div className="pill">{paper.year}</div>
-														<div className="pill">{paper.exam}</div>
-														<div className="pill">{paper.semester}</div>
+														{paper.year && <div className="pill">{paper.year}</div>}
+														{paper.exam && <div className="pill">{paper.exam}</div>}
+														{paper.semester && <div className="pill">{paper.semester}</div>}
 														{paper.note !== "" && <div className="pill">{paper.note}</div>}
 													</div>
-													<button className="btn">
+													<a className="btn" href={paper.filelink} target="_blank">
 														<FaFilePdf size="1.2em" />
-													</button>
+													</a>
 												</div>
 											</div>
 										))}
