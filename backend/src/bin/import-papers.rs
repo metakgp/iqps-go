@@ -161,9 +161,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Finished uploading papers to database.");
     dir.close()?;
 
+    let total_count = database.get_unapproved_papers_count().await?;
+
     let message = format!(
-      "{} papers have been imported into IQPS!",
+      "💥 {} papers have been imported into IQPS!\n\n<https://qp.metakgp.org/admin|Review> | Total Unapproved papers: *{}*",
       count,
+      total_count
     );
 
     let _ = slack::send_slack_message(
