@@ -13,22 +13,41 @@ use tempfile::tempdir;
 use tracing::{info, warn};
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
+#[derive(Parser, Debug)]
+#[command(
+    name = "import-papers",
+    about = "Imports papers into the database from an archive.",
+    version,
+    author
+)]
+struct Args {
+    /// Path to the .tar.gz file containing papers (e.g., qp.tar.gz)
+    file: String,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if dotenvy::dotenv().is_ok() {
         println!("Loaded an existing .env file.");
     }
-    let env_vars = env::EnvVars::parse()
+
+    let env_vars = env::EnvVars::parse()?
         .process()
         .expect("Failed to parse environment variables");
 
+	let args = Args::parse();
+	if !Path::new(&args.file).exists() {
+		eprintln!("Error: file '{}' not found.", args.file);
+		std::process::exit(1);
+	}
+	
     let database = db::Database::new(&env_vars)
         .await
         .expect("Failed to connect to database");
 
     let dir = tempdir()?;
     let dir_path = dir.path();
-    extract_tar_gz("qp.tar.gz", dir_path)?;
+    extract_tar_gz(&args.file, dir_path)?;
 
     let file = fs::File::open(dir_path.join("qp.json")).expect("Failed to open JSON file");
     let reader = BufReader::new(file);
