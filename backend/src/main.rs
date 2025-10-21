@@ -2,7 +2,6 @@
 //!
 //! The backend is divided into multiple modules. The [`routing`] module contains all the route handlers and the [`db`] module contains all database queries and models. Other modules are utilities used throughout the backend.
 
-use clap::Parser;
 use tracing_appender::rolling::{RollingFileAppender, Rotation};
 use tracing_subscriber::prelude::*;
 
@@ -22,7 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // Read environment variables
-    let env_vars = env::EnvVars::parse().process()?;
+    let env_vars = env::EnvVars::parse()?.process()?;
 
     // Initialize logger
     let (append_writer, _guard) = tracing_appender::non_blocking(

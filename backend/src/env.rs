@@ -4,95 +4,135 @@
 
 use std::path::PathBuf;
 
-use clap::Parser;
 use hmac::{digest::InvalidLength, Hmac, Mac};
 use sha2::Sha256;
 
 use crate::pathutils::Paths;
 
-#[derive(Parser, Clone)]
+#[derive(Clone)]
 pub struct EnvVars {
     // Database
-    #[arg(env)]
     /// Database name
     pub db_name: String,
-    #[arg(env)]
     /// Database hostname
     pub db_host: String,
-    #[arg(env)]
     /// Database port
     pub db_port: String,
-    #[arg(env)]
     /// Database username
     pub db_user: String,
-    #[arg(env)]
     /// Database password
     pub db_password: String,
 
     // Auth
-    #[arg(env)]
     /// OAuth app client id (public token)
     pub gh_client_id: String,
-    #[arg(env)]
     /// An org admin's Github token (with the `read:org` permission)
     pub gh_org_admin_token: String,
-    #[arg(env)]
     /// JWT encryption secret (make it a long, randomized string)
     jwt_secret: String,
-    #[arg(env)]
     /// OAuth app client secret
     pub gh_client_secret: String,
-    #[arg(env, default_value = "")]
     /// Github organization name
     pub gh_org_name: String,
-    #[arg(env, default_value = "")]
     /// Github organization team slug (this team has access to admin dashboard)
     pub gh_org_team_slug: String,
-    #[arg(env, default_value = "")]
     /// The usernames of the admins (additional to org team members, comma separated)
     pub gh_admin_usernames: String,
-    #[arg(env, default_value = "")]
     /// URL of Slack webhook for sending notifications
     pub slack_webhook_url: String, 
 
     // Other configs
-    #[arg(env, default_value = "10")]
     /// Maximum number of papers that can be uploaded at a time
     pub max_upload_limit: usize,
-    #[arg(env, default_value = "./log/application.log")]
     /// Location where logs are stored
     pub log_location: PathBuf,
 
     // Paths
-    #[arg(env, default_value = "https://static.metakgp.org")]
     /// The URL of the static files server (odin's vault)
     static_files_url: String,
-    #[arg(env, default_value = "/srv/static")]
     /// The path where static files are served from
     static_file_storage_location: PathBuf,
-    #[arg(env, default_value = "/iqps/uploaded")]
     /// The path where uploaded papers are stored temporarily, relative to the `static_file_storage_location`
     uploaded_qps_path: PathBuf,
-    #[arg(env, default_value = "/peqp/qp")]
     /// The path where library papers (scrapped) are stored, relative to the `static_file_storage_location`
     library_qps_path: PathBuf,
 
     // Server
-    #[arg(env, default_value = "8080")]
     /// The port the server listens on
     pub server_port: i32,
 
     // CORS
-    #[arg(env, default_value = "https://qp.metakgp.org,http://localhost:5173")]
     /// List of origins allowed (as a list of values separated by commas `origin1, origin2`)
     pub cors_allowed_origins: String,
 
-    #[arg(skip)]
     /// All paths must be handled using this
     pub paths: Paths,
 }
 
-impl EnvVars {
+impl EnvVars {    
+    /// Parses the environment variables into the struct
+    pub fn parse() -> Result<Self, Box<dyn std::error::Error>> {
+        let db_name = std::env::var("DB_NAME")?;
+        let db_host = std::env::var("DB_HOST")?;
+        let db_port = std::env::var("DB_PORT")?;
+        let db_user = std::env::var("DB_USER")?;
+        let db_password = std::env::var("DB_PASSWORD")?;
+        let gh_client_id = std::env::var("GH_CLIENT_ID")?;
+        let gh_org_admin_token = std::env::var("GH_ORG_ADMIN_TOKEN")?;
+        let jwt_secret = std::env::var("JWT_SECRET")?;
+        let gh_client_secret = std::env::var("GH_CLIENT_SECRET")?;
+        let gh_org_name = std::env::var("GH_ORG_NAME").unwrap_or_default();
+        let gh_org_team_slug = std::env::var("GH_ORG_TEAM_SLUG").unwrap_or_default();
+        let gh_admin_usernames = std::env::var("GH_ADMIN_USERNAMES").unwrap_or_default();
+        let slack_webhook_url = std::env::var("SLACK_WEBHOOK_URL").unwrap_or_default();
+        let max_upload_limit = std::env::var("MAX_UPLOAD_LIMIT")
+            .unwrap_or_else(|_| "10".to_string())
+            .parse::<usize>()?;
+        let log_location = std::env::var("LOG_LOCATION")
+            .unwrap_or_else(|_| "./log/application.log".to_string())
+            .into();
+        let static_files_url = std::env::var("STATIC_FILES_URL")
+            .unwrap_or_else(|_| "https://static.metakgp.org".to_string());
+        let static_file_storage_location = std::env::var("STATIC_FILE_STORAGE_LOCATION")
+            .unwrap_or_else(|_| "/srv/static".to_string())
+            .into();
+        let uploaded_qps_path = std::env::var("UPLOADED_QPS_PATH")
+            .unwrap_or_else(|_| "/iqps/uploaded".to_string())
+            .into();
+        let library_qps_path = std::env::var("LIBRARY_QPS_PATH")
+            .unwrap_or_else(|_| "/peqp/qp".to_string())
+            .into();
+        let server_port = std::env::var("SERVER_PORT")
+            .unwrap_or_else(|_| "8080".to_string())
+            .parse::<i32>()?;
+        let cors_allowed_origins = std::env::var("CORS_ALLOWED_ORIGINS")
+            .unwrap_or_else(|_| "https://qp.metakgp.org,http://localhost:5173".to_string());
+        Ok(Self {
+            db_name,
+            db_host,
+            db_port,
+            db_user,
+            db_password,
+            gh_client_id,
+            gh_org_admin_token,
+            jwt_secret,
+            gh_client_secret,
+            gh_org_name,
+            gh_org_team_slug,
+            gh_admin_usernames,
+            slack_webhook_url,
+            max_upload_limit,
+            log_location,
+            static_files_url,
+            static_file_storage_location,
+            uploaded_qps_path,
+            library_qps_path,
+            server_port,
+            cors_allowed_origins,
+            paths: Paths::default(),
+        })
+    }
+    
     /// Processes the environment variables after reading.
     pub fn process(mut self) -> Result<Self, Box<dyn std::error::Error>> {
         self.paths = Paths::new(
