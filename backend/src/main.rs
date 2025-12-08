@@ -8,6 +8,7 @@ use tracing_subscriber::prelude::*;
 mod auth;
 mod db;
 mod env;
+mod log_cleanup;
 mod pathutils;
 mod qp;
 mod routing;
@@ -28,7 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         RollingFileAppender::builder()
             .rotation(Rotation::DAILY)
             .max_log_files(2) // Keep the last 2 days of logs
-            .filename_prefix(
+            .filename_suffix(
                 env_vars
                     .log_location
                     .file_name()
@@ -53,6 +54,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with(tracing_subscriber::fmt::layer().with_writer(std::io::stdout));
 
     tracing::subscriber::set_global_default(subscriber)?;
+
+    // Clean up old log files (keep last 2 days)
+    if let Some(log_dir) = env_vars.log_location.parent() {
+        if let Some(log_prefix) = env_vars.log_location.file_name().and_then(|n| n.to_str()) {
+            if let Err(e) = log_cleanup::cleanup_old_logs(log_dir, log_prefix, 2) {
+                tracing::warn!("Failed to clean up old logs: {}", e);
+            }
+        }
+    }
 
     // Database connection
     let database = db::Database::new(&env_vars).await?;
