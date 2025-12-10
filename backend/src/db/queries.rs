@@ -211,3 +211,79 @@ pub const UPDATE_FILELINK: &str = "UPDATE iqps SET filelink=$2 WHERE id=$1";
 /// Insert a library pqper in the db
 /// Parameters in the following order: `course_code`, `course_name`, `year`, `exam`, `semester`, `note`, `filelink`, `approve_status`
 pub const INSERT_NEW_LIBRARY_QP: &str = "INSERT INTO iqps (course_code, course_name, year, exam, semester, note, filelink, from_library, approve_status) VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8) RETURNING id";
+
+
+pub fn get_qp_search_query_scores(exam_filter: Vec<Exam>) -> String {
+    let exam_filter_clause = exam_filter
+        .iter()
+        .map(|&exam| {
+            if let Exam::CT(_) = exam {
+                "exam LIKE 'ct%'".into()
+            } else {
+                format!("exam = '{}'", String::from(exam))
+            }
+        })
+        .collect::<Vec<String>>()
+        .join(" OR ");
+
+    let exam_clause_str = if exam_filter_clause.is_empty() {
+        "".into()
+    } else {
+        format!("WHERE ({} OR exam = '')", exam_filter_clause)
+    };
+
+    format!("
+            WITH filtered AS (
+                SELECT * from iqps {exam_filter} ORDER BY year DESC
+            ),
+            fuzzy AS (
+                SELECT id,
+                similarity(course_code || ' ' || course_name, $1) AS sim_score,
+                row_number() OVER (ORDER BY similarity(course_code || ' ' || course_name, $1) DESC) AS rank_ix
+                FROM filtered
+                WHERE (course_code || ' ' || course_name) %>> $1 AND approve_status = true
+                ORDER BY rank_ix
+                LIMIT 30
+            ),
+            full_text AS (
+                SELECT id,
+                    ts_rank_cd(fts_course_details, websearch_to_tsquery($1)) AS rank_score,
+                    row_number() OVER (ORDER BY ts_rank_cd(fts_course_details, websearch_to_tsquery($1)) DESC) AS rank_ix
+                FROM filtered
+                WHERE fts_course_details @@ websearch_to_tsquery($1) AND approve_status = true
+                ORDER BY rank_ix
+                LIMIT 30
+            ),
+            partial_search AS (
+                SELECT id,
+                    ts_rank_cd(fts_course_details, {to_tsquery}) AS rank_score,
+                    row_number() OVER (ORDER BY ts_rank_cd(fts_course_details, {to_tsquery}) DESC) as rank_ix
+                FROM filtered
+                WHERE fts_course_details @@ {to_tsquery} AND approve_status = true
+                LIMIT 30
+            ),
+            result AS (
+                SELECT {intermediate_fields},
+                    fuzzy.sim_score AS fuzzy_score,
+                    full_text.rank_score AS fulltext_score,
+                    partial_search.rank_score AS partial_score
+                FROM fuzzy
+                    FULL OUTER JOIN full_text ON fuzzy.id = full_text.id
+                    FULL OUTER JOIN partial_search ON coalesce(fuzzy.id, full_text.id) = partial_search.id
+                    JOIN filtered ON coalesce(fuzzy.id, full_text.id, partial_search.id) = filtered.id
+                ORDER BY
+                    coalesce(1.0 / (50 + fuzzy.rank_ix), 0.0) * 1 +
+                    coalesce(1.0 / (50 + full_text.rank_ix), 0.0) * 1 +
+                    coalesce(1.0 / (50 + partial_search.rank_ix), 0.0) * 1
+                DESC
+            ) SELECT {search_qp_fields},
+                fuzzy_score,
+                fulltext_score,
+                partial_score
+            FROM result",
+            search_qp_fields = SEARCH_QP_FIELDS,
+            to_tsquery = "to_tsquery('simple', websearch_to_tsquery('simple', $1)::text || ':*')",
+            exam_filter = exam_clause_str,
+            intermediate_fields = ADMIN_DASHBOARD_QP_FIELDS.split(", ").map(|field| format!("filtered.{}", field)).collect::<Vec<String>>().join(", ")
+        )
+}

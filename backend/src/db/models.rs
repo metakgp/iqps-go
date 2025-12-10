@@ -24,6 +24,22 @@ pub struct DBBaseQP {
 }
 
 #[derive(FromRow, Clone)]
+pub struct DBBaseQPScore {
+    id: i32,
+    filelink: String,
+    from_library: bool,
+    course_code: String,
+    course_name: String,
+    year: i32,
+    semester: String,
+    exam: String,
+    note: String,
+    fuzzy_score: Option<f32>,
+    fulltext_score: Option<f32>,
+    partial_score: Option<f32>,
+}
+
+#[derive(FromRow, Clone)]
 /// The fields of a question paper sent to the admin dashboard endpoint
 pub struct DBAdminDashboardQP {
     #[sqlx(flatten)]
@@ -54,6 +70,25 @@ impl From<DBBaseQP> for qp::BaseQP {
             semester: (&value.semester).try_into().unwrap_or(Semester::Unknown),
             exam: (&value.exam).try_into().unwrap_or(qp::Exam::Unknown),
             note: value.note,
+        }
+    }
+}
+
+impl From<DBBaseQPScore> for qp::BaseQPScore {
+    fn from(value: DBBaseQPScore) -> Self {
+        Self {
+            id: value.id,
+            filelink: value.filelink,
+            from_library: value.from_library,
+            course_code: value.course_code,
+            course_name: value.course_name,
+            year: value.year,
+            semester: (&value.semester).try_into().unwrap_or(Semester::Unknown),
+            exam: (&value.exam).try_into().unwrap_or(qp::Exam::Unknown),
+            note: value.note,
+            fuzzy_score: value.fuzzy_score,
+            fulltext_score: value.fulltext_score,
+            partial_score: value.partial_score,
         }
     }
 }

@@ -152,6 +152,23 @@ pub struct BaseQP {
 }
 
 #[derive(Serialize, Clone)]
+/// The fields of a question paper sent from the search endpoint
+pub struct BaseQPScore {
+    pub id: i32,
+    pub filelink: String,
+    pub from_library: bool,
+    pub course_code: String,
+    pub course_name: String,
+    pub year: i32,
+    pub semester: Semester,
+    pub exam: Exam,
+    pub note: String,
+    pub fuzzy_score: Option<f32>,
+    pub fulltext_score: Option<f32>,
+    pub partial_score: Option<f32>,
+}
+
+#[derive(Serialize, Clone)]
 /// The fields of a question paper sent from the admin dashboard endpoints.
 ///
 /// This includes fields such as `approve_status` and `upload_timestamp` that would only be relevant to the dashboard.

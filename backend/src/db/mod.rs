@@ -89,6 +89,22 @@ impl Database {
             .collect())
     }
 
+    pub async fn search_papers_scores(
+        &self,
+        query: &str,
+        exam_filter: Vec<Exam>,
+    ) -> Result<Vec<qp::BaseQPScore>, sqlx::Error> {
+        let query_sql = queries::get_qp_search_query_scores(exam_filter);
+        let query = sqlx::query_as(&query_sql).bind(query);
+
+        let papers: Vec<models::DBBaseQPScore> = query.fetch_all(&self.connection).await?;
+
+        Ok(papers
+            .iter()
+            .map(|qp| qp::BaseQPScore::from(qp.clone()))
+            .collect())
+    }
+
     pub async fn get_paper_by_id(&self, id: i32) -> Result<qp::AdminDashboardQP, sqlx::Error> {
         let query_sql = queries::get_get_paper_by_id_query();
         let query = sqlx::query_as(&query_sql).bind(id);
