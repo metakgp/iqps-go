@@ -7,24 +7,42 @@ use tracing_subscriber::prelude::*;
 
 // Manual log cleanup function to ensure old logs are deleted
 fn prune_old_logs(dir: &std::path::Path, prefix: &str, keep: usize) {
-    let mut files: Vec<_> = std::fs::read_dir(dir)
-        .unwrap()
+    // Read directory
+    let read_dir = match std::fs::read_dir(dir) {
+        Ok(d) => d,
+        Err(e) => {
+            tracing::warn!("Failed to read log directory for pruning: {}", e);
+            return;
+        }
+    };
+
+    let mut files: Vec<_> = read_dir
         .filter_map(|e| e.ok())
         .map(|e| e.path())
         .filter(|p| {
             p.file_name()
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .starts_with(prefix)
+                .and_then(|name| name.to_str())
+                .map(|name| name.starts_with(prefix))
+                .unwrap_or(false)
         })
         .collect();
 
-    files.sort(); // oldest first
+    // Sort: Default path sorting usually works for ISO timestamps (YYYY-MM-DD)
+    files.sort();
 
-    while files.len() > keep {
-        let old = files.remove(0);
-        let _ = std::fs::remove_file(&old);
+    // Prune
+    if files.len() > keep {
+        let to_remove = files.len() - keep;
+        tracing::info!("Pruning {} old log files...", to_remove);
+        
+        for i in 0..to_remove {
+            let file_path = &files[i];
+            if let Err(e) = std::fs::remove_file(file_path) {
+                tracing::warn!("Failed to delete old log file {:?}: {}", file_path, e);
+            } else {
+                tracing::info!("Deleted old log: {:?}", file_path);
+            }
+        }
     }
 }
 
