@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("Where do you want to store that log??");
     let log_filename = env_vars
         .log_location
-        .file_name()
+        .file_stem()
         .expect("Do you want to store the logs in a directory?")
         .to_str()
         .expect("Error converting log filename to string");
