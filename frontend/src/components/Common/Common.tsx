@@ -6,7 +6,7 @@ import { IconType } from 'react-icons';
 export function Footer() {
 	return <h3 className="meta-footer">
         Contribute on <a href="https://github.com/metakgp/iqps-go" target="_blank">GitHub</a> | 
-        Made with ❤️ and {"</>"} by <a href="https://github.com/metakgp" target="_blank">MetaKGP</a>
+        Made with ❤️ and {"</>"} by <a href="https://metakgp.org" target="_blank">metaKGP</a>
     </h3>;
 }
 
