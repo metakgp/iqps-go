@@ -24,14 +24,12 @@ pub struct EnvVars {
     pub db_password: String,
 
     // Auth
-    /// OAuth app client id (public token)
+    /// GitHub app client id (public token)
     pub gh_client_id: String,
-    /// An org admin's Github token (with the `read:org` permission)
-    pub gh_org_admin_token: String,
+    /// GitHub app client secret
+    pub gh_client_secret: String,
     /// JWT encryption secret (make it a long, randomized string)
     jwt_secret: String,
-    /// OAuth app client secret
-    pub gh_client_secret: String,
     /// Github organization name
     pub gh_org_name: String,
     /// Github organization team slug (this team has access to admin dashboard)
@@ -78,7 +76,6 @@ impl EnvVars {
         let db_user = std::env::var("DB_USER")?;
         let db_password = std::env::var("DB_PASSWORD")?;
         let gh_client_id = std::env::var("GH_CLIENT_ID")?;
-        let gh_org_admin_token = std::env::var("GH_ORG_ADMIN_TOKEN")?;
         let jwt_secret = std::env::var("JWT_SECRET")?;
         let gh_client_secret = std::env::var("GH_CLIENT_SECRET")?;
         let gh_org_name = std::env::var("GH_ORG_NAME").unwrap_or_default();
@@ -114,7 +111,6 @@ impl EnvVars {
             db_user,
             db_password,
             gh_client_id,
-            gh_org_admin_token,
             jwt_secret,
             gh_client_secret,
             gh_org_name,

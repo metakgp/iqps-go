@@ -174,7 +174,7 @@ pub async fn authenticate_user(
         ))
         .header(
             "Authorization",
-            format!("Bearer {}", env_vars.gh_org_admin_token),
+            format!("Bearer {}", access_token),
         )
         .header("User-Agent", "bruh why is this required")
         .send()

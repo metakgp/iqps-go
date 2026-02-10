@@ -110,9 +110,10 @@ IQPS uses GitHub OAuth for authentication to the `/admin` page. To set up authen
 
 For Production:
 
-1. Create a new OAuth app on GitHub. (Should be from the same GitHub account as the organization)
-   - Go to https://github.com/settings/developers and create a new OAuth app.
+1. Create a new GitHub app under the organization.
+   - Go to https://github.com/settings/apps and create a new GitHub app.
    - Set the Homepage URL to `<prod-url>` and Authorization callback URL to `<prod-url>/oauth`.
+   - Under Organisation permissions, enable Read-only access for "Members".
    - Once created, generate a client secret. Add the client ID and secret to environment variables.
 2. Set the Authentication environment variables.
 
@@ -161,11 +162,10 @@ Environment variables can be set using a `.env` file. Use the `.env.template` fi
 
 ##### Authentication
 
-- `GH_CLIENT_ID`: Client ID of the Github OAuth app.
-- `GH_CLIENT_SECRET`: Client secret of the Github OAuth app.
+- `GH_CLIENT_ID`: Client ID of the Github app.
+- `GH_CLIENT_SECRET`: Client secret of the Github app.
 - `GH_ORG_NAME`: The name of the Github organization of the admins.
 - `GH_ORG_TEAM_SLUG`: The URL slug of the Github org team of the admins.
-- `GH_ORG_ADMIN_TOKEN`: Github token of organization admin (with `read:org` scope).
 - `GH_ADMIN_USERNAMES`: Comma separated list of Github usernames of the admins. (other than the org team members)
 - `JWT_SECRET`: A secret key/password for JWT signing. It should be a long, random, unguessable string.
 
