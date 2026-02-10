@@ -111,8 +111,9 @@ IQPS uses GitHub OAuth for authentication to the `/admin` page. To set up authen
 For Production:
 
 1. Create a new GitHub app under the organization.
-   - Go to https://github.com/settings/developers and create a new GitHub app.
+   - Go to https://github.com/settings/apps and create a new GitHub app.
    - Set the Homepage URL to `<prod-url>` and Authorization callback URL to `<prod-url>/oauth`.
+   - Under Organisation permissions, enable Read-only access for "Members".
    - Once created, generate a client secret. Add the client ID and secret to environment variables.
 2. Set the Authentication environment variables.
 
