@@ -100,28 +100,21 @@ For Production:
 
 ### Authentication
 
-IQPS uses GitHub OAuth for authentication to the `/admin` page. To set up authentication:
+IQPS uses a "GitHub App" for authentication to the `/admin` page. To set up authentication:
 
-1. Create a new OAuth app on GitHub.
-   - Go to https://github.com/settings/developers and create a new OAuth app.
-   - Set the Homepage URL to `http://localhost:5173` and Authorization callback URL to `http://localhost:5173/oauth`.
-   - Once created, generate a client secret. Copy the client ID and secret into the `.env` file.
-2. Set the Authentication environment variables in the `.env` file.
+1. Go to https://github.com/settings/developers and create a new Github App.
+2. Under Organisation permissions, enable Read-only access for "Members".
+3. Set the Homepage URL to `http://localhost:5173` and Authorization callback URL to `http://localhost:5173/oauth`.
+4. Click on "Install App" and install the app on the organization to give it access to the teams and members.
+5. Once created, generate a client secret. Copy the client ID and secret into the `.env` file.
 
-For Production:
+> [!IMPORTANT]
+> For production, replace homepage and callback URLs to the production URL.
 
-1. Create a new GitHub app under the organization.
-   - Go to https://github.com/settings/apps and create a new GitHub app.
-   - Set the Homepage URL to `<prod-url>` and Authorization callback URL to `<prod-url>/oauth`.
-   - Under Organisation permissions, enable Read-only access for "Members".
-   - Once created, generate a client secret. Add the client ID and secret to environment variables.
-2. Set the Authentication environment variables.
+#### Authentication Flow
+Documentation: https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app
 
-#### OAuth Flow
-
-- Github OAuth documentation: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps
-
-On visiting `/admin`, if the user is not logged in, they get redirected to the GitHub OAuth page. After the user logs in, GitHub redirects them back to our `/oauth` endpoint with a code. The backend then uses this code to fetch an access token and username. The username is then checked against the allowed admins. If so, a JWT token is generated with the user's username and sent back to the frontend. The frontend then stores this token in local storage and sends it with every request to the backend. The backend verifies this token and allows access to admin functions.
+On visiting `/admin`, if the user is not logged in, they get redirected to the GitHub OAuth pager After the user logs in, GitHub redirects them back to our `/oauth` endpoint with a code. The backend then uses this code to fetch an access token and username. The username is then checked against the allowed admins. If so, a JWT token is generated with the user's username and sent back to the frontend. The frontend then stores this token in local storage and sends it with every request to the backend. The backend verifies this token and allows access to admin functions.
 
 A user is considered as an admin if they are a part of the team `GH_ORG_TEAM_SLUG` in `GH_ORG_NAME`, or if their username is in the `GH_ADMIN_USERNAMES` list.
 
