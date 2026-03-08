@@ -130,8 +130,6 @@ pub async fn authenticate_user(
             .context("Error parsing access token response.")?
             .access_token;
 
-    println!("Access token: {access_token}");
-
     // Get the username of the user who made the request
     let response = client
         .get("https://api.github.com/user")
@@ -153,8 +151,6 @@ pub async fn authenticate_user(
     let username = serde_json::from_slice::<GithubUserResponse>(&response.bytes().await?)
         .context("Error parsing username API response.")?
         .login;
-
-    println!("Username: {username}");
 
     // Check if the user is in the admin list
     if env_vars
