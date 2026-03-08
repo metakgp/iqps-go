@@ -9,7 +9,6 @@ use sha2::Sha256;
 
 use crate::pathutils::Paths;
 
-#[derive(Clone)]
 pub struct EnvVars {
     // Database
     /// Database name
@@ -37,7 +36,7 @@ pub struct EnvVars {
     /// The usernames of the admins (additional to org team members, comma separated)
     pub gh_admin_usernames: String,
     /// URL of Slack webhook for sending notifications
-    pub slack_webhook_url: String, 
+    pub slack_webhook_url: String,
 
     // Other configs
     /// Maximum number of papers that can be uploaded at a time
@@ -67,7 +66,7 @@ pub struct EnvVars {
     pub paths: Paths,
 }
 
-impl EnvVars {    
+impl EnvVars {
     /// Parses the environment variables into the struct
     pub fn parse() -> Result<Self, Box<dyn std::error::Error>> {
         let db_name = std::env::var("DB_NAME")?;
@@ -128,7 +127,7 @@ impl EnvVars {
             paths: Paths::default(),
         })
     }
-    
+
     /// Processes the environment variables after reading.
     pub fn process(mut self) -> Result<Self, Box<dyn std::error::Error>> {
         self.paths = Paths::new(

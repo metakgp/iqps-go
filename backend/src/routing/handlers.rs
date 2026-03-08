@@ -27,7 +27,7 @@ use crate::{
     slack::send_slack_message,
 };
 
-use super::{AppError, BackendResponse, RouterState, Status};
+use super::{AppError, BackendResponse, HandlerState, Status};
 
 /// The return type of a handler function. T is the data type returned if the operation was a success
 type HandlerReturn<T> = Result<(StatusCode, BackendResponse<T>), AppError>;
@@ -38,14 +38,12 @@ pub async fn healthcheck() -> HandlerReturn<()> {
 }
 
 /// Fetches all the unapproved papers.
-pub async fn get_unapproved(
-    State(state): State<RouterState>,
-) -> HandlerReturn<Vec<AdminDashboardQP>> {
+pub async fn get_unapproved(State(state): HandlerState) -> HandlerReturn<Vec<AdminDashboardQP>> {
     let papers: Vec<AdminDashboardQP> = state.db.get_unapproved_papers().await?;
 
     let papers = papers
-        .iter()
-        .map(|paper| paper.clone().with_url(&state.env_vars))
+        .into_iter()
+        .map(|paper| paper.with_url(&state.env_vars))
         .collect::<Result<Vec<qp::AdminDashboardQP>, color_eyre::eyre::Error>>()?;
 
     Ok(BackendResponse::ok(
@@ -55,12 +53,12 @@ pub async fn get_unapproved(
 }
 
 /// Gets all papers which have been soft-deleted.
-pub async fn get_trash(State(state): State<RouterState>) -> HandlerReturn<Vec<AdminDashboardQP>> {
+pub async fn get_trash(State(state): HandlerState) -> HandlerReturn<Vec<AdminDashboardQP>> {
     let papers: Vec<AdminDashboardQP> = state.db.get_soft_deleted_papers().await?;
 
     let papers = papers
-        .iter()
-        .map(|paper| paper.clone().with_url(&state.env_vars))
+        .into_iter()
+        .map(|paper| paper.with_url(&state.env_vars))
         .collect::<Result<Vec<qp::AdminDashboardQP>, color_eyre::eyre::Error>>()?;
 
     Ok(BackendResponse::ok(
@@ -71,7 +69,7 @@ pub async fn get_trash(State(state): State<RouterState>) -> HandlerReturn<Vec<Ad
 
 /// Fetches a paper by id.
 pub async fn get_paper_details(
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     Query(params): Query<HashMap<String, String>>,
 ) -> HandlerReturn<AdminDashboardQP> {
     if let Some(id) = params.get("id") {
@@ -102,7 +100,7 @@ pub async fn get_paper_details(
 /// * `query`: The query string to search in the question papers (searches course name or code)
 /// * `exam` (optional): A comma-separated string of exam types to filter. Leave empty to match any exam.
 pub async fn search(
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     Query(params): Query<HashMap<String, String>>,
 ) -> HandlerReturn<Vec<qp::BaseQP>> {
     let response = if let Some(query) = params.get("query") {
@@ -114,14 +112,14 @@ pub async fn search(
         if let Ok(exam_filter) = exam_query_str
             .split(',')
             .filter(|val| !val.trim().is_empty())
-            .map(|val| Exam::try_from(&val.to_owned()))
+            .map(Exam::try_from)
             .collect::<Result<Vec<Exam>, _>>()
         {
             let papers = state.db.search_papers(query, exam_filter).await?;
 
             let papers = papers
-                .iter()
-                .map(|paper| paper.clone().with_url(&state.env_vars))
+                .into_iter()
+                .map(|paper| paper.with_url(&state.env_vars))
                 .collect::<Result<Vec<qp::BaseQP>, color_eyre::eyre::Error>>()?;
 
             Ok(BackendResponse::ok(
@@ -160,7 +158,7 @@ pub struct OAuthRes {
 ///
 /// Request format - [`OAuthReq`]
 pub async fn oauth(
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     Json(body): Json<OAuthReq>,
 ) -> HandlerReturn<OAuthRes> {
     if let Some(token) = auth::authenticate_user(&body.code, &state.env_vars).await? {
@@ -215,7 +213,7 @@ pub struct EditReq {
 /// Request format - [`EditReq`]
 pub async fn edit(
     Extension(auth): Extension<Auth>,
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     Json(body): Json<EditReq>,
 ) -> HandlerReturn<AdminDashboardQP> {
     // Edit the database entry
@@ -285,7 +283,7 @@ pub struct UploadStatus {
 ///
 /// Request format - Multipart form with a `file_details` field of the format [`FileDetails`]
 pub async fn upload(
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     mut multipart: Multipart,
 ) -> HandlerReturn<Vec<UploadStatus>> {
     let mut files = Vec::<(HeaderMap, Bytes)>::new();
@@ -329,11 +327,11 @@ pub async fn upload(
         ));
     }
 
-    let files_iter = files.iter().zip(file_details.iter());
+    let files_iter = files.into_iter().zip(file_details.into_iter());
     let mut upload_statuses = Vec::<UploadStatus>::new();
 
     for ((file_headers, file_data), details) in files_iter {
-        let filename = details.filename.to_owned();
+        let filename = details.filename.clone();
 
         if file_data.len() > FILE_SIZE_LIMIT {
             upload_statuses.push(UploadStatus {
@@ -350,7 +348,7 @@ pub async fn upload(
         if let Some(content_type) = file_headers.get("content-type") {
             if content_type != "application/pdf" {
                 upload_statuses.push(UploadStatus {
-                    filename: filename.to_owned(),
+                    filename,
                     status: Status::Error,
                     message: "Only PDFs are supported.".into(),
                 });
@@ -455,10 +453,7 @@ pub struct DeleteReq {
 /// (Soft) Deletes a given paper.
 ///
 /// Request format - [`DeleteReq`]
-pub async fn delete(
-    State(state): State<RouterState>,
-    Json(body): Json<DeleteReq>,
-) -> HandlerReturn<()> {
+pub async fn delete(State(state): HandlerState, Json(body): Json<DeleteReq>) -> HandlerReturn<()> {
     let paper_deleted = state.db.soft_delete(body.id).await?;
 
     if paper_deleted {
@@ -492,7 +487,7 @@ pub struct DeleteStatus {
 ///
 /// Request format - [`HardDeleteReq`]
 pub async fn hard_delete(
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     Json(body): Json<HardDeleteReq>,
 ) -> HandlerReturn<Vec<DeleteStatus>> {
     let mut delete_statuses = Vec::<DeleteStatus>::new();
@@ -545,7 +540,7 @@ pub async fn hard_delete(
 /// * `semester` (optional): The semester (autumn/spring)
 /// * `exam` (optional): The exam field (midsem/endsem/ct)
 pub async fn similar(
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     Query(body): Query<HashMap<String, String>>,
 ) -> HandlerReturn<Vec<AdminDashboardQP>> {
     if !body.contains_key("course_code") {
@@ -571,8 +566,8 @@ pub async fn similar(
     Ok(BackendResponse::ok(
         format!("Found {} similar papers.", papers.len()),
         papers
-            .iter()
-            .map(|paper| paper.to_owned().with_url(&state.env_vars))
+            .into_iter()
+            .map(|paper| paper.with_url(&state.env_vars))
             .collect::<Result<Vec<AdminDashboardQP>>>()?,
     ))
 }

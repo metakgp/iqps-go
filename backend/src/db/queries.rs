@@ -70,12 +70,14 @@ pub const SOFT_DELETE_ANY_BY_ID: &str =
     "UPDATE iqps SET approve_status=false, is_deleted = true WHERE id=$1";
 
 /// Hard deletes a paper (removes it from the database)
-pub const HARD_DELETE_BY_ID: &str =
-    "DELETE FROM iqps WHERE id=$1";
+pub const HARD_DELETE_BY_ID: &str = "DELETE FROM iqps WHERE id=$1";
 
 /// Gets all soft-deleted papers ([`crate::db::models::DBAdminDashboardQP`]) from the database
 pub fn get_get_soft_deleted_papers_query() -> String {
-    format!("SELECT {} FROM iqps WHERE is_deleted=true", ADMIN_DASHBOARD_QP_FIELDS)
+    format!(
+        "SELECT {} FROM iqps WHERE is_deleted=true",
+        ADMIN_DASHBOARD_QP_FIELDS
+    )
 }
 
 /// Get a paper ([`crate::db::models::DBAdminDashboardQP`]) with the given id (first parameter `$1`)
@@ -128,12 +130,12 @@ pub const GET_UNAPPROVED_COUNT: &str =
 /// Returns the query and a boolean representing whether the second argument is required
 pub fn get_qp_search_query(exam_filter: Vec<Exam>) -> String {
     let exam_filter_clause = exam_filter
-        .iter()
-        .map(|&exam| {
+        .into_iter()
+        .map(|exam| {
             if let Exam::CT(_) = exam {
                 "exam LIKE 'ct%'".into()
             } else {
-                format!("exam = '{}'", String::from(exam))
+                format!("exam = '{}'", String::from(&exam))
             }
         })
         .collect::<Vec<String>>()

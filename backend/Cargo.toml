@@ -5,7 +5,7 @@ edition = "2021"
 default-run = "iqps-backend"
 
 [dependencies]
-axum = { version = "0.7.7", features = ["multipart"] }
+axum = { version = "0.8.6", features = ["multipart"] }
 chrono = "0.4.38"
 clap = { version = "4.5.20", features = ["derive", "env"] }
 color-eyre = "0.6.3"

@@ -9,7 +9,7 @@ use crate::qp::Semester;
 use super::qp;
 use sqlx::{prelude::FromRow, types::chrono};
 
-#[derive(FromRow, Clone)]
+#[derive(FromRow)]
 /// Base/common fields of a question paper
 pub struct DBBaseQP {
     id: i32,
@@ -23,7 +23,7 @@ pub struct DBBaseQP {
     note: String,
 }
 
-#[derive(FromRow, Clone)]
+#[derive(FromRow)]
 /// The fields of a question paper sent to the admin dashboard endpoint
 pub struct DBAdminDashboardQP {
     #[sqlx(flatten)]
@@ -51,8 +51,12 @@ impl From<DBBaseQP> for qp::BaseQP {
             course_code: value.course_code,
             course_name: value.course_name,
             year: value.year,
-            semester: (&value.semester).try_into().unwrap_or(Semester::Unknown),
-            exam: (&value.exam).try_into().unwrap_or(qp::Exam::Unknown),
+            semester: value
+                .semester
+                .as_str()
+                .try_into()
+                .unwrap_or(Semester::Unknown),
+            exam: value.exam.as_str().try_into().unwrap_or(qp::Exam::Unknown),
             note: value.note,
         }
     }
