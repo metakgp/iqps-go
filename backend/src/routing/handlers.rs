@@ -27,7 +27,7 @@ use crate::{
     slack::send_slack_message,
 };
 
-use super::{AppError, BackendResponse, HandlerState, Status};
+use super::{AppError, BackendResponse, HandlerState};
 
 /// The return type of a handler function. T is the data type returned if the operation was a success
 type HandlerReturn<T> = Result<(StatusCode, BackendResponse<T>), AppError>;
@@ -274,9 +274,27 @@ pub struct UploadStatus {
     /// The filename
     filename: String,
     /// Whether the file was successfully uploaded
-    status: Status,
+    status: String,
     /// A message describing the status
     message: String,
+}
+
+impl UploadStatus {
+    fn ok(filename: String) -> Self {
+        Self {
+            filename,
+            status: "success".into(),
+            message: "Successfully uploaded paper.".into(),
+        }
+    }
+
+    fn error(filename: String, message: String) -> Self {
+        Self {
+            filename,
+            status: "error".into(),
+            message,
+        }
+    }
 }
 
 /// Uploads question papers to the server
@@ -334,33 +352,29 @@ pub async fn upload(
         let filename = details.filename.clone();
 
         if file_data.len() > FILE_SIZE_LIMIT {
-            upload_statuses.push(UploadStatus {
+            upload_statuses.push(UploadStatus::error(
                 filename,
-                status: Status::Error,
-                message: format!(
+                format!(
                     "File size too big. Only files upto {} MiB are allowed.",
                     FILE_SIZE_LIMIT >> 20
                 ),
-            });
+            ));
             continue;
         }
 
         if let Some(content_type) = file_headers.get("content-type") {
             if content_type != "application/pdf" {
-                upload_statuses.push(UploadStatus {
+                upload_statuses.push(UploadStatus::error(
                     filename,
-                    status: Status::Error,
-                    message: "Only PDFs are supported.".into(),
-                });
+                    "Only PDFs are supported.".into(),
+                ));
                 continue;
             }
         } else {
-            upload_statuses.push(UploadStatus {
+            upload_statuses.push(UploadStatus::error(
                 filename,
-                status: Status::Error,
-                message: "`content-type` header not found. File type could not be determined."
-                    .into(),
-            });
+                "`content-type` header not found. File type could not be determined.".into(),
+            ));
             continue;
         }
 
@@ -385,20 +399,15 @@ pub async fn upload(
             // Write the file data
             if fs::write(&filepath, file_data).await.is_ok() {
                 if tx.commit().await.is_ok() {
-                    upload_statuses.push(UploadStatus {
-                        filename,
-                        status: Status::Success,
-                        message: "Succesfully uploaded file.".into(),
-                    });
+                    upload_statuses.push(UploadStatus::ok(filename));
                     continue;
                 } else {
                     // Transaction commit failed, delete the file
                     fs::remove_file(filepath).await?;
-                    upload_statuses.push(UploadStatus {
+                    upload_statuses.push(UploadStatus::error(
                         filename,
-                        status: Status::Success,
-                        message: "Succesfully uploaded file.".into(),
-                    });
+                        "Error: Database transaction failed.".into(),
+                    ));
                     continue;
                 }
             } else {
@@ -409,19 +418,15 @@ pub async fn upload(
         } else {
             tx.rollback().await?;
 
-            upload_statuses.push(UploadStatus {
+            upload_statuses.push(UploadStatus::error(
                 filename,
-                status: Status::Error,
-                message: "Error updating the filelink".into(),
-            });
+                "Error updating the filelink".into(),
+            ));
             continue;
         }
 
-        upload_statuses.push(UploadStatus {
-            filename,
-            status: Status::Error,
-            message: "THIS SHOULD NEVER HAPPEN. REPORT IMMEDIATELY. ALSO THIS WOULDN'T HAPPEN IF RUST HAD STABLE ASYNC CLOSURES.".into(),
-        });
+        upload_statuses.push(UploadStatus::error(filename,
+            "THIS SHOULD NEVER HAPPEN. REPORT IMMEDIATELY. ~~ALSO THIS WOULDN'T HAPPEN IF RUST HAD STABLE ASYNC CLOSURES.~~ CORRECTION: ASYNC CLOSURES ARE STABLE. THE ALTERNATIVE IS INSANE. THIS IS BETTER.".into()));
     }
 
     let total_count = state.db.get_unapproved_papers_count().await?;
@@ -479,8 +484,26 @@ pub struct HardDeleteReq {
 /// The status of a paper to be deleted
 pub struct DeleteStatus {
     id: i32,
-    status: Status,
+    status: String,
     message: String,
+}
+
+impl DeleteStatus {
+    fn ok(id: i32) -> Self {
+        Self {
+            id,
+            status: "success".into(),
+            message: "Successfully hard deleted the paper.".into(),
+        }
+    }
+
+    fn error(id: i32, message: String) -> Self {
+        Self {
+            id,
+            status: "error".into(),
+            message,
+        }
+    }
 }
 
 /// Hard deletes papers from a list of ids.
@@ -498,26 +521,17 @@ pub async fn hard_delete(
             let filepath = state.env_vars.paths.get_path_from_slug(&paper.qp.filelink);
             if fs::remove_file(&filepath).await.is_ok() {
                 if tx.commit().await.is_ok() {
-                    delete_statuses.push(DeleteStatus {
-                        id,
-                        status: Status::Success,
-                        message: "Successfully hard deleted the paper.".into(),
-                    });
+                    delete_statuses.push(DeleteStatus::ok(id));
                     deleted_count += 1;
                 } else {
-                    delete_statuses.push(DeleteStatus {
+                    delete_statuses.push(DeleteStatus::error(
                         id,
-                        status: Status::Error,
-                        message: "Error committing the transaction.".into(),
-                    });
+                        "Error committing the transaction.".into(),
+                    ));
                 }
             } else {
                 tx.rollback().await?;
-                delete_statuses.push(DeleteStatus {
-                    id,
-                    status: Status::Error,
-                    message: "Failed to delete file.".into(),
-                });
+                delete_statuses.push(DeleteStatus::error(id, "Failed to delete file.".into()));
             }
         }
     }

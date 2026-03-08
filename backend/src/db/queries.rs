@@ -130,12 +130,12 @@ pub const GET_UNAPPROVED_COUNT: &str =
 /// Returns the query and a boolean representing whether the second argument is required
 pub fn get_qp_search_query(exam_filter: Vec<Exam>) -> String {
     let exam_filter_clause = exam_filter
-        .into_iter()
+        .iter()
         .map(|exam| {
             if let Exam::CT(_) = exam {
                 "exam LIKE 'ct%'".into()
             } else {
-                format!("exam = '{}'", String::from(&exam))
+                format!("exam = '{}'", String::from(exam))
             }
         })
         .collect::<Vec<String>>()

@@ -79,35 +79,11 @@ struct RouterState {
 }
 type HandlerState = State<Arc<RouterState>>;
 
-/// The status of a server response
-enum Status {
-    Success,
-    Error,
-}
-
-impl From<&Status> for String {
-    fn from(value: &Status) -> Self {
-        match value {
-            Status::Success => "success".into(),
-            Status::Error => "error".into(),
-        }
-    }
-}
-
-impl Serialize for Status {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_str(String::from(self).as_str())
-    }
-}
-
 /// Standard backend response format (serialized as JSON)
 #[derive(serde::Serialize)]
 struct BackendResponse<T: Serialize> {
     /// Whether the operation succeeded or failed
-    pub status: Status,
+    pub status: String,
     /// A message describing the state of the operation (success/failure message)
     pub message: String,
     /// Any optional data sent (only sent if the operation was a success)
@@ -120,7 +96,7 @@ impl<T: serde::Serialize> BackendResponse<T> {
         (
             StatusCode::OK,
             Self {
-                status: Status::Success,
+                status: "success".into(),
                 message,
                 data: Some(data),
             },
@@ -132,7 +108,7 @@ impl<T: serde::Serialize> BackendResponse<T> {
         (
             status_code,
             Self {
-                status: Status::Error,
+                status: "error".into(),
                 message,
                 data: None,
             },
