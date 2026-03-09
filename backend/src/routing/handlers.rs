@@ -10,7 +10,7 @@ use axum::{
     http::StatusCode,
     Extension,
 };
-use color_eyre::eyre::{ContextCompat, Result};
+use color_eyre::eyre::{eyre, ContextCompat, Result};
 use http::HeaderMap;
 use serde::Serialize;
 use tokio::fs;
@@ -39,10 +39,9 @@ pub async fn healthcheck() -> HandlerReturn<()> {
 
 /// Fetches all the unapproved papers.
 pub async fn get_unapproved(State(state): HandlerState) -> HandlerReturn<Vec<AdminDashboardQP>> {
-    let papers: Vec<AdminDashboardQP> = state.db.get_unapproved_papers().await?;
+    let papers = state.db.get_unapproved_papers().await?;
 
     let papers = papers
-        .into_iter()
         .map(|paper| paper.with_url(&state.env_vars))
         .collect::<Result<Vec<qp::AdminDashboardQP>, color_eyre::eyre::Error>>()?;
 
@@ -54,10 +53,9 @@ pub async fn get_unapproved(State(state): HandlerState) -> HandlerReturn<Vec<Adm
 
 /// Gets all papers which have been soft-deleted.
 pub async fn get_trash(State(state): HandlerState) -> HandlerReturn<Vec<AdminDashboardQP>> {
-    let papers: Vec<AdminDashboardQP> = state.db.get_soft_deleted_papers().await?;
+    let papers = state.db.get_soft_deleted_papers().await?;
 
     let papers = papers
-        .into_iter()
         .map(|paper| paper.with_url(&state.env_vars))
         .collect::<Result<Vec<qp::AdminDashboardQP>, color_eyre::eyre::Error>>()?;
 
@@ -115,10 +113,10 @@ pub async fn search(
             .map(Exam::try_from)
             .collect::<Result<Vec<Exam>, _>>()
         {
-            let papers = state.db.search_papers(query, exam_filter).await?;
-
-            let papers = papers
-                .into_iter()
+            let papers = state
+                .db
+                .search_papers(query, exam_filter)
+                .await?
                 .map(|paper| paper.with_url(&state.env_vars))
                 .collect::<Result<Vec<qp::BaseQP>, color_eyre::eyre::Error>>()?;
 
@@ -307,8 +305,11 @@ pub async fn upload(
     let mut files = Vec::<(HeaderMap, Bytes)>::new();
     let mut file_details: String = "".into();
 
-    while let Some(field) = multipart.next_field().await.unwrap() {
-        let name = field.name().unwrap().to_string();
+    while let Some(field) = multipart.next_field().await? {
+        let name = field
+            .name()
+            .ok_or(eyre!("Error parsing file upload multipart field."))?
+            .to_string();
 
         if name == "files" {
             files.push((field.headers().clone(), field.bytes().await?));
@@ -573,13 +574,12 @@ pub async fn similar(
             body.get("semester"),
             body.get("exam"),
         )
-        .await?;
+        .await?
+        .map(|paper| paper.with_url(&state.env_vars))
+        .collect::<Result<Vec<AdminDashboardQP>>>()?;
 
     Ok(BackendResponse::ok(
         format!("Found {} similar papers.", papers.len()),
-        papers
-            .into_iter()
-            .map(|paper| paper.with_url(&state.env_vars))
-            .collect::<Result<Vec<AdminDashboardQP>>>()?,
+        papers,
     ))
 }

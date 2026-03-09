@@ -50,13 +50,15 @@ impl Database {
     }
 
     /// Fetches the list of all unapproved papers
-    pub async fn get_unapproved_papers(&self) -> Result<Vec<qp::AdminDashboardQP>, sqlx::Error> {
+    pub async fn get_unapproved_papers(
+        &self,
+    ) -> Result<impl Iterator<Item = qp::AdminDashboardQP>, sqlx::Error> {
         let query_sql = queries::get_all_unapproved_query();
         let papers: Vec<models::DBAdminDashboardQP> = sqlx::query_as(&query_sql)
             .fetch_all(&self.connection)
             .await?;
 
-        Ok(papers.into_iter().map(qp::AdminDashboardQP::from).collect())
+        Ok(papers.into_iter().map(qp::AdminDashboardQP::from))
     }
 
     /// Returns the number of unapproved papers
@@ -73,13 +75,13 @@ impl Database {
         &self,
         query: &str,
         exam_filter: Vec<Exam>,
-    ) -> Result<Vec<qp::BaseQP>, sqlx::Error> {
+    ) -> Result<impl Iterator<Item = qp::BaseQP>, sqlx::Error> {
         let query_sql = queries::get_qp_search_query(exam_filter);
         let query = sqlx::query_as(&query_sql).bind(query);
 
         let papers: Vec<models::DBBaseQP> = query.fetch_all(&self.connection).await?;
 
-        Ok(papers.into_iter().map(qp::BaseQP::from).collect())
+        Ok(papers.into_iter().map(qp::BaseQP::from))
     }
 
     pub async fn get_paper_by_id(&self, id: i32) -> Result<qp::AdminDashboardQP, sqlx::Error> {
@@ -229,13 +231,15 @@ impl Database {
     }
 
     /// Gets all soft-deleted papers from the database
-    pub async fn get_soft_deleted_papers(&self) -> Result<Vec<AdminDashboardQP>, sqlx::Error> {
+    pub async fn get_soft_deleted_papers(
+        &self,
+    ) -> Result<impl Iterator<Item = AdminDashboardQP>, sqlx::Error> {
         let query_sql = queries::get_get_soft_deleted_papers_query();
         let papers: Vec<models::DBAdminDashboardQP> = sqlx::query_as(&query_sql)
             .fetch_all(&self.connection)
             .await?;
 
-        Ok(papers.into_iter().map(qp::AdminDashboardQP::from).collect())
+        Ok(papers.into_iter().map(qp::AdminDashboardQP::from))
     }
 
     /// Permanently deletes a paper from the database
@@ -269,7 +273,7 @@ impl Database {
         year: Option<i32>,
         semester: Option<&String>,
         exam: Option<&String>,
-    ) -> Result<Vec<AdminDashboardQP>, sqlx::Error> {
+    ) -> Result<impl Iterator<Item = AdminDashboardQP>, sqlx::Error> {
         let query_sql =
             queries::get_similar_papers_query(year.is_some(), semester.is_some(), exam.is_some());
         let query = sqlx::query_as(&query_sql).bind(course_code);
@@ -280,7 +284,7 @@ impl Database {
 
         let papers: Vec<models::DBAdminDashboardQP> = query.fetch_all(&self.connection).await?;
 
-        Ok(papers.into_iter().map(qp::AdminDashboardQP::from).collect())
+        Ok(papers.into_iter().map(qp::AdminDashboardQP::from))
     }
 
     /// Inserts a new uploaded question paper into the database. Uses a placeholder for the filelink which should be replaced once the id is known using the [crate::db::Database::update_filelink] function.
