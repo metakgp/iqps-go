@@ -5,13 +5,7 @@
 use tracing_appender::rolling::{RollingFileAppender, Rotation};
 use tracing_subscriber::prelude::*;
 
-mod auth;
-mod db;
-mod env;
-mod pathutils;
-mod qp;
-mod routing;
-mod slack;
+use iqps_backend::{db, env, routing};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

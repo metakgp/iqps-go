@@ -204,15 +204,6 @@ impl Database {
         Ok((tx, old_filelink, new_qp))
     }
 
-    // /// Adds a new upload paper's details to the database. Sets the `from_library` field to false.
-    // ///
-    // /// Returns the database transaction and the id of the uploaded paper
-    // pub async fn add_uploaded_paper<'c>(
-    //     &self,
-    //     file_details:
-    // ) -> Result<(Transaction<'c, Postgres>, i32), color_eyre::eyre::Error> {
-    // }
-
     /// Sets the `is_deleted` field to true and `approve_status` to false. Only deletes uploaded papers.
     ///
     /// Returns a boolean that represents whether a db entry was affected or not. If more than one entry was affected, an error will be thrown and the transaction will be rolled back.
@@ -326,7 +317,6 @@ impl Database {
         Ok((tx, id))
     }
 
-    #[allow(unused)]
     /// Inserts a new library question paper into the database. Uses a placeholder for the filelink which should be replaced once the id is known using the [crate::db::Database::update_filelink] function.
     ///
     /// Returns a tuple with the transaction and the id of the inserted paper.
