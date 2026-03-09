@@ -109,7 +109,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .await?;
 
         if qp.approve_status {
-            if let Some(similar) = similar_papers.first() {
+            if let Some(similar) = similar_papers.next() {
                 // todo: what if there are multiple similar papers?
                 if similar.qp.from_library {
                     // check pdf hash
