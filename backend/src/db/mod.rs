@@ -1,7 +1,6 @@
 //! Database stuff. See submodules also.
 
 use color_eyre::eyre::eyre;
-use models::DBAdminDashboardQP;
 use sqlx::{postgres::PgPoolOptions, prelude::FromRow, PgPool, Postgres, Transaction};
 use std::time::Duration;
 
@@ -50,15 +49,13 @@ impl Database {
     }
 
     /// Fetches the list of all unapproved papers
-    pub async fn get_unapproved_papers(
-        &self,
-    ) -> Result<impl Iterator<Item = qp::AdminDashboardQP>, sqlx::Error> {
+    pub async fn get_unapproved_papers(&self) -> Result<Vec<qp::AdminDashboardQP>, sqlx::Error> {
         let query_sql = queries::get_all_unapproved_query();
-        let papers: Vec<models::DBAdminDashboardQP> = sqlx::query_as(&query_sql)
+        let papers: Vec<qp::AdminDashboardQP> = sqlx::query_as(&query_sql)
             .fetch_all(&self.connection)
             .await?;
 
-        Ok(papers.into_iter().map(qp::AdminDashboardQP::from))
+        Ok(papers)
     }
 
     /// Returns the number of unapproved papers
@@ -79,18 +76,18 @@ impl Database {
         let query_sql = queries::get_qp_search_query(exam_filter);
         let query = sqlx::query_as(&query_sql).bind(query);
 
-        let papers: Vec<models::DBBaseQP> = query.fetch_all(&self.connection).await?;
+        let papers: Vec<qp::BaseQP> = query.fetch_all(&self.connection).await?;
 
-        Ok(papers.into_iter().map(qp::BaseQP::from))
+        Ok(papers.into_iter())
     }
 
     pub async fn get_paper_by_id(&self, id: i32) -> Result<qp::AdminDashboardQP, sqlx::Error> {
         let query_sql = queries::get_get_paper_by_id_query();
         let query = sqlx::query_as(&query_sql).bind(id);
 
-        let paper: models::DBAdminDashboardQP = query.fetch_one(&self.connection).await?;
+        let paper: qp::AdminDashboardQP = query.fetch_one(&self.connection).await?;
 
-        Ok(paper.into())
+        Ok(paper)
     }
 
     /// Edit's a paper's details.
@@ -183,8 +180,7 @@ impl Database {
             query
         };
 
-        let new_qp: DBAdminDashboardQP = query.fetch_one(&mut *tx).await?;
-        let new_qp = AdminDashboardQP::from(new_qp);
+        let new_qp: AdminDashboardQP = query.fetch_one(&mut *tx).await?;
 
         // Delete the replaced papers
         for replace_id in replace {
@@ -231,15 +227,13 @@ impl Database {
     }
 
     /// Gets all soft-deleted papers from the database
-    pub async fn get_soft_deleted_papers(
-        &self,
-    ) -> Result<impl Iterator<Item = AdminDashboardQP>, sqlx::Error> {
+    pub async fn get_soft_deleted_papers(&self) -> Result<Vec<AdminDashboardQP>, sqlx::Error> {
         let query_sql = queries::get_get_soft_deleted_papers_query();
-        let papers: Vec<models::DBAdminDashboardQP> = sqlx::query_as(&query_sql)
+        let papers: Vec<AdminDashboardQP> = sqlx::query_as(&query_sql)
             .fetch_all(&self.connection)
             .await?;
 
-        Ok(papers.into_iter().map(qp::AdminDashboardQP::from))
+        Ok(papers)
     }
 
     /// Permanently deletes a paper from the database
@@ -273,7 +267,7 @@ impl Database {
         year: Option<i32>,
         semester: Option<&String>,
         exam: Option<&String>,
-    ) -> Result<impl Iterator<Item = AdminDashboardQP>, sqlx::Error> {
+    ) -> Result<Vec<AdminDashboardQP>, sqlx::Error> {
         let query_sql =
             queries::get_similar_papers_query(year.is_some(), semester.is_some(), exam.is_some());
         let query = sqlx::query_as(&query_sql).bind(course_code);
@@ -282,9 +276,9 @@ impl Database {
         let query = query.bind(semester);
         let query = query.bind(exam);
 
-        let papers: Vec<models::DBAdminDashboardQP> = query.fetch_all(&self.connection).await?;
+        let papers: Vec<qp::AdminDashboardQP> = query.fetch_all(&self.connection).await?;
 
-        Ok(papers.into_iter().map(qp::AdminDashboardQP::from))
+        Ok(papers)
     }
 
     /// Inserts a new uploaded question paper into the database. Uses a placeholder for the filelink which should be replaced once the id is known using the [crate::db::Database::update_filelink] function.

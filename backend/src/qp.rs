@@ -130,12 +130,11 @@ pub struct LibraryQP {
     pub year: i32,
     pub exam: String,
     pub semester: String,
-    #[allow(dead_code)]
     pub filename: String,
     pub approve_status: bool,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, sqlx::FromRow)]
 /// The fields of a question paper sent from the search endpoint
 pub struct BaseQP {
     pub id: i32,
@@ -149,12 +148,13 @@ pub struct BaseQP {
     pub note: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, sqlx::FromRow)]
 /// The fields of a question paper sent from the admin dashboard endpoints.
 ///
 /// This includes fields such as `approve_status` and `upload_timestamp` that would only be relevant to the dashboard.
 pub struct AdminDashboardQP {
     #[serde(flatten)]
+    #[sqlx(flatten)]
     pub qp: BaseQP,
     pub upload_timestamp: String,
     pub approve_status: bool,

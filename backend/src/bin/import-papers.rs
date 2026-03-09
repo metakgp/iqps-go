@@ -99,7 +99,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let file_path = dir_path.join(format!("qp/{}", qp.filename)); // TODO use consistent format
         let hash = hash_file(&file_path).expect("Failed to hash file");
 
-        let mut similar_papers = database
+        let similar_papers = database
             .get_similar_papers(
                 &qp.course_code,
                 Some(qp.year),
@@ -109,7 +109,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .await?;
 
         if qp.approve_status {
-            if let Some(similar) = similar_papers.next() {
+            if let Some(similar) = similar_papers.first() {
                 // todo: what if there are multiple similar papers?
                 if similar.qp.from_library {
                     // check pdf hash

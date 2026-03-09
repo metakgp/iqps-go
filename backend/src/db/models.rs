@@ -1,63 +1,42 @@
-//! Database models.
-//!
-//! These can be (should be) converted to the structs in [`crate::qp`] for sending as a response since the struct also parses the `semester` and `exam` fields and also generates the full static files URL.
-//!
-//! Use the [`From`] trait implementations.
+use duplicate::duplicate_item;
+use sqlx::{postgres::PgTypeInfo, Postgres};
 
-use crate::qp::Semester;
+use crate::qp::{Exam, Semester};
 
-use super::qp;
-use sqlx::{prelude::FromRow, types::chrono};
-
-#[derive(FromRow)]
-/// Base/common fields of a question paper
-pub struct DBBaseQP {
-    id: i32,
-    filelink: String,
-    from_library: bool,
-    course_code: String,
-    course_name: String,
-    year: i32,
-    semester: String,
-    exam: String,
-    note: String,
-}
-
-#[derive(FromRow)]
-/// The fields of a question paper sent to the admin dashboard endpoint
-pub struct DBAdminDashboardQP {
-    #[sqlx(flatten)]
-    qp: DBBaseQP,
-    upload_timestamp: chrono::NaiveDateTime,
-    approve_status: bool,
-}
-
-impl From<DBAdminDashboardQP> for qp::AdminDashboardQP {
-    fn from(value: DBAdminDashboardQP) -> Self {
-        Self {
-            qp: value.qp.into(),
-            upload_timestamp: value.upload_timestamp.to_string(),
-            approve_status: value.approve_status,
-        }
+// DO NOT ASK ME WHAT THE BELOW TRAIT IMPLEMENTATIONS DO
+// I JUST KNOW THEY ARE NEEDED TO TEACH SQLX HOW TO DECODE AND ENCODE THIS SHIT
+impl sqlx::Type<Postgres> for Exam {
+    fn type_info() -> <Postgres as sqlx::Database>::TypeInfo {
+        <String as sqlx::Type<Postgres>>::type_info()
     }
 }
 
-impl From<DBBaseQP> for qp::BaseQP {
-    fn from(value: DBBaseQP) -> Self {
-        Self {
-            id: value.id,
-            filelink: value.filelink,
-            from_library: value.from_library,
-            course_code: value.course_code,
-            course_name: value.course_name,
-            year: value.year,
-            semester: value
-                .semester
-                .as_str()
-                .try_into()
-                .unwrap_or(Semester::Unknown),
-            exam: value.exam.as_str().try_into().unwrap_or(qp::Exam::Unknown),
-            note: value.note,
-        }
+impl sqlx::Type<Postgres> for Semester {
+    fn type_info() -> <Postgres as sqlx::Database>::TypeInfo {
+        // Yes the init sql in queries.rs sets the type to `TEXT` but turns out the database has
+        // `VARCHAR` type so idk what to do here
+        PgTypeInfo::with_name("VARCHAR")
+    }
+}
+
+#[duplicate_item(
+    DBEncodeDecode;
+    [ Exam ];
+    [ Semester ];
+)]
+impl sqlx::Decode<'_, sqlx::Postgres> for DBEncodeDecode {
+    fn decode(
+        value: <sqlx::Postgres as sqlx::Database>::ValueRef<'_>,
+    ) -> Result<Self, sqlx::error::BoxDynError> {
+        Ok(Self::try_from(value.as_str()?)?)
+    }
+}
+
+impl<'q> sqlx::Encode<'q, Postgres> for Exam {
+    fn encode_by_ref(
+        &self,
+        buf: &mut <Postgres as sqlx::Database>::ArgumentBuffer<'q>,
+    ) -> Result<sqlx::encode::IsNull, sqlx::error::BoxDynError> {
+        <String as sqlx::Encode<'q, Postgres>>::encode_by_ref(&String::from(self), buf)
     }
 }

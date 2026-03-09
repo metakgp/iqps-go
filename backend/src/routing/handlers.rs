@@ -42,6 +42,7 @@ pub async fn get_unapproved(State(state): HandlerState) -> HandlerReturn<Vec<Adm
     let papers = state.db.get_unapproved_papers().await?;
 
     let papers = papers
+        .into_iter()
         .map(|paper| paper.with_url(&state.env_vars))
         .collect::<Result<Vec<qp::AdminDashboardQP>, color_eyre::eyre::Error>>()?;
 
@@ -56,6 +57,7 @@ pub async fn get_trash(State(state): HandlerState) -> HandlerReturn<Vec<AdminDas
     let papers = state.db.get_soft_deleted_papers().await?;
 
     let papers = papers
+        .into_iter()
         .map(|paper| paper.with_url(&state.env_vars))
         .collect::<Result<Vec<qp::AdminDashboardQP>, color_eyre::eyre::Error>>()?;
 
@@ -575,6 +577,7 @@ pub async fn similar(
             body.get("exam"),
         )
         .await?
+        .into_iter()
         .map(|paper| paper.with_url(&state.env_vars))
         .collect::<Result<Vec<AdminDashboardQP>>>()?;
 
