@@ -72,13 +72,13 @@ impl Database {
         &self,
         query: &str,
         exam_filter: Vec<Exam>,
-    ) -> Result<impl Iterator<Item = qp::BaseQP>, sqlx::Error> {
+    ) -> Result<Vec<qp::BaseQP>, sqlx::Error> {
         let query_sql = queries::get_qp_search_query(exam_filter);
         let query = sqlx::query_as(&query_sql).bind(query);
 
         let papers: Vec<qp::BaseQP> = query.fetch_all(&self.connection).await?;
 
-        Ok(papers.into_iter())
+        Ok(papers)
     }
 
     pub async fn get_paper_by_id(&self, id: i32) -> Result<qp::AdminDashboardQP, sqlx::Error> {

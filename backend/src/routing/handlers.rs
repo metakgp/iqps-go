@@ -119,6 +119,7 @@ pub async fn search(
                 .db
                 .search_papers(query, exam_filter)
                 .await?
+                .into_iter()
                 .map(|paper| paper.with_url(&state.env_vars))
                 .collect::<Result<Vec<qp::BaseQP>, color_eyre::eyre::Error>>()?;
 
