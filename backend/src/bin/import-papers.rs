@@ -99,7 +99,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let file_path = dir_path.join(format!("qp/{}", qp.filename)); // TODO use consistent format
         let hash = hash_file(&file_path).expect("Failed to hash file");
 
-        let similar_papers = database
+        let mut similar_papers = database
             .get_similar_papers(
                 &qp.course_code,
                 Some(qp.year),
