@@ -83,7 +83,7 @@ type HandlerState = State<Arc<RouterState>>;
 #[derive(serde::Serialize)]
 struct BackendResponse<T: Serialize> {
     /// Whether the operation succeeded or failed
-    pub status: String,
+    pub status: &'static str,
     /// A message describing the state of the operation (success/failure message)
     pub message: String,
     /// Any optional data sent (only sent if the operation was a success)
@@ -96,7 +96,7 @@ impl<T: serde::Serialize> BackendResponse<T> {
         (
             StatusCode::OK,
             Self {
-                status: "success".into(),
+                status: "success",
                 message,
                 data: Some(data),
             },
@@ -108,7 +108,7 @@ impl<T: serde::Serialize> BackendResponse<T> {
         (
             status_code,
             Self {
-                status: "error".into(),
+                status: "error",
                 message,
                 data: None,
             },

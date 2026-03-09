@@ -274,7 +274,7 @@ pub struct UploadStatus {
     /// The filename
     filename: String,
     /// Whether the file was successfully uploaded
-    status: String,
+    status: &'static str,
     /// A message describing the status
     message: String,
 }
@@ -283,7 +283,7 @@ impl UploadStatus {
     fn ok(filename: String) -> Self {
         Self {
             filename,
-            status: "success".into(),
+            status: "success",
             message: "Successfully uploaded paper.".into(),
         }
     }
@@ -291,7 +291,7 @@ impl UploadStatus {
     fn error(filename: String, message: String) -> Self {
         Self {
             filename,
-            status: "error".into(),
+            status: "error",
             message,
         }
     }
@@ -484,23 +484,23 @@ pub struct HardDeleteReq {
 /// The status of a paper to be deleted
 pub struct DeleteStatus {
     id: i32,
-    status: String,
-    message: String,
+    status: &'static str,
+    message: &'static str,
 }
 
 impl DeleteStatus {
     fn ok(id: i32) -> Self {
         Self {
             id,
-            status: "success".into(),
-            message: "Successfully hard deleted the paper.".into(),
+            status: "success",
+            message: "Successfully hard deleted the paper.",
         }
     }
 
-    fn error(id: i32, message: String) -> Self {
+    fn error(id: i32, message: &'static str) -> Self {
         Self {
             id,
-            status: "error".into(),
+            status: "error",
             message,
         }
     }
@@ -524,14 +524,12 @@ pub async fn hard_delete(
                     delete_statuses.push(DeleteStatus::ok(id));
                     deleted_count += 1;
                 } else {
-                    delete_statuses.push(DeleteStatus::error(
-                        id,
-                        "Error committing the transaction.".into(),
-                    ));
+                    delete_statuses
+                        .push(DeleteStatus::error(id, "Error committing the transaction."));
                 }
             } else {
                 tx.rollback().await?;
-                delete_statuses.push(DeleteStatus::error(id, "Failed to delete file.".into()));
+                delete_statuses.push(DeleteStatus::error(id, "Failed to delete file."));
             }
         }
     }
