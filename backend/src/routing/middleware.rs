@@ -9,18 +9,18 @@ use http::{HeaderMap, StatusCode};
 
 use crate::auth;
 
-use super::{AppError, BackendResponse, RouterState};
+use super::{AppError, BackendResponse, HandlerState};
 
 /// Verifies the JWT and authenticates a user. If the JWT is invalid, the user is sent an unauthorized status code. If the JWT is valid, the authentication is added to the state.
 pub async fn verify_jwt_middleware(
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     headers: HeaderMap,
     mut request: Request,
     next: Next,
 ) -> Result<Response, AppError> {
     if let Some(auth_header) = headers.get("Authorization") {
         if let Some(jwt) = auth_header.to_str()?.strip_prefix("Bearer ") {
-            let auth = auth::verify_token(jwt, &state.env_vars).await;
+            let auth = auth::verify_token(jwt.to_owned(), &state.env_vars).await;
 
             if let Ok(auth) = auth {
                 // If auth is fine, add it to the request extensions

@@ -22,7 +22,7 @@ pub struct Auth {
 ///
 /// Returns the username and jwt in a struct
 pub async fn verify_token(
-    token: &str,
+    token: String,
     env_vars: &EnvVars,
 ) -> Result<Auth, color_eyre::eyre::Error> {
     let jwt_key = env_vars.get_jwt_key()?;
@@ -38,7 +38,7 @@ pub async fn verify_token(
         .ok_or(eyre!("Username is not a string."))?;
 
     Ok(Auth {
-        jwt: token.to_owned(),
+        jwt: token,
         username: username.to_owned(),
     })
 }
@@ -100,7 +100,7 @@ struct GithubMembershipResponse {
 ///
 /// Returns the JWT if the user is authenticated, `None` otherwise.
 pub async fn authenticate_user(
-    code: &String,
+    code: &str,
     env_vars: &EnvVars,
 ) -> Result<Option<String>, color_eyre::eyre::Error> {
     let client = reqwest::Client::new();
@@ -172,10 +172,7 @@ pub async fn authenticate_user(
             "https://api.github.com/orgs/{}/teams/{}/memberships/{}",
             env_vars.gh_org_name, env_vars.gh_org_team_slug, username
         ))
-        .header(
-            "Authorization",
-            format!("Bearer {}", access_token),
-        )
+        .header("Authorization", format!("Bearer {}", access_token))
         .header("User-Agent", "bruh why is this required")
         .send()
         .await

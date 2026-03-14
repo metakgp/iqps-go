@@ -1,7 +1,9 @@
 //! Router, [`handlers`], [`middleware`], state, and response utils.
 
+use std::sync::Arc;
+
 use axum::{
-    extract::{DefaultBodyLimit, Json},
+    extract::{DefaultBodyLimit, Json, State},
     http::StatusCode,
     response::IntoResponse,
 };
@@ -23,11 +25,19 @@ mod middleware;
 pub use handlers::{EditReq, FileDetails};
 
 /// Returns the Axum router for IQPS
-pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
-    let state = RouterState {
-        db,
-        env_vars: env_vars.clone(),
-    };
+pub fn get_router(env_vars: EnvVars, db: Database) -> axum::Router {
+    let cors_origins = env_vars
+        .cors_allowed_origins
+        .split(',')
+        .map(|origin| {
+            origin
+                .trim()
+                .parse::<HeaderValue>()
+                .expect("CORS Allowed Origins Invalid")
+        })
+        .collect::<Vec<HeaderValue>>();
+
+    let state = Arc::new(RouterState { db, env_vars });
 
     axum::Router::new()
         .route("/unapproved", axum::routing::get(handlers::get_unapproved))
@@ -58,58 +68,22 @@ pub fn get_router(env_vars: &EnvVars, db: Database) -> axum::Router {
             CorsLayer::new()
                 .allow_headers(Any)
                 .allow_methods(vec![Method::GET, Method::POST, Method::OPTIONS])
-                .allow_origin(
-                    env_vars
-                        .cors_allowed_origins
-                        .split(',')
-                        .map(|origin| {
-                            origin
-                                .trim()
-                                .parse::<HeaderValue>()
-                                .expect("CORS Allowed Origins Invalid")
-                        })
-                        .collect::<Vec<HeaderValue>>(),
-                ),
+                .allow_origin(cors_origins),
         )
 }
 
-#[derive(Clone)]
 /// The state of the axum router, containing the environment variables and the database connection.
 struct RouterState {
     pub db: db::Database,
     pub env_vars: EnvVars,
 }
-
-#[derive(Clone, Copy)]
-/// The status of a server response
-enum Status {
-    Success,
-    Error,
-}
-
-impl From<Status> for String {
-    fn from(value: Status) -> Self {
-        match value {
-            Status::Success => "success".into(),
-            Status::Error => "error".into(),
-        }
-    }
-}
-
-impl Serialize for Status {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_str(&String::from(*self))
-    }
-}
+type HandlerState = State<Arc<RouterState>>;
 
 /// Standard backend response format (serialized as JSON)
 #[derive(serde::Serialize)]
 struct BackendResponse<T: Serialize> {
     /// Whether the operation succeeded or failed
-    pub status: Status,
+    pub status: &'static str,
     /// A message describing the state of the operation (success/failure message)
     pub message: String,
     /// Any optional data sent (only sent if the operation was a success)
@@ -122,7 +96,7 @@ impl<T: serde::Serialize> BackendResponse<T> {
         (
             StatusCode::OK,
             Self {
-                status: Status::Success,
+                status: "success",
                 message,
                 data: Some(data),
             },
@@ -134,7 +108,7 @@ impl<T: serde::Serialize> BackendResponse<T> {
         (
             status_code,
             Self {
-                status: Status::Error,
+                status: "error",
                 message,
                 data: None,
             },

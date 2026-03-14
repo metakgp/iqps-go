@@ -1,7 +1,6 @@
 //! Database stuff. See submodules also.
 
 use color_eyre::eyre::eyre;
-use models::DBAdminDashboardQP;
 use sqlx::{postgres::PgPoolOptions, prelude::FromRow, PgPool, Postgres, Transaction};
 use std::time::Duration;
 
@@ -15,7 +14,6 @@ use crate::{
 mod models;
 mod queries;
 
-#[derive(Clone)]
 /// The database
 pub struct Database {
     connection: PgPool,
@@ -53,14 +51,11 @@ impl Database {
     /// Fetches the list of all unapproved papers
     pub async fn get_unapproved_papers(&self) -> Result<Vec<qp::AdminDashboardQP>, sqlx::Error> {
         let query_sql = queries::get_all_unapproved_query();
-        let papers: Vec<models::DBAdminDashboardQP> = sqlx::query_as(&query_sql)
+        let papers: Vec<qp::AdminDashboardQP> = sqlx::query_as(&query_sql)
             .fetch_all(&self.connection)
             .await?;
 
-        Ok(papers
-            .iter()
-            .map(|qp| qp::AdminDashboardQP::from(qp.clone()))
-            .collect())
+        Ok(papers)
     }
 
     /// Returns the number of unapproved papers
@@ -81,21 +76,18 @@ impl Database {
         let query_sql = queries::get_qp_search_query(exam_filter);
         let query = sqlx::query_as(&query_sql).bind(query);
 
-        let papers: Vec<models::DBBaseQP> = query.fetch_all(&self.connection).await?;
+        let papers: Vec<qp::BaseQP> = query.fetch_all(&self.connection).await?;
 
-        Ok(papers
-            .iter()
-            .map(|qp| qp::BaseQP::from(qp.clone()))
-            .collect())
+        Ok(papers)
     }
 
     pub async fn get_paper_by_id(&self, id: i32) -> Result<qp::AdminDashboardQP, sqlx::Error> {
         let query_sql = queries::get_get_paper_by_id_query();
         let query = sqlx::query_as(&query_sql).bind(id);
 
-        let paper: models::DBAdminDashboardQP = query.fetch_one(&self.connection).await?;
+        let paper: qp::AdminDashboardQP = query.fetch_one(&self.connection).await?;
 
-        Ok(paper.into())
+        Ok(paper)
     }
 
     /// Edit's a paper's details.
@@ -107,12 +99,12 @@ impl Database {
     /// - Deletes `replace` papers from the database.
     ///
     /// Returns the database transaction, the old filelink and the new paper details ([`crate::qp::AdminDashboardQP`])
-    pub async fn edit_paper<'c>(
+    pub async fn edit_paper(
         &self,
         edit_req: EditReq,
         username: &str,
         env_vars: &EnvVars,
-    ) -> Result<(Transaction<'c, Postgres>, String, AdminDashboardQP), color_eyre::eyre::Error>
+    ) -> Result<(Transaction<'_, Postgres>, String, AdminDashboardQP), color_eyre::eyre::Error>
     {
         let EditReq {
             id,
@@ -132,22 +124,25 @@ impl Database {
         let course_code = course_code.unwrap_or(current_details.qp.course_code);
         let course_name = course_name.unwrap_or(current_details.qp.course_name);
         let year = year.unwrap_or(current_details.qp.year);
-        let semester: String = semester
-            .map(|sem| Semester::try_from(&sem))
-            .transpose()?
-            .unwrap_or(current_details.qp.semester)
-            .into();
-        let exam: String = exam
-            .map(|exam| Exam::try_from(&exam))
-            .transpose()?
-            .unwrap_or(current_details.qp.exam)
-            .into();
+        let semester: String = String::from(
+            &semester
+                .map(|sem| Semester::try_from(sem.as_str()))
+                .transpose()?
+                .unwrap_or(current_details.qp.semester),
+        );
+        let exam: String = String::from(
+            &exam
+                .map(|exam| Exam::try_from(exam.as_str()))
+                .transpose()?
+                .unwrap_or(current_details.qp.exam),
+        );
         let approve_status = approve_status.unwrap_or(current_details.approve_status);
 
         // Set the new filelink
         let old_filelink = current_details.qp.filelink;
+
         let new_filelink = if current_details.qp.from_library {
-            old_filelink.clone() // TODO use consistent format
+            old_filelink.clone()
         } else if approve_status {
             env_vars.paths.get_slug(
                 &format!(
@@ -185,8 +180,7 @@ impl Database {
             query
         };
 
-        let new_qp: DBAdminDashboardQP = query.fetch_one(&mut *tx).await?;
-        let new_qp = AdminDashboardQP::from(new_qp);
+        let new_qp: AdminDashboardQP = query.fetch_one(&mut *tx).await?;
 
         // Delete the replaced papers
         for replace_id in replace {
@@ -207,15 +201,6 @@ impl Database {
 
         Ok((tx, old_filelink, new_qp))
     }
-
-    // /// Adds a new upload paper's details to the database. Sets the `from_library` field to false.
-    // ///
-    // /// Returns the database transaction and the id of the uploaded paper
-    // pub async fn add_uploaded_paper<'c>(
-    //     &self,
-    //     file_details:
-    // ) -> Result<(Transaction<'c, Postgres>, i32), color_eyre::eyre::Error> {
-    // }
 
     /// Sets the `is_deleted` field to true and `approve_status` to false. Only deletes uploaded papers.
     ///
@@ -244,14 +229,11 @@ impl Database {
     /// Gets all soft-deleted papers from the database
     pub async fn get_soft_deleted_papers(&self) -> Result<Vec<AdminDashboardQP>, sqlx::Error> {
         let query_sql = queries::get_get_soft_deleted_papers_query();
-        let papers: Vec<models::DBAdminDashboardQP> = sqlx::query_as(&query_sql)
+        let papers: Vec<AdminDashboardQP> = sqlx::query_as(&query_sql)
             .fetch_all(&self.connection)
             .await?;
 
-        Ok(papers
-            .iter()
-            .map(|qp| qp::AdminDashboardQP::from(qp.clone()))
-            .collect())
+        Ok(papers)
     }
 
     /// Permanently deletes a paper from the database
@@ -294,12 +276,9 @@ impl Database {
         let query = query.bind(semester);
         let query = query.bind(exam);
 
-        let papers: Vec<models::DBAdminDashboardQP> = query.fetch_all(&self.connection).await?;
+        let papers: Vec<qp::AdminDashboardQP> = query.fetch_all(&self.connection).await?;
 
-        Ok(papers
-            .iter()
-            .map(|qp| qp::AdminDashboardQP::from(qp.clone()))
-            .collect())
+        Ok(papers)
     }
 
     /// Inserts a new uploaded question paper into the database. Uses a placeholder for the filelink which should be replaced once the id is known using the [crate::db::Database::update_filelink] function.
@@ -307,7 +286,7 @@ impl Database {
     /// Returns a tuple with the transaction and the id of the inserted paper.
     pub async fn insert_new_uploaded_qp<'c>(
         &self,
-        file_details: &FileDetails,
+        file_details: FileDetails,
     ) -> Result<(Transaction<'c, Postgres>, i32), color_eyre::eyre::Error> {
         let mut tx = self.connection.begin().await?;
 
@@ -336,7 +315,6 @@ impl Database {
         Ok((tx, id))
     }
 
-    #[allow(unused)]
     /// Inserts a new library question paper into the database. Uses a placeholder for the filelink which should be replaced once the id is known using the [crate::db::Database::update_filelink] function.
     ///
     /// Returns a tuple with the transaction and the id of the inserted paper.

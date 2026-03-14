@@ -35,12 +35,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .process()
         .expect("Failed to parse environment variables");
 
-	let args = Args::parse();
-	if !Path::new(&args.file).exists() {
-		eprintln!("Error: file '{}' not found.", args.file);
-		std::process::exit(1);
-	}
-	
+    let args = Args::parse();
+    if !Path::new(&args.file).exists() {
+        eprintln!("Error: file '{}' not found.", args.file);
+        std::process::exit(1);
+    }
+
     let database = db::Database::new(&env_vars)
         .await
         .expect("Failed to connect to database");
@@ -157,7 +157,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             break;
         }
     }
-    
+
     println!("Finished uploading papers to database.");
     dir.close()?;
 
@@ -167,10 +167,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
       "💥 {count} papers have been imported into IQPS!\n\n<https://qp.metakgp.org/admin|Review> | Total Unapproved papers: *{total_count}*",
     );
 
-    let _ = slack::send_slack_message(
-      &env_vars.slack_webhook_url,
-      &message,
-    ).await;
+    let _ = slack::send_slack_message(&env_vars.slack_webhook_url, &message).await;
 
     Ok(())
 }

@@ -9,7 +9,6 @@ use sha2::Sha256;
 
 use crate::pathutils::Paths;
 
-#[derive(Clone)]
 pub struct EnvVars {
     // Database
     /// Database name
@@ -37,7 +36,7 @@ pub struct EnvVars {
     /// The usernames of the admins (additional to org team members, comma separated)
     pub gh_admin_usernames: String,
     /// URL of Slack webhook for sending notifications
-    pub slack_webhook_url: String, 
+    pub slack_webhook_url: String,
 
     // Other configs
     /// Maximum number of papers that can be uploaded at a time
@@ -67,7 +66,7 @@ pub struct EnvVars {
     pub paths: Paths,
 }
 
-impl EnvVars {    
+impl EnvVars {
     /// Parses the environment variables into the struct
     pub fn parse() -> Result<Self, Box<dyn std::error::Error>> {
         let db_name = std::env::var("DB_NAME")?;
@@ -82,28 +81,29 @@ impl EnvVars {
         let gh_org_team_slug = std::env::var("GH_ORG_TEAM_SLUG").unwrap_or_default();
         let gh_admin_usernames = std::env::var("GH_ADMIN_USERNAMES").unwrap_or_default();
         let slack_webhook_url = std::env::var("SLACK_WEBHOOK_URL").unwrap_or_default();
-        let max_upload_limit = std::env::var("MAX_UPLOAD_LIMIT")
-            .unwrap_or_else(|_| "10".to_string())
-            .parse::<usize>()?;
+        let max_upload_limit: usize = std::env::var("MAX_UPLOAD_LIMIT")
+            .map(|s| s.parse())
+            .unwrap_or(Ok(10))?;
         let log_location = std::env::var("LOG_LOCATION")
-            .unwrap_or_else(|_| "./log/application.log".to_string())
+            .unwrap_or("./log/application.log".to_string())
             .into();
-        let static_files_url = std::env::var("STATIC_FILES_URL")
-            .unwrap_or_else(|_| "https://static.metakgp.org".to_string());
+        let static_files_url =
+            std::env::var("STATIC_FILES_URL").unwrap_or("https://static.metakgp.org".to_string());
         let static_file_storage_location = std::env::var("STATIC_FILE_STORAGE_LOCATION")
-            .unwrap_or_else(|_| "/srv/static".to_string())
+            .unwrap_or("/srv/static".to_string())
             .into();
         let uploaded_qps_path = std::env::var("UPLOADED_QPS_PATH")
-            .unwrap_or_else(|_| "/iqps/uploaded".to_string())
+            .unwrap_or("/iqps/uploaded".to_string())
             .into();
         let library_qps_path = std::env::var("LIBRARY_QPS_PATH")
-            .unwrap_or_else(|_| "/peqp/qp".to_string())
+            .unwrap_or("/peqp/qp".to_string())
             .into();
-        let server_port = std::env::var("SERVER_PORT")
-            .unwrap_or_else(|_| "8080".to_string())
-            .parse::<i32>()?;
+        let server_port: i32 = std::env::var("SERVER_PORT")
+            .map(|s| s.parse())
+            .unwrap_or(Ok(8080))?;
         let cors_allowed_origins = std::env::var("CORS_ALLOWED_ORIGINS")
-            .unwrap_or_else(|_| "https://qp.metakgp.org,http://localhost:5173".to_string());
+            .unwrap_or("https://qp.metakgp.org,http://localhost:5173".to_string());
+
         Ok(Self {
             db_name,
             db_host,
@@ -128,7 +128,7 @@ impl EnvVars {
             paths: Paths::default(),
         })
     }
-    
+
     /// Processes the environment variables after reading.
     pub fn process(mut self) -> Result<Self, Box<dyn std::error::Error>> {
         self.paths = Paths::new(

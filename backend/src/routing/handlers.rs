@@ -10,7 +10,7 @@ use axum::{
     http::StatusCode,
     Extension,
 };
-use color_eyre::eyre::{ContextCompat, Result};
+use color_eyre::eyre::{eyre, ContextCompat, Result};
 use http::HeaderMap;
 use serde::Serialize;
 use tokio::fs;
@@ -27,7 +27,7 @@ use crate::{
     slack::send_slack_message,
 };
 
-use super::{AppError, BackendResponse, RouterState, Status};
+use super::{AppError, BackendResponse, HandlerState};
 
 /// The return type of a handler function. T is the data type returned if the operation was a success
 type HandlerReturn<T> = Result<(StatusCode, BackendResponse<T>), AppError>;
@@ -38,14 +38,12 @@ pub async fn healthcheck() -> HandlerReturn<()> {
 }
 
 /// Fetches all the unapproved papers.
-pub async fn get_unapproved(
-    State(state): State<RouterState>,
-) -> HandlerReturn<Vec<AdminDashboardQP>> {
-    let papers: Vec<AdminDashboardQP> = state.db.get_unapproved_papers().await?;
+pub async fn get_unapproved(State(state): HandlerState) -> HandlerReturn<Vec<AdminDashboardQP>> {
+    let papers = state.db.get_unapproved_papers().await?;
 
     let papers = papers
-        .iter()
-        .map(|paper| paper.clone().with_url(&state.env_vars))
+        .into_iter()
+        .map(|paper| paper.with_url(&state.env_vars))
         .collect::<Result<Vec<qp::AdminDashboardQP>, color_eyre::eyre::Error>>()?;
 
     Ok(BackendResponse::ok(
@@ -55,12 +53,12 @@ pub async fn get_unapproved(
 }
 
 /// Gets all papers which have been soft-deleted.
-pub async fn get_trash(State(state): State<RouterState>) -> HandlerReturn<Vec<AdminDashboardQP>> {
-    let papers: Vec<AdminDashboardQP> = state.db.get_soft_deleted_papers().await?;
+pub async fn get_trash(State(state): HandlerState) -> HandlerReturn<Vec<AdminDashboardQP>> {
+    let papers = state.db.get_soft_deleted_papers().await?;
 
     let papers = papers
-        .iter()
-        .map(|paper| paper.clone().with_url(&state.env_vars))
+        .into_iter()
+        .map(|paper| paper.with_url(&state.env_vars))
         .collect::<Result<Vec<qp::AdminDashboardQP>, color_eyre::eyre::Error>>()?;
 
     Ok(BackendResponse::ok(
@@ -71,7 +69,7 @@ pub async fn get_trash(State(state): State<RouterState>) -> HandlerReturn<Vec<Ad
 
 /// Fetches a paper by id.
 pub async fn get_paper_details(
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     Query(params): Query<HashMap<String, String>>,
 ) -> HandlerReturn<AdminDashboardQP> {
     if let Some(id) = params.get("id") {
@@ -102,7 +100,7 @@ pub async fn get_paper_details(
 /// * `query`: The query string to search in the question papers (searches course name or code)
 /// * `exam` (optional): A comma-separated string of exam types to filter. Leave empty to match any exam.
 pub async fn search(
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     Query(params): Query<HashMap<String, String>>,
 ) -> HandlerReturn<Vec<qp::BaseQP>> {
     let response = if let Some(query) = params.get("query") {
@@ -114,14 +112,15 @@ pub async fn search(
         if let Ok(exam_filter) = exam_query_str
             .split(',')
             .filter(|val| !val.trim().is_empty())
-            .map(|val| Exam::try_from(&val.to_owned()))
+            .map(Exam::try_from)
             .collect::<Result<Vec<Exam>, _>>()
         {
-            let papers = state.db.search_papers(query, exam_filter).await?;
-
-            let papers = papers
-                .iter()
-                .map(|paper| paper.clone().with_url(&state.env_vars))
+            let papers = state
+                .db
+                .search_papers(query, exam_filter)
+                .await?
+                .into_iter()
+                .map(|paper| paper.with_url(&state.env_vars))
                 .collect::<Result<Vec<qp::BaseQP>, color_eyre::eyre::Error>>()?;
 
             Ok(BackendResponse::ok(
@@ -160,7 +159,7 @@ pub struct OAuthRes {
 ///
 /// Request format - [`OAuthReq`]
 pub async fn oauth(
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     Json(body): Json<OAuthReq>,
 ) -> HandlerReturn<OAuthRes> {
     if let Some(token) = auth::authenticate_user(&body.code, &state.env_vars).await? {
@@ -215,7 +214,7 @@ pub struct EditReq {
 /// Request format - [`EditReq`]
 pub async fn edit(
     Extension(auth): Extension<Auth>,
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     Json(body): Json<EditReq>,
 ) -> HandlerReturn<AdminDashboardQP> {
     // Edit the database entry
@@ -276,23 +275,44 @@ pub struct UploadStatus {
     /// The filename
     filename: String,
     /// Whether the file was successfully uploaded
-    status: Status,
+    status: &'static str,
     /// A message describing the status
     message: String,
+}
+
+impl UploadStatus {
+    fn ok(filename: String) -> Self {
+        Self {
+            filename,
+            status: "success",
+            message: "Successfully uploaded paper.".into(),
+        }
+    }
+
+    fn error(filename: String, message: String) -> Self {
+        Self {
+            filename,
+            status: "error",
+            message,
+        }
+    }
 }
 
 /// Uploads question papers to the server
 ///
 /// Request format - Multipart form with a `file_details` field of the format [`FileDetails`]
 pub async fn upload(
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     mut multipart: Multipart,
 ) -> HandlerReturn<Vec<UploadStatus>> {
     let mut files = Vec::<(HeaderMap, Bytes)>::new();
     let mut file_details: String = "".into();
 
-    while let Some(field) = multipart.next_field().await.unwrap() {
-        let name = field.name().unwrap().to_string();
+    while let Some(field) = multipart.next_field().await? {
+        let name = field
+            .name()
+            .ok_or(eyre!("Error parsing file upload multipart field."))?
+            .to_string();
 
         if name == "files" {
             files.push((field.headers().clone(), field.bytes().await?));
@@ -329,40 +349,36 @@ pub async fn upload(
         ));
     }
 
-    let files_iter = files.iter().zip(file_details.iter());
+    let files_iter = files.into_iter().zip(file_details.into_iter());
     let mut upload_statuses = Vec::<UploadStatus>::new();
 
     for ((file_headers, file_data), details) in files_iter {
-        let filename = details.filename.to_owned();
+        let filename = details.filename.clone();
 
         if file_data.len() > FILE_SIZE_LIMIT {
-            upload_statuses.push(UploadStatus {
+            upload_statuses.push(UploadStatus::error(
                 filename,
-                status: Status::Error,
-                message: format!(
+                format!(
                     "File size too big. Only files upto {} MiB are allowed.",
                     FILE_SIZE_LIMIT >> 20
                 ),
-            });
+            ));
             continue;
         }
 
         if let Some(content_type) = file_headers.get("content-type") {
             if content_type != "application/pdf" {
-                upload_statuses.push(UploadStatus {
-                    filename: filename.to_owned(),
-                    status: Status::Error,
-                    message: "Only PDFs are supported.".into(),
-                });
+                upload_statuses.push(UploadStatus::error(
+                    filename,
+                    "Only PDFs are supported.".into(),
+                ));
                 continue;
             }
         } else {
-            upload_statuses.push(UploadStatus {
+            upload_statuses.push(UploadStatus::error(
                 filename,
-                status: Status::Error,
-                message: "`content-type` header not found. File type could not be determined."
-                    .into(),
-            });
+                "`content-type` header not found. File type could not be determined.".into(),
+            ));
             continue;
         }
 
@@ -387,20 +403,15 @@ pub async fn upload(
             // Write the file data
             if fs::write(&filepath, file_data).await.is_ok() {
                 if tx.commit().await.is_ok() {
-                    upload_statuses.push(UploadStatus {
-                        filename,
-                        status: Status::Success,
-                        message: "Succesfully uploaded file.".into(),
-                    });
+                    upload_statuses.push(UploadStatus::ok(filename));
                     continue;
                 } else {
                     // Transaction commit failed, delete the file
                     fs::remove_file(filepath).await?;
-                    upload_statuses.push(UploadStatus {
+                    upload_statuses.push(UploadStatus::error(
                         filename,
-                        status: Status::Success,
-                        message: "Succesfully uploaded file.".into(),
-                    });
+                        "Error: Database transaction failed.".into(),
+                    ));
                     continue;
                 }
             } else {
@@ -411,19 +422,15 @@ pub async fn upload(
         } else {
             tx.rollback().await?;
 
-            upload_statuses.push(UploadStatus {
+            upload_statuses.push(UploadStatus::error(
                 filename,
-                status: Status::Error,
-                message: "Error updating the filelink".into(),
-            });
+                "Error updating the filelink".into(),
+            ));
             continue;
         }
 
-        upload_statuses.push(UploadStatus {
-            filename,
-            status: Status::Error,
-            message: "THIS SHOULD NEVER HAPPEN. REPORT IMMEDIATELY. ALSO THIS WOULDN'T HAPPEN IF RUST HAD STABLE ASYNC CLOSURES.".into(),
-        });
+        upload_statuses.push(UploadStatus::error(filename,
+            "THIS SHOULD NEVER HAPPEN. REPORT IMMEDIATELY. ~~ALSO THIS WOULDN'T HAPPEN IF RUST HAD STABLE ASYNC CLOSURES.~~ CORRECTION: ASYNC CLOSURES ARE STABLE. THE ALTERNATIVE IS INSANE. THIS IS BETTER.".into()));
     }
 
     let total_count = state.db.get_unapproved_papers_count().await?;
@@ -455,10 +462,7 @@ pub struct DeleteReq {
 /// (Soft) Deletes a given paper.
 ///
 /// Request format - [`DeleteReq`]
-pub async fn delete(
-    State(state): State<RouterState>,
-    Json(body): Json<DeleteReq>,
-) -> HandlerReturn<()> {
+pub async fn delete(State(state): HandlerState, Json(body): Json<DeleteReq>) -> HandlerReturn<()> {
     let paper_deleted = state.db.soft_delete(body.id).await?;
 
     if paper_deleted {
@@ -484,15 +488,33 @@ pub struct HardDeleteReq {
 /// The status of a paper to be deleted
 pub struct DeleteStatus {
     id: i32,
-    status: Status,
-    message: String,
+    status: &'static str,
+    message: &'static str,
+}
+
+impl DeleteStatus {
+    fn ok(id: i32) -> Self {
+        Self {
+            id,
+            status: "success",
+            message: "Successfully hard deleted the paper.",
+        }
+    }
+
+    fn error(id: i32, message: &'static str) -> Self {
+        Self {
+            id,
+            status: "error",
+            message,
+        }
+    }
 }
 
 /// Hard deletes papers from a list of ids.
 ///
 /// Request format - [`HardDeleteReq`]
 pub async fn hard_delete(
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     Json(body): Json<HardDeleteReq>,
 ) -> HandlerReturn<Vec<DeleteStatus>> {
     let mut delete_statuses = Vec::<DeleteStatus>::new();
@@ -503,26 +525,15 @@ pub async fn hard_delete(
             let filepath = state.env_vars.paths.get_path_from_slug(&paper.qp.filelink);
             if fs::remove_file(&filepath).await.is_ok() {
                 if tx.commit().await.is_ok() {
-                    delete_statuses.push(DeleteStatus {
-                        id,
-                        status: Status::Success,
-                        message: "Successfully hard deleted the paper.".into(),
-                    });
+                    delete_statuses.push(DeleteStatus::ok(id));
                     deleted_count += 1;
                 } else {
-                    delete_statuses.push(DeleteStatus {
-                        id,
-                        status: Status::Error,
-                        message: "Error committing the transaction.".into(),
-                    });
+                    delete_statuses
+                        .push(DeleteStatus::error(id, "Error committing the transaction."));
                 }
             } else {
                 tx.rollback().await?;
-                delete_statuses.push(DeleteStatus {
-                    id,
-                    status: Status::Error,
-                    message: "Failed to delete file.".into(),
-                });
+                delete_statuses.push(DeleteStatus::error(id, "Failed to delete file."));
             }
         }
     }
@@ -545,7 +556,7 @@ pub async fn hard_delete(
 /// * `semester` (optional): The semester (autumn/spring)
 /// * `exam` (optional): The exam field (midsem/endsem/ct)
 pub async fn similar(
-    State(state): State<RouterState>,
+    State(state): HandlerState,
     Query(body): Query<HashMap<String, String>>,
 ) -> HandlerReturn<Vec<AdminDashboardQP>> {
     if !body.contains_key("course_code") {
@@ -566,13 +577,13 @@ pub async fn similar(
             body.get("semester"),
             body.get("exam"),
         )
-        .await?;
+        .await?
+        .into_iter()
+        .map(|paper| paper.with_url(&state.env_vars))
+        .collect::<Result<Vec<AdminDashboardQP>>>()?;
 
     Ok(BackendResponse::ok(
         format!("Found {} similar papers.", papers.len()),
-        papers
-            .iter()
-            .map(|paper| paper.to_owned().with_url(&state.env_vars))
-            .collect::<Result<Vec<AdminDashboardQP>>>()?,
+        papers,
     ))
 }

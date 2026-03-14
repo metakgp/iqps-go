@@ -10,7 +10,6 @@ use color_eyre::eyre::eyre;
 use url::Url;
 
 /// A category of papers, can also be used to represent the directory where these papers are stored
-#[allow(unused)]
 pub enum PaperCategory {
     /// Unapproved paper
     Unapproved,
@@ -20,7 +19,7 @@ pub enum PaperCategory {
     Library,
 }
 
-#[derive(Clone, Default)]
+#[derive(Default)]
 /// A set of paths (absolute, relative, or even URLs) for all three categories of papers (directories)
 struct PathTriad {
     /// Unapproved paper path
@@ -42,17 +41,12 @@ impl PathTriad {
     }
 }
 
-#[derive(Clone)]
-#[allow(unused)]
 /// Struct containing all the paths and URLs required to parse or create any question paper's slug, absolute path, or URL.
 pub struct Paths {
     /// URL of the static files server
     static_files_url: Url,
     /// The absolute path to the location from where the static files server serves files
     static_files_path: PathBuf,
-
-    /// The absolute system paths to all three directories on the server
-    system_paths: PathTriad,
 
     /// The slugs to all three directories
     ///
@@ -66,13 +60,11 @@ impl Default for Paths {
             static_files_url: Url::parse("https://metakgp.org")
                 .expect("This library thinks https://metakgp.org is not a valid URL."),
             static_files_path: PathBuf::default(),
-            system_paths: PathTriad::default(),
             path_slugs: PathTriad::default(),
         }
     }
 }
 
-#[allow(unused)]
 impl Paths {
     /// Creates a new `Paths` struct
     /// # Arguments
@@ -130,7 +122,6 @@ impl Paths {
         Ok(Self {
             static_files_url: Url::parse(static_files_url)?,
             static_files_path: path::absolute(static_file_storage_location)?,
-            system_paths,
             path_slugs,
         })
     }
@@ -144,30 +135,9 @@ impl Paths {
             .to_string()
     }
 
-    /// Returns the absolute system path for the specified directory and filename
-    pub fn get_path(&self, filename: &str, dir: PaperCategory) -> PathBuf {
-        self.system_paths.get(dir).join(filename)
-    }
-
     /// Returns the absolute system path from a given slug
     pub fn get_path_from_slug(&self, slug: &str) -> PathBuf {
         self.static_files_path.join(slug)
-    }
-
-    /// Returns the static server URL for the specified directory and filename
-    pub fn get_url(
-        &self,
-        filename: &str,
-        dir: PaperCategory,
-    ) -> Result<String, color_eyre::eyre::Error> {
-        let slug = self
-            .path_slugs
-            .get(dir)
-            .join(filename)
-            .to_string_lossy()
-            .into_owned();
-
-        self.get_url_from_slug(&slug)
     }
 
     /// Returns the static server URL for a given slug

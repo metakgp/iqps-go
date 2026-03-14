@@ -5,13 +5,7 @@
 use tracing_appender::rolling::{RollingFileAppender, Rotation};
 use tracing_subscriber::prelude::*;
 
-mod auth;
-mod db;
-mod env;
-mod pathutils;
-mod qp;
-mod routing;
-mod slack;
+use iqps_backend::{db, env, routing};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -61,7 +55,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let listener =
         tokio::net::TcpListener::bind(format!("0.0.0.0:{}", env_vars.server_port)).await?;
     tracing::info!("Starting server on port {}", env_vars.server_port);
-    axum::serve(listener, routing::get_router(&env_vars, database)).await?;
+    axum::serve(listener, routing::get_router(env_vars, database)).await?;
 
     Ok(())
 }

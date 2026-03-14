@@ -7,7 +7,6 @@ use serde::Serialize;
 
 use crate::env::EnvVars;
 
-#[derive(Clone, Copy)]
 /// Represents a semester.
 ///
 /// It can be parsed from a [`String`] using the `.try_from()` function. An error will be returned if the given string has an invalid value.
@@ -24,10 +23,10 @@ pub enum Semester {
     Unknown,
 }
 
-impl TryFrom<&String> for Semester {
+impl TryFrom<&str> for Semester {
     type Error = color_eyre::eyre::Error;
 
-    fn try_from(value: &String) -> Result<Self, Self::Error> {
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
         if value == "autumn" {
             Ok(Semester::Autumn)
         } else if value == "spring" {
@@ -40,8 +39,8 @@ impl TryFrom<&String> for Semester {
     }
 }
 
-impl From<Semester> for String {
-    fn from(value: Semester) -> Self {
+impl From<&Semester> for String {
+    fn from(value: &Semester) -> Self {
         match value {
             Semester::Autumn => "autumn".into(),
             Semester::Spring => "spring".into(),
@@ -50,7 +49,6 @@ impl From<Semester> for String {
     }
 }
 
-#[derive(Clone, Copy)]
 /// Represents the exam type of the paper.
 ///
 /// Can be converted to and parsed from a String using the [`From`] and [`TryFrom`] trait implementations.
@@ -69,10 +67,10 @@ pub enum Exam {
     Unknown,
 }
 
-impl TryFrom<&String> for Exam {
+impl TryFrom<&str> for Exam {
     type Error = color_eyre::eyre::Error;
 
-    fn try_from(value: &String) -> Result<Self, Self::Error> {
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
         if value == "midsem" {
             Ok(Exam::Midsem)
         } else if value == "endsem" {
@@ -93,8 +91,8 @@ impl TryFrom<&String> for Exam {
     }
 }
 
-impl From<Exam> for String {
-    fn from(value: Exam) -> Self {
+impl From<&Exam> for String {
+    fn from(value: &Exam) -> Self {
         match value {
             Exam::Midsem => "midsem".into(),
             Exam::Endsem => "endsem".into(),
@@ -115,7 +113,7 @@ impl Serialize for Serializable {
     where
         S: serde::Serializer,
     {
-        serializer.serialize_str(&String::from(*self))
+        serializer.serialize_str(String::from(self).as_str())
     }
 }
 
@@ -132,12 +130,11 @@ pub struct LibraryQP {
     pub year: i32,
     pub exam: String,
     pub semester: String,
-    #[allow(dead_code)]
     pub filename: String,
     pub approve_status: bool,
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, sqlx::FromRow)]
 /// The fields of a question paper sent from the search endpoint
 pub struct BaseQP {
     pub id: i32,
@@ -151,14 +148,18 @@ pub struct BaseQP {
     pub note: String,
 }
 
-#[derive(Serialize, Clone)]
+
+#[derive(Serialize, sqlx::FromRow)]
 /// The fields of a question paper sent from the admin dashboard endpoints.
 ///
 /// This includes fields such as `approve_status` and `upload_timestamp` that would only be relevant to the dashboard.
 pub struct AdminDashboardQP {
     #[serde(flatten)]
+    #[sqlx(flatten)]
+    /// The basic question paper fields, inherited from the `BaseQP` type. This field is flattened
+    /// for JSON serialization.
     pub qp: BaseQP,
-    pub upload_timestamp: String,
+    pub upload_timestamp: chrono::NaiveDateTime,
     pub approve_status: bool,
 }
 
