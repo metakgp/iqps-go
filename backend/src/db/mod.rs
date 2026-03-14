@@ -99,12 +99,12 @@ impl Database {
     /// - Deletes `replace` papers from the database.
     ///
     /// Returns the database transaction, the old filelink and the new paper details ([`crate::qp::AdminDashboardQP`])
-    pub async fn edit_paper<'c>(
+    pub async fn edit_paper(
         &self,
         edit_req: EditReq,
         username: &str,
         env_vars: &EnvVars,
-    ) -> Result<(Transaction<'c, Postgres>, String, AdminDashboardQP), color_eyre::eyre::Error>
+    ) -> Result<(Transaction<'_, Postgres>, String, AdminDashboardQP), color_eyre::eyre::Error>
     {
         let EditReq {
             id,

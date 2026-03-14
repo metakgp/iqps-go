@@ -148,6 +148,7 @@ pub struct BaseQP {
     pub note: String,
 }
 
+
 #[derive(Serialize, sqlx::FromRow)]
 /// The fields of a question paper sent from the admin dashboard endpoints.
 ///
@@ -155,8 +156,10 @@ pub struct BaseQP {
 pub struct AdminDashboardQP {
     #[serde(flatten)]
     #[sqlx(flatten)]
+    /// The basic question paper fields, inherited from the `BaseQP` type. This field is flattened
+    /// for JSON serialization.
     pub qp: BaseQP,
-    pub upload_timestamp: String,
+    pub upload_timestamp: chrono::NaiveDateTime,
     pub approve_status: bool,
 }
 
