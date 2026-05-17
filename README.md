@@ -207,12 +207,12 @@ Environment variables can be set using a `.env` file. Use the `.env.template` fi
 ### Maintainer(s)
 The currently active maintainer(s) of this project. See https://wiki.metakgp.org/w/Metakgp:Project_Maintainer.
 
-- [Harsh Khandeparkar](https://github.com/harshkhandeparkar)
 - [Dipam Sen](https://github.com/dipamsen)
 
 ### Past Maintainer(s)
 Previous maintainer(s) of this project. See https://wiki.metakgp.org/w/Metakgp:Project_Maintainer.
 
+- [Harsh Khandeparkar](https://github.com/harshkhandeparkar)
 - [Rajiv Harlalka](https://github.com/rajivharlalka)
 - [Chirag Ghosh](https://github.com/chirag-ghosh)
 - [Arpit Bhardwaj](https://github.com/proffapt)
