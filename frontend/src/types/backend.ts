@@ -101,5 +101,13 @@ export interface IEndpointTypes {
 			exam?: Exam;
 		},
 		response: IAdminDashboardQP[];
-	}
+	},
+	stats: {
+		request: null;
+		response: {
+			total_papers: number;
+			recent_uploads: number;
+			total_courses: number;
+		}
+	},
 }

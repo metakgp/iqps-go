@@ -13,12 +13,25 @@ type SortOrder = 'ascending' | 'descending';
 type FilterByYear = number | null;
 type FilterFields = 'filterByYear' | 'sortBy' | 'sortOrder';
 
+interface IStatCard {
+	label: string;
+	value: number;
+}
+
 interface ISearchResultsProps {
 	awaitingResults: boolean;
 	success: boolean;
 	msg: string;
 	results: ISearchResult[];
+	stats: {
+		total_papers: number;
+		recent_uploads: number;
+		total_courses: number;
+	} | null;
+	showStats: boolean;
 }
+
+
 function SearchResults(props: ISearchResultsProps) {
 	const [displayedResults, setDisplayedResults] = useState<ISearchResult[]>(props.results);
 	const [filterByYear, setFilterByYear] = useState<FilterByYear>(null);
@@ -84,10 +97,32 @@ function SearchResults(props: ISearchResultsProps) {
 	// To update when filters are changed
 	useEffect(updateDisplayedResults, [filterByYear, sortBy, sortOrder])
 
+	const statsCards: IStatCard[] = props.stats ? [
+		{ label: 'question papers', value: props.stats.total_papers },
+		{ label: 'recently uploaded', value: props.stats.recent_uploads },
+		{ label: 'courses covered', value: props.stats.total_courses },
+	] : [];
+
+	const fmt = (num: number) => {
+		if (num >= 1000) return (num / 1000).toFixed(0) + 'k';
+		else return num;
+	}
+
 	return <div className="search-results">
 		{
 			props.awaitingResults ? <div className="spinner"><Spinner /></div> :
-				!props.success ? <p className="message">{props.msg}</p> : (
+				!props.success ? (
+					props.showStats && statsCards.length > 0 ? (
+						<div className="stats-panel">
+							{statsCards.map((stat, index) => (
+								<div key={index} className="stat-card">
+									<span className="stat-card-value">{fmt(stat.value)}</span>
+									<span className="stat-card-label">{stat.label}</span>
+								</div>
+							))}
+						</div>
+					) : <p className="message">{props.msg}</p>
+				) : (
 					<>
 						<ResultsFilter
 							filterByYear={filterByYear}

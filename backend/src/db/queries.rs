@@ -209,3 +209,12 @@ pub const UPDATE_FILELINK: &str = "UPDATE iqps SET filelink=$2 WHERE id=$1";
 /// Insert a library pqper in the db
 /// Parameters in the following order: `course_code`, `course_name`, `year`, `exam`, `semester`, `note`, `filelink`, `approve_status`
 pub const INSERT_NEW_LIBRARY_QP: &str = "INSERT INTO iqps (course_code, course_name, year, exam, semester, note, filelink, from_library, approve_status) VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8) RETURNING id";
+
+/// Get total number of approved papers
+pub const GET_APPROVED_COUNT: &str = "SELECT COUNT(*) FROM iqps WHERE approve_status = true AND is_deleted = false";
+
+/// Get number of recently uploaded papers (last 1 week)
+pub const GET_RECENT_UPLOADS_COUNT: &str = "SELECT COUNT(*) FROM iqps WHERE upload_timestamp > (now() - interval '1 week')";
+
+/// Get total number of courses
+pub const GET_TOTAL_COURSES_COUNT: &str = "SELECT COUNT(DISTINCT course_code) FROM iqps";

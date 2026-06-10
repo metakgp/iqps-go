@@ -26,6 +26,7 @@ function CourseSearchForm() {
 	const [success, setSuccess] = useState<boolean>(false);
 	const [awaitingResponse, setAwaitingResponse] = useState<boolean>(false);
 	const [msg, setMsg] = useState<string>('Search for something.');
+	const [stats, setStats] = useState<{ total_papers: number; recent_uploads: number; total_courses: number } | null>(null);
 
 	const courseInputRef = createRef<HTMLInputElement>();
 
@@ -73,12 +74,30 @@ function CourseSearchForm() {
 		window.history.replaceState(window.history.state, "", url);
 	}
 
+	useEffect(() => {
+		const fetchStats = async () => {
+			const response = await makeRequest('stats', 'get');
+			if (response.status === 'success') {
+				setStats(response.data);
+			} else {
+				console.error('Error loading stats:', response.message);
+			}
+		};
+
+		if (query === '') {
+			fetchStats();
+		}
+	}, [])
+
 	// Load results if the link has a query
 	useEffect(() => {
 		if (query !== '') {
 			fetchResults();
 		}
 	}, [])
+
+	const showStats = query === '' && !awaitingResponse && !success && searchResults.length === 0 && stats !== null;
+	const displayMsg = showStats ? '' : msg;
 
 	return <div className="search-form">
 		<form onSubmit={handleSubmit}>
@@ -113,8 +132,10 @@ function CourseSearchForm() {
 		<SearchResults
 			awaitingResults={awaitingResponse}
 			success={success}
-			msg={msg}
+			msg={displayMsg}
 			results={searchResults}
+			stats={stats}
+			showStats={showStats}
 		/>
 	</div>;
 }

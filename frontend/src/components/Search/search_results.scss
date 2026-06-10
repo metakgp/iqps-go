@@ -16,6 +16,40 @@
 		font-size: 1.2rem;
 	}
 
+	.stats-panel {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 1rem;
+		margin: 1rem 0;
+	}
+
+	.stat-card {
+		background-color: $surface-2;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		padding: 1rem 1.25rem;
+		border-radius: 12px;
+		min-width: 180px;
+		flex: 1 1 180px;
+		max-width: 280px;
+		text-align: center;
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+	}
+
+	.stat-card-value {
+		display: block;
+		font-size: 2rem;
+		font-weight: 700;
+		color: $accent-color-lighter;
+	}
+
+	.stat-card-label {
+		display: block;
+		margin-top: 0.5rem;
+		color: $fg-color-darker;
+		font-size: 0.95rem;
+	}
+
 	.results-filter {
 		width: 100%;
 		display: flex;
@@ -104,6 +138,35 @@
 
 	@media only screen and (max-width: 768px) {
 		padding: 0.5rem 0;
+
+		.stats-panel {
+			flex-direction: column;
+		}
+
+		.stat-card {
+			max-width: none;
+			margin: 0 1rem;
+			flex: 1;
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			padding: 0;
+		}
+		
+		.stat-card-value, .stat-card-label {
+			font-size: 1rem;
+			margin: 0;
+			flex: 1;
+		}
+
+		.stat-card-value {
+			max-width: 60px;
+		}
+
+		.stat-card-label {
+			text-align: left;
+		}
+
 
 		.results-filter {
 			gap: 0rem;
