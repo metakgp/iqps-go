@@ -20,9 +20,14 @@ function StatsShowcase() {
     fetchStats();
   }, []);
 
+  const fmt = (num: number) => {
+    if (num > 1000) return `${(num / 1000).toFixed(0)}k`;
+    return num;
+  }
+
   return (
     <div className="stats-panel">
-        Serving <span className="stat-value">{stats ? stats.total_papers : "..."}</span> question papers across <span className="stat-value">{stats ? stats.total_courses : "..."}</span> courses
+        Serving <span className="stat-value">{stats ? fmt(stats.total_papers) : "..."}</span> question papers across <span className="stat-value">{stats ? fmt(stats.total_courses) : "..."}</span> courses
     </div>
   );
 }

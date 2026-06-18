@@ -83,3 +83,9 @@ select,
 
 	border-radius: 10px !important;
 }
+
+@media only screen and (max-width: 768px) {
+    :root {
+		font-size: 11pt;
+	}
+}
