@@ -591,14 +591,12 @@ pub async fn similar(
 #[derive(Serialize)]
 pub struct Stats {
     total_papers: i64,
-    recent_uploads: i64,
     total_courses: i64,
 }
 
 /// Get statistics about the database
 pub async fn get_stats(State(state): HandlerState) -> HandlerReturn<Stats> {
     let total_papers = state.db.get_approved_count().await?;
-    let recent_uploads = state.db.get_recent_uploads_count().await?;
     let total_courses = state.db.get_total_courses_count().await?;
-    Ok(BackendResponse::ok(format!("Found {} papers.", total_papers), Stats { total_papers, recent_uploads, total_courses }))
+    Ok(BackendResponse::ok(format!("Found {} papers.", total_papers), Stats { total_papers, total_courses }))
 }

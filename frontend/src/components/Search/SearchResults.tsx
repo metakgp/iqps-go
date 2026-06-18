@@ -13,22 +13,11 @@ type SortOrder = 'ascending' | 'descending';
 type FilterByYear = number | null;
 type FilterFields = 'filterByYear' | 'sortBy' | 'sortOrder';
 
-interface IStatCard {
-	label: string;
-	value: number;
-}
-
 interface ISearchResultsProps {
 	awaitingResults: boolean;
 	success: boolean;
 	msg: string;
 	results: ISearchResult[];
-	stats: {
-		total_papers: number;
-		recent_uploads: number;
-		total_courses: number;
-	} | null;
-	showStats: boolean;
 }
 
 
@@ -97,31 +86,11 @@ function SearchResults(props: ISearchResultsProps) {
 	// To update when filters are changed
 	useEffect(updateDisplayedResults, [filterByYear, sortBy, sortOrder])
 
-	const statsCards: IStatCard[] = props.stats ? [
-		{ label: 'question papers', value: props.stats.total_papers },
-		{ label: 'recently uploaded', value: props.stats.recent_uploads },
-		{ label: 'courses covered', value: props.stats.total_courses },
-	] : [];
-
-	const fmt = (num: number) => {
-		if (num >= 1000) return (num / 1000).toFixed(0) + 'k';
-		else return num;
-	}
-
 	return <div className="search-results">
 		{
 			props.awaitingResults ? <div className="spinner"><Spinner /></div> :
 				!props.success ? (
-					props.showStats && statsCards.length > 0 ? (
-						<div className="stats-panel">
-							{statsCards.map((stat, index) => (
-								<div key={index} className="stat-card">
-									<span className="stat-card-value">{fmt(stat.value)}</span>
-									<span className="stat-card-label">{stat.label}</span>
-								</div>
-							))}
-						</div>
-					) : <p className="message">{props.msg}</p>
+					<p className="message">{props.msg}</p>
 				) : (
 					<>
 						<ResultsFilter
@@ -237,7 +206,7 @@ function ResultCard(result: ISearchResult) {
 	}
 
 	return <div className="result-card">
-		<p className="result-card-info">
+		<div className="result-card-info">
 			<p className="result-card-title">{getTitle()}</p>
 			<div className="result-card-tags">
 				<span className="result-card-tag">{result.year}</span>
@@ -246,7 +215,7 @@ function ResultCard(result: ISearchResult) {
 				{result.note !== "" && <span className="result-card-tag">{result.note}</span>}
 				{auth.isAuthenticated && <span className="result-card-tag">id: {result.id}</span>}
 			</div>
-		</p>
+		</div>
 		<div className="result-card-btns">
 			{auth.isAuthenticated && <a
 				className="result-card-btn icon-btn"

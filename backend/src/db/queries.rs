@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS iqps (
 	course_name TEXT NOT NULL DEFAULT '',
 	year INTEGER NOT NULL,
     exam TEXT NOT NULL DEFAULT '',
-    semester TEXT NOT NULL DEFAULT '',
+    semester VARCHAR NOT NULL DEFAULT '',
     note TEXT NOT NULL DEFAULT '',
     filelink TEXT NOT NULL,
     from_library BOOLEAN DEFAULT FALSE,
@@ -212,9 +212,6 @@ pub const INSERT_NEW_LIBRARY_QP: &str = "INSERT INTO iqps (course_code, course_n
 
 /// Get total number of approved papers
 pub const GET_APPROVED_COUNT: &str = "SELECT COUNT(*) FROM iqps WHERE approve_status = true AND is_deleted = false";
-
-/// Get number of recently uploaded papers (last 1 week)
-pub const GET_RECENT_UPLOADS_COUNT: &str = "SELECT COUNT(*) FROM iqps WHERE upload_timestamp > (now() - interval '1 week')";
 
 /// Get total number of courses
 pub const GET_TOTAL_COURSES_COUNT: &str = "SELECT COUNT(DISTINCT course_code) FROM iqps";

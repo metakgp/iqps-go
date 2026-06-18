@@ -1,0 +1,24 @@
+@import "../../styles/variables";
+
+
+.stats-panel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.stat-value {
+    display: inline-block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: $accent-color-lighter;
+}
+
+
+
+@media only screen and (max-width: 768px) {
+    .stats-panel {
+        margin-bottom: 1.25rem;
+    }
+}

@@ -372,13 +372,6 @@ impl Database {
         Ok(count.get(0))
     }
 
-    /// Get number of recently uploaded papers
-    pub async fn get_recent_uploads_count(&self) -> Result<i64, color_eyre::eyre::Error> {
-        let query = sqlx::query(queries::GET_RECENT_UPLOADS_COUNT);
-        let count = query.fetch_one(&self.connection).await?;
-        Ok(count.get(0))
-    }
-
     /// Get total number of courses
     pub async fn get_total_courses_count(&self) -> Result<i64, color_eyre::eyre::Error> {
         let query = sqlx::query(queries::GET_TOTAL_COURSES_COUNT);
