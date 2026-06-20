@@ -82,7 +82,7 @@ export function extractDetailsFromText(text: string): IExtractedDetails {
     if (semester === null) {
         // Matches any string of the format 2xxx (matches any year)
         const yearMatch = lines.match(/([^\d]|^)(2\d{3})([^\d]|$)/); // Someone change this in the year 3000
-        year = yearMatch ? Number(yearMatch[0]) : null;
+        year = yearMatch ? Number(yearMatch[2]) : null;
     } else {
         // If semester is known, match any string of the format 2xxx-2xxx or 2xxx-xx and select the first or second based on semester
         const yearMatch = lines.match(/([^\d]|^)(2[\d]{3})-(2[\d]{3}|[\d]{2})([^\d]|$)/) // Someone change this in the year 3000
