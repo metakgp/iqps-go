@@ -587,3 +587,16 @@ pub async fn similar(
         papers,
     ))
 }
+
+#[derive(Serialize)]
+pub struct Stats {
+    total_papers: i64,
+    total_courses: i64,
+}
+
+/// Get statistics about the database
+pub async fn get_stats(State(state): HandlerState) -> HandlerReturn<Stats> {
+    let total_papers = state.db.get_approved_count().await?;
+    let total_courses = state.db.get_total_courses_count().await?;
+    Ok(BackendResponse::ok(format!("Found {} papers.", total_papers), Stats { total_papers, total_courses }))
+}

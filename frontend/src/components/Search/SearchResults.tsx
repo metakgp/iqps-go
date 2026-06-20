@@ -19,6 +19,8 @@ interface ISearchResultsProps {
 	msg: string;
 	results: ISearchResult[];
 }
+
+
 function SearchResults(props: ISearchResultsProps) {
 	const [displayedResults, setDisplayedResults] = useState<ISearchResult[]>(props.results);
 	const [filterByYear, setFilterByYear] = useState<FilterByYear>(null);
@@ -87,7 +89,9 @@ function SearchResults(props: ISearchResultsProps) {
 	return <div className="search-results">
 		{
 			props.awaitingResults ? <div className="spinner"><Spinner /></div> :
-				!props.success ? <p className="message">{props.msg}</p> : (
+				!props.success ? (
+					<p className="message">{props.msg}</p>
+				) : (
 					<>
 						<ResultsFilter
 							filterByYear={filterByYear}
@@ -202,7 +206,7 @@ function ResultCard(result: ISearchResult) {
 	}
 
 	return <div className="result-card">
-		<p className="result-card-info">
+		<div className="result-card-info">
 			<p className="result-card-title">{getTitle()}</p>
 			<div className="result-card-tags">
 				<span className="result-card-tag">{result.year}</span>
@@ -211,7 +215,7 @@ function ResultCard(result: ISearchResult) {
 				{result.note !== "" && <span className="result-card-tag">{result.note}</span>}
 				{auth.isAuthenticated && <span className="result-card-tag">id: {result.id}</span>}
 			</div>
-		</p>
+		</div>
 		<div className="result-card-btns">
 			{auth.isAuthenticated && <a
 				className="result-card-btn icon-btn"

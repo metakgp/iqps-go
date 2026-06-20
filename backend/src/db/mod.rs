@@ -1,7 +1,7 @@
 //! Database stuff. See submodules also.
 
 use color_eyre::eyre::eyre;
-use sqlx::{postgres::PgPoolOptions, prelude::FromRow, PgPool, Postgres, Transaction};
+use sqlx::{PgPool, Postgres, Row, Transaction, postgres::PgPoolOptions, prelude::FromRow};
 use std::time::Duration;
 
 use crate::{
@@ -363,5 +363,19 @@ impl Database {
         query.execute(&mut **tx).await?;
 
         Ok(())
+    }
+    
+    /// Get total number of approved papers
+    pub async fn get_approved_count(&self) -> Result<i64, color_eyre::eyre::Error> {
+        let query = sqlx::query(queries::GET_APPROVED_COUNT);
+        let count = query.fetch_one(&self.connection).await?;
+        Ok(count.get(0))
+    }
+
+    /// Get total number of courses
+    pub async fn get_total_courses_count(&self) -> Result<i64, color_eyre::eyre::Error> {
+        let query = sqlx::query(queries::GET_TOTAL_COURSES_COUNT);
+        let count = query.fetch_one(&self.connection).await?;
+        Ok(count.get(0))
     }
 }
