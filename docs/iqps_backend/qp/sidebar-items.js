@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Exam","Semester"],"struct":["AdminDashboardQP","BaseQP","LibraryQP"],"trait":["WithUrl"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["authenticate_user","verify_token"],"struct":["Auth"]};
