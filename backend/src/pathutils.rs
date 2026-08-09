@@ -52,6 +52,9 @@ pub struct Paths {
     ///
     /// A slug is a relative path independent of the URL or system path. This slug is stored in the database and either the [`crate::pathutils::Paths::static_files_url`] or the [`crate::pathutils::Paths::static_files_path`] is prepended to it to get its URL (to send to the frontend) or the system path (for backend operations)
     path_slugs: PathTriad,
+
+    /// The absolute path to the library directory (for static file serving)
+    pub library_path: PathBuf,
 }
 
 impl Default for Paths {
@@ -61,6 +64,7 @@ impl Default for Paths {
                 .expect("This library thinks https://metakgp.org is not a valid URL."),
             static_files_path: PathBuf::default(),
             path_slugs: PathTriad::default(),
+            library_path: PathBuf::default(),
         }
     }
 }
@@ -123,6 +127,7 @@ impl Paths {
             static_files_url: Url::parse(static_files_url)?,
             static_files_path: path::absolute(static_file_storage_location)?,
             path_slugs,
+            library_path: system_paths.library,
         })
     }
 

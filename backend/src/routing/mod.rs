@@ -6,12 +6,14 @@ use axum::{
     extract::{DefaultBodyLimit, Json, State},
     http::StatusCode,
     response::IntoResponse,
+    routing::get_service,
 };
 use http::{HeaderValue, Method};
 use serde::Serialize;
 use tower_http::{
     cors::{Any, CorsLayer},
     trace::{self, TraceLayer},
+    services::ServeDir,
 };
 
 use crate::{
@@ -39,6 +41,9 @@ pub fn get_router(env_vars: EnvVars, db: Database) -> axum::Router {
 
     let state = Arc::new(RouterState { db, env_vars });
 
+    // Get the library path for static file serving
+    let library_path = state.env_vars.paths.library_path.clone();
+
     axum::Router::new()
         .route("/unapproved", axum::routing::get(handlers::get_unapproved))
         .route("/trash", axum::routing::get(handlers::get_trash))
@@ -59,6 +64,11 @@ pub fn get_router(env_vars: EnvVars, db: Database) -> axum::Router {
         .layer(DefaultBodyLimit::max(2 << 20)) // Default limit of 2 MiB
         .route("/upload", axum::routing::post(handlers::upload))
         .layer(DefaultBodyLimit::max(50 << 20)) // 50 MiB limit for upload endpoint
+        // Static file serving with CORS support
+        .nest_service(
+            "/library",
+            get_service(ServeDir::new(&library_path).append_index_html_on_directories(true))
+        )
         .with_state(state)
         .layer(
             TraceLayer::new_for_http()

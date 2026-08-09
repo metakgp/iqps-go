@@ -3,6 +3,7 @@ dist
 
 iqps.db
 .env
+.env.local
 
 crawler/cache
 crawler/qp/*.pdf
@@ -15,3 +16,18 @@ frontend/public/pdf.worker.min.mjs
 *.log
 *.patch
 log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+backend/target/
+frontend/dist/
+frontend/build/

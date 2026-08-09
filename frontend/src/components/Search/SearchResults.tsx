@@ -4,9 +4,11 @@ import { copyLink } from '../../utils/copyLink';
 import Spinner from '../Spinner/Spinner';
 import './search_results.scss';
 import { IoLink } from 'react-icons/io5';
-import { FaFilePdf, FaRegPenToSquare } from 'react-icons/fa6';
+import { FaFilePdf, FaRegPenToSquare, FaDownload, FaSquareCheck, FaSquare, FaFileZipper } from 'react-icons/fa6';
 import { Select } from '../Common/Form';
 import { useAuthContext } from '../../utils/auth';
+import JSZip from 'jszip';
+import toast from 'react-hot-toast';
 
 type SortBy = 'relevance' | 'course_name' | 'year';
 type SortOrder = 'ascending' | 'descending';
@@ -26,7 +28,10 @@ function SearchResults(props: ISearchResultsProps) {
 	const [filterByYear, setFilterByYear] = useState<FilterByYear>(null);
 	const [sortBy, setSortBy] = useState<SortBy>('relevance');
 	const [sortOrder, setSortOrder] = useState<SortOrder>('descending');
+	const [showDownloadOptions, setShowDownloadOptions] = useState(false);
 	const [availableYears, setAvailableYears] = useState<number[]>([]);
+	const [selectedPapers, setSelectedPapers] = useState<Set<number>>(new Set());
+	const [isDownloading, setIsDownloading] = useState(false);
 
 	const updateFilters = (field: FilterFields, value: string) => {
 		switch (field) {
@@ -86,6 +91,169 @@ function SearchResults(props: ISearchResultsProps) {
 	// To update when filters are changed
 	useEffect(updateDisplayedResults, [filterByYear, sortBy, sortOrder])
 
+	// Reset selection when results change
+	useEffect(() => {
+		setSelectedPapers(new Set());
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [props.results])
+
+	const togglePaperSelection = (id: number) => {
+		setSelectedPapers(prev => {
+			const newSet = new Set(prev);
+			if (newSet.has(id)) {
+				newSet.delete(id);
+			} else {
+				newSet.add(id);
+			}
+			return newSet;
+		});
+	};
+
+	const toggleSelectAll = () => {
+		if (selectedPapers.size === displayedResults.length) {
+			setSelectedPapers(new Set());
+		} else {
+			setSelectedPapers(new Set(displayedResults.map(r => r.id)));
+		}
+	};
+
+	// Convert external URL to backend proxy URL
+	const getProxyUrl = (url: string): string => {
+		// If URL is from the static server, proxy through backend
+		if (url.includes('localhost:8081') || url.includes('static.metakgp.org')) {
+			// Extract the library path from the URL
+			const match = url.match(/\/library\/(.+)/);
+			if (match) {
+				return `/library/${match[1]}`;
+			}
+		}
+		return url;
+	};
+
+	// Download as ZIP using backend proxy (CORS-enabled)
+	const downloadAsZip = async () => {
+		if (selectedPapers.size === 0) {
+			toast.error('No papers selected');
+			return;
+		}
+
+		const selectedResults = displayedResults.filter(r => selectedPapers.has(r.id));
+
+		// Single paper - direct download
+		if (selectedResults.length === 1) {
+			window.open(selectedResults[0].filelink, '_blank');
+			return;
+		}
+
+		setIsDownloading(true);
+		setShowDownloadOptions(false);
+		const toastId = toast.loading(`Downloading ${selectedPapers.size} paper(s) as ZIP...`);
+
+		try {
+			const zip = new JSZip();
+
+			// Download all PDFs in parallel using proxy URLs
+			const downloadPromises = selectedResults.map(async (result) => {
+				const proxyUrl = getProxyUrl(result.filelink);
+				const response = await fetch(proxyUrl);
+				if (!response.ok) throw new Error(`HTTP ${response.status}`);
+				const blob = await response.blob();
+				const filename = `${result.course_code || 'unknown'}_${result.year}_${result.exam || 'unknown'}_${result.semester || 'na'}.pdf`;
+				zip.file(filename, blob);
+			});
+
+			await Promise.all(downloadPromises);
+
+			// Generate ZIP filename: course_name_coursecode_years.zip
+			const courseName = selectedResults[0].course_name || 'unknown';
+			const courseCode = selectedResults[0].course_code || 'unknown';
+			const years = [...new Set(selectedResults.map(r => r.year))].sort().join('-');
+			const zipFilename = `${courseName}_${courseCode}_${years}.zip`;
+
+			const content = await zip.generateAsync({ type: 'blob' });
+			const url = URL.createObjectURL(content);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = zipFilename;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+			toast.success(`Downloaded ${selectedResults.length} paper(s) as ZIP`, { id: toastId });
+		} catch (error) {
+			console.error('ZIP download error:', error);
+			toast.error('Failed to download as ZIP. Try opening files individually.', { id: toastId });
+		} finally {
+			setIsDownloading(false);
+		}
+	};
+
+	// Download files one by one sequentially (allows choosing save location)
+	const downloadFilesSequentially = async () => {
+		if (selectedPapers.size === 0) {
+			toast.error('No papers selected');
+			return;
+		}
+
+		setShowDownloadOptions(false);
+		setIsDownloading(true);
+		const selectedResults = displayedResults.filter(r => selectedPapers.has(r.id));
+		const total = selectedResults.length;
+		let completed = 0;
+		let failed = 0;
+
+		toast.loading(`Downloading 0/${total}...`, { id: 'sequential-download' });
+
+		for (const result of selectedResults) {
+			const filename = `${result.course_code || 'unknown'}_${result.year}_${result.exam || 'unknown'}_${result.semester || 'na'}.pdf`;
+			const proxyUrl = getProxyUrl(result.filelink);
+
+			try {
+				const response = await fetch(proxyUrl);
+				if (!response.ok) throw new Error(`HTTP ${response.status}`);
+				const blob = await response.blob();
+
+				// Create download link
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = filename;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+
+				completed++;
+				toast.loading(`Downloading ${completed}/${total}...`, { id: 'sequential-download' });
+
+				// Wait between downloads to let browser handle each save dialog
+				if (completed < total) {
+					await new Promise(resolve => setTimeout(resolve, 1500));
+				}
+			} catch (error) {
+				console.error(`Failed to download ${filename}:`, error);
+				failed++;
+			}
+		}
+
+		toast.dismiss('sequential-download');
+		if (failed === 0) {
+			toast.success(`Downloaded ${completed} paper(s)`);
+		} else {
+			toast.error(`Downloaded ${completed}, failed ${failed}`);
+		}
+
+		setIsDownloading(false);
+	};
+
+	const handleDownloadClick = () => {
+		if (selectedPapers.size === 0) {
+			toast.error('No papers selected');
+			return;
+		}
+		setShowDownloadOptions(!showDownloadOptions);
+	};
+
 	return <div className="search-results">
 		{
 			props.awaitingResults ? <div className="spinner"><Spinner /></div> :
@@ -103,8 +271,56 @@ function SearchResults(props: ISearchResultsProps) {
 						{
 							displayedResults.length > 0 ? (
 								<>
+									<div className="selection-controls">
+										<button
+											className="select-all-btn"
+											onClick={toggleSelectAll}
+											disabled={isDownloading}
+										>
+											{selectedPapers.size === displayedResults.length ? 'Deselect All' : 'Select All'}
+										</button>
+										<div className="download-dropdown-container">
+											<button
+												className="download-selected-btn"
+												onClick={handleDownloadClick}
+												disabled={selectedPapers.size === 0 || isDownloading}
+											>
+												<FaDownload />
+												{isDownloading ? 'Downloading...' : `Download Selected (${selectedPapers.size})`}
+											</button>
+											{showDownloadOptions && (
+												<div className="download-dropdown">
+													{selectedPapers.size > 1 && (
+														<button
+															className="download-option-btn"
+															onClick={downloadAsZip}
+															disabled={isDownloading}
+														>
+															<FaFileZipper />
+															Download as ZIP
+														</button>
+													)}
+													<button
+														className="download-option-btn"
+														onClick={downloadFilesSequentially}
+														disabled={isDownloading}
+													>
+														<FaDownload />
+														Download One by One
+													</button>
+												</div>
+											)}
+										</div>
+									</div>
 									<div className="search-results">
-										{displayedResults.map((result, i) => <ResultCard key={i} {...result} />)}
+										{displayedResults.map((result, i) => (
+											<ResultCard
+												key={i}
+												{...result}
+												isSelected={selectedPapers.has(result.id)}
+												onToggleSelection={() => togglePaperSelection(result.id)}
+											/>
+										))}
 									</div>
 								</>
 							) : <p>No results.</p>
@@ -156,7 +372,12 @@ function ResultsFilter(props: IResultsFilterProps) {
 	</div>
 }
 
-function ResultCard(result: ISearchResult) {
+interface IResultCardProps extends ISearchResult {
+	isSelected: boolean;
+	onToggleSelection: () => void;
+}
+
+function ResultCard(result: IResultCardProps) {
 	const auth = useAuthContext();
 
 	const getSemesterTag = (sem: ISearchResult['semester']) => {
@@ -205,7 +426,10 @@ function ResultCard(result: ISearchResult) {
 		return title;
 	}
 
-	return <div className="result-card">
+	return <div className={`result-card ${result.isSelected ? 'selected' : ''}`}>
+		<div className="result-card-checkbox" onClick={result.onToggleSelection}>
+			{result.isSelected ? <FaSquareCheck size="1.2rem" /> : <FaSquare size="1.2rem" />}
+		</div>
 		<div className="result-card-info">
 			<p className="result-card-title">{getTitle()}</p>
 			<div className="result-card-tags">

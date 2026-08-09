@@ -32,6 +32,99 @@
 		}
 	}
 
+	.selection-controls {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+		margin: 1rem 0;
+		flex-wrap: wrap;
+
+		.select-all-btn,
+		.download-selected-btn {
+			padding: 0.5rem 1rem;
+			border-radius: 5px;
+			font-weight: bold;
+			cursor: pointer;
+			border: none;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			transition: background-color 0.2s;
+
+			&:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+		}
+
+		.select-all-btn {
+			background-color: $surface-2;
+			color: $fg-color;
+			border: 1px solid $accent-color;
+
+			&:hover:not(:disabled) {
+				background-color: darken($surface-2, 10%);
+			}
+		}
+
+		.download-selected-btn {
+			background-color: $accent-color-darker;
+			color: $fg-color-darker;
+
+			&:hover:not(:disabled) {
+				background-color: $accent-color-darkerer;
+			}
+		}
+
+		.download-dropdown-container {
+			position: relative;
+
+			.download-dropdown {
+				position: absolute;
+				top: 100%;
+				right: 0;
+				margin-top: 0.25rem;
+				background-color: $surface-1;
+				border: 1px solid $accent-color;
+				border-radius: 5px;
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+				z-index: 100;
+				min-width: 180px;
+
+				.download-option-btn {
+					width: 100%;
+					padding: 0.75rem 1rem;
+					border: none;
+					background: none;
+					color: $fg-color;
+					cursor: pointer;
+					display: flex;
+					align-items: center;
+					gap: 0.5rem;
+					font-size: 0.9rem;
+					text-align: left;
+
+					&:hover:not(:disabled) {
+						background-color: $surface-2;
+					}
+
+					&:first-child {
+						border-radius: 5px 5px 0 0;
+					}
+
+					&:last-child {
+						border-radius: 0 0 5px 5px;
+					}
+
+					&:disabled {
+						opacity: 0.5;
+						cursor: not-allowed;
+					}
+				}
+			}
+		}
+	}
+
 	.search-results {
 		width: 100%;
 		border-collapse: collapse;
@@ -44,9 +137,27 @@
 
 			display: flex;
 			gap: 0.5rem;
+			align-items: center;
 
-			&:nth-of-type(odd) {
+			&.selected {
+				background-color: rgba($accent-color, 0.15);
+				border: 2px solid $accent-color;
+			}
+
+			&:nth-of-type(odd):not(.selected) {
 				background-color: $surface-2;
+			}
+
+			.result-card-checkbox {
+				cursor: pointer;
+				color: $accent-color;
+				display: flex;
+				align-items: center;
+				padding: 0.25rem;
+
+				&:hover {
+					opacity: 0.7;
+				}
 			}
 
 			.result-card-info {
@@ -54,6 +165,7 @@
 				display: flex;
 				flex-direction: column;
 				gap: 0.5rem;
+				flex: 1;
 
 				.result-card-title {
 					margin: 0;
@@ -67,7 +179,6 @@
 			}
 
 			.result-card-btns {
-				margin-left: auto;
 				display: flex;
 				align-items: center;
 				gap: 5px;
@@ -120,6 +231,56 @@
 			td,
 			th {
 				padding: 10px;
+			}
+		}
+
+		.selection-controls {
+			flex-direction: column;
+			gap: 0.75rem;
+			padding: 0.75rem;
+
+			.selection-info {
+				font-size: 0.9rem;
+			}
+
+			.selection-actions {
+				width: 100%;
+				justify-content: space-between;
+			}
+
+			.select-all-btn,
+			.download-selected-btn {
+				flex: 1;
+				padding: 0.6rem 1rem;
+				font-size: 0.85rem;
+			}
+		}
+
+		.result-card {
+			padding: 0.75rem;
+
+			.result-card-header {
+				flex-direction: row;
+				align-items: flex-start;
+				gap: 0.5rem;
+
+				.result-card-checkbox {
+					padding: 0.15rem;
+					font-size: 1.2rem;
+				}
+			}
+
+			.result-card-info {
+				.result-card-title {
+					font-size: 0.95rem;
+				}
+			}
+
+			.result-card-btns {
+				.result-card-btn {
+					padding: 6px 10px;
+					font-size: 0.8rem;
+				}
 			}
 		}
 	}
