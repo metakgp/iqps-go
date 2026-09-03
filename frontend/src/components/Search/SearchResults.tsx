@@ -92,11 +92,24 @@ function SearchResults(props: ISearchResultsProps) {
 	// To update when filters are changed
 	useEffect(updateDisplayedResults, [filterByYear, sortBy, sortOrder])
 
-	// Reset selection when results change
+	// Reset selection and close download dropdown when results change
 	useEffect(() => {
 		setSelectedPapers(new Set());
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+		setShowDownloadOptions(false);
 	}, [props.results])
+
+	// Sanitize a string for safe use as a filesystem/ZIP entry name.
+	// Strips path separators, control characters, and Windows-reserved chars,
+	// collapses whitespace to single hyphens, and trims length.
+	const sanitizeFilename = (value: string | number | undefined | null, fallback: string): string => {
+		const raw = value === undefined || value === null ? '' : String(value);
+		const cleaned = raw
+			.replace(/[\\/:*?"<>|\u0000-\u001F]/g, '') // strip reserved/control chars
+			.trim()
+			.replace(/\s+/g, '-');                    // collapse whitespace
+		const safe = cleaned.length > 0 ? cleaned : fallback;
+		return safe.slice(0, 80) || fallback;        // cap length defensively
+	};
 
 	const togglePaperSelection = (id: number) => {
 		setSelectedPapers(prev => {
@@ -154,6 +167,15 @@ function SearchResults(props: ISearchResultsProps) {
 			return;
 		}
 
+		// ZIP download only works for library papers because the backend's
+		// /library endpoint serves files from LIBRARY_QPS_PATH (/peqp/qp).
+		// Non-library uploads live elsewhere and would fail CORS via fetch().
+		const nonLibraryCount = selectedResults.filter(r => !r.from_library).length;
+		if (nonLibraryCount > 0) {
+			toast.error('Some selected papers are not from the library and cannot be downloaded via ZIP. Open them individually instead.');
+			return;
+		}
+
 		// Single paper - direct download
 		if (selectedResults.length === 1) {
 			window.open(selectedResults[0].filelink, '_blank');
@@ -173,15 +195,20 @@ function SearchResults(props: ISearchResultsProps) {
 				const response = await fetch(proxyUrl);
 				if (!response.ok) throw new Error(`HTTP ${response.status}`);
 				const blob = await response.blob();
-				const filename = `${result.course_code || 'unknown'}_${result.year}_${result.exam || 'unknown'}_${result.semester || 'na'}.pdf`;
+				const filename = [
+					sanitizeFilename(result.course_code, 'unknown'),
+					sanitizeFilename(result.year, '0000'),
+					sanitizeFilename(result.exam, 'unknown'),
+					sanitizeFilename(result.semester, 'na'),
+				].join('_') + '.pdf';
 				zip.file(filename, blob);
 			});
 
 			await Promise.all(downloadPromises);
 
 			// Generate ZIP filename: course_name_coursecode_years.zip
-			const courseName = selectedResults[0].course_name || 'unknown';
-			const courseCode = selectedResults[0].course_code || 'unknown';
+			const courseName = sanitizeFilename(selectedResults[0].course_name, 'unknown');
+			const courseCode = sanitizeFilename(selectedResults[0].course_code, 'unknown');
 			const years = [...new Set(selectedResults.map(r => r.year))].sort().join('-');
 			const zipFilename = `${courseName}_${courseCode}_${years}.zip`;
 
@@ -216,6 +243,14 @@ function SearchResults(props: ISearchResultsProps) {
 			return;
 		}
 
+		// Sequential download also relies on the CORS-enabled /library proxy,
+		// so it only works for library papers.
+		const nonLibraryCount = selectedResults.filter(r => !r.from_library).length;
+		if (nonLibraryCount > 0) {
+			toast.error('Some selected papers are not from the library and cannot be downloaded via this option. Open them individually instead.');
+			return;
+		}
+
 		setShowDownloadOptions(false);
 		setIsDownloading(true);
 		const total = selectedResults.length;
@@ -225,7 +260,12 @@ function SearchResults(props: ISearchResultsProps) {
 		toast.loading(`Downloading 0/${total}...`, { id: 'sequential-download' });
 
 		for (const result of selectedResults) {
-			const filename = `${result.course_code || 'unknown'}_${result.year}_${result.exam || 'unknown'}_${result.semester || 'na'}.pdf`;
+			const filename = [
+				sanitizeFilename(result.course_code, 'unknown'),
+				sanitizeFilename(result.year, '0000'),
+				sanitizeFilename(result.exam, 'unknown'),
+				sanitizeFilename(result.semester, 'na'),
+			].join('_') + '.pdf';
 			const proxyUrl = getProxyUrl(result.filelink);
 
 			try {
