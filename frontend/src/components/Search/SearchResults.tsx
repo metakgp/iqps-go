@@ -7,6 +7,7 @@ import { IoLink } from 'react-icons/io5';
 import { FaFilePdf, FaRegPenToSquare, FaDownload, FaSquareCheck, FaSquare, FaFileZipper } from 'react-icons/fa6';
 import { Select } from '../Common/Form';
 import { useAuthContext } from '../../utils/auth';
+import { BACKEND_URL } from '../../utils/backend';
 import JSZip from 'jszip';
 import toast from 'react-hot-toast';
 
@@ -117,15 +118,25 @@ function SearchResults(props: ISearchResultsProps) {
 		}
 	};
 
-	// Convert external URL to backend proxy URL
+	// Convert external/static URL to a CORS-enabled backend proxy URL.
+	// The backend exposes /library/* which serves files from LIBRARY_QPS_PATH
+	// (default /peqp/qp). We strip that prefix and route through BACKEND_URL so
+	// fetch() works regardless of where the frontend is hosted.
 	const getProxyUrl = (url: string): string => {
-		// If URL is from the static server, proxy through backend
-		if (url.includes('localhost:8081') || url.includes('static.metakgp.org')) {
-			// Extract the library path from the URL
-			const match = url.match(/\/library\/(.+)/);
-			if (match) {
-				return `/library/${match[1]}`;
+		try {
+			const parsed = new URL(url, window.location.origin);
+			const pathname = parsed.pathname;
+
+			// Match either an already-proxied /library/<path> or the upstream
+			// /peqp/qp/<path> layout used by the static files server.
+			const libraryMatch = pathname.match(/^\/(?:library|peqp\/qp)\/(.+)$/);
+			if (libraryMatch) {
+				const tail = libraryMatch[1];
+				const base = BACKEND_URL.replace(/\/$/, '');
+				return `${base}/library/${tail}`;
 			}
+		} catch {
+			// Fall through and return the original URL below.
 		}
 		return url;
 	};
@@ -138,6 +149,10 @@ function SearchResults(props: ISearchResultsProps) {
 		}
 
 		const selectedResults = displayedResults.filter(r => selectedPapers.has(r.id));
+		if (selectedResults.length === 0) {
+			toast.error('No visible papers selected. Adjust filters and try again.');
+			return;
+		}
 
 		// Single paper - direct download
 		if (selectedResults.length === 1) {
@@ -147,7 +162,7 @@ function SearchResults(props: ISearchResultsProps) {
 
 		setIsDownloading(true);
 		setShowDownloadOptions(false);
-		const toastId = toast.loading(`Downloading ${selectedPapers.size} paper(s) as ZIP...`);
+		const toastId = toast.loading(`Downloading ${selectedResults.length} paper(s) as ZIP...`);
 
 		try {
 			const zip = new JSZip();
@@ -195,9 +210,14 @@ function SearchResults(props: ISearchResultsProps) {
 			return;
 		}
 
+		const selectedResults = displayedResults.filter(r => selectedPapers.has(r.id));
+		if (selectedResults.length === 0) {
+			toast.error('No visible papers selected. Adjust filters and try again.');
+			return;
+		}
+
 		setShowDownloadOptions(false);
 		setIsDownloading(true);
-		const selectedResults = displayedResults.filter(r => selectedPapers.has(r.id));
 		const total = selectedResults.length;
 		let completed = 0;
 		let failed = 0;
@@ -313,9 +333,9 @@ function SearchResults(props: ISearchResultsProps) {
 										</div>
 									</div>
 									<div className="search-results">
-										{displayedResults.map((result, i) => (
+										{displayedResults.map((result) => (
 											<ResultCard
-												key={i}
+												key={result.id}
 												{...result}
 												isSelected={selectedPapers.has(result.id)}
 												onToggleSelection={() => togglePaperSelection(result.id)}
@@ -427,9 +447,15 @@ function ResultCard(result: IResultCardProps) {
 	}
 
 	return <div className={`result-card ${result.isSelected ? 'selected' : ''}`}>
-		<div className="result-card-checkbox" onClick={result.onToggleSelection}>
+		<button
+			type="button"
+			className="result-card-checkbox"
+			onClick={result.onToggleSelection}
+			aria-pressed={result.isSelected}
+			aria-label={result.isSelected ? 'Deselect paper' : 'Select paper'}
+		>
 			{result.isSelected ? <FaSquareCheck size="1.2rem" /> : <FaSquare size="1.2rem" />}
-		</div>
+		</button>
 		<div className="result-card-info">
 			<p className="result-card-title">{getTitle()}</p>
 			<div className="result-card-tags">
