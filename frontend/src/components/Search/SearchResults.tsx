@@ -92,11 +92,19 @@ function SearchResults(props: ISearchResultsProps) {
 	// To update when filters are changed
 	useEffect(updateDisplayedResults, [filterByYear, sortBy, sortOrder])
 
-	// Reset selection and close download dropdown when results change
+	// Prune selection to only currently-visible papers whenever the displayed
+	// list changes (new search, filter, or sort). This keeps the "Download
+	// Selected (N)" count accurate and prevents hidden selections from
+	// silently changing what gets downloaded.
 	useEffect(() => {
-		setSelectedPapers(new Set());
+		setSelectedPapers(prev => {
+			const visibleIds = new Set(displayedResults.map(r => r.id));
+			const pruned = new Set<number>();
+			prev.forEach(id => { if (visibleIds.has(id)) pruned.add(id); });
+			return pruned;
+		});
 		setShowDownloadOptions(false);
-	}, [props.results])
+	}, [displayedResults])
 
 	// Sanitize a string for safe use as a filesystem/ZIP entry name.
 	// Strips path separators, control characters, and Windows-reserved chars,
@@ -182,6 +190,14 @@ function SearchResults(props: ISearchResultsProps) {
 			return;
 		}
 
+		// Cap the number of papers bundled into a single ZIP to avoid OOM:
+		// every PDF plus the final archive is held fully in memory.
+		const MAX_ZIP_PAPERS = 25;
+		if (selectedResults.length > MAX_ZIP_PAPERS) {
+			toast.error(`Too many papers selected for ZIP download. Please select ${MAX_ZIP_PAPERS} or fewer.`);
+			return;
+		}
+
 		setIsDownloading(true);
 		setShowDownloadOptions(false);
 		const toastId = toast.loading(`Downloading ${selectedResults.length} paper(s) as ZIP...`);
@@ -195,11 +211,14 @@ function SearchResults(props: ISearchResultsProps) {
 				const response = await fetch(proxyUrl);
 				if (!response.ok) throw new Error(`HTTP ${response.status}`);
 				const blob = await response.blob();
+				// Include `id` so duplicate metadata fields don't collide and
+				// silently overwrite earlier entries inside the ZIP.
 				const filename = [
 					sanitizeFilename(result.course_code, 'unknown'),
 					sanitizeFilename(result.year, '0000'),
 					sanitizeFilename(result.exam, 'unknown'),
 					sanitizeFilename(result.semester, 'na'),
+					sanitizeFilename(result.id, '0'),
 				].join('_') + '.pdf';
 				zip.file(filename, blob);
 			});
@@ -209,7 +228,9 @@ function SearchResults(props: ISearchResultsProps) {
 			// Generate ZIP filename: course_name_coursecode_years.zip
 			const courseName = sanitizeFilename(selectedResults[0].course_name, 'unknown');
 			const courseCode = sanitizeFilename(selectedResults[0].course_code, 'unknown');
-			const years = [...new Set(selectedResults.map(r => r.year))].sort().join('-');
+			const years = [...new Set(selectedResults.map(r => r.year))]
+				.sort((a, b) => a - b)
+				.join('-');
 			const zipFilename = `${courseName}_${courseCode}_${years}.zip`;
 
 			const content = await zip.generateAsync({ type: 'blob' });
@@ -260,11 +281,14 @@ function SearchResults(props: ISearchResultsProps) {
 		toast.loading(`Downloading 0/${total}...`, { id: 'sequential-download' });
 
 		for (const result of selectedResults) {
+			// Include `id` so duplicate metadata fields don't collide and
+			// cause the browser to auto-rename or overwrite files.
 			const filename = [
 				sanitizeFilename(result.course_code, 'unknown'),
 				sanitizeFilename(result.year, '0000'),
 				sanitizeFilename(result.exam, 'unknown'),
 				sanitizeFilename(result.semester, 'na'),
+				sanitizeFilename(result.id, '0'),
 			].join('_') + '.pdf';
 			const proxyUrl = getProxyUrl(result.filelink);
 
@@ -491,7 +515,8 @@ function ResultCard(result: IResultCardProps) {
 			type="button"
 			className="result-card-checkbox"
 			onClick={result.onToggleSelection}
-			aria-pressed={result.isSelected}
+			role="checkbox"
+			aria-checked={result.isSelected}
 			aria-label={result.isSelected ? 'Deselect paper' : 'Select paper'}
 		>
 			{result.isSelected ? <FaSquareCheck size="1.2rem" /> : <FaSquare size="1.2rem" />}
