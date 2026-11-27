@@ -1,0 +1,62 @@
+# Self-contained deployment for an institute server: Postgres + Rust backend + nginx.
+# Usage (from this folder):  cp .env.example .env  &&  docker compose up -d --build
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ../backend
+    restart: always
+    env_file: .env
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      STATIC_FILE_STORAGE_LOCATION: /srv/static
+      UPLOADED_QPS_PATH: iqps/uploaded
+      LIBRARY_QPS_PATH: library/qp
+      LOG_LOCATION: /var/log/iqps/logs/application.log
+      SERVER_PORT: "8080"
+    # Create the storage folders on first run, and skip upstream's MetaPloy postinstall
+    # script (it copies an nginx config we don't use).
+    command: ["sh", "-c", "mkdir -p /srv/static/iqps/uploaded /srv/static/library/qp && exec ./iqps-backend"]
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - papers:/srv/static
+      - ./logs:/var/log/iqps/logs
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "3"
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: always
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - papers:/srv/static:ro
+      # Only needed if you also serve the frontend from this server (run `pnpm build` in ../frontend first)
+      - ../frontend/dist:/srv/frontend:ro
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  papers:

@@ -7,7 +7,7 @@ import StatsShowcase from "../components/Search/Stats";
 function SearchPage() {
 	return <>
 		<Header
-			title="Intelligent Question Paper Search"
+			title="Previous Year Question Papers"
 			subtitle="Search for question papers when the library can't save you."
 			link={{
 				to: "/upload",

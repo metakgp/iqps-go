@@ -8,6 +8,8 @@ import { UploadDragAndDrop } from "./UploadDragAndDrop";
 import PaperEditModal from "../Common/PaperEditModal";
 import { autofillData } from "../../utils/autofillData";
 import './styles/upload_form.scss';
+import toast from "react-hot-toast";
+import { MAX_FILE_SIZE_MB } from "../../utils/institute";
 
 interface IUploadFormProps {
 	max_upload_limit: number;
@@ -28,7 +30,16 @@ export function UploadForm(props: IUploadFormProps) {
 	const [processingComplete, setProcessingComplete] = useState<boolean>(false);
 	const [currentOcrPaper, setCurrentOcrPaper] = useState<UploadFileData | null>(null);
 
-	const addQPapers = (newFiles: File[]) => {
+	const addQPapers = (files: File[]) => {
+		const newFiles = files.filter((file) => {
+			if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+				toast.error(`${file.name} is larger than ${MAX_FILE_SIZE_MB} MB and was skipped.`);
+				return false;
+			}
+			return true;
+		});
+		if (newFiles.length === 0) return;
+
 		setQPapers((prevQPs) => {
 			const newQPs: UploadFileData[] = newFiles.map((file) => {
 				return {

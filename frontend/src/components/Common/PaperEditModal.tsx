@@ -10,7 +10,7 @@ import { FaArrowLeft, FaArrowRight, FaBan, FaFilePdf } from "react-icons/fa6";
 import Spinner from "../Spinner/Spinner";
 import { FormGroup, RadioGroup, NumberInput, SuggestionTextInput, ISuggestion } from "./Form";
 
-import COURSE_CODE_MAP from "../../data/courses.json";
+import { COURSES as COURSE_CODE_MAP } from "../../utils/courses";
 import { makeRequest } from "../../utils/backend";
 import { IEndpointTypes } from "../../types/backend";
 import { useAuthContext } from "../../utils/auth";
@@ -86,9 +86,9 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 
 	// Automatically fill the course name if course code matches
 	useEffect(() => {
-		if (data.course_code.length === 7) {
+		if (validateCourseCode(data.course_code)) {
 			if (data.course_code in COURSE_CODE_MAP) {
-				changeData('course_name', COURSE_CODE_MAP[data.course_code as keyof typeof COURSE_CODE_MAP]);
+				changeData('course_name', COURSE_CODE_MAP[data.course_code]);
 				setCourseCodeSuggestions([]);
 			}
 		}
@@ -296,9 +296,9 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				>
 					<RadioGroup
 						options={[
-							{ label: 'Mid Semester', value: 'midsem' },
-							{ label: 'End Semester', value: 'endsem' },
-							{ label: 'Class Test', value: 'ct' }
+							{ label: 'Mid-Sem', value: 'midsem' },
+							{ label: 'End-Sem', value: 'endsem' },
+							{ label: 'Quiz', value: 'ct' }
 						]}
 						value={data.exam.startsWith('ct') ? 'ct' : data.exam as Exam}
 						onSelect={(value: Exam | 'ct') => changeData('exam', value)}
@@ -306,7 +306,7 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				</FormGroup>
 				{data.exam.startsWith('ct') &&
 					<FormGroup
-						label="Class Test Number:"
+						label="Quiz Number:"
 						validationError={validationErrors.examErr}
 					>
 						<NumberInput
@@ -323,8 +323,8 @@ function PaperEditModal<T extends IQuestionPaperFile | IAdminDashboardQP>(props:
 				>
 					<RadioGroup
 						options={[
-							{ label: 'Autumn Semester', value: 'autumn' },
-							{ label: 'Spring Semester', value: 'spring' }
+							{ label: 'Monsoon (Jul–Dec)', value: 'autumn' },
+							{ label: 'Winter (Jan–May)', value: 'spring' }
 						]}
 						value={data.semester as Semester}
 						onSelect={(value: Semester) => changeData('semester', value)}

@@ -1,3 +1,4 @@
+import { examLabel, semesterLabel } from "../utils/institute";
 import { useEffect, useState } from "react";
 import { OAUTH_LOGIN_URL, useAuthContext } from "../utils/auth";
 import { makeRequest } from "../utils/backend";
@@ -158,8 +159,8 @@ function TrashPage() {
 													</div>
 													<div className="pills">
 														{paper.year && <div className="pill">{paper.year}</div>}
-														{paper.exam && <div className="pill">{paper.exam}</div>}
-														{paper.semester && <div className="pill">{paper.semester}</div>}
+														{paper.exam && <div className="pill">{examLabel(paper.exam)}</div>}
+														{paper.semester && <div className="pill">{semesterLabel(paper.semester)}</div>}
 														{paper.note !== "" && <div className="pill">{paper.note}</div>}
 													</div>
 													<a className="btn" href={paper.filelink} target="_blank">

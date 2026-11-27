@@ -164,7 +164,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let total_count = database.get_unapproved_papers_count().await?;
 
     let message = format!(
-      "💥 {count} papers have been imported into IQPS!\n\n<https://qp.metakgp.org/admin|Review> | Total Unapproved papers: *{total_count}*",
+      "💥 {count} papers have been imported into the PYQ portal!\n\n<{frontend_url}/admin|Review> | Total Unapproved papers: *{total_count}*",
+      frontend_url = env_vars.frontend_url,
     );
 
     let _ = slack::send_slack_message(&env_vars.slack_webhook_url, &message).await;

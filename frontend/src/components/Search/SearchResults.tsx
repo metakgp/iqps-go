@@ -7,11 +7,13 @@ import { IoLink } from 'react-icons/io5';
 import { FaFilePdf, FaRegPenToSquare } from 'react-icons/fa6';
 import { Select } from '../Common/Form';
 import { useAuthContext } from '../../utils/auth';
+import { DEPARTMENTS, examLabel, examTag, getDepartment, semesterLabel } from '../../utils/institute';
 
 type SortBy = 'relevance' | 'course_name' | 'year';
 type SortOrder = 'ascending' | 'descending';
 type FilterByYear = number | null;
-type FilterFields = 'filterByYear' | 'sortBy' | 'sortOrder';
+type FilterBySemester = 'autumn' | 'spring' | null;
+type FilterFields = 'filterByYear' | 'filterByDept' | 'filterBySemester' | 'sortBy' | 'sortOrder';
 
 interface ISearchResultsProps {
 	awaitingResults: boolean;
@@ -24,6 +26,8 @@ interface ISearchResultsProps {
 function SearchResults(props: ISearchResultsProps) {
 	const [displayedResults, setDisplayedResults] = useState<ISearchResult[]>(props.results);
 	const [filterByYear, setFilterByYear] = useState<FilterByYear>(null);
+	const [filterByDept, setFilterByDept] = useState<string | null>(null);
+	const [filterBySemester, setFilterBySemester] = useState<FilterBySemester>(null);
 	const [sortBy, setSortBy] = useState<SortBy>('relevance');
 	const [sortOrder, setSortOrder] = useState<SortOrder>('descending');
 	const [availableYears, setAvailableYears] = useState<number[]>([]);
@@ -32,6 +36,12 @@ function SearchResults(props: ISearchResultsProps) {
 		switch (field) {
 			case 'filterByYear':
 				setFilterByYear(value === 'null' ? null : parseInt(value));
+				break;
+			case 'filterByDept':
+				setFilterByDept(value === 'null' ? null : value);
+				break;
+			case 'filterBySemester':
+				setFilterBySemester(value === 'null' ? null : value as FilterBySemester);
 				break;
 			case 'sortBy':
 				setSortBy(value as SortBy);
@@ -45,6 +55,8 @@ function SearchResults(props: ISearchResultsProps) {
 	const updateDisplayedResults = () => {
 		let filtered_results = props.results.slice();
 		if (filterByYear !== null) filtered_results = filtered_results.filter((result) => result.year === filterByYear);
+		if (filterByDept !== null) filtered_results = filtered_results.filter((result) => getDepartment(result.course_code) === filterByDept);
+		if (filterBySemester !== null) filtered_results = filtered_results.filter((result) => result.semester === filterBySemester);
 
 		if (sortBy === 'relevance') {
 			setDisplayedResults(filtered_results);
@@ -79,12 +91,14 @@ function SearchResults(props: ISearchResultsProps) {
 		props.results.forEach((result) => unique_years.add(result.year));
 		setAvailableYears(Array.from(unique_years.values()).sort().reverse());
 		setFilterByYear(null);
+		setFilterByDept(null);
+		setFilterBySemester(null);
 
 		updateDisplayedResults();
 	}, [props.results])
 
 	// To update when filters are changed
-	useEffect(updateDisplayedResults, [filterByYear, sortBy, sortOrder])
+	useEffect(updateDisplayedResults, [filterByYear, filterByDept, filterBySemester, sortBy, sortOrder])
 
 	return <div className="search-results">
 		{
@@ -95,6 +109,8 @@ function SearchResults(props: ISearchResultsProps) {
 					<>
 						<ResultsFilter
 							filterByYear={filterByYear}
+							filterByDept={filterByDept}
+							filterBySemester={filterBySemester}
 							availableYears={availableYears}
 							sortBy={sortBy}
 							sortOrder={sortOrder}
@@ -117,6 +133,8 @@ function SearchResults(props: ISearchResultsProps) {
 
 interface IResultsFilterProps {
 	filterByYear: FilterByYear;
+	filterByDept: string | null;
+	filterBySemester: FilterBySemester;
 	availableYears: number[];
 	sortBy: SortBy;
 	sortOrder: SortOrder;
@@ -133,6 +151,25 @@ function ResultsFilter(props: IResultsFilterProps) {
 				})
 			]}
 			onInput={(e) => props.updateFilters('filterByYear', e.currentTarget.value)}
+		/>
+
+		<Select
+			value={props.filterByDept ?? 'null'}
+			options={[
+				{ value: 'null', title: 'All Departments' },
+				...DEPARTMENTS.map((dept) => ({ title: dept.name, value: dept.name }))
+			]}
+			onInput={(e) => props.updateFilters('filterByDept', e.currentTarget.value)}
+		/>
+
+		<Select
+			value={props.filterBySemester ?? 'null'}
+			options={[
+				{ value: 'null', title: 'Both Semesters' },
+				{ value: 'autumn', title: 'Monsoon' },
+				{ value: 'spring', title: 'Winter' },
+			]}
+			onInput={(e) => props.updateFilters('filterBySemester', e.currentTarget.value)}
 		/>
 
 		<Select
@@ -159,43 +196,10 @@ function ResultsFilter(props: IResultsFilterProps) {
 function ResultCard(result: ISearchResult) {
 	const auth = useAuthContext();
 
-	const getSemesterTag = (sem: ISearchResult['semester']) => {
-		// empty string - N/A
-		// midsem - MID; endsem - END
-		// ctx - CT1, CT2, etc.
-		return sem === '' ? 'N/A' :
-			(sem === 'autumn' || sem === 'spring') ?
-				sem.slice(0, 3).toUpperCase() :
-				sem;
-	}
-
-	const getSemesterTooltip = (semester: ISearchResult['semester']) => {
-		if (semester.length > 0) {
-			return semester[0].toUpperCase() + semester.slice(1) + ' Semester'
-		} else {
-			return "Unknown Semester";
-		}
-	}
-
-	const getExamTag = (exam: ISearchResult['exam']) => {
-		// empty string - Unknown
-		// midsem - Midsem; endsem - Endsem
-		// ctx - Class Test 1, Class Test 2, etc.
-		return exam === '' ? 'Unknown' :
-			(exam === 'midsem' || exam === 'endsem') ?
-				exam.slice(0, 3).toUpperCase() :
-				exam.toUpperCase();
-	}
-
-	const getExamTooltip = (exam: ISearchResult['exam']) => {
-		// empty string - Unknown
-		// midsem - Midsem; endsem - Endsem
-		// ctx - Class Test 1, Class Test 2, etc.
-		return exam === '' ? 'Unknown' :
-			(exam === 'midsem' || exam === 'endsem') ?
-				exam[0].toUpperCase() + exam.slice(1) :
-				`Class Test ${exam.slice(2).length > 0 ? exam.slice(2) : '?'}`;
-	}
+	const getSemesterTag = (sem: ISearchResult['semester']) => semesterLabel(sem);
+	const getSemesterTooltip = (sem: ISearchResult['semester']) => sem === '' ? 'Unknown Semester' : `${semesterLabel(sem)} Semester`;
+	const getExamTag = (exam: ISearchResult['exam']) => examTag(exam);
+	const getExamTooltip = (exam: ISearchResult['exam']) => examLabel(exam);
 
 	const getTitle = () => {
 		let title = `${result.course_name}`;

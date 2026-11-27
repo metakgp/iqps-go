@@ -1,248 +1,185 @@
-<div id="top"></div>
-<div align="center">
+# PYQ Portal – IIT Bhilai
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![Wiki][wiki-shield]][wiki-url]
+Search, preview and upload previous year question papers (PYQs) at IIT Bhilai.
+Students upload papers without logging in. Student admins sign in with GitHub, review each upload and approve it before it goes public.
 
-</div>
+This is a fork of **[IQPS by MetaKGP](https://github.com/metakgp/iqps-go)** (IIT Kharagpur), adapted for IIT Bhilai. It is licensed under **GPL-3.0** like the original, so it has to stay open source and keep the credit to MetaKGP. The original README is in [`docs/UPSTREAM_IQPS_README.md`](docs/UPSTREAM_IQPS_README.md).
 
-<br />
-<div align="center">
-  <a href="https://github.com/metakgp/iqps">
-    <img width="140" alt="image" src="https://raw.githubusercontent.com/metakgp/design/main/logos/black-large.jpg">
-  </a>
+## Features
 
-  <h3 align="center">IQPS</h3>
+| Feature | Where |
+|---|---|
+| Search by course code or name (full-text + fuzzy) | `/` |
+| Filter by exam (Mid-Sem / End-Sem / Quiz), year, department, semester (Monsoon / Winter) | `/` |
+| Upload up to 10 PDFs at once (15 MB each), no login | `/upload` |
+| Auto-fill of course code, exam, year and semester from the PDF's first page (text layer first, OCR for scanned papers) | `/upload` |
+| Admin review with GitHub login (allowlist of usernames) | `/admin` |
+| Edit details, approve, delete (trash + restore), and see "similar papers" to catch duplicates | `/admin` |
+| Optional Slack alert for new uploads | backend |
 
-  <p align="center">
-    <i>Intelligent Question Paper Search</i>
-    <br />
-    <a href="https://qp.metakgp.org">Website</a>
-    ·
-    <a href="https://github.com/metakgp/iqps-go/issues">Report Bug / Request Feature</a>
-    ·
-    <a href="https://metakgp.github.io/iqps-go/iqps_backend/">Backend Documentation</a>
-  </p>
-</div>
+## What changed from IQPS
 
-<!-- TABLE OF CONTENTS -->
-<details>
-<summary>Table of Contents</summary>
+- **Course codes** use IIT Bhilai's format, `[A-Z]{2,3}\d{3}` (e.g. `CSL101`, `MAL201`), instead of KGP's `CS10001`.
+- **Auto-fill parser** rewritten for IIT Bhilai paper headers (`frontend/src/utils/parseQPText.ts`, with unit tests). It reads `Quiz 1/2/I/II`, `Mid/End Semester`, `Monsoon/Winter 2023-24`, exam dates, and `Supplementary`, skips `Max Marks 100`-style false matches and fixes OCR `O`/`0` mix-ups. It reads the PDF's text layer before falling back to OCR, which is faster.
+- **Labels:** semesters are shown as Monsoon/Winter and class tests as Quiz. The stored values are the same as upstream, so the database and API are unchanged.
+- **Department filter**, worked out from the course-code prefix (no database change).
+- **Upload limit** raised to 15 MB. The backend also checks that each file really is a PDF (`%PDF-` header), not just its content type.
+- **Admin check**: usernames are matched case-insensitively and with spaces trimmed. If no GitHub org/team is configured, users outside the list get a clean "not an admin" instead of a GitHub API error.
+- **Branding and URLs** are configurable (`FRONTEND_URL`, `VITE_REPO_URL`), and there are no hard-coded metakgp.org links.
+- **Self-contained deployment** in [`deploy/`](deploy/): Postgres, backend and nginx in one `docker compose`, for the institute server.
+- The KGP library crawler (`crawler/`) is unused and can be deleted.
 
-- [About The Project](#about-the-project)
-- [Development](#development)
-  - [Database](#database)
-  - [Authentication](#authentication)
-    - [OAuth Flow](#oauth-flow)
-  - [Crawler](#crawler)
-- [Deployment](#deployment)
-  - [Backend](#backend)
-  - [Environment Variables](#environment-variables)
-- [Contact](#contact)
-  - [Maintainer(s)](#maintainers)
-  - [Creator(s)](#creators)
-- [Additional documentation](#additional-documentation)
+All institute-specific settings live in **`frontend/src/utils/institute.ts`**: course-code regex, department prefixes, labels and max file size.
 
-</details>
+## Project structure
 
-## About The Project
+```
+backend/                 Rust (axum + sqlx) API — search, upload, admin, GitHub OAuth
+  src/routing/handlers.rs  endpoints (FILE_SIZE_LIMIT = 15 MiB)
+  src/auth.rs              GitHub OAuth + admin allowlist
+  src/db/queries.rs        SQL queries (INIT_DB = schema)
+frontend/                React + Vite + TypeScript + SCSS
+  src/utils/institute.ts   ← IIT Bhilai config (codes, departments, labels)
+  src/utils/parseQPText.ts ← PDF text → course code / exam / year / semester
+  src/utils/autofillData.ts  pdf.js text layer → OCR fallback
+  src/data/courses.json    course code → name map (fill this, see below)
+  scripts/csv-to-courses.mjs
+deploy/                  docker-compose.yaml, nginx.conf, init.sql, .env.example
+```
 
-<div align="center">
-  <img width="60%" alt="image" src="./frontend/public/banner.png">
-</div>
+## Database
 
-IQPS is a platform for searching and uploading previous year question papers for IIT Kharagpur students. The frontend is deployed at https://qp.metakgp.org and the backend is hosted on a DigitalOcean droplet with 2GB RAM and a single CPU. See [MetaPloy](https://github.com/metakgp/metaploy) for the deployment architecture.
-IQPS was originally created by [Shubham Mishra](https://github.com/grapheo12) in python. You can find it [here](https://github.com/grapheo12/iqps).
+One table, `iqps` ([`deploy/init.sql`](deploy/init.sql)):
 
-> [!Note]
-> Currently in active development. Get involved at our [Slack](https://slack.metakgp.org/).
+| column | notes |
+|---|---|
+| `id` | integer identity |
+| `course_code`, `course_name` | full-text index + trigram index on name |
+| `year` | year the exam was held |
+| `semester` | `autumn` = Monsoon, `spring` = Winter |
+| `exam` | `midsem`, `endsem`, `ct1` = Quiz 1, `ct2` = Quiz 2 |
+| `note` | e.g. `Supplementary` |
+| `filelink` | path of the PDF under the static folder |
+| `approve_status`, `is_deleted` | pending = `false`/`false`; trash = `is_deleted = true` |
+| `upload_timestamp`, `approved_by` | |
 
-## Development
+PDFs are stored on disk at `iqps/uploaded/unapproved/` and moved to `iqps/uploaded/approved/` on approval. nginx serves them directly.
 
-1. Clone this repository.
-2. For starting the backend:
-   - Change directory to backend `cd backend`
-   - Make the env file by copying the template: `cp .env.template .env`
-   - Fill the env variables and set `DB_HOST=localhost` for running locally for development (see [Environment Variables](#environment-variables)). Make sure to create corresponding folders for `STATIC_FILE_STORAGE_LOCATION`, `UPLOADED_QPS_PATH`, and `LIBRARY_QPS_PATH`.
-   - Set up the database (see [Database](#database))
-   - Start the Rust backend by running `cargo run .`
-3. Set up the frontend by running `pnpm install` and then `pnpm start` in the `frontend/` directory.
-4. (Optional) Set up an http file server for serving static files from the `STATIC_FILE_STORAGE_LOCATION` directory. (eg: `python3 -m http.server 8081`) The host of this server should be set in the `.env` file as `STATIC_FILES_URL`.
-5. Profit.
+## Step 1 — Add the IIT Bhilai course list
 
-### Database
+Auto-fill and the admin's course-name suggestions use `frontend/src/data/courses.json`, which starts empty. Get the course list from the academic office or ERP as a CSV with two columns:
 
-To initialise the database for the first time:
+```csv
+course_code,course_name
+CSL101,Data Structures
+```
 
-1. Set environment variables for Postgres in the `.env` file.
-2. Start the database by running `docker compose -f docker-compose.dev.yaml up -d`.
-3. Initialise the database:
-   - Open a shell in the docker container by running `docker compose -f docker-compose.dev.yaml exec database-dev bash`.
-   - Connect to the database by running `psql -U $POSTGRES_USER -d $POSTGRES_DB`.
-   - Run the queries in `INIT_DB` in [`backend/src/db/queries.rs`](./backend/src/db/queries.rs) to initialise the database.
+Then run:
 
-To run the pre-initialised database:
+```powershell
+cd frontend
+node scripts/csv-to-courses.mjs courses.csv
+```
 
-1. Start the database by running `docker compose -f docker-compose.dev.yaml up -d`.
+Also check the department prefixes in `frontend/src/utils/institute.ts` (`DEPARTMENTS`) against the real course codes.
 
-For Production:
+## Step 2 — Create the GitHub login for admins
 
-1. Set environment variables for Postgres in the `.env` file.
-2. Start the database by running `docker compose -f docker-compose.yaml up -d`.
-3. Initialise the database:
-   - Open a shell in the docker container by running `docker compose -f docker-compose.yaml exec iqps-backend bash`.
-   - Connect to the database by running `psql -U $POSTGRES_USER -d $POSTGRES_DB`.
-   - Run the queries in `INIT_DB` in [`backend/src/db/queries.rs`](./backend/src/db/queries.rs) to initialise the database.
+1. Go to GitHub → Settings → Developer settings → **GitHub Apps** → New GitHub App. This is what upstream IQPS uses.
+2. Homepage URL: your frontend URL. **Callback URL: `<frontend URL>/oauth`**, e.g. `http://localhost:5173/oauth` for local work or `https://pyq.iitbhilai.ac.in/oauth` in production. You can add both.
+3. No permissions are needed if you only use the username allowlist.
+4. Generate a client secret. Copy the **Client ID** and **secret**.
+5. Put the admins' GitHub usernames in `GH_ADMIN_USERNAMES`, comma-separated.
 
-### Authentication
+## Step 3 — Run locally
 
-IQPS uses a "GitHub App" for authentication to the `/admin` page. To set up authentication:
+Requirements: Rust (stable), Node 20+, pnpm 9, Docker (for Postgres).
 
-1. Go to https://github.com/settings/developers and create a new Github App.
-2. Under Organisation permissions, enable Read-only access for "Members".
-3. Set the Homepage URL to `http://localhost:5173` and Authorization callback URL to `http://localhost:5173/oauth`.
-4. Click on "Install App" and install the app on the organization to give it access to the teams and members.
-5. Once created, generate a client secret. Copy the client ID and secret into the `.env` file.
+```powershell
+# 1. Database
+cd backend
+cp .env.template .env        # fill DB_*, GH_*, JWT_SECRET; set DB_HOST=localhost
+docker compose -f docker-compose.dev.yaml up -d
+# load the schema
+Get-Content ..\deploy\init.sql | docker compose -f docker-compose.dev.yaml exec -T database-dev psql -U <DB_USER> -d <DB_NAME>
 
-> [!IMPORTANT]
-> For production, replace homepage and callback URLs to the production URL.
+# 2. Storage folders used by the backend (.env: STATIC_FILE_STORAGE_LOCATION=./static)
+mkdir static\iqps\uploaded, static\library\qp
 
-#### Authentication Flow
-Documentation: https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app
+# 3. Backend (port 8080)
+cargo run --bin iqps-backend
 
-On visiting `/admin`, if the user is not logged in, they get redirected to the GitHub OAuth pager After the user logs in, GitHub redirects them back to our `/oauth` endpoint with a code. The backend then uses this code to fetch an access token and username. The username is then checked against the allowed admins. If so, a JWT token is generated with the user's username and sent back to the frontend. The frontend then stores this token in local storage and sends it with every request to the backend. The backend verifies this token and allows access to admin functions.
+# 4. Static file server for PDFs (STATIC_FILES_URL=http://localhost:8081/), in a new terminal
+cd backend\static; python -m http.server 8081
 
-A user is considered as an admin if they are a part of the team `GH_ORG_TEAM_SLUG` in `GH_ORG_NAME`, or if their username is in the `GH_ADMIN_USERNAMES` list.
+# 5. Frontend (port 5173), in a new terminal
+cd frontend
+pnpm install
+# frontend/.env.development: VITE_BACKEND_URL=http://localhost:8080, VITE_GH_OAUTH_CLIENT_ID=<client id>
+pnpm dev
+```
 
-### Crawler
+Tests: `cd frontend; pnpm test`. This runs the auto-fill parser tests.
 
-The crawler is a go script which crawls and downloads papers from [peqp](http://10.18.24.75/peqp/) (only accessible over campus network) and spits an archive which can be imported into the database.
+## Step 4 — Deploy on the institute server
 
-1. Change directory to `crawler/` and run `go mod tidy`.
-2. Run the crawler by running `go run crawler.go [flags]`. (Make sure you are connected to the campus network) (Run `go run crawler.go -h` to see flags that can be set.)
-3. This will generate a `qp.tar.gz` file. Transfer this file to the server's `backend/` folder.
-4. (Development): In the backend, run `cargo run --bin import-papers qp.tar.gz` to import the data into the database. (Make sure the database is set up and running)\
-    (Production): In the backend, run `./import_papers.sh ./qp.tar.gz` to run the import script in the docker container running the application.
+Everything runs from [`deploy/`](deploy/) on one domain, e.g. `https://pyq.iitbhilai.ac.in`:
 
-## Deployment
+| Path | Served by |
+|---|---|
+| `/api/*` | Rust backend |
+| `/iqps/*` | uploaded PDFs |
+| `/*` | frontend build |
 
-### Backend
+```bash
+git clone https://github.com/<you>/iitbh-pyq.git && cd iitbh-pyq
 
-0. Set up [MetaPloy](https://github.com/metakgp/metaploy) **for production**.
-1. Clone this repository at a convenient location such as `/deployments`.
-2. `cd backend/`
-3. Set the appropriate **production** [environment variables](#environment-variables) in the `.env` file.
-4. Run `docker compose up` to start the backend.
-5. Optionally set up a Systemd service to start IQPS on startup or use this [deployment github workflow](./.github/workflows/deploy.yaml).
+# Frontend build (or host the frontend on Vercel instead — see below)
+cd frontend
+cat > .env.production <<'EOF'
+VITE_BACKEND_URL=https://pyq.iitbhilai.ac.in/api
+VITE_MAX_UPLOAD_LIMIT=10
+VITE_GH_OAUTH_CLIENT_ID=<github client id>
+VITE_REPO_URL=https://github.com/<you>/iitbh-pyq
+EOF
+pnpm install && pnpm build
+cd ../deploy
 
-### Environment Variables
+cp .env.example .env     # fill passwords, GH_*, JWT_SECRET (openssl rand -hex 32), URLs
+docker compose up -d --build
+docker compose logs -f backend
+```
 
-Environment variables can be set using a `.env` file. Use the `.env.template` files for reference. See `backend/src/env.rs` for more documentation and types.
+The schema in `init.sql` loads automatically on the first start. PDFs and database data live in Docker volumes (`papers`, `pgdata`).
 
-#### Backend
+**HTTPS:** if the institute already has a reverse proxy or certificate, point it at this server's port `HTTP_PORT` (default 80). Otherwise add certbot/Caddy in front. GitHub login needs the exact HTTPS callback URL from Step 2.
 
-##### Database (Postgres)
+**Backups (do this):**
+```bash
+docker compose exec db pg_dump -U iqps iqps > backup_$(date +%F).sql
+docker run --rm -v deploy_papers:/data -v $PWD:/out alpine tar czf /out/papers_$(date +%F).tgz -C /data .
+```
 
-- `DB_NAME`: Database name
-- `DB_HOST`: Database hostname (eg: `localhost`)
-- `DB_PORT`: Database port
-- `DB_USER`: Database username
-- `DB_PASSWORD`: Database password
+**Updating:** `git pull && (cd ../frontend && pnpm build) && docker compose up -d --build`.
 
-##### Authentication
+### Option: frontend on Vercel, backend on the institute server
 
-- `GH_CLIENT_ID`: Client ID of the Github app.
-- `GH_CLIENT_SECRET`: Client secret of the Github app.
-- `GH_ORG_NAME`: The name of the Github organization of the admins.
-- `GH_ORG_TEAM_SLUG`: The URL slug of the Github org team of the admins.
-- `GH_ADMIN_USERNAMES`: Comma separated list of Github usernames of the admins. (other than the org team members)
-- `JWT_SECRET`: A secret key/password for JWT signing. It should be a long, random, unguessable string.
+1. Import the repo in Vercel and set **Root Directory = `frontend`**. Framework is Vite, build `pnpm build`, output `dist`. `frontend/vercel.json` already handles SPA routing.
+2. Add the env vars `VITE_BACKEND_URL=https://<server>/api`, `VITE_GH_OAUTH_CLIENT_ID` and `VITE_REPO_URL`.
+3. On the server, add the Vercel URL to `CORS_ALLOWED_ORIGINS` and set `FRONTEND_URL` to it in `deploy/.env`. Then run `docker compose up -d`.
+4. Add `https://<vercel-url>/oauth` as a callback URL in the GitHub App.
 
-##### Configuration
+> If the institute server is only reachable on the campus network, Vercel users off campus won't be able to search. In that case serve everything from the institute server.
 
-- `SLACK_WEBHOOK_URL`: URL of Slack webhook for sending notifications (ignored if empty).
-- `MAX_UPLOAD_LIMIT`: Maximum number of files that can be uploaded at once.
-- `LOG_LOCATION`: The path to a local logfile.
-- `STATIC_FILES_URL`: The URL of the static files server. (eg: `https://static.metakgp.org`)
-- `STATIC_FILE_STORAGE_LOCATION`: The path to the local directory from which the static files are served.
-- `UPLOADED_QPS_PATH`: A path relative to `STATIC_FILE_STORAGE_LOCATION` where the uploaded question papers will be stored. (eg: `iqps/uploaded`)
-- `LIBRARY_QPS_PATH`: A path relative to `STATIC_FILE_STORAGE_LOCATION` where the library question papers are scraped and stored. (eg: `peqp/qp`)
-- `SERVER_PORT`: The port on which the server listens.
-- `CORS_ALLOWED_ORIGINS`: A comma (,) separated list of origins to be allowed in CORS.
+## Pulling updates from MetaKGP
 
-#### Frontend
+```bash
+git remote add upstream https://github.com/metakgp/iqps-go.git
+git fetch upstream && git merge upstream/main
+```
 
-- `VITE_BACKEND_URL`: The IQPS backend URL. Use `http://localhost:8080` in development.
-- `VITE_MAX_UPLOAD_LIMIT` The maximum number of files that can be uploaded at once. (Note: This is only a client-side limit)
-- `VITE_GH_OAUTH_CLIENT_ID` The Client ID of the Github OAuth app.
+Most IIT Bhilai changes sit in new files (`institute.ts`, `parseQPText.ts`, `courses.ts`, `deploy/`), so merge conflicts should stay small.
 
-## Contact
+## Credits & License
 
-<p>
-📫 MetaKGP -
-<a href="https://bit.ly/metakgp-slack">
-  <img align="center" alt="Metakgp's slack invite" width="22px" src="https://raw.githubusercontent.com/edent/SuperTinyIcons/master/images/svg/slack.svg" />
-</a>
-<a href="mailto:metakgp@gmail.com">
-  <img align="center" alt="Metakgp's email " width="22px" src="https://raw.githubusercontent.com/edent/SuperTinyIcons/master/images/svg/gmail.svg" />
-</a>
-<a href="https://www.facebook.com/metakgp">
-  <img align="center" alt="metakgp's Facebook" width="22px" src="https://raw.githubusercontent.com/edent/SuperTinyIcons/master/images/svg/facebook.svg" />
-</a>
-<a href="https://www.linkedin.com/company/metakgp-org/">
-  <img align="center" alt="metakgp's LinkedIn" width="22px" src="https://raw.githubusercontent.com/edent/SuperTinyIcons/master/images/svg/linkedin.svg" />
-</a>
-<a href="https://twitter.com/metakgp">
-  <img align="center" alt="metakgp's Twitter " width="22px" src="https://raw.githubusercontent.com/edent/SuperTinyIcons/master/images/svg/twitter.svg" />
-</a>
-<a href="https://www.instagram.com/metakgp_/">
-  <img align="center" alt="metakgp's Instagram" width="22px" src="https://raw.githubusercontent.com/edent/SuperTinyIcons/master/images/svg/instagram.svg" />
-</a>
-</p>
-
-### Maintainer(s)
-The currently active maintainer(s) of this project. See https://wiki.metakgp.org/w/Metakgp:Project_Maintainer.
-
-- [Dipam Sen](https://github.com/dipamsen)
-
-### Past Maintainer(s)
-Previous maintainer(s) of this project. See https://wiki.metakgp.org/w/Metakgp:Project_Maintainer.
-
-- [Harsh Khandeparkar](https://github.com/harshkhandeparkar)
-- [Rajiv Harlalka](https://github.com/rajivharlalka)
-- [Chirag Ghosh](https://github.com/chirag-ghosh)
-- [Arpit Bhardwaj](https://github.com/proffapt)
-
-### Creator(s)
-
-Honoring the original creator(s) and ideator(s) of this project.
-
-- [Shubham Mishra](https://github.com/grapheo12)
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-## Additional documentation
-
-- [License](/LICENSE)
-- [Code of Conduct](/.github/CODE_OF_CONDUCT.md)
-- [Security Policy](/.github/SECURITY.md)
-- [Contribution Guidelines](/.github/CONTRIBUTING.md)
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-[contributors-shield]: https://img.shields.io/github/contributors/metakgp/iqps-go.svg?style=for-the-badge
-[contributors-url]: https://github.com/metakgp/iqps-go/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/metakgp/iqps-go.svg?style=for-the-badge
-[forks-url]: https://github.com/metakgp/iqps-go/network/members
-[stars-shield]: https://img.shields.io/github/stars/metakgp/iqps-go.svg?style=for-the-badge
-[stars-url]: https://github.com/metakgp/iqps-go/stargazers
-[issues-shield]: https://img.shields.io/github/issues/metakgp/iqps-go.svg?style=for-the-badge
-[issues-url]: https://github.com/metakgp/iqps-go/issues
-[license-shield]: https://img.shields.io/github/license/metakgp/iqps-go.svg?style=for-the-badge
-[license-url]: https://github.com/metakgp/iqps-go/blob/master/LICENSE
-[wiki-shield]: https://custom-icon-badges.demolab.com/badge/metakgp_wiki-grey?logo=metakgp_logo&style=for-the-badge
-[wiki-url]: https://wiki.metakgp.org
+Based on [IQPS](https://github.com/metakgp/iqps-go) by [MetaKGP](https://metakgp.org), originally created by [Shubham Mishra](https://github.com/grapheo12). Licensed under [GPL-3.0](LICENSE).

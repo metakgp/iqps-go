@@ -84,16 +84,16 @@ function CourseSearchForm() {
 		<form onSubmit={handleSubmit}>
 			<div>
 				<label htmlFor="course">Course Name or Code:</label>
-				<input ref={courseInputRef} autoFocus={true} id="course" value={query} onInput={() => setQuery(courseInputRef.current?.value ?? '')} />
+				<input ref={courseInputRef} autoFocus={true} id="course" placeholder="e.g. CSL101 or Data Structures" value={query} onInput={() => setQuery(courseInputRef.current?.value ?? '')} />
 			</div>
 			<div className="exam-checkbox-group">
 				<label htmlFor="exam">Exam:</label>
 				<CheckboxGroup<Exam>
 					values={examFilter}
 					options={[
-						{label: 'Midsem', value: 'midsem'},
-						{label: 'Endsem', value: 'endsem'},
-						{label: 'Class Test', value: 'ct'},
+						{label: 'Mid-Sem', value: 'midsem'},
+						{label: 'End-Sem', value: 'endsem'},
+						{label: 'Quiz', value: 'ct'},
 					]}
 					onSelect={(value, checked) => setExamFilter((currentValues) => {
 						if (checked) return [...currentValues, value];

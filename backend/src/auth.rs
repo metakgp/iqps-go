@@ -152,13 +152,19 @@ pub async fn authenticate_user(
         .context("Error parsing username API response.")?
         .login;
 
-    // Check if the user is in the admin list
+    // Check if the user is in the admin list (GitHub usernames are case-insensitive)
     if env_vars
         .gh_admin_usernames
-        .split(",")
-        .any(|x| x == username)
+        .split(',')
+        .map(str::trim)
+        .any(|x| !x.is_empty() && x.eq_ignore_ascii_case(&username))
     {
         return Ok(Some(generate_token(&username, env_vars).await?));
+    }
+
+    // No GitHub org/team configured: only the usernames above are admins.
+    if env_vars.gh_org_name.is_empty() || env_vars.gh_org_team_slug.is_empty() {
+        return Ok(None);
     }
 
     // Check the user's membership in the team

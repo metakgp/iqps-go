@@ -1,3 +1,4 @@
+import { examLabel, semesterLabel } from "../../utils/institute";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { IAdminDashboardQP } from "../../types/question_paper";
 import { isQPValid, validate } from "../../utils/validateInput";
@@ -30,8 +31,8 @@ export function QPCard({ qPaper, onEdit, onDelete, hasOcr, onToggle }: IQPCardPr
                 <div className="pills">
                     {hasOcr && <div className="pill">OCR</div>}
                     <div className="pill">{qPaper.year}</div>
-                    <div className="pill">{qPaper.exam}</div>
-                    <div className="pill">{qPaper.semester}</div>
+                    <div className="pill">{examLabel(qPaper.exam)}</div>
+                    <div className="pill">{semesterLabel(qPaper.semester)}</div>
                     {qPaper.note !== "" && <div className="pill">{qPaper.note}</div>}
                 </div>
                 {!isValid &&

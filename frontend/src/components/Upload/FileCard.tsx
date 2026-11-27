@@ -1,3 +1,4 @@
+import { examLabel, semesterLabel } from "../../utils/institute";
 import { IQuestionPaperFile } from "../../types/question_paper";
 import { FaFilePdf, FaRegPenToSquare } from "react-icons/fa6";
 import './styles/file_card.scss';
@@ -28,8 +29,8 @@ export function FileCard({ file: { qp: qPaper, ocr }, removeQPaper, edit, invali
                         </div>
                         <div className="pills">
                             <div className="pill">{qPaper.year}</div>
-                            <div className="pill">{qPaper.exam}</div>
-                            <div className="pill">{qPaper.semester}</div>
+                            <div className="pill">{examLabel(qPaper.exam)}</div>
+                            <div className="pill">{semesterLabel(qPaper.semester)}</div>
                             {qPaper.note !== "" && <div className="pill">{qPaper.note}</div>}
                         </div>
                         {invalidDetails &&

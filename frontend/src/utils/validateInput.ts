@@ -1,7 +1,8 @@
 import { IAdminDashboardQP, IErrorMessage, IQuestionPaperFile } from "../types/question_paper";
+import { COURSE_CODE_REGEX } from "./institute";
 
 export const validateCourseCode = (course_code: string): boolean => {
-    return course_code.length === 7 && course_code.match(/[a-z]{2}\d{5}/i) !== null;
+    return COURSE_CODE_REGEX.test(course_code.toUpperCase());
 }
 
 export const validateYear = (year: number): boolean => {

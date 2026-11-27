@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 
 import './styles/common_styles.scss';
+import { INSTITUTE_NAME, REPO_URL } from '../../utils/institute';
 import { IconType } from 'react-icons';
 
 export function Footer() {
 	return <h3 className="meta-footer">
-        Contribute on <a href="https://github.com/metakgp/iqps-go" target="_blank">GitHub</a> | 
-        Made with ❤️ and {"</>"} by <a href="https://metakgp.org" target="_blank">metaKGP</a>
+        Contribute on <a href={REPO_URL} target="_blank" rel="noopener noreferrer">GitHub</a> | 
+        Built on <a href="https://github.com/metakgp/iqps-go" target="_blank" rel="noopener noreferrer">IQPS</a> by metaKGP (GPL-3.0)
     </h3>;
 }
 
@@ -30,7 +31,7 @@ export function Header(props: IHeaderProps) {
 	const linkButtonInnerHtml = props.link && <><props.link.icon size="1rem" />{props.link.button_text}</>;
 
 	return <div className="header">
-		<h1>IQPS - {props.title}</h1>
+		<h1>{INSTITUTE_NAME} PYQs - {props.title}</h1>
 		<p>
 			<i>{props.subtitle}</i>
 		</p>

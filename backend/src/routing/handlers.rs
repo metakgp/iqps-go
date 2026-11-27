@@ -268,7 +268,8 @@ pub struct FileDetails {
 }
 
 /// 10 MiB file size limit
-const FILE_SIZE_LIMIT: usize = 10 << 20;
+/// Max size of one uploaded PDF (15 MiB). Keep in sync with MAX_FILE_SIZE_MB in frontend/src/utils/institute.ts
+const FILE_SIZE_LIMIT: usize = 15 << 20;
 #[derive(Serialize)]
 /// The status of an uploaded question paper file
 pub struct UploadStatus {
@@ -382,6 +383,15 @@ pub async fn upload(
             continue;
         }
 
+        // The content-type header is set by the client, so also check the file itself is a PDF.
+        if !file_data.starts_with(b"%PDF-") {
+            upload_statuses.push(UploadStatus::error(
+                filename,
+                "This file is not a valid PDF.".into(),
+            ));
+            continue;
+        }
+
         // Insert the db entry
         let (mut tx, id) = state.db.insert_new_uploaded_qp(details).await?;
 
@@ -436,12 +446,13 @@ pub async fn upload(
     let total_count = state.db.get_unapproved_papers_count().await?;
     let count = upload_statuses.len();
     let message = format!(
-        "🔔 {} uploaded to IQPS!\n\n<https://qp.metakgp.org/admin|Review> | Total Unapproved papers: *{}*",
+        "🔔 {} uploaded to the PYQ portal!\n\n<{}/admin|Review> | Total Unapproved papers: *{}*",
         if count == 1 {
             "A new paper was".into()
         } else {
             format!("{} new papers were", count)
         },
+        state.env_vars.frontend_url,
         total_count
     );
 

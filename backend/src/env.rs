@@ -62,6 +62,9 @@ pub struct EnvVars {
     /// List of origins allowed (as a list of values separated by commas `origin1, origin2`)
     pub cors_allowed_origins: String,
 
+    /// Public URL of the frontend, used in Slack notification links (eg: https://pyq.iitbhilai.ac.in)
+    pub frontend_url: String,
+
     /// All paths must be handled using this
     pub paths: Paths,
 }
@@ -88,7 +91,7 @@ impl EnvVars {
             .unwrap_or("./log/application.log".to_string())
             .into();
         let static_files_url =
-            std::env::var("STATIC_FILES_URL").unwrap_or("https://static.metakgp.org".to_string());
+            std::env::var("STATIC_FILES_URL").unwrap_or("http://localhost:8081".to_string());
         let static_file_storage_location = std::env::var("STATIC_FILE_STORAGE_LOCATION")
             .unwrap_or("/srv/static".to_string())
             .into();
@@ -102,7 +105,11 @@ impl EnvVars {
             .map(|s| s.parse())
             .unwrap_or(Ok(8080))?;
         let cors_allowed_origins = std::env::var("CORS_ALLOWED_ORIGINS")
-            .unwrap_or("https://qp.metakgp.org,http://localhost:5173".to_string());
+            .unwrap_or("http://localhost:5173".to_string());
+        let frontend_url = std::env::var("FRONTEND_URL")
+            .unwrap_or("http://localhost:5173".to_string())
+            .trim_end_matches('/')
+            .to_string();
 
         Ok(Self {
             db_name,
@@ -125,6 +132,7 @@ impl EnvVars {
             library_qps_path,
             server_port,
             cors_allowed_origins,
+            frontend_url,
             paths: Paths::default(),
         })
     }
